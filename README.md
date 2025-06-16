@@ -1,17 +1,22 @@
-# Interactive Art Diary - Production Build
+# Interactive Art Diary - Test Deployment
 
-This is the production build of the Interactive Art Diary project.
+This repository contains the compiled build for testing and review.
 
 ## Deployment
 
-This repository is automatically deployed to Netlify when changes are pushed to the main branch.
+This repository automatically deploys to Netlify when changes are pushed to the main branch.
 
-**Live URL**: [Your Netlify URL will appear here after first deployment]
+**Live URL**: https://diary-deji.netlify.app
 
 ## Important
 
 - This is an auto-generated repository
 - Do not edit files directly here
 - All changes should be made in the development repository
+- Contains compiled JavaScript and generated tile images
 
-Last updated: 2025-06-16 03:08:31
+## Current Status
+
+- ✅ Core viewer with 647 hotspots
+- 🚧 Audio system in progress
+- 🚧 Navigation UI pending
