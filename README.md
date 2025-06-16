@@ -8,10 +8,15 @@ This repository is automatically deployed to Netlify when changes are pushed to 
 
 **Live URL**: [Your Netlify URL will appear here after first deployment]
 
+## Build Info
+
+- **Last updated**: 2025-06-16 17:12:40
+- **Web Worker**: ✓ Web Worker enabled
+- **Tile size**: 1024px
+- **Performance**: Optimized for 60 FPS
+
 ## Important
 
 - This is an auto-generated repository
 - Do not edit files directly here
 - All changes should be made in the development repository
-
-Last updated: 2025-06-16 03:08:31
