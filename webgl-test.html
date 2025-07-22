@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebGL Simple Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #222;
+            color: white;
+            font-family: monospace;
+        }
+        #canvas {
+            border: 2px solid white;
+            display: block;
+            margin: 20px 0;
+        }
+        #status {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebGL Simple Test</h1>
+    <div id="status">Initializing...</div>
+    <canvas id="canvas" width="600" height="400"></canvas>
+    <button onclick="testRender()">Test Render</button>
+    <button onclick="clearCanvas()">Clear</button>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const status = document.getElementById('status');
+        let gl = null;
+        let shaderProgram = null;
+        let vertexBuffer = null;
+        
+        // Initialize WebGL
+        function initWebGL() {
+            gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            
+            if (!gl) {
+                status.textContent = 'WebGL not supported!';
+                return false;
+            }
+            
+            status.textContent = 'WebGL initialized successfully';
+            
+            // Set clear color
+            gl.clearColor(0.1, 0.1, 0.1, 1.0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            
+            return true;
+        }
+        
+        // Create shaders
+        function createShaders() {
+            const vertexShaderSource = `
+                attribute vec2 a_position;
+                void main() {
+                    gl_Position = vec4(a_position, 0.0, 1.0);
+                }
+            `;
+            
+            const fragmentShaderSource = `
+                precision mediump float;
+                void main() {
+                    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+                }
+            `;
+            
+            // Compile vertex shader
+            const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+            gl.shaderSource(vertexShader, vertexShaderSource);
+            gl.compileShader(vertexShader);
+            
+            if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+                console.error('Vertex shader error:', gl.getShaderInfoLog(vertexShader));
+                return false;
+            }
+            
+            // Compile fragment shader
+            const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+            gl.shaderSource(fragmentShader, fragmentShaderSource);
+            gl.compileShader(fragmentShader);
+            
+            if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+                console.error('Fragment shader error:', gl.getShaderInfoLog(fragmentShader));
+                return false;
+            }
+            
+            // Create program
+            shaderProgram = gl.createProgram();
+            gl.attachShader(shaderProgram, vertexShader);
+            gl.attachShader(shaderProgram, fragmentShader);
+            gl.linkProgram(shaderProgram);
+            
+            if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+                console.error('Program link error:', gl.getProgramInfoLog(shaderProgram));
+                return false;
+            }
+            
+            status.textContent += ' | Shaders compiled';
+            return true;
+        }
+        
+        // Create geometry
+        function createGeometry() {
+            const vertices = new Float32Array([
+                 0.0,  0.5,  // Top
+                -0.5, -0.5,  // Bottom left
+                 0.5, -0.5   // Bottom right
+            ]);
+            
+            vertexBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+            
+            status.textContent += ' | Geometry created';
+            return true;
+        }
+        
+        // Render
+        function render() {
+            gl.viewport(0, 0, canvas.width, canvas.height);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            
+            gl.useProgram(shaderProgram);
+            
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+            
+            const positionLocation = gl.getAttribLocation(shaderProgram, 'a_position');
+            gl.enableVertexAttribArray(positionLocation);
+            gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+            
+            gl.drawArrays(gl.TRIANGLES, 0, 3);
+            
+            status.textContent = 'Rendered! You should see a red triangle';
+        }
+        
+        // Test render button
+        function testRender() {
+            render();
+        }
+        
+        // Clear button
+        function clearCanvas() {
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            status.textContent = 'Canvas cleared';
+        }
+        
+        // Initialize everything
+        if (initWebGL() && createShaders() && createGeometry()) {
+            render();
+        }
+    </script>
+</body>
+</html>
