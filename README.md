@@ -10,7 +10,7 @@ This repository is automatically deployed to Netlify when changes are pushed to 
 
 ## Build Info
 
-- **Last updated**: 2025-08-28 16:56:01
+- **Last updated**: 2025-08-28 17:08:49
 - **Web Worker**: ✓ Web Worker enabled
 - **Tile size**: 1024px
 - **Performance**: Optimized for 60 FPS
