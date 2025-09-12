@@ -1,5 +1,5 @@
-import { g as getHapticManager } from "./HapticManager-DRclJToY.js";
-import "./main-DAZqnlRp.js";
+import { g as getHapticManager } from "./HapticManager-C2Z_NQGD.js";
+import "./main-CUTk6aOB.js";
 class DopamineAudioEngine {
   constructor() {
     this.audioContext = null;
@@ -8,6 +8,7 @@ class DopamineAudioEngine {
     this.platform = this.detectPlatform();
     this.lastInteractionTime = 0;
     this.minTimeBetweenSounds = 30;
+    this.useAbsorbedImpactForBoth = false;
     this.variations = {
       revelation: [
         { baseFreq: 146.83, sparkleGain: 0.15, attackTime: 0.01 },
@@ -28,10 +29,17 @@ class DopamineAudioEngine {
         // Absorbed Impact (ancien son)
       ]
     };
+    const isMobileDevice = this.platform === "ios" || this.platform === "android";
     this.currentVariation = {
       revelation: 0,
-      activation: 0
+      // Keep revelation as is (we'll use Absorbed Impact for both)
+      activation: isMobileDevice ? 3 : 0
+      // Absorbed Impact on mobile, C-E-G-C on desktop
     };
+    this.useAbsorbedImpactForBoth = isMobileDevice;
+    if (isMobileDevice) {
+      console.log('[DopamineAudioEngine] Mobile device detected - Using "Absorbed Impact ★" for both TEMPO 1 & TEMPO 2');
+    }
     this.metrics = {
       interactions: [],
       sessionStart: Date.now()
@@ -93,9 +101,17 @@ class DopamineAudioEngine {
     }
     const now = Date.now();
     if (now - this.lastInteractionTime < this.minTimeBetweenSounds) {
+      console.log("[DopamineAudioEngine] Debounced reveal sound (too fast)");
       return;
     }
     this.lastInteractionTime = now;
+    if (this.useAbsorbedImpactForBoth) {
+      console.log("[DopamineAudioEngine] Playing Absorbed Impact ★ for REVEAL (mobile default)");
+      const startTime2 = this.audioContext.currentTime;
+      this.createAbsorbedImpact(startTime2);
+      this.recordInteraction("revelation");
+      return;
+    }
     const variation = this.variations.revelation[this.currentVariation.revelation];
     const baseFreq = variation.baseFreq;
     const randomVariation = 0.8 + Math.random() * 0.4;
@@ -189,7 +205,9 @@ class DopamineAudioEngine {
     this.lastInteractionTime = now;
     const variation = this.variations.activation[this.currentVariation.activation];
     this.createProgression(variation);
-    this.scheduleSparkle(variation.sparkleDelay);
+    if (variation.progression !== "absorbed" && variation.sparkleDelay > 0) {
+      this.scheduleSparkle(variation.sparkleDelay);
+    }
     this.recordInteraction("activation");
   }
   createProgression(variation) {
@@ -333,16 +351,17 @@ class DopamineAudioEngine {
   createAbsorbedImpact(startTime) {
     const ctx = this.audioContext;
     const duration = 0.4;
+    const pitchVariation = 0.9 + Math.random() * 0.2;
     const osc1 = ctx.createOscillator();
     osc1.type = "triangle";
-    osc1.frequency.setValueAtTime(80, startTime);
-    osc1.frequency.exponentialRampToValueAtTime(200, startTime + 0.1);
-    osc1.frequency.exponentialRampToValueAtTime(120, startTime + 0.4);
+    osc1.frequency.setValueAtTime(80 * pitchVariation, startTime);
+    osc1.frequency.exponentialRampToValueAtTime(200 * pitchVariation, startTime + 0.1);
+    osc1.frequency.exponentialRampToValueAtTime(120 * pitchVariation, startTime + 0.4);
     const osc2 = ctx.createOscillator();
     osc2.type = "sine";
-    osc2.frequency.setValueAtTime(160, startTime);
-    osc2.frequency.exponentialRampToValueAtTime(240, startTime + 0.1);
-    osc2.frequency.exponentialRampToValueAtTime(180, startTime + 0.4);
+    osc2.frequency.setValueAtTime(160 * pitchVariation, startTime);
+    osc2.frequency.exponentialRampToValueAtTime(240 * pitchVariation, startTime + 0.1);
+    osc2.frequency.exponentialRampToValueAtTime(180 * pitchVariation, startTime + 0.4);
     const noiseBuffer = this.createNoiseBuffer(duration);
     const noise = ctx.createBufferSource();
     noise.buffer = noiseBuffer;
@@ -434,6 +453,20 @@ class DopamineAudioEngine {
     if (index >= 0 && index < this.variations.activation.length) {
       this.currentVariation.activation = index;
       console.log(`[DopamineAudioEngine] Set activation variation to ${index}`);
+      if (index === 3) {
+        this.setAbsorbedImpactForBoth(true);
+      } else {
+        this.setAbsorbedImpactForBoth(false);
+      }
+    }
+  }
+  // Enable/disable Absorbed Impact for BOTH reveal and activate
+  setAbsorbedImpactForBoth(enabled) {
+    this.useAbsorbedImpactForBoth = enabled;
+    if (enabled) {
+      console.log("[DopamineAudioEngine] Absorbed Impact enabled for BOTH reveal and activate sounds");
+    } else {
+      console.log("[DopamineAudioEngine] Absorbed Impact disabled for reveal, using normal variations");
     }
   }
   // Get current variation info for debug panel
