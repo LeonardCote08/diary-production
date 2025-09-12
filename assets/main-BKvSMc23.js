@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/MinimalistAudioEngine-CLIymWlN.js","assets/HapticManager-0gMSfzDo.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/MinimalistAudioEngine-CmSqlnIu.js","assets/HapticManager-DYjex1_y.js"])))=>i.map(i=>d[i]);
 (function polyfill() {
   const relList = document.createElement("link").relList;
   if (relList && relList.supports && relList.supports("modulepreload")) {
@@ -24254,7 +24254,7 @@ class CacheManager {
 }
 const cacheManager = new CacheManager();
 cacheManager.initDevelopmentMode();
-var _tmpl$$5 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Hovered</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Selected</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Type</span><span class=debug-stat-value>`), _tmpl$2$5 = /* @__PURE__ */ template(`<div class=debug-stat-row style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.1);"><span class=debug-stat-label style=color:#00ffff;>Safari Hybrid</span><span class=debug-stat-value style=color:#00ffff;>Active`), _tmpl$3$4 = /* @__PURE__ */ template(`<div class=debug-stat-row><span class=debug-stat-label>Render Time</span><span class=debug-stat-value>ms`), _tmpl$4$4 = /* @__PURE__ */ template(`<div class=debug-stat-row><span class=debug-stat-label>Visible/Total</span><span class=debug-stat-value>/`), _tmpl$5$3 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>FPS</span><span class=debug-stat-value><span style=opacity:0.7;font-size:10px> (avg: <!>)</span></span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Memory</span><span class=debug-stat-value>MB</span></div><div class=debug-stat-row><span class=debug-stat-label>Frame Time</span><span class=debug-stat-value>ms</span></div><div class=debug-stat-row><span class=debug-stat-label>Zoom</span><span class=debug-stat-value>x`), _tmpl$6$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Zoom Animation Speed<span class=debug-control-value>x</span></label><input type=range class=debug-slider min=0.5 max=2.5 step=0.1><p class=debug-control-description>How fast the artwork zooms when you click on elements`), _tmpl$7$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Color Theme<span class=debug-help-icon title="Changes the highlight colors">?</span></label><div class=debug-toggle-group><button type=button>Cyan Tech</button><button type=button>Golden Magic</button><button type=button>Blue Moon</button></div><div class=debug-toggle-group style=margin-top:8px;><button type=button>Pure White</button><button type=button>Soft White</button><button type=button>Dark Mode`), _tmpl$8$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Stroke Animation Speed</label><div style=display:flex;align-items:center;gap:12px;><span style=font-size:11px;color:#888;min-width:30px;>Fast</span><input type=range min=0.3 max=4.0 step=0.1 style=flex:1;cursor:pointer;><span style=font-size:11px;color:#888;min-width:30px;text-align:right;>Slow</span></div><p class=debug-control-description style=margin-top:8px;text-align:center;><span style=color:#666;font-size:10px;>`), _tmpl$9$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Hotspot Reveal Mode</label><div class=debug-toggle-group><button type=button>Focus</button><button type=button>Ripple (experimental)</button></div><p class=debug-control-description>`), _tmpl$0$3 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>FPS Target</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Effects</span><span class=debug-stat-value style=font-size:10px;></span></div><div class=debug-stat-row><span class=debug-stat-label>GPU</span><span class=debug-stat-value>`), _tmpl$1$2 = /* @__PURE__ */ template(`<div class=debug-control style=margin-top:16px;><button class="debug-toggle-option active"style=width:100%; type=button>Test Random Zoom`), _tmpl$10$2 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Cache Version</span><span class=debug-stat-value>1.0.2</span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value>Active</span></div><div class=debug-stat-row><span class=debug-stat-label>localStorage Size</span><span class=debug-stat-value>`), _tmpl$11$1 = /* @__PURE__ */ template(`<div class=debug-control style=margin-top:16px;><button class=debug-toggle-option>🗑️ Clear Cache & Reload</button><p class=debug-control-description>Fixes stuck animations and broken hover states`), _tmpl$12$1 = /* @__PURE__ */ template(`<button class=glass-button>◐ Initialize Audio`), _tmpl$13$1 = /* @__PURE__ */ template(`<div style="margin-bottom:20px;padding:12px;background:rgba(100, 200, 255, 0.05);border:1px solid rgba(100, 200, 255, 0.2);border-radius:4px;"><h4 style="margin:0 0 12px 0;color:#66AAFF;font-size:11px;text-transform:uppercase;letter-spacing:1px;">🧠 Dopamine Audio A/B Testing`), _tmpl$14$1 = /* @__PURE__ */ template(`<div style=margin-bottom:20px;opacity:0.5;><h4 style="margin:0 0 12px 0;color:#666;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Legacy Sand Variations (Deprecated)</h4><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;"><button class=glass-button>Sand Shift</button><button class=glass-button>Sand Crystal</button><button class=glass-button>Sand Whisper</button><button class=glass-button>Sand Trickle</button><button class=glass-button>Sand Magic</button><button class=glass-button>🎲 Random Sand`), _tmpl$15$1 = /* @__PURE__ */ template(`<div><h4 style="margin:0 0 12px 0;color:#666;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Activate — Hotspot Click</h4><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;"><button>Absorbed Impact</button><button>Paper Wave</button><button>Ink Saturation</button><button>Surface Echo`), _tmpl$16$1 = /* @__PURE__ */ template(`<div style="margin-top:16px;padding:10px;background:rgba(0, 0, 0, 0.2);border:1px solid rgba(255, 255, 255, 0.05);border-radius:4px;"><p style=font-size:10px;color:#666;margin:0;line-height:1.4;><span style=color:#999>Reveal:</span> <br><span style=color:#999>Activate:</span> `), _tmpl$17$1 = /* @__PURE__ */ template(`<div class=debug-stats-classic>`), _tmpl$18$1 = /* @__PURE__ */ template(`<div style=margin-bottom:12px;><label style=color:#999;font-size:10px;display:block;margin-bottom:4px;>REVEAL SOUND: </label><div><button class=glass-button>D3 Original</button><button class=glass-button>C3 Bright</button><button class=glass-button>E3 Subtle`), _tmpl$19$1 = /* @__PURE__ */ template(`<div style=margin-bottom:12px;><label style=color:#999;font-size:10px;display:block;margin-bottom:4px;>ACTIVATION SOUND: <!> </label><div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:4px;"><button class=glass-button>C-E-G-C</button><button class=glass-button>Pentatonic</button><button class=glass-button>Fifths</button><button class=glass-button>Absorbed Impact ★`), _tmpl$20$1 = /* @__PURE__ */ template(`<div style="padding:8px;background:rgba(0, 0, 0, 0.2);border-radius:4px;"><div style=display:flex;justify-content:space-between;font-size:10px;color:#777;><span>Interactions: </span><span>Session: <!>m <!>s`), _tmpl$21$1 = /* @__PURE__ */ template(`<button class=glass-button>🎵 Test Both Dopamine Sounds`), _tmpl$22$1 = /* @__PURE__ */ template(`<div style="padding:8px;background:rgba(255, 200, 0, 0.1);border:1px solid rgba(255, 200, 0, 0.3);border-radius:4px;margin-bottom:8px;"><div style=font-size:10px;color:#FFC400;text-align:center;>★ Son par défaut mobile ★<br><span style=font-size:9px;opacity:0.8;>Utilisé pour TEMPO 1 (révélation) & TEMPO 2 (activation)`), _tmpl$23$1 = /* @__PURE__ */ template(`<div><button style=background:none;border:none;color:#fff;font-size:14px;padding:8px;cursor:pointer;opacity:0.8;hover:opacity:1;>◀ Last</button><button style=background:none;border:none;color:#fff;font-size:14px;padding:8px;cursor:pointer;opacity:0.8;>⏪ 15</button><button style="background:none;border:none;color:#fff;font-size:18px;padding:8px 16px;cursor:pointer;"></button><button style=background:none;border:none;color:#fff;font-size:14px;padding:8px;cursor:pointer;opacity:0.8;>15 ⏩</button><button style=background:none;border:none;color:#fff;font-size:14px;padding:8px;cursor:pointer;opacity:0.8;>Next ▶`), _tmpl$24$1 = /* @__PURE__ */ template(`<div><button style=background:none;border:none;color:rgba(255,255,255,0.5);font-size:12px;padding:4px;cursor:pointer;>◀</button><button style=background:none;border:none;color:rgba(255,255,255,0.5);font-size:10px;padding:4px;cursor:pointer;>-15</button><button style="background:none;border:none;color:#fff;font-size:16px;padding:4px 8px;cursor:pointer;"></button><button style=background:none;border:none;color:rgba(255,255,255,0.5);font-size:10px;padding:4px;cursor:pointer;>+15</button><button style=background:none;border:none;color:rgba(255,255,255,0.5);font-size:12px;padding:4px;cursor:pointer;>▶`), _tmpl$25$1 = /* @__PURE__ */ template(`<div><div><button style=background:none;border:none;color:rgba(255,255,255,0.7);font-size:16px;padding:4px;cursor:pointer;>⏮</button><button style=background:none;border:none;color:rgba(255,255,255,0.7);font-size:14px;padding:4px;cursor:pointer;>⏪</button><button style=background:rgba(255,255,255,0.1);border:none;color:#fff;font-size:18px;padding:8px;border-radius:50%;width:40px;height:40px;cursor:pointer;></button><button style=background:none;border:none;color:rgba(255,255,255,0.7);font-size:14px;padding:4px;cursor:pointer;>⏩</button><button style=background:none;border:none;color:rgba(255,255,255,0.7);font-size:16px;padding:4px;cursor:pointer;>⏭`), _tmpl$26$1 = /* @__PURE__ */ template(`<div><div style=display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:12px;><button style="background:none;border:none;color:rgba(255,255,255,0.7);font-size:18px;cursor:pointer;transition:color 0.2s;">⏮</button><button style=background:none;border:none;color:rgba(255,255,255,0.7);font-size:16px;cursor:pointer;>⏪</button><button style=background:#1db954;border:none;color:#000;font-size:16px;padding:0;border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;></button><button style=background:none;border:none;color:rgba(255,255,255,0.7);font-size:16px;cursor:pointer;>⏩</button><button style=background:none;border:none;color:rgba(255,255,255,0.7);font-size:18px;cursor:pointer;>⏭</button></div><div style=display:flex;align-items:center;gap:8px;><span style=font-size:11px;color:rgba(255,255,255,0.5);>0:00</span><div style=flex:1;height:4px;background:rgba(255,255,255,0.1);border-radius:2px;position:relative;><div style=position:absolute;left:0;top:0;width:30%;height:100%;background:#1db954;border-radius:2px;></div></div><span style=font-size:11px;color:rgba(255,255,255,0.5);>1:30`), _tmpl$27$1 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div style=margin-bottom:20px;><h4 style="margin:0 0 12px 0;color:#666;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Select Player Style</h4><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><button class=glass-button>Deji's Vision</button><button class=glass-button>Ultra Minimal</button><button class=glass-button>Floating Bar</button><button class=glass-button>Spotify-like</button></div></div><div style=margin-bottom:20px;><h4 style="margin:0 0 12px 0;color:#666;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Player Preview (Segment <!>/<!>)</h4></div><div style="padding:10px;background:rgba(0, 0, 0, 0.2);border:1px solid rgba(255, 255, 255, 0.05);border-radius:4px;"><p style=font-size:10px;color:#666;margin:0;line-height:1.4;>Test different audio player styles for the narration system. Each style has different visual approaches while maintaining the same core functionality.`), _tmpl$28$1 = /* @__PURE__ */ template(`<span class=debug-mobile-compact-fps> FPS`), _tmpl$29$1 = /* @__PURE__ */ template(`<div class="debug-mobile-compact glass-button"><div class=debug-mobile-compact-content><span class=debug-mobile-compact-icon><svg width=16 height=16 viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round></path></svg></span><span class=debug-mobile-compact-label>Debug`), _tmpl$30$1 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Cache Version</span><span class=debug-stat-value>1.0.2</span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value style=color:#4CAF50>Active</span></div><div style=margin-top:20px;><button class=glass-button>🗑️ Clear Cache & Reload</button><p style=margin-top:10px;font-size:11px;opacity:0.6;text-align:center;>Clears localStorage, sessionStorage and reloads the app`), _tmpl$31$1 = /* @__PURE__ */ template(`<div><div><div class=debug-mobile-sheet-handle><div class=debug-mobile-sheet-handle-bar></div></div><div class=debug-mobile-sheet-header><h3 class=debug-mobile-sheet-title><svg width=18 height=18 viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round></path></svg>Artwork Controls</h3></div><div class=debug-mobile-tabs></div><div class=debug-mobile-content>`), _tmpl$32$1 = /* @__PURE__ */ template(`<button><span class=debug-mobile-tab-icon></span><span class=debug-mobile-tab-label>`), _tmpl$33$1 = /* @__PURE__ */ template(`<span style=margin-left:8px;>Artwork Controls`), _tmpl$34$1 = /* @__PURE__ */ template(`<button title="Minimize panel"><svg viewBox="0 0 20 20"><rect x=11 y=15 width=14 height=2>`), _tmpl$35$1 = /* @__PURE__ */ template(`<div><div class=debug-panel-header><h3 class=debug-panel-title style="margin:0;display:'flex';alignItems:'center';"><svg viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round>`), _tmpl$36$1 = /* @__PURE__ */ template(`<div><div class=debug-section-header><div class=debug-section-title><span class=debug-section-icon></span><span></span></div><span class=debug-section-chevron>▼</span></div><div class=debug-section-content><div class=debug-section-body>`);
+var _tmpl$$5 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Hovered</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Selected</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Type</span><span class=debug-stat-value>`), _tmpl$2$5 = /* @__PURE__ */ template(`<div class=debug-stat-row style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.1);"><span class=debug-stat-label style=color:#00ffff;>Safari Hybrid</span><span class=debug-stat-value style=color:#00ffff;>Active`), _tmpl$3$4 = /* @__PURE__ */ template(`<div class=debug-stat-row><span class=debug-stat-label>Render Time</span><span class=debug-stat-value>ms`), _tmpl$4$4 = /* @__PURE__ */ template(`<div class=debug-stat-row><span class=debug-stat-label>Visible/Total</span><span class=debug-stat-value>/`), _tmpl$5$3 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>FPS</span><span class=debug-stat-value><span style=opacity:0.7;font-size:10px> (avg: <!>)</span></span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Memory</span><span class=debug-stat-value>MB</span></div><div class=debug-stat-row><span class=debug-stat-label>Frame Time</span><span class=debug-stat-value>ms</span></div><div class=debug-stat-row><span class=debug-stat-label>Zoom</span><span class=debug-stat-value>x`), _tmpl$6$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Zoom Animation Speed<span class=debug-control-value>x</span></label><input type=range class=debug-slider min=0.5 max=2.5 step=0.1><p class=debug-control-description>How fast the artwork zooms when you click on elements`), _tmpl$7$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Color Theme<span class=debug-help-icon title="Changes the highlight colors">?</span></label><div class=debug-toggle-group><button type=button>Cyan Tech</button><button type=button>Golden Magic</button><button type=button>Blue Moon</button></div><div class=debug-toggle-group style=margin-top:8px;><button type=button>Pure White</button><button type=button>Soft White</button><button type=button>Dark Mode`), _tmpl$8$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Stroke Animation Speed</label><div style=display:flex;align-items:center;gap:12px;><span style=font-size:11px;color:#888;min-width:30px;>Fast</span><input type=range min=0.3 max=4.0 step=0.1 style=flex:1;cursor:pointer;><span style=font-size:11px;color:#888;min-width:30px;text-align:right;>Slow</span></div><p class=debug-control-description style=margin-top:8px;text-align:center;><span style=color:#666;font-size:10px;>`), _tmpl$9$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Hotspot Reveal Mode</label><div class=debug-toggle-group><button type=button>Focus</button><button type=button>Ripple (experimental)</button></div><p class=debug-control-description>`), _tmpl$0$3 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>FPS Target</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Effects</span><span class=debug-stat-value style=font-size:10px;></span></div><div class=debug-stat-row><span class=debug-stat-label>GPU</span><span class=debug-stat-value>`), _tmpl$1$2 = /* @__PURE__ */ template(`<div class=debug-control style=margin-top:16px;><button class="debug-toggle-option active"style=width:100%; type=button>Test Random Zoom`), _tmpl$10$2 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Cache Version</span><span class=debug-stat-value>1.0.2</span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value>Active</span></div><div class=debug-stat-row><span class=debug-stat-label>localStorage Size</span><span class=debug-stat-value>`), _tmpl$11$1 = /* @__PURE__ */ template(`<div class=debug-control style=margin-top:16px;><button class=debug-toggle-option>🗑️ Clear Cache & Reload</button><p class=debug-control-description>Fixes stuck animations and broken hover states`), _tmpl$12$1 = /* @__PURE__ */ template(`<div style=margin-bottom:20px;><label style=color:#999;font-size:10px;display:block;margin-bottom:8px;>HAPTIC FEEDBACK</label><div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:8px;"><button class=glass-button>Reveal (100ms)</button><button class=glass-button>Activate (200ms)`), _tmpl$13$1 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div style="margin-bottom:20px;padding:12px;background:rgba(255, 200, 0, 0.05);border:1px solid rgba(255, 200, 0, 0.2);border-radius:4px;"><h4 style="margin:0 0 12px 0;color:#FFC400;font-size:11px;text-transform:uppercase;letter-spacing:1px;">★ Absorbed Impact ★</h4><div style=text-align:center;><button class=glass-button></button><div style="padding:8px;background:rgba(0, 0, 0, 0.2);border-radius:4px;"><div style=font-size:10px;color:#999;text-align:center;>Son par défaut mobile<br><span style=font-size:9px;opacity:0.8;>Utilisé pour TEMPO 1 & TEMPO 2`), _tmpl$14$1 = /* @__PURE__ */ template(`<div style="margin-top:12px;padding:8px;background:rgba(0, 0, 0, 0.2);border-radius:4px;"><div style=display:flex;justify-content:space-between;font-size:10px;color:#777;><span>Interactions: </span><span>Session: <!>m <!>s`), _tmpl$15$1 = /* @__PURE__ */ template(`<div><button style=background:none;border:none;color:#fff;font-size:14px;padding:8px;cursor:pointer;opacity:0.8;hover:opacity:1;>◀ Last</button><button style=background:none;border:none;color:#fff;font-size:14px;padding:8px;cursor:pointer;opacity:0.8;>⏪ 15</button><button style="background:none;border:none;color:#fff;font-size:18px;padding:8px 16px;cursor:pointer;"></button><button style=background:none;border:none;color:#fff;font-size:14px;padding:8px;cursor:pointer;opacity:0.8;>15 ⏩</button><button style=background:none;border:none;color:#fff;font-size:14px;padding:8px;cursor:pointer;opacity:0.8;>Next ▶`), _tmpl$16$1 = /* @__PURE__ */ template(`<div><button style=background:none;border:none;color:rgba(255,255,255,0.5);font-size:12px;padding:4px;cursor:pointer;>◀</button><button style=background:none;border:none;color:rgba(255,255,255,0.5);font-size:10px;padding:4px;cursor:pointer;>-15</button><button style="background:none;border:none;color:#fff;font-size:16px;padding:4px 8px;cursor:pointer;"></button><button style=background:none;border:none;color:rgba(255,255,255,0.5);font-size:10px;padding:4px;cursor:pointer;>+15</button><button style=background:none;border:none;color:rgba(255,255,255,0.5);font-size:12px;padding:4px;cursor:pointer;>▶`), _tmpl$17$1 = /* @__PURE__ */ template(`<div><div><button style=background:none;border:none;color:rgba(255,255,255,0.7);font-size:16px;padding:4px;cursor:pointer;>⏮</button><button style=background:none;border:none;color:rgba(255,255,255,0.7);font-size:14px;padding:4px;cursor:pointer;>⏪</button><button style=background:rgba(255,255,255,0.1);border:none;color:#fff;font-size:18px;padding:8px;border-radius:50%;width:40px;height:40px;cursor:pointer;></button><button style=background:none;border:none;color:rgba(255,255,255,0.7);font-size:14px;padding:4px;cursor:pointer;>⏩</button><button style=background:none;border:none;color:rgba(255,255,255,0.7);font-size:16px;padding:4px;cursor:pointer;>⏭`), _tmpl$18$1 = /* @__PURE__ */ template(`<div><div style=display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:12px;><button style="background:none;border:none;color:rgba(255,255,255,0.7);font-size:18px;cursor:pointer;transition:color 0.2s;">⏮</button><button style=background:none;border:none;color:rgba(255,255,255,0.7);font-size:16px;cursor:pointer;>⏪</button><button style=background:#1db954;border:none;color:#000;font-size:16px;padding:0;border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;></button><button style=background:none;border:none;color:rgba(255,255,255,0.7);font-size:16px;cursor:pointer;>⏩</button><button style=background:none;border:none;color:rgba(255,255,255,0.7);font-size:18px;cursor:pointer;>⏭</button></div><div style=display:flex;align-items:center;gap:8px;><span style=font-size:11px;color:rgba(255,255,255,0.5);>0:00</span><div style=flex:1;height:4px;background:rgba(255,255,255,0.1);border-radius:2px;position:relative;><div style=position:absolute;left:0;top:0;width:30%;height:100%;background:#1db954;border-radius:2px;></div></div><span style=font-size:11px;color:rgba(255,255,255,0.5);>1:30`), _tmpl$19$1 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div style=margin-bottom:20px;><h4 style="margin:0 0 12px 0;color:#666;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Select Player Style</h4><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><button class=glass-button>Deji's Vision</button><button class=glass-button>Ultra Minimal</button><button class=glass-button>Floating Bar</button><button class=glass-button>Spotify-like</button></div></div><div style=margin-bottom:20px;><h4 style="margin:0 0 12px 0;color:#666;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Player Preview (Segment <!>/<!>)</h4></div><div style="padding:10px;background:rgba(0, 0, 0, 0.2);border:1px solid rgba(255, 255, 255, 0.05);border-radius:4px;"><p style=font-size:10px;color:#666;margin:0;line-height:1.4;>Test different audio player styles for the narration system. Each style has different visual approaches while maintaining the same core functionality.`), _tmpl$20$1 = /* @__PURE__ */ template(`<span class=debug-mobile-compact-fps> FPS`), _tmpl$21$1 = /* @__PURE__ */ template(`<div class="debug-mobile-compact glass-button"><div class=debug-mobile-compact-content><span class=debug-mobile-compact-icon><svg width=16 height=16 viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round></path></svg></span><span class=debug-mobile-compact-label>Debug`), _tmpl$22$1 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Cache Version</span><span class=debug-stat-value>1.0.2</span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value style=color:#4CAF50>Active</span></div><div style=margin-top:20px;><button class=glass-button>🗑️ Clear Cache & Reload</button><p style=margin-top:10px;font-size:11px;opacity:0.6;text-align:center;>Clears localStorage, sessionStorage and reloads the app`), _tmpl$23$1 = /* @__PURE__ */ template(`<div><div><div class=debug-mobile-sheet-handle><div class=debug-mobile-sheet-handle-bar></div></div><div class=debug-mobile-sheet-header><h3 class=debug-mobile-sheet-title><svg width=18 height=18 viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round></path></svg>Artwork Controls</h3></div><div class=debug-mobile-tabs></div><div class=debug-mobile-content>`), _tmpl$24$1 = /* @__PURE__ */ template(`<button><span class=debug-mobile-tab-icon></span><span class=debug-mobile-tab-label>`), _tmpl$25$1 = /* @__PURE__ */ template(`<span style=margin-left:8px;>Artwork Controls`), _tmpl$26$1 = /* @__PURE__ */ template(`<button title="Minimize panel"><svg viewBox="0 0 20 20"><rect x=11 y=15 width=14 height=2>`), _tmpl$27$1 = /* @__PURE__ */ template(`<div><div class=debug-panel-header><h3 class=debug-panel-title style="margin:0;display:'flex';alignItems:'center';"><svg viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round>`), _tmpl$28$1 = /* @__PURE__ */ template(`<div><div class=debug-section-header><div class=debug-section-title><span class=debug-section-icon></span><span></span></div><span class=debug-section-chevron>▼</span></div><div class=debug-section-content><div class=debug-section-body>`);
 function DebugPanel(props) {
   const [isMinimized, setIsMinimized] = createSignal(true);
   const [expandedSections, setExpandedSections] = createSignal({
@@ -24621,340 +24621,104 @@ function DebugPanel(props) {
       title: "Sound Test",
       content: () => {
         const [audioEngine, setAudioEngine] = createSignal(null);
-        const [currentReveal, setCurrentReveal] = createSignal("inkDiffusion");
-        const [currentActivate, setCurrentActivate] = createSignal("absorbedImpact");
-        const [isInitialized, setIsInitialized] = createSignal(false);
-        const initAudio = async () => {
+        onMount(async () => {
           if (window.minimalistAudioEngine) {
             setAudioEngine(window.minimalistAudioEngine);
             if (!window.minimalistAudioEngine.isUnlocked) {
               await window.minimalistAudioEngine.init();
             }
-            setIsInitialized(true);
-            setCurrentReveal(window.minimalistAudioEngine.currentReveal);
-            setCurrentActivate(window.minimalistAudioEngine.currentActivate);
             console.log("[Minimalist Audio] Using global engine");
-          } else if (!audioEngine()) {
+          } else {
             const MinimalistAudioEngine = (await __vitePreload(async () => {
-              const { default: __vite_default__ } = await import("./MinimalistAudioEngine-CLIymWlN.js");
+              const { default: __vite_default__ } = await import("./MinimalistAudioEngine-CmSqlnIu.js");
               return { default: __vite_default__ };
             }, true ? __vite__mapDeps([0,1]) : void 0)).default;
             const engine = new MinimalistAudioEngine();
             await engine.init();
             setAudioEngine(engine);
             window.minimalistAudioEngine = engine;
-            setIsInitialized(true);
             console.log("[Minimalist Audio] Created new engine");
           }
-        };
-        const playRevealSound = (sound) => {
-          if (!audioEngine()) return;
-          audioEngine().playReveal(Math.random() * 500, Math.random() * 500);
-        };
-        const playActivateSound = (sound) => {
-          if (!audioEngine()) return;
-          setCurrentActivate(sound);
-          audioEngine().setActivateSound(sound);
-          audioEngine().playActivate();
-        };
+        });
         return (() => {
-          var _el$93 = _tmpl$17$1();
-          insert(_el$93, createComponent(Show, {
-            get when() {
-              return !isInitialized();
-            },
-            get children() {
-              var _el$94 = _tmpl$12$1();
-              _el$94.$$click = initAudio;
-              _el$94.style.setProperty("width", "100%");
-              _el$94.style.setProperty("padding", "12px");
-              _el$94.style.setProperty("background", "rgba(76, 175, 80, 0.1)");
-              _el$94.style.setProperty("border", "1px solid rgba(76, 175, 80, 0.3)");
-              _el$94.style.setProperty("color", "#4CAF50");
-              _el$94.style.setProperty("marginBottom", "16px");
-              return _el$94;
+          var _el$93 = _tmpl$13$1(), _el$94 = _el$93.firstChild, _el$95 = _el$94.firstChild, _el$96 = _el$95.nextSibling, _el$97 = _el$96.firstChild;
+          _el$97.$$click = () => {
+            var _a, _b;
+            if (audioEngine()) {
+              (_b = (_a = audioEngine()).playActivate) == null ? void 0 : _b.call(_a);
             }
-          }), null);
-          insert(_el$93, createComponent(Show, {
+          };
+          _el$97.style.setProperty("padding", "16px 24px");
+          _el$97.style.setProperty("fontSize", "12px");
+          _el$97.style.setProperty("marginBottom", "12px");
+          _el$97.style.setProperty("fontWeight", "bold");
+          _el$97.style.setProperty("width", "100%");
+          insert(_el$97, () => audioEngine() ? "🔊 Tester le son" : "⏳ Initialisation...");
+          insert(_el$94, createComponent(Show, {
             get when() {
-              return isInitialized();
+              return audioEngine();
             },
             get children() {
-              return [(() => {
-                var _el$95 = _tmpl$13$1();
-                _el$95.firstChild;
-                insert(_el$95, () => {
-                  var _a, _b;
-                  const info = ((_b = (_a = audioEngine()) == null ? void 0 : _a.getVariationInfo) == null ? void 0 : _b.call(_a)) || {
-                    revelation: {
-                      current: 0,
-                      description: "Unknown"
-                    },
-                    activation: {
-                      current: 0,
-                      description: "Unknown"
-                    },
-                    metrics: {
-                      totalInteractions: 0,
-                      sessionDuration: 0
-                    }
-                  };
-                  return [(() => {
-                    var _el$120 = _tmpl$18$1(), _el$121 = _el$120.firstChild;
-                    _el$121.firstChild;
-                    var _el$123 = _el$121.nextSibling, _el$124 = _el$123.firstChild, _el$125 = _el$124.nextSibling, _el$126 = _el$125.nextSibling;
-                    insert(_el$121, () => info.activation.current === 3 ? "★ ABSORBED IMPACT ★" : info.revelation.description, null);
-                    _el$123.style.setProperty("display", "grid");
-                    _el$123.style.setProperty("gridTemplateColumns", "repeat(3, 1fr)");
-                    _el$123.style.setProperty("gap", "4px");
-                    _el$124.$$click = () => {
-                      var _a2, _b2, _c, _d, _e, _f;
-                      if (info.activation.current !== 3) {
-                        (_b2 = (_a2 = audioEngine()) == null ? void 0 : _a2.setAbsorbedImpactForBoth) == null ? void 0 : _b2.call(_a2, false);
-                        (_d = (_c = audioEngine()) == null ? void 0 : _c.setRevealVariation) == null ? void 0 : _d.call(_c, 0);
-                        (_f = (_e = audioEngine()) == null ? void 0 : _e.playReveal) == null ? void 0 : _f.call(_e, 100, 100);
-                      }
-                    };
-                    _el$124.style.setProperty("padding", "8px");
-                    _el$124.style.setProperty("fontSize", "10px");
-                    _el$125.$$click = () => {
-                      var _a2, _b2, _c, _d;
-                      (_b2 = (_a2 = audioEngine()) == null ? void 0 : _a2.setRevealVariation) == null ? void 0 : _b2.call(_a2, 1);
-                      (_d = (_c = audioEngine()) == null ? void 0 : _c.playReveal) == null ? void 0 : _d.call(_c, 200, 200);
-                    };
-                    _el$125.style.setProperty("padding", "8px");
-                    _el$125.style.setProperty("fontSize", "10px");
-                    _el$126.$$click = () => {
-                      var _a2, _b2, _c, _d;
-                      (_b2 = (_a2 = audioEngine()) == null ? void 0 : _a2.setRevealVariation) == null ? void 0 : _b2.call(_a2, 2);
-                      (_d = (_c = audioEngine()) == null ? void 0 : _c.playReveal) == null ? void 0 : _d.call(_c, 300, 300);
-                    };
-                    _el$126.style.setProperty("padding", "8px");
-                    _el$126.style.setProperty("fontSize", "10px");
-                    createRenderEffect((_p$) => {
-                      var _v$27 = info.activation.current === 3 ? 0.5 : 1, _v$28 = info.activation.current === 3 ? "rgba(50, 50, 50, 0.1)" : info.revelation.current === 0 ? "rgba(100, 200, 255, 0.2)" : "rgba(255, 255, 255, 0.02)", _v$29 = "1px solid " + (info.activation.current === 3 ? "rgba(100, 100, 100, 0.2)" : info.revelation.current === 0 ? "rgba(100, 200, 255, 0.4)" : "rgba(255, 255, 255, 0.08)"), _v$30 = info.activation.current === 3 ? "#555" : info.revelation.current === 0 ? "#66AAFF" : "#999", _v$31 = info.activation.current === 3 ? 0.5 : 1, _v$32 = info.activation.current === 3 ? "not-allowed" : "pointer", _v$33 = info.revelation.current === 1 ? "rgba(100, 200, 255, 0.2)" : "rgba(255, 255, 255, 0.02)", _v$34 = "1px solid " + (info.revelation.current === 1 ? "rgba(100, 200, 255, 0.4)" : "rgba(255, 255, 255, 0.08)"), _v$35 = info.revelation.current === 1 ? "#66AAFF" : "#999", _v$36 = info.revelation.current === 2 ? "rgba(100, 200, 255, 0.2)" : "rgba(255, 255, 255, 0.02)", _v$37 = "1px solid " + (info.revelation.current === 2 ? "rgba(100, 200, 255, 0.4)" : "rgba(255, 255, 255, 0.08)"), _v$38 = info.revelation.current === 2 ? "#66AAFF" : "#999";
-                      _v$27 !== _p$.e && ((_p$.e = _v$27) != null ? _el$123.style.setProperty("opacity", _v$27) : _el$123.style.removeProperty("opacity"));
-                      _v$28 !== _p$.t && ((_p$.t = _v$28) != null ? _el$124.style.setProperty("background", _v$28) : _el$124.style.removeProperty("background"));
-                      _v$29 !== _p$.a && ((_p$.a = _v$29) != null ? _el$124.style.setProperty("border", _v$29) : _el$124.style.removeProperty("border"));
-                      _v$30 !== _p$.o && ((_p$.o = _v$30) != null ? _el$124.style.setProperty("color", _v$30) : _el$124.style.removeProperty("color"));
-                      _v$31 !== _p$.i && ((_p$.i = _v$31) != null ? _el$124.style.setProperty("opacity", _v$31) : _el$124.style.removeProperty("opacity"));
-                      _v$32 !== _p$.n && ((_p$.n = _v$32) != null ? _el$124.style.setProperty("cursor", _v$32) : _el$124.style.removeProperty("cursor"));
-                      _v$33 !== _p$.s && ((_p$.s = _v$33) != null ? _el$125.style.setProperty("background", _v$33) : _el$125.style.removeProperty("background"));
-                      _v$34 !== _p$.h && ((_p$.h = _v$34) != null ? _el$125.style.setProperty("border", _v$34) : _el$125.style.removeProperty("border"));
-                      _v$35 !== _p$.r && ((_p$.r = _v$35) != null ? _el$125.style.setProperty("color", _v$35) : _el$125.style.removeProperty("color"));
-                      _v$36 !== _p$.d && ((_p$.d = _v$36) != null ? _el$126.style.setProperty("background", _v$36) : _el$126.style.removeProperty("background"));
-                      _v$37 !== _p$.l && ((_p$.l = _v$37) != null ? _el$126.style.setProperty("border", _v$37) : _el$126.style.removeProperty("border"));
-                      _v$38 !== _p$.u && ((_p$.u = _v$38) != null ? _el$126.style.setProperty("color", _v$38) : _el$126.style.removeProperty("color"));
-                      return _p$;
-                    }, {
-                      e: void 0,
-                      t: void 0,
-                      a: void 0,
-                      o: void 0,
-                      i: void 0,
-                      n: void 0,
-                      s: void 0,
-                      h: void 0,
-                      r: void 0,
-                      d: void 0,
-                      l: void 0,
-                      u: void 0
-                    });
-                    return _el$120;
-                  })(), (() => {
-                    var _el$127 = _tmpl$19$1(), _el$128 = _el$127.firstChild, _el$129 = _el$128.firstChild, _el$131 = _el$129.nextSibling;
-                    _el$131.nextSibling;
-                    var _el$132 = _el$128.nextSibling, _el$133 = _el$132.firstChild, _el$134 = _el$133.nextSibling, _el$135 = _el$134.nextSibling, _el$136 = _el$135.nextSibling;
-                    insert(_el$128, () => info.activation.description, _el$131);
-                    insert(_el$128, () => info.activation.current === 3 ? "★" : "", null);
-                    _el$133.$$click = () => {
-                      var _a2, _b2, _c, _d, _e, _f;
-                      (_b2 = (_a2 = audioEngine()) == null ? void 0 : _a2.setAbsorbedImpactForBoth) == null ? void 0 : _b2.call(_a2, false);
-                      (_d = (_c = audioEngine()) == null ? void 0 : _c.setActivationVariation) == null ? void 0 : _d.call(_c, 0);
-                      (_f = (_e = audioEngine()) == null ? void 0 : _e.playActivate) == null ? void 0 : _f.call(_e);
-                    };
-                    _el$133.style.setProperty("padding", "8px");
-                    _el$133.style.setProperty("fontSize", "10px");
-                    _el$134.$$click = () => {
-                      var _a2, _b2, _c, _d, _e, _f;
-                      (_b2 = (_a2 = audioEngine()) == null ? void 0 : _a2.setAbsorbedImpactForBoth) == null ? void 0 : _b2.call(_a2, false);
-                      (_d = (_c = audioEngine()) == null ? void 0 : _c.setActivationVariation) == null ? void 0 : _d.call(_c, 1);
-                      (_f = (_e = audioEngine()) == null ? void 0 : _e.playActivate) == null ? void 0 : _f.call(_e);
-                    };
-                    _el$134.style.setProperty("padding", "8px");
-                    _el$134.style.setProperty("fontSize", "10px");
-                    _el$135.$$click = () => {
-                      var _a2, _b2, _c, _d, _e, _f;
-                      (_b2 = (_a2 = audioEngine()) == null ? void 0 : _a2.setAbsorbedImpactForBoth) == null ? void 0 : _b2.call(_a2, false);
-                      (_d = (_c = audioEngine()) == null ? void 0 : _c.setActivationVariation) == null ? void 0 : _d.call(_c, 2);
-                      (_f = (_e = audioEngine()) == null ? void 0 : _e.playActivate) == null ? void 0 : _f.call(_e);
-                    };
-                    _el$135.style.setProperty("padding", "8px");
-                    _el$135.style.setProperty("fontSize", "10px");
-                    _el$136.$$click = () => {
-                      var _a2, _b2, _c, _d;
-                      (_b2 = (_a2 = audioEngine()) == null ? void 0 : _a2.setActivationVariation) == null ? void 0 : _b2.call(_a2, 3);
-                      (_d = (_c = audioEngine()) == null ? void 0 : _c.playActivate) == null ? void 0 : _d.call(_c);
-                    };
-                    _el$136.style.setProperty("padding", "8px");
-                    _el$136.style.setProperty("fontSize", "10px");
-                    createRenderEffect((_p$) => {
-                      var _v$39 = info.activation.current === 0 ? "rgba(100, 200, 255, 0.2)" : "rgba(255, 255, 255, 0.02)", _v$40 = "1px solid " + (info.activation.current === 0 ? "rgba(100, 200, 255, 0.4)" : "rgba(255, 255, 255, 0.08)"), _v$41 = info.activation.current === 0 ? "#66AAFF" : "#999", _v$42 = info.activation.current === 1 ? "rgba(100, 200, 255, 0.2)" : "rgba(255, 255, 255, 0.02)", _v$43 = "1px solid " + (info.activation.current === 1 ? "rgba(100, 200, 255, 0.4)" : "rgba(255, 255, 255, 0.08)"), _v$44 = info.activation.current === 1 ? "#66AAFF" : "#999", _v$45 = info.activation.current === 2 ? "rgba(100, 200, 255, 0.2)" : "rgba(255, 255, 255, 0.02)", _v$46 = "1px solid " + (info.activation.current === 2 ? "rgba(100, 200, 255, 0.4)" : "rgba(255, 255, 255, 0.08)"), _v$47 = info.activation.current === 2 ? "#66AAFF" : "#999", _v$48 = info.activation.current === 3 ? "rgba(255, 100, 100, 0.2)" : "rgba(255, 255, 255, 0.02)", _v$49 = "1px solid " + (info.activation.current === 3 ? "rgba(255, 100, 100, 0.4)" : "rgba(255, 255, 255, 0.08)"), _v$50 = info.activation.current === 3 ? "#FF6666" : "#999";
-                      _v$39 !== _p$.e && ((_p$.e = _v$39) != null ? _el$133.style.setProperty("background", _v$39) : _el$133.style.removeProperty("background"));
-                      _v$40 !== _p$.t && ((_p$.t = _v$40) != null ? _el$133.style.setProperty("border", _v$40) : _el$133.style.removeProperty("border"));
-                      _v$41 !== _p$.a && ((_p$.a = _v$41) != null ? _el$133.style.setProperty("color", _v$41) : _el$133.style.removeProperty("color"));
-                      _v$42 !== _p$.o && ((_p$.o = _v$42) != null ? _el$134.style.setProperty("background", _v$42) : _el$134.style.removeProperty("background"));
-                      _v$43 !== _p$.i && ((_p$.i = _v$43) != null ? _el$134.style.setProperty("border", _v$43) : _el$134.style.removeProperty("border"));
-                      _v$44 !== _p$.n && ((_p$.n = _v$44) != null ? _el$134.style.setProperty("color", _v$44) : _el$134.style.removeProperty("color"));
-                      _v$45 !== _p$.s && ((_p$.s = _v$45) != null ? _el$135.style.setProperty("background", _v$45) : _el$135.style.removeProperty("background"));
-                      _v$46 !== _p$.h && ((_p$.h = _v$46) != null ? _el$135.style.setProperty("border", _v$46) : _el$135.style.removeProperty("border"));
-                      _v$47 !== _p$.r && ((_p$.r = _v$47) != null ? _el$135.style.setProperty("color", _v$47) : _el$135.style.removeProperty("color"));
-                      _v$48 !== _p$.d && ((_p$.d = _v$48) != null ? _el$136.style.setProperty("background", _v$48) : _el$136.style.removeProperty("background"));
-                      _v$49 !== _p$.l && ((_p$.l = _v$49) != null ? _el$136.style.setProperty("border", _v$49) : _el$136.style.removeProperty("border"));
-                      _v$50 !== _p$.u && ((_p$.u = _v$50) != null ? _el$136.style.setProperty("color", _v$50) : _el$136.style.removeProperty("color"));
-                      return _p$;
-                    }, {
-                      e: void 0,
-                      t: void 0,
-                      a: void 0,
-                      o: void 0,
-                      i: void 0,
-                      n: void 0,
-                      s: void 0,
-                      h: void 0,
-                      r: void 0,
-                      d: void 0,
-                      l: void 0,
-                      u: void 0
-                    });
-                    return _el$127;
-                  })(), memo(() => memo(() => info.activation.current === 3)() && _tmpl$22$1()), (() => {
-                    var _el$137 = _tmpl$20$1(), _el$138 = _el$137.firstChild, _el$139 = _el$138.firstChild;
-                    _el$139.firstChild;
-                    var _el$141 = _el$139.nextSibling, _el$142 = _el$141.firstChild, _el$145 = _el$142.nextSibling, _el$143 = _el$145.nextSibling, _el$146 = _el$143.nextSibling;
-                    _el$146.nextSibling;
-                    insert(_el$139, () => info.metrics.totalInteractions, null);
-                    insert(_el$141, () => Math.floor(info.metrics.sessionDuration / 60), _el$145);
-                    insert(_el$141, () => info.metrics.sessionDuration % 60, _el$146);
-                    return _el$137;
-                  })(), (() => {
-                    var _el$147 = _tmpl$21$1();
-                    _el$147.$$click = () => {
-                      var _a2, _b2;
-                      return (_b2 = (_a2 = audioEngine()) == null ? void 0 : _a2.testSounds) == null ? void 0 : _b2.call(_a2);
-                    };
-                    _el$147.style.setProperty("width", "100%");
-                    _el$147.style.setProperty("marginTop", "8px");
-                    _el$147.style.setProperty("padding", "10px");
-                    _el$147.style.setProperty("background", "rgba(255, 200, 0, 0.1)");
-                    _el$147.style.setProperty("border", "1px solid rgba(255, 200, 0, 0.3)");
-                    _el$147.style.setProperty("color", "#FFC400");
-                    _el$147.style.setProperty("fontSize", "11px");
-                    return _el$147;
-                  })()];
-                }, null);
-                return _el$95;
-              })(), (() => {
-                var _el$97 = _tmpl$14$1(), _el$98 = _el$97.firstChild, _el$99 = _el$98.nextSibling, _el$100 = _el$99.firstChild, _el$101 = _el$100.nextSibling, _el$102 = _el$101.nextSibling, _el$103 = _el$102.nextSibling, _el$104 = _el$103.nextSibling, _el$105 = _el$104.nextSibling;
-                _el$100.$$click = () => playRevealSound();
-                _el$100.style.setProperty("padding", "12px 8px");
-                _el$100.style.setProperty("fontSize", "11px");
-                _el$100.style.setProperty("background", "rgba(255, 255, 255, 0.02)");
-                _el$100.style.setProperty("border", "1px solid rgba(255, 255, 255, 0.08)");
-                _el$100.style.setProperty("color", "#999");
-                _el$101.$$click = () => playRevealSound();
-                _el$101.style.setProperty("padding", "12px 8px");
-                _el$101.style.setProperty("fontSize", "11px");
-                _el$101.style.setProperty("background", "rgba(255, 255, 255, 0.02)");
-                _el$101.style.setProperty("border", "1px solid rgba(255, 255, 255, 0.08)");
-                _el$101.style.setProperty("color", "#999");
-                _el$102.$$click = () => playRevealSound();
-                _el$102.style.setProperty("padding", "12px 8px");
-                _el$102.style.setProperty("fontSize", "11px");
-                _el$102.style.setProperty("background", "rgba(255, 255, 255, 0.02)");
-                _el$102.style.setProperty("border", "1px solid rgba(255, 255, 255, 0.08)");
-                _el$102.style.setProperty("color", "#999");
-                _el$103.$$click = () => playRevealSound();
-                _el$103.style.setProperty("padding", "12px 8px");
-                _el$103.style.setProperty("fontSize", "11px");
-                _el$103.style.setProperty("background", "rgba(255, 255, 255, 0.02)");
-                _el$103.style.setProperty("border", "1px solid rgba(255, 255, 255, 0.08)");
-                _el$103.style.setProperty("color", "#999");
-                _el$104.$$click = () => playRevealSound();
-                _el$104.style.setProperty("padding", "12px 8px");
-                _el$104.style.setProperty("fontSize", "11px");
-                _el$104.style.setProperty("background", "rgba(255, 255, 255, 0.02)");
-                _el$104.style.setProperty("border", "1px solid rgba(255, 255, 255, 0.08)");
-                _el$104.style.setProperty("color", "#999");
-                _el$105.$$click = () => playRevealSound();
-                _el$105.style.setProperty("padding", "12px 8px");
-                _el$105.style.setProperty("fontSize", "11px");
-                _el$105.style.setProperty("background", "rgba(139, 69, 19, 0.1)");
-                _el$105.style.setProperty("border", "1px solid rgba(139, 69, 19, 0.3)");
-                _el$105.style.setProperty("color", "#8B4513");
-                _el$105.style.setProperty("gridColumn", "span 2");
-                return _el$97;
-              })(), (() => {
-                var _el$106 = _tmpl$15$1(), _el$107 = _el$106.firstChild, _el$108 = _el$107.nextSibling, _el$109 = _el$108.firstChild, _el$110 = _el$109.nextSibling, _el$111 = _el$110.nextSibling, _el$112 = _el$111.nextSibling;
-                _el$109.$$click = () => playActivateSound("absorbedImpact");
-                _el$109.style.setProperty("padding", "12px 8px");
-                _el$109.style.setProperty("fontSize", "11px");
-                _el$110.$$click = () => playActivateSound("paperWave");
-                _el$110.style.setProperty("padding", "12px 8px");
-                _el$110.style.setProperty("fontSize", "11px");
-                _el$111.$$click = () => playActivateSound("inkSaturation");
-                _el$111.style.setProperty("padding", "12px 8px");
-                _el$111.style.setProperty("fontSize", "11px");
-                _el$112.$$click = () => playActivateSound("surfaceEcho");
-                _el$112.style.setProperty("padding", "12px 8px");
-                _el$112.style.setProperty("fontSize", "11px");
-                createRenderEffect((_p$) => {
-                  var _v$11 = `glass-button ${currentActivate() === "absorbedImpact" ? "active" : ""}`, _v$12 = currentActivate() === "absorbedImpact" ? "rgba(255, 255, 255, 0.08)" : "rgba(255, 255, 255, 0.02)", _v$13 = currentActivate() === "absorbedImpact" ? "1px solid rgba(255, 255, 255, 0.2)" : "1px solid rgba(255, 255, 255, 0.08)", _v$14 = currentActivate() === "absorbedImpact" ? "#fff" : "#999", _v$15 = `glass-button ${currentActivate() === "paperWave" ? "active" : ""}`, _v$16 = currentActivate() === "paperWave" ? "rgba(255, 255, 255, 0.08)" : "rgba(255, 255, 255, 0.02)", _v$17 = currentActivate() === "paperWave" ? "1px solid rgba(255, 255, 255, 0.2)" : "1px solid rgba(255, 255, 255, 0.08)", _v$18 = currentActivate() === "paperWave" ? "#fff" : "#999", _v$19 = `glass-button ${currentActivate() === "inkSaturation" ? "active" : ""}`, _v$20 = currentActivate() === "inkSaturation" ? "rgba(255, 255, 255, 0.08)" : "rgba(255, 255, 255, 0.02)", _v$21 = currentActivate() === "inkSaturation" ? "1px solid rgba(255, 255, 255, 0.2)" : "1px solid rgba(255, 255, 255, 0.08)", _v$22 = currentActivate() === "inkSaturation" ? "#fff" : "#999", _v$23 = `glass-button ${currentActivate() === "surfaceEcho" ? "active" : ""}`, _v$24 = currentActivate() === "surfaceEcho" ? "rgba(255, 255, 255, 0.08)" : "rgba(255, 255, 255, 0.02)", _v$25 = currentActivate() === "surfaceEcho" ? "1px solid rgba(255, 255, 255, 0.2)" : "1px solid rgba(255, 255, 255, 0.08)", _v$26 = currentActivate() === "surfaceEcho" ? "#fff" : "#999";
-                  _v$11 !== _p$.e && className(_el$109, _p$.e = _v$11);
-                  _v$12 !== _p$.t && ((_p$.t = _v$12) != null ? _el$109.style.setProperty("background", _v$12) : _el$109.style.removeProperty("background"));
-                  _v$13 !== _p$.a && ((_p$.a = _v$13) != null ? _el$109.style.setProperty("border", _v$13) : _el$109.style.removeProperty("border"));
-                  _v$14 !== _p$.o && ((_p$.o = _v$14) != null ? _el$109.style.setProperty("color", _v$14) : _el$109.style.removeProperty("color"));
-                  _v$15 !== _p$.i && className(_el$110, _p$.i = _v$15);
-                  _v$16 !== _p$.n && ((_p$.n = _v$16) != null ? _el$110.style.setProperty("background", _v$16) : _el$110.style.removeProperty("background"));
-                  _v$17 !== _p$.s && ((_p$.s = _v$17) != null ? _el$110.style.setProperty("border", _v$17) : _el$110.style.removeProperty("border"));
-                  _v$18 !== _p$.h && ((_p$.h = _v$18) != null ? _el$110.style.setProperty("color", _v$18) : _el$110.style.removeProperty("color"));
-                  _v$19 !== _p$.r && className(_el$111, _p$.r = _v$19);
-                  _v$20 !== _p$.d && ((_p$.d = _v$20) != null ? _el$111.style.setProperty("background", _v$20) : _el$111.style.removeProperty("background"));
-                  _v$21 !== _p$.l && ((_p$.l = _v$21) != null ? _el$111.style.setProperty("border", _v$21) : _el$111.style.removeProperty("border"));
-                  _v$22 !== _p$.u && ((_p$.u = _v$22) != null ? _el$111.style.setProperty("color", _v$22) : _el$111.style.removeProperty("color"));
-                  _v$23 !== _p$.c && className(_el$112, _p$.c = _v$23);
-                  _v$24 !== _p$.w && ((_p$.w = _v$24) != null ? _el$112.style.setProperty("background", _v$24) : _el$112.style.removeProperty("background"));
-                  _v$25 !== _p$.m && ((_p$.m = _v$25) != null ? _el$112.style.setProperty("border", _v$25) : _el$112.style.removeProperty("border"));
-                  _v$26 !== _p$.f && ((_p$.f = _v$26) != null ? _el$112.style.setProperty("color", _v$26) : _el$112.style.removeProperty("color"));
-                  return _p$;
-                }, {
-                  e: void 0,
-                  t: void 0,
-                  a: void 0,
-                  o: void 0,
-                  i: void 0,
-                  n: void 0,
-                  s: void 0,
-                  h: void 0,
-                  r: void 0,
-                  d: void 0,
-                  l: void 0,
-                  u: void 0,
-                  c: void 0,
-                  w: void 0,
-                  m: void 0,
-                  f: void 0
+              return (() => {
+                var _a, _b;
+                const info = ((_b = (_a = audioEngine()) == null ? void 0 : _a.getVariationInfo) == null ? void 0 : _b.call(_a)) || {
+                  metrics: {
+                    totalInteractions: 0,
+                    sessionDuration: 0
+                  }
+                };
+                return createComponent(Show, {
+                  get when() {
+                    return info.metrics.totalInteractions > 0;
+                  },
+                  get children() {
+                    var _el$103 = _tmpl$14$1(), _el$104 = _el$103.firstChild, _el$105 = _el$104.firstChild;
+                    _el$105.firstChild;
+                    var _el$107 = _el$105.nextSibling, _el$108 = _el$107.firstChild, _el$111 = _el$108.nextSibling, _el$109 = _el$111.nextSibling, _el$112 = _el$109.nextSibling;
+                    _el$112.nextSibling;
+                    insert(_el$105, () => info.metrics.totalInteractions, null);
+                    insert(_el$107, () => Math.floor(info.metrics.sessionDuration / 60), _el$111);
+                    insert(_el$107, () => info.metrics.sessionDuration % 60, _el$112);
+                    return _el$103;
+                  }
                 });
-                return _el$106;
-              })(), (() => {
-                var _el$113 = _tmpl$16$1(), _el$114 = _el$113.firstChild, _el$115 = _el$114.firstChild, _el$116 = _el$115.nextSibling, _el$117 = _el$116.nextSibling, _el$118 = _el$117.nextSibling;
-                _el$118.nextSibling;
-                insert(_el$114, currentReveal, _el$117);
-                insert(_el$114, currentActivate, null);
-                return _el$113;
-              })()];
+              })();
             }
           }), null);
+          insert(_el$93, createComponent(Show, {
+            when: false,
+            get children() {
+              var _el$98 = _tmpl$12$1(), _el$99 = _el$98.firstChild, _el$100 = _el$99.nextSibling, _el$101 = _el$100.firstChild, _el$102 = _el$101.nextSibling;
+              _el$101.$$click = () => {
+                var _a, _b;
+                (_b = (_a = audioEngine()) == null ? void 0 : _a.testHaptics) == null ? void 0 : _b.call(_a, "reveal");
+              };
+              _el$101.style.setProperty("padding", "12px");
+              _el$101.style.setProperty("fontSize", "11px");
+              _el$102.$$click = () => {
+                var _a, _b;
+                (_b = (_a = audioEngine()) == null ? void 0 : _a.testHaptics) == null ? void 0 : _b.call(_a, "activate");
+              };
+              _el$102.style.setProperty("padding", "12px");
+              _el$102.style.setProperty("fontSize", "11px");
+              return _el$98;
+            }
+          }), null);
+          createRenderEffect((_p$) => {
+            var _v$11 = audioEngine() ? "rgba(255, 200, 0, 0.1)" : "rgba(100, 100, 100, 0.1)", _v$12 = audioEngine() ? "2px solid rgba(255, 200, 0, 0.3)" : "2px solid rgba(100, 100, 100, 0.3)", _v$13 = audioEngine() ? "#FFC400" : "#666", _v$14 = audioEngine() ? "pointer" : "wait", _v$15 = !audioEngine();
+            _v$11 !== _p$.e && ((_p$.e = _v$11) != null ? _el$97.style.setProperty("background", _v$11) : _el$97.style.removeProperty("background"));
+            _v$12 !== _p$.t && ((_p$.t = _v$12) != null ? _el$97.style.setProperty("border", _v$12) : _el$97.style.removeProperty("border"));
+            _v$13 !== _p$.a && ((_p$.a = _v$13) != null ? _el$97.style.setProperty("color", _v$13) : _el$97.style.removeProperty("color"));
+            _v$14 !== _p$.o && ((_p$.o = _v$14) != null ? _el$97.style.setProperty("cursor", _v$14) : _el$97.style.removeProperty("cursor"));
+            _v$15 !== _p$.i && (_el$97.disabled = _p$.i = _v$15);
+            return _p$;
+          }, {
+            e: void 0,
+            t: void 0,
+            a: void 0,
+            o: void 0,
+            i: void 0
+          });
           return _el$93;
         })();
       }
@@ -25003,135 +24767,135 @@ function DebugPanel(props) {
           console.log(`[Audio Player Test] Skip ${seconds} seconds`);
         };
         return (() => {
-          var _el$149 = _tmpl$27$1(), _el$150 = _el$149.firstChild, _el$151 = _el$150.firstChild, _el$152 = _el$151.nextSibling, _el$153 = _el$152.firstChild, _el$154 = _el$153.nextSibling, _el$155 = _el$154.nextSibling, _el$156 = _el$155.nextSibling, _el$157 = _el$150.nextSibling, _el$158 = _el$157.firstChild, _el$159 = _el$158.firstChild, _el$162 = _el$159.nextSibling, _el$160 = _el$162.nextSibling, _el$163 = _el$160.nextSibling;
-          _el$163.nextSibling;
-          _el$153.$$click = () => {
+          var _el$113 = _tmpl$19$1(), _el$114 = _el$113.firstChild, _el$115 = _el$114.firstChild, _el$116 = _el$115.nextSibling, _el$117 = _el$116.firstChild, _el$118 = _el$117.nextSibling, _el$119 = _el$118.nextSibling, _el$120 = _el$119.nextSibling, _el$121 = _el$114.nextSibling, _el$122 = _el$121.firstChild, _el$123 = _el$122.firstChild, _el$126 = _el$123.nextSibling, _el$124 = _el$126.nextSibling, _el$127 = _el$124.nextSibling;
+          _el$127.nextSibling;
+          _el$117.$$click = () => {
             setSelectedStyle("deji");
             activatePlayerStyle("deji");
           };
-          _el$153.style.setProperty("padding", "10px");
-          _el$154.$$click = () => {
+          _el$117.style.setProperty("padding", "10px");
+          _el$118.$$click = () => {
             setSelectedStyle("minimal");
             activatePlayerStyle("minimal");
           };
-          _el$154.style.setProperty("padding", "10px");
-          _el$155.$$click = () => {
+          _el$118.style.setProperty("padding", "10px");
+          _el$119.$$click = () => {
             setSelectedStyle("floating");
             activatePlayerStyle("floating");
           };
-          _el$155.style.setProperty("padding", "10px");
-          _el$156.$$click = () => {
+          _el$119.style.setProperty("padding", "10px");
+          _el$120.$$click = () => {
             setSelectedStyle("spotify");
             activatePlayerStyle("spotify");
           };
-          _el$156.style.setProperty("padding", "10px");
-          insert(_el$158, currentSegment, _el$162);
-          insert(_el$158, totalSegments, _el$163);
-          insert(_el$157, createComponent(Show, {
+          _el$120.style.setProperty("padding", "10px");
+          insert(_el$122, currentSegment, _el$126);
+          insert(_el$122, totalSegments, _el$127);
+          insert(_el$121, createComponent(Show, {
             get when() {
               return selectedStyle() === "deji";
             },
             get children() {
-              var _el$164 = _tmpl$23$1(), _el$165 = _el$164.firstChild, _el$166 = _el$165.nextSibling, _el$167 = _el$166.nextSibling, _el$168 = _el$167.nextSibling, _el$169 = _el$168.nextSibling;
-              _el$164.style.setProperty("background", "rgba(0, 0, 0, 0.95)");
-              _el$164.style.setProperty("border", "1px solid rgba(255, 255, 255, 0.1)");
-              _el$164.style.setProperty("borderRadius", "4px");
-              _el$164.style.setProperty("padding", "12px");
-              _el$164.style.setProperty("display", "flex");
-              _el$164.style.setProperty("alignItems", "center");
-              _el$164.style.setProperty("justifyContent", "space-between");
-              _el$164.style.setProperty("gap", "8px");
-              _el$164.style.setProperty("minHeight", "56px");
-              _el$165.$$click = previousSegment;
-              _el$166.$$click = () => skip(-15);
-              _el$167.$$click = togglePlayPause;
-              insert(_el$167, () => isPlaying() ? "⏸" : "▶");
-              _el$168.$$click = () => skip(15);
-              _el$169.$$click = nextSegment;
-              return _el$164;
+              var _el$128 = _tmpl$15$1(), _el$129 = _el$128.firstChild, _el$130 = _el$129.nextSibling, _el$131 = _el$130.nextSibling, _el$132 = _el$131.nextSibling, _el$133 = _el$132.nextSibling;
+              _el$128.style.setProperty("background", "rgba(0, 0, 0, 0.95)");
+              _el$128.style.setProperty("border", "1px solid rgba(255, 255, 255, 0.1)");
+              _el$128.style.setProperty("borderRadius", "4px");
+              _el$128.style.setProperty("padding", "12px");
+              _el$128.style.setProperty("display", "flex");
+              _el$128.style.setProperty("alignItems", "center");
+              _el$128.style.setProperty("justifyContent", "space-between");
+              _el$128.style.setProperty("gap", "8px");
+              _el$128.style.setProperty("minHeight", "56px");
+              _el$129.$$click = previousSegment;
+              _el$130.$$click = () => skip(-15);
+              _el$131.$$click = togglePlayPause;
+              insert(_el$131, () => isPlaying() ? "⏸" : "▶");
+              _el$132.$$click = () => skip(15);
+              _el$133.$$click = nextSegment;
+              return _el$128;
             }
           }), null);
-          insert(_el$157, createComponent(Show, {
+          insert(_el$121, createComponent(Show, {
             get when() {
               return selectedStyle() === "minimal";
             },
             get children() {
-              var _el$170 = _tmpl$24$1(), _el$171 = _el$170.firstChild, _el$172 = _el$171.nextSibling, _el$173 = _el$172.nextSibling, _el$174 = _el$173.nextSibling, _el$175 = _el$174.nextSibling;
-              _el$170.style.setProperty("display", "flex");
-              _el$170.style.setProperty("alignItems", "center");
-              _el$170.style.setProperty("justifyContent", "center");
-              _el$170.style.setProperty("gap", "20px");
-              _el$170.style.setProperty("padding", "20px");
-              _el$170.style.setProperty("background", "transparent");
-              _el$171.$$click = previousSegment;
-              _el$172.$$click = () => skip(-15);
-              _el$173.$$click = togglePlayPause;
-              insert(_el$173, () => isPlaying() ? "⏸" : "▶");
-              _el$174.$$click = () => skip(15);
-              _el$175.$$click = nextSegment;
-              return _el$170;
+              var _el$134 = _tmpl$16$1(), _el$135 = _el$134.firstChild, _el$136 = _el$135.nextSibling, _el$137 = _el$136.nextSibling, _el$138 = _el$137.nextSibling, _el$139 = _el$138.nextSibling;
+              _el$134.style.setProperty("display", "flex");
+              _el$134.style.setProperty("alignItems", "center");
+              _el$134.style.setProperty("justifyContent", "center");
+              _el$134.style.setProperty("gap", "20px");
+              _el$134.style.setProperty("padding", "20px");
+              _el$134.style.setProperty("background", "transparent");
+              _el$135.$$click = previousSegment;
+              _el$136.$$click = () => skip(-15);
+              _el$137.$$click = togglePlayPause;
+              insert(_el$137, () => isPlaying() ? "⏸" : "▶");
+              _el$138.$$click = () => skip(15);
+              _el$139.$$click = nextSegment;
+              return _el$134;
             }
           }), null);
-          insert(_el$157, createComponent(Show, {
+          insert(_el$121, createComponent(Show, {
             get when() {
               return selectedStyle() === "floating";
             },
             get children() {
-              var _el$176 = _tmpl$25$1(), _el$177 = _el$176.firstChild, _el$178 = _el$177.firstChild, _el$179 = _el$178.nextSibling, _el$180 = _el$179.nextSibling, _el$181 = _el$180.nextSibling, _el$182 = _el$181.nextSibling;
-              _el$176.style.setProperty("position", "relative");
-              _el$176.style.setProperty("height", "80px");
-              _el$176.style.setProperty("display", "flex");
-              _el$176.style.setProperty("alignItems", "flex-end");
-              _el$177.style.setProperty("background", "rgba(0, 0, 0, 0.8)");
-              _el$177.style.setProperty("backdropFilter", "blur(10px)");
-              _el$177.style.setProperty("borderRadius", "24px");
-              _el$177.style.setProperty("padding", "8px 16px");
-              _el$177.style.setProperty("display", "flex");
-              _el$177.style.setProperty("alignItems", "center");
-              _el$177.style.setProperty("gap", "12px");
-              _el$177.style.setProperty("boxShadow", "0 4px 12px rgba(0,0,0,0.3)");
-              _el$178.$$click = previousSegment;
-              _el$179.$$click = () => skip(-15);
-              _el$180.$$click = togglePlayPause;
-              insert(_el$180, () => isPlaying() ? "⏸" : "▶");
-              _el$181.$$click = () => skip(15);
-              _el$182.$$click = nextSegment;
-              return _el$176;
+              var _el$140 = _tmpl$17$1(), _el$141 = _el$140.firstChild, _el$142 = _el$141.firstChild, _el$143 = _el$142.nextSibling, _el$144 = _el$143.nextSibling, _el$145 = _el$144.nextSibling, _el$146 = _el$145.nextSibling;
+              _el$140.style.setProperty("position", "relative");
+              _el$140.style.setProperty("height", "80px");
+              _el$140.style.setProperty("display", "flex");
+              _el$140.style.setProperty("alignItems", "flex-end");
+              _el$141.style.setProperty("background", "rgba(0, 0, 0, 0.8)");
+              _el$141.style.setProperty("backdropFilter", "blur(10px)");
+              _el$141.style.setProperty("borderRadius", "24px");
+              _el$141.style.setProperty("padding", "8px 16px");
+              _el$141.style.setProperty("display", "flex");
+              _el$141.style.setProperty("alignItems", "center");
+              _el$141.style.setProperty("gap", "12px");
+              _el$141.style.setProperty("boxShadow", "0 4px 12px rgba(0,0,0,0.3)");
+              _el$142.$$click = previousSegment;
+              _el$143.$$click = () => skip(-15);
+              _el$144.$$click = togglePlayPause;
+              insert(_el$144, () => isPlaying() ? "⏸" : "▶");
+              _el$145.$$click = () => skip(15);
+              _el$146.$$click = nextSegment;
+              return _el$140;
             }
           }), null);
-          insert(_el$157, createComponent(Show, {
+          insert(_el$121, createComponent(Show, {
             get when() {
               return selectedStyle() === "spotify";
             },
             get children() {
-              var _el$183 = _tmpl$26$1(), _el$184 = _el$183.firstChild, _el$185 = _el$184.firstChild, _el$186 = _el$185.nextSibling, _el$187 = _el$186.nextSibling, _el$188 = _el$187.nextSibling, _el$189 = _el$188.nextSibling;
-              _el$183.style.setProperty("background", "linear-gradient(to bottom, rgba(40,40,40,0.95), rgba(18,18,18,0.95))");
-              _el$183.style.setProperty("borderRadius", "8px");
-              _el$183.style.setProperty("padding", "16px");
-              _el$183.style.setProperty("boxShadow", "0 8px 24px rgba(0,0,0,0.4)");
-              _el$185.$$click = previousSegment;
-              _el$186.$$click = () => skip(-15);
-              _el$187.$$click = togglePlayPause;
-              insert(_el$187, () => isPlaying() ? "⏸" : "▶");
-              _el$188.$$click = () => skip(15);
-              _el$189.$$click = nextSegment;
-              return _el$183;
+              var _el$147 = _tmpl$18$1(), _el$148 = _el$147.firstChild, _el$149 = _el$148.firstChild, _el$150 = _el$149.nextSibling, _el$151 = _el$150.nextSibling, _el$152 = _el$151.nextSibling, _el$153 = _el$152.nextSibling;
+              _el$147.style.setProperty("background", "linear-gradient(to bottom, rgba(40,40,40,0.95), rgba(18,18,18,0.95))");
+              _el$147.style.setProperty("borderRadius", "8px");
+              _el$147.style.setProperty("padding", "16px");
+              _el$147.style.setProperty("boxShadow", "0 8px 24px rgba(0,0,0,0.4)");
+              _el$149.$$click = previousSegment;
+              _el$150.$$click = () => skip(-15);
+              _el$151.$$click = togglePlayPause;
+              insert(_el$151, () => isPlaying() ? "⏸" : "▶");
+              _el$152.$$click = () => skip(15);
+              _el$153.$$click = nextSegment;
+              return _el$147;
             }
           }), null);
           createRenderEffect((_p$) => {
-            var _v$51 = selectedStyle() === "deji" ? "rgba(0, 0, 0, 0.3)" : "rgba(0, 0, 0, 0.1)", _v$52 = selectedStyle() === "deji" ? "1px solid rgba(255, 255, 255, 0.3)" : "1px solid rgba(255, 255, 255, 0.1)", _v$53 = selectedStyle() === "deji" ? "#fff" : "#999", _v$54 = selectedStyle() === "minimal" ? "rgba(0, 0, 0, 0.3)" : "rgba(0, 0, 0, 0.1)", _v$55 = selectedStyle() === "minimal" ? "1px solid rgba(255, 255, 255, 0.3)" : "1px solid rgba(255, 255, 255, 0.1)", _v$56 = selectedStyle() === "minimal" ? "#fff" : "#999", _v$57 = selectedStyle() === "floating" ? "rgba(0, 0, 0, 0.3)" : "rgba(0, 0, 0, 0.1)", _v$58 = selectedStyle() === "floating" ? "1px solid rgba(255, 255, 255, 0.3)" : "1px solid rgba(255, 255, 255, 0.1)", _v$59 = selectedStyle() === "floating" ? "#fff" : "#999", _v$60 = selectedStyle() === "spotify" ? "rgba(0, 0, 0, 0.3)" : "rgba(0, 0, 0, 0.1)", _v$61 = selectedStyle() === "spotify" ? "1px solid rgba(255, 255, 255, 0.3)" : "1px solid rgba(255, 255, 255, 0.1)", _v$62 = selectedStyle() === "spotify" ? "#fff" : "#999";
-            _v$51 !== _p$.e && ((_p$.e = _v$51) != null ? _el$153.style.setProperty("background", _v$51) : _el$153.style.removeProperty("background"));
-            _v$52 !== _p$.t && ((_p$.t = _v$52) != null ? _el$153.style.setProperty("border", _v$52) : _el$153.style.removeProperty("border"));
-            _v$53 !== _p$.a && ((_p$.a = _v$53) != null ? _el$153.style.setProperty("color", _v$53) : _el$153.style.removeProperty("color"));
-            _v$54 !== _p$.o && ((_p$.o = _v$54) != null ? _el$154.style.setProperty("background", _v$54) : _el$154.style.removeProperty("background"));
-            _v$55 !== _p$.i && ((_p$.i = _v$55) != null ? _el$154.style.setProperty("border", _v$55) : _el$154.style.removeProperty("border"));
-            _v$56 !== _p$.n && ((_p$.n = _v$56) != null ? _el$154.style.setProperty("color", _v$56) : _el$154.style.removeProperty("color"));
-            _v$57 !== _p$.s && ((_p$.s = _v$57) != null ? _el$155.style.setProperty("background", _v$57) : _el$155.style.removeProperty("background"));
-            _v$58 !== _p$.h && ((_p$.h = _v$58) != null ? _el$155.style.setProperty("border", _v$58) : _el$155.style.removeProperty("border"));
-            _v$59 !== _p$.r && ((_p$.r = _v$59) != null ? _el$155.style.setProperty("color", _v$59) : _el$155.style.removeProperty("color"));
-            _v$60 !== _p$.d && ((_p$.d = _v$60) != null ? _el$156.style.setProperty("background", _v$60) : _el$156.style.removeProperty("background"));
-            _v$61 !== _p$.l && ((_p$.l = _v$61) != null ? _el$156.style.setProperty("border", _v$61) : _el$156.style.removeProperty("border"));
-            _v$62 !== _p$.u && ((_p$.u = _v$62) != null ? _el$156.style.setProperty("color", _v$62) : _el$156.style.removeProperty("color"));
+            var _v$16 = selectedStyle() === "deji" ? "rgba(0, 0, 0, 0.3)" : "rgba(0, 0, 0, 0.1)", _v$17 = selectedStyle() === "deji" ? "1px solid rgba(255, 255, 255, 0.3)" : "1px solid rgba(255, 255, 255, 0.1)", _v$18 = selectedStyle() === "deji" ? "#fff" : "#999", _v$19 = selectedStyle() === "minimal" ? "rgba(0, 0, 0, 0.3)" : "rgba(0, 0, 0, 0.1)", _v$20 = selectedStyle() === "minimal" ? "1px solid rgba(255, 255, 255, 0.3)" : "1px solid rgba(255, 255, 255, 0.1)", _v$21 = selectedStyle() === "minimal" ? "#fff" : "#999", _v$22 = selectedStyle() === "floating" ? "rgba(0, 0, 0, 0.3)" : "rgba(0, 0, 0, 0.1)", _v$23 = selectedStyle() === "floating" ? "1px solid rgba(255, 255, 255, 0.3)" : "1px solid rgba(255, 255, 255, 0.1)", _v$24 = selectedStyle() === "floating" ? "#fff" : "#999", _v$25 = selectedStyle() === "spotify" ? "rgba(0, 0, 0, 0.3)" : "rgba(0, 0, 0, 0.1)", _v$26 = selectedStyle() === "spotify" ? "1px solid rgba(255, 255, 255, 0.3)" : "1px solid rgba(255, 255, 255, 0.1)", _v$27 = selectedStyle() === "spotify" ? "#fff" : "#999";
+            _v$16 !== _p$.e && ((_p$.e = _v$16) != null ? _el$117.style.setProperty("background", _v$16) : _el$117.style.removeProperty("background"));
+            _v$17 !== _p$.t && ((_p$.t = _v$17) != null ? _el$117.style.setProperty("border", _v$17) : _el$117.style.removeProperty("border"));
+            _v$18 !== _p$.a && ((_p$.a = _v$18) != null ? _el$117.style.setProperty("color", _v$18) : _el$117.style.removeProperty("color"));
+            _v$19 !== _p$.o && ((_p$.o = _v$19) != null ? _el$118.style.setProperty("background", _v$19) : _el$118.style.removeProperty("background"));
+            _v$20 !== _p$.i && ((_p$.i = _v$20) != null ? _el$118.style.setProperty("border", _v$20) : _el$118.style.removeProperty("border"));
+            _v$21 !== _p$.n && ((_p$.n = _v$21) != null ? _el$118.style.setProperty("color", _v$21) : _el$118.style.removeProperty("color"));
+            _v$22 !== _p$.s && ((_p$.s = _v$22) != null ? _el$119.style.setProperty("background", _v$22) : _el$119.style.removeProperty("background"));
+            _v$23 !== _p$.h && ((_p$.h = _v$23) != null ? _el$119.style.setProperty("border", _v$23) : _el$119.style.removeProperty("border"));
+            _v$24 !== _p$.r && ((_p$.r = _v$24) != null ? _el$119.style.setProperty("color", _v$24) : _el$119.style.removeProperty("color"));
+            _v$25 !== _p$.d && ((_p$.d = _v$25) != null ? _el$120.style.setProperty("background", _v$25) : _el$120.style.removeProperty("background"));
+            _v$26 !== _p$.l && ((_p$.l = _v$26) != null ? _el$120.style.setProperty("border", _v$26) : _el$120.style.removeProperty("border"));
+            _v$27 !== _p$.u && ((_p$.u = _v$27) != null ? _el$120.style.setProperty("color", _v$27) : _el$120.style.removeProperty("color"));
             return _p$;
           }, {
             e: void 0,
@@ -25147,7 +24911,7 @@ function DebugPanel(props) {
             l: void 0,
             u: void 0
           });
-          return _el$149;
+          return _el$113;
         })();
       }
     }
@@ -25175,91 +24939,91 @@ function DebugPanel(props) {
       icon: "🎵"
     }];
     return [(() => {
-      var _el$190 = _tmpl$29$1(), _el$191 = _el$190.firstChild, _el$192 = _el$191.firstChild;
-      _el$192.nextSibling;
-      _el$190.$$click = (e) => {
+      var _el$154 = _tmpl$21$1(), _el$155 = _el$154.firstChild, _el$156 = _el$155.firstChild;
+      _el$156.nextSibling;
+      _el$154.$$click = (e) => {
         addGlassButtonEffects(e, e.currentTarget);
         setMobileExpanded(true);
       };
-      _el$190.style.setProperty("position", "fixed");
-      _el$190.style.setProperty("bottom", "20px");
-      _el$190.style.setProperty("left", "20px");
-      _el$190.style.setProperty("transform", "none");
-      _el$190.style.setProperty("zIndex", "1000");
-      insert(_el$191, createComponent(Show, {
+      _el$154.style.setProperty("position", "fixed");
+      _el$154.style.setProperty("bottom", "20px");
+      _el$154.style.setProperty("left", "20px");
+      _el$154.style.setProperty("transform", "none");
+      _el$154.style.setProperty("zIndex", "1000");
+      insert(_el$155, createComponent(Show, {
         get when() {
           var _a;
           return (_a = props.performanceMetrics) == null ? void 0 : _a.currentFPS;
         },
         get children() {
-          var _el$194 = _tmpl$28$1(), _el$195 = _el$194.firstChild;
-          insert(_el$194, () => {
+          var _el$158 = _tmpl$20$1(), _el$159 = _el$158.firstChild;
+          insert(_el$158, () => {
             var _a, _b;
             return (_b = (_a = props.performanceMetrics) == null ? void 0 : _a.currentFPS) == null ? void 0 : _b.toFixed(0);
-          }, _el$195);
+          }, _el$159);
           createRenderEffect((_$p) => {
             var _a;
-            return (_$p = (((_a = props.performanceMetrics) == null ? void 0 : _a.currentFPS) || 60) < 45 ? "#FF9800" : "#4CAF50") != null ? _el$194.style.setProperty("color", _$p) : _el$194.style.removeProperty("color");
+            return (_$p = (((_a = props.performanceMetrics) == null ? void 0 : _a.currentFPS) || 60) < 45 ? "#FF9800" : "#4CAF50") != null ? _el$158.style.setProperty("color", _$p) : _el$158.style.removeProperty("color");
           });
-          return _el$194;
+          return _el$158;
         }
       }), null);
-      createRenderEffect((_$p) => (_$p = mobileExpanded() ? "none" : "flex") != null ? _el$190.style.setProperty("display", _$p) : _el$190.style.removeProperty("display"));
-      return _el$190;
+      createRenderEffect((_$p) => (_$p = mobileExpanded() ? "none" : "flex") != null ? _el$154.style.setProperty("display", _$p) : _el$154.style.removeProperty("display"));
+      return _el$154;
     })(), createComponent(Show, {
       get when() {
         return mobileExpanded();
       },
       get children() {
-        var _el$196 = _tmpl$31$1(), _el$197 = _el$196.firstChild, _el$198 = _el$197.firstChild, _el$199 = _el$198.nextSibling, _el$200 = _el$199.firstChild, _el$201 = _el$199.nextSibling, _el$202 = _el$201.nextSibling;
-        _el$196.$$click = (e) => {
+        var _el$160 = _tmpl$23$1(), _el$161 = _el$160.firstChild, _el$162 = _el$161.firstChild, _el$163 = _el$162.nextSibling, _el$164 = _el$163.firstChild, _el$165 = _el$163.nextSibling, _el$166 = _el$165.nextSibling;
+        _el$160.$$click = (e) => {
           if (e.target === e.currentTarget) {
             closeBottomSheet();
           }
         };
-        _el$197.$$pointerdown = (e) => e.stopPropagation();
-        _el$197.$$click = (e) => e.stopPropagation();
-        _el$197.$$touchend = handleTouchEnd;
-        _el$197.$$touchmove = handleTouchMove;
-        _el$197.$$touchstart = handleTouchStart;
+        _el$161.$$pointerdown = (e) => e.stopPropagation();
+        _el$161.$$click = (e) => e.stopPropagation();
+        _el$161.$$touchend = handleTouchEnd;
+        _el$161.$$touchmove = handleTouchMove;
+        _el$161.$$touchstart = handleTouchStart;
         var _ref$ = bottomSheetRef;
-        typeof _ref$ === "function" ? use(_ref$, _el$197) : bottomSheetRef = _el$197;
-        _el$197.style.setProperty("position", "fixed");
-        _el$197.style.setProperty("bottom", "0");
-        _el$197.style.setProperty("left", "50%");
-        _el$197.style.setProperty("transform", "translateX(-50%)");
-        _el$197.style.setProperty("transition", "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)");
-        _el$197.style.setProperty("willChange", "transform");
-        _el$197.style.setProperty("width", "90%");
-        _el$197.style.setProperty("maxWidth", "500px");
-        _el$197.style.setProperty("minHeight", "60vh");
-        _el$197.style.setProperty("maxHeight", "85vh");
-        _el$197.style.setProperty("display", "flex");
-        _el$197.style.setProperty("flexDirection", "column");
-        _el$198.style.setProperty("padding", "8px");
-        _el$199.style.setProperty("padding", "12px 20px");
-        _el$200.style.setProperty("fontSize", "14px");
-        _el$200.style.setProperty("margin", "0");
-        _el$200.style.setProperty("display", "flex");
-        _el$200.style.setProperty("alignItems", "center");
-        _el$200.style.setProperty("gap", "8px");
-        insert(_el$201, createComponent(For, {
+        typeof _ref$ === "function" ? use(_ref$, _el$161) : bottomSheetRef = _el$161;
+        _el$161.style.setProperty("position", "fixed");
+        _el$161.style.setProperty("bottom", "0");
+        _el$161.style.setProperty("left", "50%");
+        _el$161.style.setProperty("transform", "translateX(-50%)");
+        _el$161.style.setProperty("transition", "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)");
+        _el$161.style.setProperty("willChange", "transform");
+        _el$161.style.setProperty("width", "90%");
+        _el$161.style.setProperty("maxWidth", "500px");
+        _el$161.style.setProperty("minHeight", "60vh");
+        _el$161.style.setProperty("maxHeight", "85vh");
+        _el$161.style.setProperty("display", "flex");
+        _el$161.style.setProperty("flexDirection", "column");
+        _el$162.style.setProperty("padding", "8px");
+        _el$163.style.setProperty("padding", "12px 20px");
+        _el$164.style.setProperty("fontSize", "14px");
+        _el$164.style.setProperty("margin", "0");
+        _el$164.style.setProperty("display", "flex");
+        _el$164.style.setProperty("alignItems", "center");
+        _el$164.style.setProperty("gap", "8px");
+        insert(_el$165, createComponent(For, {
           each: tabs,
           children: (tab, index) => (() => {
-            var _el$208 = _tmpl$32$1(), _el$209 = _el$208.firstChild, _el$210 = _el$209.nextSibling;
-            _el$208.$$click = () => setActiveTab(index());
-            insert(_el$209, () => tab.icon);
-            insert(_el$210, () => tab.label);
-            createRenderEffect(() => className(_el$208, `debug-mobile-tab ${activeTab() === index() ? "active" : ""}`));
-            return _el$208;
+            var _el$172 = _tmpl$24$1(), _el$173 = _el$172.firstChild, _el$174 = _el$173.nextSibling;
+            _el$172.$$click = () => setActiveTab(index());
+            insert(_el$173, () => tab.icon);
+            insert(_el$174, () => tab.label);
+            createRenderEffect(() => className(_el$172, `debug-mobile-tab ${activeTab() === index() ? "active" : ""}`));
+            return _el$172;
           })()
         }));
-        _el$202.style.setProperty("flex", "1");
-        _el$202.style.setProperty("overflowY", "auto");
-        _el$202.style.setProperty("WebkitOverflowScrolling", "touch");
-        _el$202.style.setProperty("padding", "32px 24px 40px");
-        _el$202.style.setProperty("minHeight", "300px");
-        insert(_el$202, createComponent(Switch, {
+        _el$166.style.setProperty("flex", "1");
+        _el$166.style.setProperty("overflowY", "auto");
+        _el$166.style.setProperty("WebkitOverflowScrolling", "touch");
+        _el$166.style.setProperty("padding", "32px 24px 40px");
+        _el$166.style.setProperty("minHeight", "300px");
+        insert(_el$166, createComponent(Switch, {
           get children() {
             return [createComponent(Match, {
               get when() {
@@ -25278,17 +25042,17 @@ function DebugPanel(props) {
                   var _a;
                   const metrics = ((_a = props.consciousnessMetrics) == null ? void 0 : _a.call(props)) || {};
                   return [(() => {
-                    var _el$211 = _tmpl$0$3(), _el$212 = _el$211.firstChild, _el$213 = _el$212.firstChild, _el$214 = _el$213.nextSibling, _el$215 = _el$212.nextSibling, _el$216 = _el$215.firstChild, _el$217 = _el$216.nextSibling, _el$218 = _el$215.nextSibling, _el$219 = _el$218.firstChild, _el$220 = _el$219.nextSibling;
-                    insert(_el$214, () => metrics.targetFPS || "60");
-                    insert(_el$217, () => {
+                    var _el$175 = _tmpl$0$3(), _el$176 = _el$175.firstChild, _el$177 = _el$176.firstChild, _el$178 = _el$177.nextSibling, _el$179 = _el$176.nextSibling, _el$180 = _el$179.firstChild, _el$181 = _el$180.nextSibling, _el$182 = _el$179.nextSibling, _el$183 = _el$182.firstChild, _el$184 = _el$183.nextSibling;
+                    insert(_el$178, () => metrics.targetFPS || "60");
+                    insert(_el$181, () => {
                       var _a2;
                       return ((_a2 = metrics.effects) == null ? void 0 : _a2.join(", ")) || "none";
                     });
-                    insert(_el$220, () => metrics.gpu || "unknown");
-                    return _el$211;
+                    insert(_el$184, () => metrics.gpu || "unknown");
+                    return _el$175;
                   })(), (() => {
-                    var _el$221 = _tmpl$1$2(), _el$222 = _el$221.firstChild;
-                    _el$222.$$click = () => {
+                    var _el$185 = _tmpl$1$2(), _el$186 = _el$185.firstChild;
+                    _el$186.$$click = () => {
                       var _a2;
                       console.log("🌊 Testing consciousness zoom...");
                       const renderer = window.nativeHotspotRenderer;
@@ -25329,7 +25093,7 @@ function DebugPanel(props) {
                         console.warn("❌ No hotspots found");
                       }
                     };
-                    return _el$221;
+                    return _el$185;
                   })()];
                 })();
               }
@@ -25338,18 +25102,18 @@ function DebugPanel(props) {
                 return activeTab() === 2;
               },
               get children() {
-                var _el$203 = _tmpl$30$1(), _el$204 = _el$203.firstChild, _el$205 = _el$204.nextSibling, _el$206 = _el$205.nextSibling, _el$207 = _el$206.firstChild;
-                _el$207.$$click = () => {
+                var _el$167 = _tmpl$22$1(), _el$168 = _el$167.firstChild, _el$169 = _el$168.nextSibling, _el$170 = _el$169.nextSibling, _el$171 = _el$170.firstChild;
+                _el$171.$$click = () => {
                   if (confirm("Clear all cached data and reload?")) {
                     cacheManager.forceReset();
                   }
                 };
-                _el$207.style.setProperty("width", "100%");
-                _el$207.style.setProperty("padding", "12px");
-                _el$207.style.setProperty("background", "rgba(255, 87, 34, 0.1)");
-                _el$207.style.setProperty("border", "1px solid rgba(255, 87, 34, 0.3)");
-                _el$207.style.setProperty("color", "#FF5722");
-                return _el$203;
+                _el$171.style.setProperty("width", "100%");
+                _el$171.style.setProperty("padding", "12px");
+                _el$171.style.setProperty("background", "rgba(255, 87, 34, 0.1)");
+                _el$171.style.setProperty("border", "1px solid rgba(255, 87, 34, 0.3)");
+                _el$171.style.setProperty("color", "#FF5722");
+                return _el$167;
               }
             }), createComponent(Match, {
               get when() {
@@ -25371,15 +25135,15 @@ function DebugPanel(props) {
           }
         }));
         createRenderEffect((_p$) => {
-          var _v$63 = `debug-mobile-backdrop ${isClosing() ? "closing" : ""}`, _v$64 = `debug-mobile-sheet ${isClosing() ? "closing" : "expanded"}`;
-          _v$63 !== _p$.e && className(_el$196, _p$.e = _v$63);
-          _v$64 !== _p$.t && className(_el$197, _p$.t = _v$64);
+          var _v$28 = `debug-mobile-backdrop ${isClosing() ? "closing" : ""}`, _v$29 = `debug-mobile-sheet ${isClosing() ? "closing" : "expanded"}`;
+          _v$28 !== _p$.e && className(_el$160, _p$.e = _v$28);
+          _v$29 !== _p$.t && className(_el$161, _p$.t = _v$29);
           return _p$;
         }, {
           e: void 0,
           t: void 0
         });
-        return _el$196;
+        return _el$160;
       }
     })];
   }
@@ -25439,67 +25203,67 @@ function DebugPanel(props) {
     }));
   };
   return (() => {
-    var _el$223 = _tmpl$35$1(), _el$224 = _el$223.firstChild, _el$225 = _el$224.firstChild, _el$226 = _el$225.firstChild;
-    _el$223.$$mousedown = handleMouseDown;
-    _el$224.$$click = () => {
+    var _el$187 = _tmpl$27$1(), _el$188 = _el$187.firstChild, _el$189 = _el$188.firstChild, _el$190 = _el$189.firstChild;
+    _el$187.$$mousedown = handleMouseDown;
+    _el$188.$$click = () => {
       if (isMinimized()) {
         setIsMinimized(false);
       }
     };
-    _el$226.style.setProperty("transition", "all 0.3s");
-    _el$226.style.setProperty("color", "rgba(255, 255, 255, 0.9)");
-    insert(_el$225, createComponent(Show, {
+    _el$190.style.setProperty("transition", "all 0.3s");
+    _el$190.style.setProperty("color", "rgba(255, 255, 255, 0.9)");
+    insert(_el$189, createComponent(Show, {
       get when() {
         return !isMinimized();
       },
       get children() {
-        return _tmpl$33$1();
+        return _tmpl$25$1();
       }
     }), null);
-    insert(_el$224, createComponent(Show, {
+    insert(_el$188, createComponent(Show, {
       get when() {
         return !isMinimized();
       },
       get children() {
-        var _el$228 = _tmpl$34$1(), _el$229 = _el$228.firstChild;
-        _el$228.addEventListener("mouseleave", (e) => {
+        var _el$192 = _tmpl$26$1(), _el$193 = _el$192.firstChild;
+        _el$192.addEventListener("mouseleave", (e) => {
           e.currentTarget.style.background = "rgba(255,255,255,0.08)";
           e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
           e.currentTarget.style.color = "rgba(255,255,255,0.5)";
         });
-        _el$228.addEventListener("mouseenter", (e) => {
+        _el$192.addEventListener("mouseenter", (e) => {
           e.currentTarget.style.background = "rgba(255,255,255,0.12)";
           e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
           e.currentTarget.style.color = "rgba(255,255,255,0.8)";
         });
-        _el$228.$$click = (e) => {
+        _el$192.$$click = (e) => {
           e.stopPropagation();
           setIsMinimized(!isMinimized());
         };
-        _el$228.style.setProperty("position", "absolute");
-        _el$228.style.setProperty("top", "12px");
-        _el$228.style.setProperty("right", "12px");
-        _el$228.style.setProperty("background", "rgba(255,255,255,0.08)");
-        _el$228.style.setProperty("border", "1px solid rgba(255,255,255,0.12)");
-        _el$228.style.setProperty("color", "rgba(255,255,255,0.5)");
-        _el$228.style.setProperty("fontSize", "14px");
-        _el$228.style.setProperty("lineHeight", "1");
-        _el$228.style.setProperty("cursor", "pointer");
-        _el$228.style.setProperty("padding", "0");
-        _el$228.style.setProperty("width", "28px");
-        _el$228.style.setProperty("height", "28px");
-        _el$228.style.setProperty("display", "flex");
-        _el$228.style.setProperty("alignItems", "center");
-        _el$228.style.setProperty("justifyContent", "center");
-        _el$228.style.setProperty("borderRadius", "8px");
-        _el$228.style.setProperty("transition", "all 0.2s");
-        _el$229.style.setProperty("width", "16px");
-        _el$229.style.setProperty("height", "16px");
-        _el$229.style.setProperty("fill", "currentColor");
-        return _el$228;
+        _el$192.style.setProperty("position", "absolute");
+        _el$192.style.setProperty("top", "12px");
+        _el$192.style.setProperty("right", "12px");
+        _el$192.style.setProperty("background", "rgba(255,255,255,0.08)");
+        _el$192.style.setProperty("border", "1px solid rgba(255,255,255,0.12)");
+        _el$192.style.setProperty("color", "rgba(255,255,255,0.5)");
+        _el$192.style.setProperty("fontSize", "14px");
+        _el$192.style.setProperty("lineHeight", "1");
+        _el$192.style.setProperty("cursor", "pointer");
+        _el$192.style.setProperty("padding", "0");
+        _el$192.style.setProperty("width", "28px");
+        _el$192.style.setProperty("height", "28px");
+        _el$192.style.setProperty("display", "flex");
+        _el$192.style.setProperty("alignItems", "center");
+        _el$192.style.setProperty("justifyContent", "center");
+        _el$192.style.setProperty("borderRadius", "8px");
+        _el$192.style.setProperty("transition", "all 0.2s");
+        _el$193.style.setProperty("width", "16px");
+        _el$193.style.setProperty("height", "16px");
+        _el$193.style.setProperty("fill", "currentColor");
+        return _el$192;
       }
     }), null);
-    insert(_el$223, createComponent(Show, {
+    insert(_el$187, createComponent(Show, {
       get when() {
         return !isMinimized();
       },
@@ -25507,20 +25271,20 @@ function DebugPanel(props) {
         return createComponent(For, {
           each: sections,
           children: (section) => (() => {
-            var _el$230 = _tmpl$36$1(), _el$231 = _el$230.firstChild, _el$232 = _el$231.firstChild, _el$233 = _el$232.firstChild, _el$234 = _el$233.nextSibling, _el$235 = _el$231.nextSibling, _el$236 = _el$235.firstChild;
-            _el$231.$$click = () => toggleSection(section.id);
-            insert(_el$233, () => section.icon);
-            insert(_el$234, () => section.title);
-            insert(_el$236, () => section.content());
-            createRenderEffect(() => className(_el$230, `debug-section ${expandedSections()[section.id] ? "expanded" : ""}`));
-            return _el$230;
+            var _el$194 = _tmpl$28$1(), _el$195 = _el$194.firstChild, _el$196 = _el$195.firstChild, _el$197 = _el$196.firstChild, _el$198 = _el$197.nextSibling, _el$199 = _el$195.nextSibling, _el$200 = _el$199.firstChild;
+            _el$195.$$click = () => toggleSection(section.id);
+            insert(_el$197, () => section.icon);
+            insert(_el$198, () => section.title);
+            insert(_el$200, () => section.content());
+            createRenderEffect(() => className(_el$194, `debug-section ${expandedSections()[section.id] ? "expanded" : ""}`));
+            return _el$194;
           })()
         });
       }
     }), null);
     createRenderEffect((_p$) => {
       var _a, _b, _c;
-      var _v$65 = `debug-panel ${isMinimized() ? "glass-button" : ""}`, _v$66 = {
+      var _v$30 = `debug-panel ${isMinimized() ? "glass-button" : ""}`, _v$31 = {
         ...position().x !== null && !isMinimized() ? {
           // When dragging, use absolute positioning
           position: "fixed",
@@ -25558,7 +25322,7 @@ function DebugPanel(props) {
         cursor: isDragging() ? "grabbing" : "default",
         transition: isDragging() ? "none" : "all 0.2s"
         // Remove transition during drag
-      }, _v$67 = {
+      }, _v$32 = {
         cursor: isMinimized() ? "pointer" : "grab",
         ...isMinimized() ? {
           height: "100%",
@@ -25567,12 +25331,12 @@ function DebugPanel(props) {
           justifyContent: "center",
           padding: 0
         } : {}
-      }, _v$68 = isMinimized() ? "20" : "18", _v$69 = isMinimized() ? "20" : "18";
-      _v$65 !== _p$.e && className(_el$223, _p$.e = _v$65);
-      _p$.t = style(_el$223, _v$66, _p$.t);
-      _p$.a = style(_el$224, _v$67, _p$.a);
-      _v$68 !== _p$.o && setAttribute(_el$226, "width", _p$.o = _v$68);
-      _v$69 !== _p$.i && setAttribute(_el$226, "height", _p$.i = _v$69);
+      }, _v$33 = isMinimized() ? "20" : "18", _v$34 = isMinimized() ? "20" : "18";
+      _v$30 !== _p$.e && className(_el$187, _p$.e = _v$30);
+      _p$.t = style(_el$187, _v$31, _p$.t);
+      _p$.a = style(_el$188, _v$32, _p$.a);
+      _v$33 !== _p$.o && setAttribute(_el$190, "width", _p$.o = _v$33);
+      _v$34 !== _p$.i && setAttribute(_el$190, "height", _p$.i = _v$34);
       return _p$;
     }, {
       e: void 0,
@@ -25581,7 +25345,7 @@ function DebugPanel(props) {
       o: void 0,
       i: void 0
     });
-    return _el$223;
+    return _el$187;
   })();
 }
 delegateEvents(["input", "click", "touchstart", "touchmove", "touchend", "pointerdown", "mousedown"]);
@@ -26288,7 +26052,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-B5obAAyF.js").then((n) => n.v);
+      } = await import("./viewerSetup-Ct4gg4tl.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
