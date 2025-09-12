@@ -1,5 +1,5 @@
-import { g as getHapticManager } from "./HapticManager-TrnQVFBm.js";
-import "./main-DeDfi9Uz.js";
+import { g as getHapticManager } from "./HapticManager-1cOE49OM.js";
+import "./main-Btzvyjzn.js";
 class DopamineAudioEngine {
   constructor() {
     this.audioContext = null;
@@ -56,7 +56,7 @@ class DopamineAudioEngine {
     try {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       const config = {
-        ios: { sampleRate: 44100, latencyHint: "interactive" },
+        ios: { sampleRate: 48e3, latencyHint: "interactive" },
         android: { sampleRate: 48e3, latencyHint: "balanced" },
         desktop: { sampleRate: 48e3, latencyHint: "interactive" }
       };
