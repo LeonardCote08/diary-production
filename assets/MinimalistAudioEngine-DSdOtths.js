@@ -1,5 +1,5 @@
-import { g as getHapticManager } from "./HapticManager-C2Z_NQGD.js";
-import "./main-CUTk6aOB.js";
+import { g as getHapticManager } from "./HapticManager-TrnQVFBm.js";
+import "./main-DeDfi9Uz.js";
 class DopamineAudioEngine {
   constructor() {
     this.audioContext = null;
@@ -414,9 +414,12 @@ class DopamineAudioEngine {
       timestamp: Date.now(),
       variation: type === "revelation" ? this.currentVariation.revelation : this.currentVariation.activation
     });
-    if (this.metrics.interactions.length % 20 === 0) {
-      this.rotateVariations();
-      this.analyzeMetrics();
+    const isMobileDevice = this.platform === "ios" || this.platform === "android";
+    if (!isMobileDevice) {
+      if (this.metrics.interactions.length % 20 === 0) {
+        this.rotateVariations();
+        this.analyzeMetrics();
+      }
     }
   }
   rotateVariations() {
@@ -444,12 +447,24 @@ class DopamineAudioEngine {
   }
   // Manual variation control for debug panel
   setRevealVariation(index) {
+    const isMobileDevice = this.platform === "ios" || this.platform === "android";
+    if (isMobileDevice) {
+      console.log("[DopamineAudioEngine] Mobile device - keeping Absorbed Impact ★ for reveal");
+      return;
+    }
     if (index >= 0 && index < this.variations.revelation.length) {
       this.currentVariation.revelation = index;
       console.log(`[DopamineAudioEngine] Set reveal variation to ${index}`);
     }
   }
   setActivationVariation(index) {
+    const isMobileDevice = this.platform === "ios" || this.platform === "android";
+    if (isMobileDevice) {
+      this.currentVariation.activation = 3;
+      this.useAbsorbedImpactForBoth = true;
+      console.log("[DopamineAudioEngine] Mobile device - forcing Absorbed Impact ★ for both tempos");
+      return;
+    }
     if (index >= 0 && index < this.variations.activation.length) {
       this.currentVariation.activation = index;
       console.log(`[DopamineAudioEngine] Set activation variation to ${index}`);
@@ -462,6 +477,13 @@ class DopamineAudioEngine {
   }
   // Enable/disable Absorbed Impact for BOTH reveal and activate
   setAbsorbedImpactForBoth(enabled) {
+    const isMobileDevice = this.platform === "ios" || this.platform === "android";
+    if (isMobileDevice) {
+      this.useAbsorbedImpactForBoth = true;
+      this.currentVariation.activation = 3;
+      console.log("[DopamineAudioEngine] Mobile device - Absorbed Impact ★ locked as default");
+      return;
+    }
     this.useAbsorbedImpactForBoth = enabled;
     if (enabled) {
       console.log("[DopamineAudioEngine] Absorbed Impact enabled for BOTH reveal and activate sounds");
