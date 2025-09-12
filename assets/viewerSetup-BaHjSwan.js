@@ -1,0 +1,12255 @@
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-bNPQl7Vq.js","assets/main-C9PBdCor.js","assets/main-DTOzWaBI.css"])))=>i.map(i=>d[i]);
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-C9PBdCor.js";
+var howler = {};
+/*!
+ *  howler.js v2.2.4
+ *  howlerjs.com
+ *
+ *  (c) 2013-2020, James Simpson of GoldFire Studios
+ *  goldfirestudios.com
+ *
+ *  MIT License
+ */
+(function(exports) {
+  (function() {
+    var HowlerGlobal2 = function() {
+      this.init();
+    };
+    HowlerGlobal2.prototype = {
+      /**
+       * Initialize the global Howler object.
+       * @return {Howler}
+       */
+      init: function() {
+        var self = this || Howler2;
+        self._counter = 1e3;
+        self._html5AudioPool = [];
+        self.html5PoolSize = 10;
+        self._codecs = {};
+        self._howls = [];
+        self._muted = false;
+        self._volume = 1;
+        self._canPlayEvent = "canplaythrough";
+        self._navigator = typeof window !== "undefined" && window.navigator ? window.navigator : null;
+        self.masterGain = null;
+        self.noAudio = false;
+        self.usingWebAudio = true;
+        self.autoSuspend = true;
+        self.ctx = null;
+        self.autoUnlock = true;
+        self._setup();
+        return self;
+      },
+      /**
+       * Get/set the global volume for all sounds.
+       * @param  {Float} vol Volume from 0.0 to 1.0.
+       * @return {Howler/Float}     Returns self or current volume.
+       */
+      volume: function(vol) {
+        var self = this || Howler2;
+        vol = parseFloat(vol);
+        if (!self.ctx) {
+          setupAudioContext();
+        }
+        if (typeof vol !== "undefined" && vol >= 0 && vol <= 1) {
+          self._volume = vol;
+          if (self._muted) {
+            return self;
+          }
+          if (self.usingWebAudio) {
+            self.masterGain.gain.setValueAtTime(vol, Howler2.ctx.currentTime);
+          }
+          for (var i = 0; i < self._howls.length; i++) {
+            if (!self._howls[i]._webAudio) {
+              var ids = self._howls[i]._getSoundIds();
+              for (var j = 0; j < ids.length; j++) {
+                var sound = self._howls[i]._soundById(ids[j]);
+                if (sound && sound._node) {
+                  sound._node.volume = sound._volume * vol;
+                }
+              }
+            }
+          }
+          return self;
+        }
+        return self._volume;
+      },
+      /**
+       * Handle muting and unmuting globally.
+       * @param  {Boolean} muted Is muted or not.
+       */
+      mute: function(muted) {
+        var self = this || Howler2;
+        if (!self.ctx) {
+          setupAudioContext();
+        }
+        self._muted = muted;
+        if (self.usingWebAudio) {
+          self.masterGain.gain.setValueAtTime(muted ? 0 : self._volume, Howler2.ctx.currentTime);
+        }
+        for (var i = 0; i < self._howls.length; i++) {
+          if (!self._howls[i]._webAudio) {
+            var ids = self._howls[i]._getSoundIds();
+            for (var j = 0; j < ids.length; j++) {
+              var sound = self._howls[i]._soundById(ids[j]);
+              if (sound && sound._node) {
+                sound._node.muted = muted ? true : sound._muted;
+              }
+            }
+          }
+        }
+        return self;
+      },
+      /**
+       * Handle stopping all sounds globally.
+       */
+      stop: function() {
+        var self = this || Howler2;
+        for (var i = 0; i < self._howls.length; i++) {
+          self._howls[i].stop();
+        }
+        return self;
+      },
+      /**
+       * Unload and destroy all currently loaded Howl objects.
+       * @return {Howler}
+       */
+      unload: function() {
+        var self = this || Howler2;
+        for (var i = self._howls.length - 1; i >= 0; i--) {
+          self._howls[i].unload();
+        }
+        if (self.usingWebAudio && self.ctx && typeof self.ctx.close !== "undefined") {
+          self.ctx.close();
+          self.ctx = null;
+          setupAudioContext();
+        }
+        return self;
+      },
+      /**
+       * Check for codec support of specific extension.
+       * @param  {String} ext Audio file extention.
+       * @return {Boolean}
+       */
+      codecs: function(ext) {
+        return (this || Howler2)._codecs[ext.replace(/^x-/, "")];
+      },
+      /**
+       * Setup various state values for global tracking.
+       * @return {Howler}
+       */
+      _setup: function() {
+        var self = this || Howler2;
+        self.state = self.ctx ? self.ctx.state || "suspended" : "suspended";
+        self._autoSuspend();
+        if (!self.usingWebAudio) {
+          if (typeof Audio !== "undefined") {
+            try {
+              var test = new Audio();
+              if (typeof test.oncanplaythrough === "undefined") {
+                self._canPlayEvent = "canplay";
+              }
+            } catch (e) {
+              self.noAudio = true;
+            }
+          } else {
+            self.noAudio = true;
+          }
+        }
+        try {
+          var test = new Audio();
+          if (test.muted) {
+            self.noAudio = true;
+          }
+        } catch (e) {
+        }
+        if (!self.noAudio) {
+          self._setupCodecs();
+        }
+        return self;
+      },
+      /**
+       * Check for browser support for various codecs and cache the results.
+       * @return {Howler}
+       */
+      _setupCodecs: function() {
+        var self = this || Howler2;
+        var audioTest = null;
+        try {
+          audioTest = typeof Audio !== "undefined" ? new Audio() : null;
+        } catch (err) {
+          return self;
+        }
+        if (!audioTest || typeof audioTest.canPlayType !== "function") {
+          return self;
+        }
+        var mpegTest = audioTest.canPlayType("audio/mpeg;").replace(/^no$/, "");
+        var ua = self._navigator ? self._navigator.userAgent : "";
+        var checkOpera = ua.match(/OPR\/(\d+)/g);
+        var isOldOpera = checkOpera && parseInt(checkOpera[0].split("/")[1], 10) < 33;
+        var checkSafari = ua.indexOf("Safari") !== -1 && ua.indexOf("Chrome") === -1;
+        var safariVersion = ua.match(/Version\/(.*?) /);
+        var isOldSafari = checkSafari && safariVersion && parseInt(safariVersion[1], 10) < 15;
+        self._codecs = {
+          mp3: !!(!isOldOpera && (mpegTest || audioTest.canPlayType("audio/mp3;").replace(/^no$/, ""))),
+          mpeg: !!mpegTest,
+          opus: !!audioTest.canPlayType('audio/ogg; codecs="opus"').replace(/^no$/, ""),
+          ogg: !!audioTest.canPlayType('audio/ogg; codecs="vorbis"').replace(/^no$/, ""),
+          oga: !!audioTest.canPlayType('audio/ogg; codecs="vorbis"').replace(/^no$/, ""),
+          wav: !!(audioTest.canPlayType('audio/wav; codecs="1"') || audioTest.canPlayType("audio/wav")).replace(/^no$/, ""),
+          aac: !!audioTest.canPlayType("audio/aac;").replace(/^no$/, ""),
+          caf: !!audioTest.canPlayType("audio/x-caf;").replace(/^no$/, ""),
+          m4a: !!(audioTest.canPlayType("audio/x-m4a;") || audioTest.canPlayType("audio/m4a;") || audioTest.canPlayType("audio/aac;")).replace(/^no$/, ""),
+          m4b: !!(audioTest.canPlayType("audio/x-m4b;") || audioTest.canPlayType("audio/m4b;") || audioTest.canPlayType("audio/aac;")).replace(/^no$/, ""),
+          mp4: !!(audioTest.canPlayType("audio/x-mp4;") || audioTest.canPlayType("audio/mp4;") || audioTest.canPlayType("audio/aac;")).replace(/^no$/, ""),
+          weba: !!(!isOldSafari && audioTest.canPlayType('audio/webm; codecs="vorbis"').replace(/^no$/, "")),
+          webm: !!(!isOldSafari && audioTest.canPlayType('audio/webm; codecs="vorbis"').replace(/^no$/, "")),
+          dolby: !!audioTest.canPlayType('audio/mp4; codecs="ec-3"').replace(/^no$/, ""),
+          flac: !!(audioTest.canPlayType("audio/x-flac;") || audioTest.canPlayType("audio/flac;")).replace(/^no$/, "")
+        };
+        return self;
+      },
+      /**
+       * Some browsers/devices will only allow audio to be played after a user interaction.
+       * Attempt to automatically unlock audio on the first user interaction.
+       * Concept from: http://paulbakaus.com/tutorials/html5/web-audio-on-ios/
+       * @return {Howler}
+       */
+      _unlockAudio: function() {
+        var self = this || Howler2;
+        if (self._audioUnlocked || !self.ctx) {
+          return;
+        }
+        self._audioUnlocked = false;
+        self.autoUnlock = false;
+        if (!self._mobileUnloaded && self.ctx.sampleRate !== 44100) {
+          self._mobileUnloaded = true;
+          self.unload();
+        }
+        self._scratchBuffer = self.ctx.createBuffer(1, 1, 22050);
+        var unlock = function(e) {
+          while (self._html5AudioPool.length < self.html5PoolSize) {
+            try {
+              var audioNode = new Audio();
+              audioNode._unlocked = true;
+              self._releaseHtml5Audio(audioNode);
+            } catch (e2) {
+              self.noAudio = true;
+              break;
+            }
+          }
+          for (var i = 0; i < self._howls.length; i++) {
+            if (!self._howls[i]._webAudio) {
+              var ids = self._howls[i]._getSoundIds();
+              for (var j = 0; j < ids.length; j++) {
+                var sound = self._howls[i]._soundById(ids[j]);
+                if (sound && sound._node && !sound._node._unlocked) {
+                  sound._node._unlocked = true;
+                  sound._node.load();
+                }
+              }
+            }
+          }
+          self._autoResume();
+          var source = self.ctx.createBufferSource();
+          source.buffer = self._scratchBuffer;
+          source.connect(self.ctx.destination);
+          if (typeof source.start === "undefined") {
+            source.noteOn(0);
+          } else {
+            source.start(0);
+          }
+          if (typeof self.ctx.resume === "function") {
+            self.ctx.resume();
+          }
+          source.onended = function() {
+            source.disconnect(0);
+            self._audioUnlocked = true;
+            document.removeEventListener("touchstart", unlock, true);
+            document.removeEventListener("touchend", unlock, true);
+            document.removeEventListener("click", unlock, true);
+            document.removeEventListener("keydown", unlock, true);
+            for (var i2 = 0; i2 < self._howls.length; i2++) {
+              self._howls[i2]._emit("unlock");
+            }
+          };
+        };
+        document.addEventListener("touchstart", unlock, true);
+        document.addEventListener("touchend", unlock, true);
+        document.addEventListener("click", unlock, true);
+        document.addEventListener("keydown", unlock, true);
+        return self;
+      },
+      /**
+       * Get an unlocked HTML5 Audio object from the pool. If none are left,
+       * return a new Audio object and throw a warning.
+       * @return {Audio} HTML5 Audio object.
+       */
+      _obtainHtml5Audio: function() {
+        var self = this || Howler2;
+        if (self._html5AudioPool.length) {
+          return self._html5AudioPool.pop();
+        }
+        var testPlay = new Audio().play();
+        if (testPlay && typeof Promise !== "undefined" && (testPlay instanceof Promise || typeof testPlay.then === "function")) {
+          testPlay.catch(function() {
+            console.warn("HTML5 Audio pool exhausted, returning potentially locked audio object.");
+          });
+        }
+        return new Audio();
+      },
+      /**
+       * Return an activated HTML5 Audio object to the pool.
+       * @return {Howler}
+       */
+      _releaseHtml5Audio: function(audio) {
+        var self = this || Howler2;
+        if (audio._unlocked) {
+          self._html5AudioPool.push(audio);
+        }
+        return self;
+      },
+      /**
+       * Automatically suspend the Web Audio AudioContext after no sound has played for 30 seconds.
+       * This saves processing/energy and fixes various browser-specific bugs with audio getting stuck.
+       * @return {Howler}
+       */
+      _autoSuspend: function() {
+        var self = this;
+        if (!self.autoSuspend || !self.ctx || typeof self.ctx.suspend === "undefined" || !Howler2.usingWebAudio) {
+          return;
+        }
+        for (var i = 0; i < self._howls.length; i++) {
+          if (self._howls[i]._webAudio) {
+            for (var j = 0; j < self._howls[i]._sounds.length; j++) {
+              if (!self._howls[i]._sounds[j]._paused) {
+                return self;
+              }
+            }
+          }
+        }
+        if (self._suspendTimer) {
+          clearTimeout(self._suspendTimer);
+        }
+        self._suspendTimer = setTimeout(function() {
+          if (!self.autoSuspend) {
+            return;
+          }
+          self._suspendTimer = null;
+          self.state = "suspending";
+          var handleSuspension = function() {
+            self.state = "suspended";
+            if (self._resumeAfterSuspend) {
+              delete self._resumeAfterSuspend;
+              self._autoResume();
+            }
+          };
+          self.ctx.suspend().then(handleSuspension, handleSuspension);
+        }, 3e4);
+        return self;
+      },
+      /**
+       * Automatically resume the Web Audio AudioContext when a new sound is played.
+       * @return {Howler}
+       */
+      _autoResume: function() {
+        var self = this;
+        if (!self.ctx || typeof self.ctx.resume === "undefined" || !Howler2.usingWebAudio) {
+          return;
+        }
+        if (self.state === "running" && self.ctx.state !== "interrupted" && self._suspendTimer) {
+          clearTimeout(self._suspendTimer);
+          self._suspendTimer = null;
+        } else if (self.state === "suspended" || self.state === "running" && self.ctx.state === "interrupted") {
+          self.ctx.resume().then(function() {
+            self.state = "running";
+            for (var i = 0; i < self._howls.length; i++) {
+              self._howls[i]._emit("resume");
+            }
+          });
+          if (self._suspendTimer) {
+            clearTimeout(self._suspendTimer);
+            self._suspendTimer = null;
+          }
+        } else if (self.state === "suspending") {
+          self._resumeAfterSuspend = true;
+        }
+        return self;
+      }
+    };
+    var Howler2 = new HowlerGlobal2();
+    var Howl2 = function(o) {
+      var self = this;
+      if (!o.src || o.src.length === 0) {
+        console.error("An array of source files must be passed with any new Howl.");
+        return;
+      }
+      self.init(o);
+    };
+    Howl2.prototype = {
+      /**
+       * Initialize a new Howl group object.
+       * @param  {Object} o Passed in properties for this group.
+       * @return {Howl}
+       */
+      init: function(o) {
+        var self = this;
+        if (!Howler2.ctx) {
+          setupAudioContext();
+        }
+        self._autoplay = o.autoplay || false;
+        self._format = typeof o.format !== "string" ? o.format : [o.format];
+        self._html5 = o.html5 || false;
+        self._muted = o.mute || false;
+        self._loop = o.loop || false;
+        self._pool = o.pool || 5;
+        self._preload = typeof o.preload === "boolean" || o.preload === "metadata" ? o.preload : true;
+        self._rate = o.rate || 1;
+        self._sprite = o.sprite || {};
+        self._src = typeof o.src !== "string" ? o.src : [o.src];
+        self._volume = o.volume !== void 0 ? o.volume : 1;
+        self._xhr = {
+          method: o.xhr && o.xhr.method ? o.xhr.method : "GET",
+          headers: o.xhr && o.xhr.headers ? o.xhr.headers : null,
+          withCredentials: o.xhr && o.xhr.withCredentials ? o.xhr.withCredentials : false
+        };
+        self._duration = 0;
+        self._state = "unloaded";
+        self._sounds = [];
+        self._endTimers = {};
+        self._queue = [];
+        self._playLock = false;
+        self._onend = o.onend ? [{ fn: o.onend }] : [];
+        self._onfade = o.onfade ? [{ fn: o.onfade }] : [];
+        self._onload = o.onload ? [{ fn: o.onload }] : [];
+        self._onloaderror = o.onloaderror ? [{ fn: o.onloaderror }] : [];
+        self._onplayerror = o.onplayerror ? [{ fn: o.onplayerror }] : [];
+        self._onpause = o.onpause ? [{ fn: o.onpause }] : [];
+        self._onplay = o.onplay ? [{ fn: o.onplay }] : [];
+        self._onstop = o.onstop ? [{ fn: o.onstop }] : [];
+        self._onmute = o.onmute ? [{ fn: o.onmute }] : [];
+        self._onvolume = o.onvolume ? [{ fn: o.onvolume }] : [];
+        self._onrate = o.onrate ? [{ fn: o.onrate }] : [];
+        self._onseek = o.onseek ? [{ fn: o.onseek }] : [];
+        self._onunlock = o.onunlock ? [{ fn: o.onunlock }] : [];
+        self._onresume = [];
+        self._webAudio = Howler2.usingWebAudio && !self._html5;
+        if (typeof Howler2.ctx !== "undefined" && Howler2.ctx && Howler2.autoUnlock) {
+          Howler2._unlockAudio();
+        }
+        Howler2._howls.push(self);
+        if (self._autoplay) {
+          self._queue.push({
+            event: "play",
+            action: function() {
+              self.play();
+            }
+          });
+        }
+        if (self._preload && self._preload !== "none") {
+          self.load();
+        }
+        return self;
+      },
+      /**
+       * Load the audio file.
+       * @return {Howler}
+       */
+      load: function() {
+        var self = this;
+        var url = null;
+        if (Howler2.noAudio) {
+          self._emit("loaderror", null, "No audio support.");
+          return;
+        }
+        if (typeof self._src === "string") {
+          self._src = [self._src];
+        }
+        for (var i = 0; i < self._src.length; i++) {
+          var ext, str;
+          if (self._format && self._format[i]) {
+            ext = self._format[i];
+          } else {
+            str = self._src[i];
+            if (typeof str !== "string") {
+              self._emit("loaderror", null, "Non-string found in selected audio sources - ignoring.");
+              continue;
+            }
+            ext = /^data:audio\/([^;,]+);/i.exec(str);
+            if (!ext) {
+              ext = /\.([^.]+)$/.exec(str.split("?", 1)[0]);
+            }
+            if (ext) {
+              ext = ext[1].toLowerCase();
+            }
+          }
+          if (!ext) {
+            console.warn('No file extension was found. Consider using the "format" property or specify an extension.');
+          }
+          if (ext && Howler2.codecs(ext)) {
+            url = self._src[i];
+            break;
+          }
+        }
+        if (!url) {
+          self._emit("loaderror", null, "No codec support for selected audio sources.");
+          return;
+        }
+        self._src = url;
+        self._state = "loading";
+        if (window.location.protocol === "https:" && url.slice(0, 5) === "http:") {
+          self._html5 = true;
+          self._webAudio = false;
+        }
+        new Sound2(self);
+        if (self._webAudio) {
+          loadBuffer(self);
+        }
+        return self;
+      },
+      /**
+       * Play a sound or resume previous playback.
+       * @param  {String/Number} sprite   Sprite name for sprite playback or sound id to continue previous.
+       * @param  {Boolean} internal Internal Use: true prevents event firing.
+       * @return {Number}          Sound ID.
+       */
+      play: function(sprite, internal) {
+        var self = this;
+        var id = null;
+        if (typeof sprite === "number") {
+          id = sprite;
+          sprite = null;
+        } else if (typeof sprite === "string" && self._state === "loaded" && !self._sprite[sprite]) {
+          return null;
+        } else if (typeof sprite === "undefined") {
+          sprite = "__default";
+          if (!self._playLock) {
+            var num = 0;
+            for (var i = 0; i < self._sounds.length; i++) {
+              if (self._sounds[i]._paused && !self._sounds[i]._ended) {
+                num++;
+                id = self._sounds[i]._id;
+              }
+            }
+            if (num === 1) {
+              sprite = null;
+            } else {
+              id = null;
+            }
+          }
+        }
+        var sound = id ? self._soundById(id) : self._inactiveSound();
+        if (!sound) {
+          return null;
+        }
+        if (id && !sprite) {
+          sprite = sound._sprite || "__default";
+        }
+        if (self._state !== "loaded") {
+          sound._sprite = sprite;
+          sound._ended = false;
+          var soundId = sound._id;
+          self._queue.push({
+            event: "play",
+            action: function() {
+              self.play(soundId);
+            }
+          });
+          return soundId;
+        }
+        if (id && !sound._paused) {
+          if (!internal) {
+            self._loadQueue("play");
+          }
+          return sound._id;
+        }
+        if (self._webAudio) {
+          Howler2._autoResume();
+        }
+        var seek = Math.max(0, sound._seek > 0 ? sound._seek : self._sprite[sprite][0] / 1e3);
+        var duration = Math.max(0, (self._sprite[sprite][0] + self._sprite[sprite][1]) / 1e3 - seek);
+        var timeout = duration * 1e3 / Math.abs(sound._rate);
+        var start = self._sprite[sprite][0] / 1e3;
+        var stop = (self._sprite[sprite][0] + self._sprite[sprite][1]) / 1e3;
+        sound._sprite = sprite;
+        sound._ended = false;
+        var setParams = function() {
+          sound._paused = false;
+          sound._seek = seek;
+          sound._start = start;
+          sound._stop = stop;
+          sound._loop = !!(sound._loop || self._sprite[sprite][2]);
+        };
+        if (seek >= stop) {
+          self._ended(sound);
+          return;
+        }
+        var node = sound._node;
+        if (self._webAudio) {
+          var playWebAudio = function() {
+            self._playLock = false;
+            setParams();
+            self._refreshBuffer(sound);
+            var vol = sound._muted || self._muted ? 0 : sound._volume;
+            node.gain.setValueAtTime(vol, Howler2.ctx.currentTime);
+            sound._playStart = Howler2.ctx.currentTime;
+            if (typeof node.bufferSource.start === "undefined") {
+              sound._loop ? node.bufferSource.noteGrainOn(0, seek, 86400) : node.bufferSource.noteGrainOn(0, seek, duration);
+            } else {
+              sound._loop ? node.bufferSource.start(0, seek, 86400) : node.bufferSource.start(0, seek, duration);
+            }
+            if (timeout !== Infinity) {
+              self._endTimers[sound._id] = setTimeout(self._ended.bind(self, sound), timeout);
+            }
+            if (!internal) {
+              setTimeout(function() {
+                self._emit("play", sound._id);
+                self._loadQueue();
+              }, 0);
+            }
+          };
+          if (Howler2.state === "running" && Howler2.ctx.state !== "interrupted") {
+            playWebAudio();
+          } else {
+            self._playLock = true;
+            self.once("resume", playWebAudio);
+            self._clearTimer(sound._id);
+          }
+        } else {
+          var playHtml5 = function() {
+            node.currentTime = seek;
+            node.muted = sound._muted || self._muted || Howler2._muted || node.muted;
+            node.volume = sound._volume * Howler2.volume();
+            node.playbackRate = sound._rate;
+            try {
+              var play = node.play();
+              if (play && typeof Promise !== "undefined" && (play instanceof Promise || typeof play.then === "function")) {
+                self._playLock = true;
+                setParams();
+                play.then(function() {
+                  self._playLock = false;
+                  node._unlocked = true;
+                  if (!internal) {
+                    self._emit("play", sound._id);
+                  } else {
+                    self._loadQueue();
+                  }
+                }).catch(function() {
+                  self._playLock = false;
+                  self._emit("playerror", sound._id, "Playback was unable to start. This is most commonly an issue on mobile devices and Chrome where playback was not within a user interaction.");
+                  sound._ended = true;
+                  sound._paused = true;
+                });
+              } else if (!internal) {
+                self._playLock = false;
+                setParams();
+                self._emit("play", sound._id);
+              }
+              node.playbackRate = sound._rate;
+              if (node.paused) {
+                self._emit("playerror", sound._id, "Playback was unable to start. This is most commonly an issue on mobile devices and Chrome where playback was not within a user interaction.");
+                return;
+              }
+              if (sprite !== "__default" || sound._loop) {
+                self._endTimers[sound._id] = setTimeout(self._ended.bind(self, sound), timeout);
+              } else {
+                self._endTimers[sound._id] = function() {
+                  self._ended(sound);
+                  node.removeEventListener("ended", self._endTimers[sound._id], false);
+                };
+                node.addEventListener("ended", self._endTimers[sound._id], false);
+              }
+            } catch (err) {
+              self._emit("playerror", sound._id, err);
+            }
+          };
+          if (node.src === "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA") {
+            node.src = self._src;
+            node.load();
+          }
+          var loadedNoReadyState = window && window.ejecta || !node.readyState && Howler2._navigator.isCocoonJS;
+          if (node.readyState >= 3 || loadedNoReadyState) {
+            playHtml5();
+          } else {
+            self._playLock = true;
+            self._state = "loading";
+            var listener = function() {
+              self._state = "loaded";
+              playHtml5();
+              node.removeEventListener(Howler2._canPlayEvent, listener, false);
+            };
+            node.addEventListener(Howler2._canPlayEvent, listener, false);
+            self._clearTimer(sound._id);
+          }
+        }
+        return sound._id;
+      },
+      /**
+       * Pause playback and save current position.
+       * @param  {Number} id The sound ID (empty to pause all in group).
+       * @return {Howl}
+       */
+      pause: function(id) {
+        var self = this;
+        if (self._state !== "loaded" || self._playLock) {
+          self._queue.push({
+            event: "pause",
+            action: function() {
+              self.pause(id);
+            }
+          });
+          return self;
+        }
+        var ids = self._getSoundIds(id);
+        for (var i = 0; i < ids.length; i++) {
+          self._clearTimer(ids[i]);
+          var sound = self._soundById(ids[i]);
+          if (sound && !sound._paused) {
+            sound._seek = self.seek(ids[i]);
+            sound._rateSeek = 0;
+            sound._paused = true;
+            self._stopFade(ids[i]);
+            if (sound._node) {
+              if (self._webAudio) {
+                if (!sound._node.bufferSource) {
+                  continue;
+                }
+                if (typeof sound._node.bufferSource.stop === "undefined") {
+                  sound._node.bufferSource.noteOff(0);
+                } else {
+                  sound._node.bufferSource.stop(0);
+                }
+                self._cleanBuffer(sound._node);
+              } else if (!isNaN(sound._node.duration) || sound._node.duration === Infinity) {
+                sound._node.pause();
+              }
+            }
+          }
+          if (!arguments[1]) {
+            self._emit("pause", sound ? sound._id : null);
+          }
+        }
+        return self;
+      },
+      /**
+       * Stop playback and reset to start.
+       * @param  {Number} id The sound ID (empty to stop all in group).
+       * @param  {Boolean} internal Internal Use: true prevents event firing.
+       * @return {Howl}
+       */
+      stop: function(id, internal) {
+        var self = this;
+        if (self._state !== "loaded" || self._playLock) {
+          self._queue.push({
+            event: "stop",
+            action: function() {
+              self.stop(id);
+            }
+          });
+          return self;
+        }
+        var ids = self._getSoundIds(id);
+        for (var i = 0; i < ids.length; i++) {
+          self._clearTimer(ids[i]);
+          var sound = self._soundById(ids[i]);
+          if (sound) {
+            sound._seek = sound._start || 0;
+            sound._rateSeek = 0;
+            sound._paused = true;
+            sound._ended = true;
+            self._stopFade(ids[i]);
+            if (sound._node) {
+              if (self._webAudio) {
+                if (sound._node.bufferSource) {
+                  if (typeof sound._node.bufferSource.stop === "undefined") {
+                    sound._node.bufferSource.noteOff(0);
+                  } else {
+                    sound._node.bufferSource.stop(0);
+                  }
+                  self._cleanBuffer(sound._node);
+                }
+              } else if (!isNaN(sound._node.duration) || sound._node.duration === Infinity) {
+                sound._node.currentTime = sound._start || 0;
+                sound._node.pause();
+                if (sound._node.duration === Infinity) {
+                  self._clearSound(sound._node);
+                }
+              }
+            }
+            if (!internal) {
+              self._emit("stop", sound._id);
+            }
+          }
+        }
+        return self;
+      },
+      /**
+       * Mute/unmute a single sound or all sounds in this Howl group.
+       * @param  {Boolean} muted Set to true to mute and false to unmute.
+       * @param  {Number} id    The sound ID to update (omit to mute/unmute all).
+       * @return {Howl}
+       */
+      mute: function(muted, id) {
+        var self = this;
+        if (self._state !== "loaded" || self._playLock) {
+          self._queue.push({
+            event: "mute",
+            action: function() {
+              self.mute(muted, id);
+            }
+          });
+          return self;
+        }
+        if (typeof id === "undefined") {
+          if (typeof muted === "boolean") {
+            self._muted = muted;
+          } else {
+            return self._muted;
+          }
+        }
+        var ids = self._getSoundIds(id);
+        for (var i = 0; i < ids.length; i++) {
+          var sound = self._soundById(ids[i]);
+          if (sound) {
+            sound._muted = muted;
+            if (sound._interval) {
+              self._stopFade(sound._id);
+            }
+            if (self._webAudio && sound._node) {
+              sound._node.gain.setValueAtTime(muted ? 0 : sound._volume, Howler2.ctx.currentTime);
+            } else if (sound._node) {
+              sound._node.muted = Howler2._muted ? true : muted;
+            }
+            self._emit("mute", sound._id);
+          }
+        }
+        return self;
+      },
+      /**
+       * Get/set the volume of this sound or of the Howl group. This method can optionally take 0, 1 or 2 arguments.
+       *   volume() -> Returns the group's volume value.
+       *   volume(id) -> Returns the sound id's current volume.
+       *   volume(vol) -> Sets the volume of all sounds in this Howl group.
+       *   volume(vol, id) -> Sets the volume of passed sound id.
+       * @return {Howl/Number} Returns self or current volume.
+       */
+      volume: function() {
+        var self = this;
+        var args = arguments;
+        var vol, id;
+        if (args.length === 0) {
+          return self._volume;
+        } else if (args.length === 1 || args.length === 2 && typeof args[1] === "undefined") {
+          var ids = self._getSoundIds();
+          var index = ids.indexOf(args[0]);
+          if (index >= 0) {
+            id = parseInt(args[0], 10);
+          } else {
+            vol = parseFloat(args[0]);
+          }
+        } else if (args.length >= 2) {
+          vol = parseFloat(args[0]);
+          id = parseInt(args[1], 10);
+        }
+        var sound;
+        if (typeof vol !== "undefined" && vol >= 0 && vol <= 1) {
+          if (self._state !== "loaded" || self._playLock) {
+            self._queue.push({
+              event: "volume",
+              action: function() {
+                self.volume.apply(self, args);
+              }
+            });
+            return self;
+          }
+          if (typeof id === "undefined") {
+            self._volume = vol;
+          }
+          id = self._getSoundIds(id);
+          for (var i = 0; i < id.length; i++) {
+            sound = self._soundById(id[i]);
+            if (sound) {
+              sound._volume = vol;
+              if (!args[2]) {
+                self._stopFade(id[i]);
+              }
+              if (self._webAudio && sound._node && !sound._muted) {
+                sound._node.gain.setValueAtTime(vol, Howler2.ctx.currentTime);
+              } else if (sound._node && !sound._muted) {
+                sound._node.volume = vol * Howler2.volume();
+              }
+              self._emit("volume", sound._id);
+            }
+          }
+        } else {
+          sound = id ? self._soundById(id) : self._sounds[0];
+          return sound ? sound._volume : 0;
+        }
+        return self;
+      },
+      /**
+       * Fade a currently playing sound between two volumes (if no id is passed, all sounds will fade).
+       * @param  {Number} from The value to fade from (0.0 to 1.0).
+       * @param  {Number} to   The volume to fade to (0.0 to 1.0).
+       * @param  {Number} len  Time in milliseconds to fade.
+       * @param  {Number} id   The sound id (omit to fade all sounds).
+       * @return {Howl}
+       */
+      fade: function(from, to, len, id) {
+        var self = this;
+        if (self._state !== "loaded" || self._playLock) {
+          self._queue.push({
+            event: "fade",
+            action: function() {
+              self.fade(from, to, len, id);
+            }
+          });
+          return self;
+        }
+        from = Math.min(Math.max(0, parseFloat(from)), 1);
+        to = Math.min(Math.max(0, parseFloat(to)), 1);
+        len = parseFloat(len);
+        self.volume(from, id);
+        var ids = self._getSoundIds(id);
+        for (var i = 0; i < ids.length; i++) {
+          var sound = self._soundById(ids[i]);
+          if (sound) {
+            if (!id) {
+              self._stopFade(ids[i]);
+            }
+            if (self._webAudio && !sound._muted) {
+              var currentTime = Howler2.ctx.currentTime;
+              var end = currentTime + len / 1e3;
+              sound._volume = from;
+              sound._node.gain.setValueAtTime(from, currentTime);
+              sound._node.gain.linearRampToValueAtTime(to, end);
+            }
+            self._startFadeInterval(sound, from, to, len, ids[i], typeof id === "undefined");
+          }
+        }
+        return self;
+      },
+      /**
+       * Starts the internal interval to fade a sound.
+       * @param  {Object} sound Reference to sound to fade.
+       * @param  {Number} from The value to fade from (0.0 to 1.0).
+       * @param  {Number} to   The volume to fade to (0.0 to 1.0).
+       * @param  {Number} len  Time in milliseconds to fade.
+       * @param  {Number} id   The sound id to fade.
+       * @param  {Boolean} isGroup   If true, set the volume on the group.
+       */
+      _startFadeInterval: function(sound, from, to, len, id, isGroup) {
+        var self = this;
+        var vol = from;
+        var diff = to - from;
+        var steps = Math.abs(diff / 0.01);
+        var stepLen = Math.max(4, steps > 0 ? len / steps : len);
+        var lastTick = Date.now();
+        sound._fadeTo = to;
+        sound._interval = setInterval(function() {
+          var tick = (Date.now() - lastTick) / len;
+          lastTick = Date.now();
+          vol += diff * tick;
+          vol = Math.round(vol * 100) / 100;
+          if (diff < 0) {
+            vol = Math.max(to, vol);
+          } else {
+            vol = Math.min(to, vol);
+          }
+          if (self._webAudio) {
+            sound._volume = vol;
+          } else {
+            self.volume(vol, sound._id, true);
+          }
+          if (isGroup) {
+            self._volume = vol;
+          }
+          if (to < from && vol <= to || to > from && vol >= to) {
+            clearInterval(sound._interval);
+            sound._interval = null;
+            sound._fadeTo = null;
+            self.volume(to, sound._id);
+            self._emit("fade", sound._id);
+          }
+        }, stepLen);
+      },
+      /**
+       * Internal method that stops the currently playing fade when
+       * a new fade starts, volume is changed or the sound is stopped.
+       * @param  {Number} id The sound id.
+       * @return {Howl}
+       */
+      _stopFade: function(id) {
+        var self = this;
+        var sound = self._soundById(id);
+        if (sound && sound._interval) {
+          if (self._webAudio) {
+            sound._node.gain.cancelScheduledValues(Howler2.ctx.currentTime);
+          }
+          clearInterval(sound._interval);
+          sound._interval = null;
+          self.volume(sound._fadeTo, id);
+          sound._fadeTo = null;
+          self._emit("fade", id);
+        }
+        return self;
+      },
+      /**
+       * Get/set the loop parameter on a sound. This method can optionally take 0, 1 or 2 arguments.
+       *   loop() -> Returns the group's loop value.
+       *   loop(id) -> Returns the sound id's loop value.
+       *   loop(loop) -> Sets the loop value for all sounds in this Howl group.
+       *   loop(loop, id) -> Sets the loop value of passed sound id.
+       * @return {Howl/Boolean} Returns self or current loop value.
+       */
+      loop: function() {
+        var self = this;
+        var args = arguments;
+        var loop, id, sound;
+        if (args.length === 0) {
+          return self._loop;
+        } else if (args.length === 1) {
+          if (typeof args[0] === "boolean") {
+            loop = args[0];
+            self._loop = loop;
+          } else {
+            sound = self._soundById(parseInt(args[0], 10));
+            return sound ? sound._loop : false;
+          }
+        } else if (args.length === 2) {
+          loop = args[0];
+          id = parseInt(args[1], 10);
+        }
+        var ids = self._getSoundIds(id);
+        for (var i = 0; i < ids.length; i++) {
+          sound = self._soundById(ids[i]);
+          if (sound) {
+            sound._loop = loop;
+            if (self._webAudio && sound._node && sound._node.bufferSource) {
+              sound._node.bufferSource.loop = loop;
+              if (loop) {
+                sound._node.bufferSource.loopStart = sound._start || 0;
+                sound._node.bufferSource.loopEnd = sound._stop;
+                if (self.playing(ids[i])) {
+                  self.pause(ids[i], true);
+                  self.play(ids[i], true);
+                }
+              }
+            }
+          }
+        }
+        return self;
+      },
+      /**
+       * Get/set the playback rate of a sound. This method can optionally take 0, 1 or 2 arguments.
+       *   rate() -> Returns the first sound node's current playback rate.
+       *   rate(id) -> Returns the sound id's current playback rate.
+       *   rate(rate) -> Sets the playback rate of all sounds in this Howl group.
+       *   rate(rate, id) -> Sets the playback rate of passed sound id.
+       * @return {Howl/Number} Returns self or the current playback rate.
+       */
+      rate: function() {
+        var self = this;
+        var args = arguments;
+        var rate, id;
+        if (args.length === 0) {
+          id = self._sounds[0]._id;
+        } else if (args.length === 1) {
+          var ids = self._getSoundIds();
+          var index = ids.indexOf(args[0]);
+          if (index >= 0) {
+            id = parseInt(args[0], 10);
+          } else {
+            rate = parseFloat(args[0]);
+          }
+        } else if (args.length === 2) {
+          rate = parseFloat(args[0]);
+          id = parseInt(args[1], 10);
+        }
+        var sound;
+        if (typeof rate === "number") {
+          if (self._state !== "loaded" || self._playLock) {
+            self._queue.push({
+              event: "rate",
+              action: function() {
+                self.rate.apply(self, args);
+              }
+            });
+            return self;
+          }
+          if (typeof id === "undefined") {
+            self._rate = rate;
+          }
+          id = self._getSoundIds(id);
+          for (var i = 0; i < id.length; i++) {
+            sound = self._soundById(id[i]);
+            if (sound) {
+              if (self.playing(id[i])) {
+                sound._rateSeek = self.seek(id[i]);
+                sound._playStart = self._webAudio ? Howler2.ctx.currentTime : sound._playStart;
+              }
+              sound._rate = rate;
+              if (self._webAudio && sound._node && sound._node.bufferSource) {
+                sound._node.bufferSource.playbackRate.setValueAtTime(rate, Howler2.ctx.currentTime);
+              } else if (sound._node) {
+                sound._node.playbackRate = rate;
+              }
+              var seek = self.seek(id[i]);
+              var duration = (self._sprite[sound._sprite][0] + self._sprite[sound._sprite][1]) / 1e3 - seek;
+              var timeout = duration * 1e3 / Math.abs(sound._rate);
+              if (self._endTimers[id[i]] || !sound._paused) {
+                self._clearTimer(id[i]);
+                self._endTimers[id[i]] = setTimeout(self._ended.bind(self, sound), timeout);
+              }
+              self._emit("rate", sound._id);
+            }
+          }
+        } else {
+          sound = self._soundById(id);
+          return sound ? sound._rate : self._rate;
+        }
+        return self;
+      },
+      /**
+       * Get/set the seek position of a sound. This method can optionally take 0, 1 or 2 arguments.
+       *   seek() -> Returns the first sound node's current seek position.
+       *   seek(id) -> Returns the sound id's current seek position.
+       *   seek(seek) -> Sets the seek position of the first sound node.
+       *   seek(seek, id) -> Sets the seek position of passed sound id.
+       * @return {Howl/Number} Returns self or the current seek position.
+       */
+      seek: function() {
+        var self = this;
+        var args = arguments;
+        var seek, id;
+        if (args.length === 0) {
+          if (self._sounds.length) {
+            id = self._sounds[0]._id;
+          }
+        } else if (args.length === 1) {
+          var ids = self._getSoundIds();
+          var index = ids.indexOf(args[0]);
+          if (index >= 0) {
+            id = parseInt(args[0], 10);
+          } else if (self._sounds.length) {
+            id = self._sounds[0]._id;
+            seek = parseFloat(args[0]);
+          }
+        } else if (args.length === 2) {
+          seek = parseFloat(args[0]);
+          id = parseInt(args[1], 10);
+        }
+        if (typeof id === "undefined") {
+          return 0;
+        }
+        if (typeof seek === "number" && (self._state !== "loaded" || self._playLock)) {
+          self._queue.push({
+            event: "seek",
+            action: function() {
+              self.seek.apply(self, args);
+            }
+          });
+          return self;
+        }
+        var sound = self._soundById(id);
+        if (sound) {
+          if (typeof seek === "number" && seek >= 0) {
+            var playing = self.playing(id);
+            if (playing) {
+              self.pause(id, true);
+            }
+            sound._seek = seek;
+            sound._ended = false;
+            self._clearTimer(id);
+            if (!self._webAudio && sound._node && !isNaN(sound._node.duration)) {
+              sound._node.currentTime = seek;
+            }
+            var seekAndEmit = function() {
+              if (playing) {
+                self.play(id, true);
+              }
+              self._emit("seek", id);
+            };
+            if (playing && !self._webAudio) {
+              var emitSeek = function() {
+                if (!self._playLock) {
+                  seekAndEmit();
+                } else {
+                  setTimeout(emitSeek, 0);
+                }
+              };
+              setTimeout(emitSeek, 0);
+            } else {
+              seekAndEmit();
+            }
+          } else {
+            if (self._webAudio) {
+              var realTime = self.playing(id) ? Howler2.ctx.currentTime - sound._playStart : 0;
+              var rateSeek = sound._rateSeek ? sound._rateSeek - sound._seek : 0;
+              return sound._seek + (rateSeek + realTime * Math.abs(sound._rate));
+            } else {
+              return sound._node.currentTime;
+            }
+          }
+        }
+        return self;
+      },
+      /**
+       * Check if a specific sound is currently playing or not (if id is provided), or check if at least one of the sounds in the group is playing or not.
+       * @param  {Number}  id The sound id to check. If none is passed, the whole sound group is checked.
+       * @return {Boolean} True if playing and false if not.
+       */
+      playing: function(id) {
+        var self = this;
+        if (typeof id === "number") {
+          var sound = self._soundById(id);
+          return sound ? !sound._paused : false;
+        }
+        for (var i = 0; i < self._sounds.length; i++) {
+          if (!self._sounds[i]._paused) {
+            return true;
+          }
+        }
+        return false;
+      },
+      /**
+       * Get the duration of this sound. Passing a sound id will return the sprite duration.
+       * @param  {Number} id The sound id to check. If none is passed, return full source duration.
+       * @return {Number} Audio duration in seconds.
+       */
+      duration: function(id) {
+        var self = this;
+        var duration = self._duration;
+        var sound = self._soundById(id);
+        if (sound) {
+          duration = self._sprite[sound._sprite][1] / 1e3;
+        }
+        return duration;
+      },
+      /**
+       * Returns the current loaded state of this Howl.
+       * @return {String} 'unloaded', 'loading', 'loaded'
+       */
+      state: function() {
+        return this._state;
+      },
+      /**
+       * Unload and destroy the current Howl object.
+       * This will immediately stop all sound instances attached to this group.
+       */
+      unload: function() {
+        var self = this;
+        var sounds = self._sounds;
+        for (var i = 0; i < sounds.length; i++) {
+          if (!sounds[i]._paused) {
+            self.stop(sounds[i]._id);
+          }
+          if (!self._webAudio) {
+            self._clearSound(sounds[i]._node);
+            sounds[i]._node.removeEventListener("error", sounds[i]._errorFn, false);
+            sounds[i]._node.removeEventListener(Howler2._canPlayEvent, sounds[i]._loadFn, false);
+            sounds[i]._node.removeEventListener("ended", sounds[i]._endFn, false);
+            Howler2._releaseHtml5Audio(sounds[i]._node);
+          }
+          delete sounds[i]._node;
+          self._clearTimer(sounds[i]._id);
+        }
+        var index = Howler2._howls.indexOf(self);
+        if (index >= 0) {
+          Howler2._howls.splice(index, 1);
+        }
+        var remCache = true;
+        for (i = 0; i < Howler2._howls.length; i++) {
+          if (Howler2._howls[i]._src === self._src || self._src.indexOf(Howler2._howls[i]._src) >= 0) {
+            remCache = false;
+            break;
+          }
+        }
+        if (cache && remCache) {
+          delete cache[self._src];
+        }
+        Howler2.noAudio = false;
+        self._state = "unloaded";
+        self._sounds = [];
+        self = null;
+        return null;
+      },
+      /**
+       * Listen to a custom event.
+       * @param  {String}   event Event name.
+       * @param  {Function} fn    Listener to call.
+       * @param  {Number}   id    (optional) Only listen to events for this sound.
+       * @param  {Number}   once  (INTERNAL) Marks event to fire only once.
+       * @return {Howl}
+       */
+      on: function(event, fn, id, once) {
+        var self = this;
+        var events = self["_on" + event];
+        if (typeof fn === "function") {
+          events.push(once ? { id, fn, once } : { id, fn });
+        }
+        return self;
+      },
+      /**
+       * Remove a custom event. Call without parameters to remove all events.
+       * @param  {String}   event Event name.
+       * @param  {Function} fn    Listener to remove. Leave empty to remove all.
+       * @param  {Number}   id    (optional) Only remove events for this sound.
+       * @return {Howl}
+       */
+      off: function(event, fn, id) {
+        var self = this;
+        var events = self["_on" + event];
+        var i = 0;
+        if (typeof fn === "number") {
+          id = fn;
+          fn = null;
+        }
+        if (fn || id) {
+          for (i = 0; i < events.length; i++) {
+            var isId = id === events[i].id;
+            if (fn === events[i].fn && isId || !fn && isId) {
+              events.splice(i, 1);
+              break;
+            }
+          }
+        } else if (event) {
+          self["_on" + event] = [];
+        } else {
+          var keys = Object.keys(self);
+          for (i = 0; i < keys.length; i++) {
+            if (keys[i].indexOf("_on") === 0 && Array.isArray(self[keys[i]])) {
+              self[keys[i]] = [];
+            }
+          }
+        }
+        return self;
+      },
+      /**
+       * Listen to a custom event and remove it once fired.
+       * @param  {String}   event Event name.
+       * @param  {Function} fn    Listener to call.
+       * @param  {Number}   id    (optional) Only listen to events for this sound.
+       * @return {Howl}
+       */
+      once: function(event, fn, id) {
+        var self = this;
+        self.on(event, fn, id, 1);
+        return self;
+      },
+      /**
+       * Emit all events of a specific type and pass the sound id.
+       * @param  {String} event Event name.
+       * @param  {Number} id    Sound ID.
+       * @param  {Number} msg   Message to go with event.
+       * @return {Howl}
+       */
+      _emit: function(event, id, msg) {
+        var self = this;
+        var events = self["_on" + event];
+        for (var i = events.length - 1; i >= 0; i--) {
+          if (!events[i].id || events[i].id === id || event === "load") {
+            setTimeout((function(fn) {
+              fn.call(this, id, msg);
+            }).bind(self, events[i].fn), 0);
+            if (events[i].once) {
+              self.off(event, events[i].fn, events[i].id);
+            }
+          }
+        }
+        self._loadQueue(event);
+        return self;
+      },
+      /**
+       * Queue of actions initiated before the sound has loaded.
+       * These will be called in sequence, with the next only firing
+       * after the previous has finished executing (even if async like play).
+       * @return {Howl}
+       */
+      _loadQueue: function(event) {
+        var self = this;
+        if (self._queue.length > 0) {
+          var task = self._queue[0];
+          if (task.event === event) {
+            self._queue.shift();
+            self._loadQueue();
+          }
+          if (!event) {
+            task.action();
+          }
+        }
+        return self;
+      },
+      /**
+       * Fired when playback ends at the end of the duration.
+       * @param  {Sound} sound The sound object to work with.
+       * @return {Howl}
+       */
+      _ended: function(sound) {
+        var self = this;
+        var sprite = sound._sprite;
+        if (!self._webAudio && sound._node && !sound._node.paused && !sound._node.ended && sound._node.currentTime < sound._stop) {
+          setTimeout(self._ended.bind(self, sound), 100);
+          return self;
+        }
+        var loop = !!(sound._loop || self._sprite[sprite][2]);
+        self._emit("end", sound._id);
+        if (!self._webAudio && loop) {
+          self.stop(sound._id, true).play(sound._id);
+        }
+        if (self._webAudio && loop) {
+          self._emit("play", sound._id);
+          sound._seek = sound._start || 0;
+          sound._rateSeek = 0;
+          sound._playStart = Howler2.ctx.currentTime;
+          var timeout = (sound._stop - sound._start) * 1e3 / Math.abs(sound._rate);
+          self._endTimers[sound._id] = setTimeout(self._ended.bind(self, sound), timeout);
+        }
+        if (self._webAudio && !loop) {
+          sound._paused = true;
+          sound._ended = true;
+          sound._seek = sound._start || 0;
+          sound._rateSeek = 0;
+          self._clearTimer(sound._id);
+          self._cleanBuffer(sound._node);
+          Howler2._autoSuspend();
+        }
+        if (!self._webAudio && !loop) {
+          self.stop(sound._id, true);
+        }
+        return self;
+      },
+      /**
+       * Clear the end timer for a sound playback.
+       * @param  {Number} id The sound ID.
+       * @return {Howl}
+       */
+      _clearTimer: function(id) {
+        var self = this;
+        if (self._endTimers[id]) {
+          if (typeof self._endTimers[id] !== "function") {
+            clearTimeout(self._endTimers[id]);
+          } else {
+            var sound = self._soundById(id);
+            if (sound && sound._node) {
+              sound._node.removeEventListener("ended", self._endTimers[id], false);
+            }
+          }
+          delete self._endTimers[id];
+        }
+        return self;
+      },
+      /**
+       * Return the sound identified by this ID, or return null.
+       * @param  {Number} id Sound ID
+       * @return {Object}    Sound object or null.
+       */
+      _soundById: function(id) {
+        var self = this;
+        for (var i = 0; i < self._sounds.length; i++) {
+          if (id === self._sounds[i]._id) {
+            return self._sounds[i];
+          }
+        }
+        return null;
+      },
+      /**
+       * Return an inactive sound from the pool or create a new one.
+       * @return {Sound} Sound playback object.
+       */
+      _inactiveSound: function() {
+        var self = this;
+        self._drain();
+        for (var i = 0; i < self._sounds.length; i++) {
+          if (self._sounds[i]._ended) {
+            return self._sounds[i].reset();
+          }
+        }
+        return new Sound2(self);
+      },
+      /**
+       * Drain excess inactive sounds from the pool.
+       */
+      _drain: function() {
+        var self = this;
+        var limit = self._pool;
+        var cnt = 0;
+        var i = 0;
+        if (self._sounds.length < limit) {
+          return;
+        }
+        for (i = 0; i < self._sounds.length; i++) {
+          if (self._sounds[i]._ended) {
+            cnt++;
+          }
+        }
+        for (i = self._sounds.length - 1; i >= 0; i--) {
+          if (cnt <= limit) {
+            return;
+          }
+          if (self._sounds[i]._ended) {
+            if (self._webAudio && self._sounds[i]._node) {
+              self._sounds[i]._node.disconnect(0);
+            }
+            self._sounds.splice(i, 1);
+            cnt--;
+          }
+        }
+      },
+      /**
+       * Get all ID's from the sounds pool.
+       * @param  {Number} id Only return one ID if one is passed.
+       * @return {Array}    Array of IDs.
+       */
+      _getSoundIds: function(id) {
+        var self = this;
+        if (typeof id === "undefined") {
+          var ids = [];
+          for (var i = 0; i < self._sounds.length; i++) {
+            ids.push(self._sounds[i]._id);
+          }
+          return ids;
+        } else {
+          return [id];
+        }
+      },
+      /**
+       * Load the sound back into the buffer source.
+       * @param  {Sound} sound The sound object to work with.
+       * @return {Howl}
+       */
+      _refreshBuffer: function(sound) {
+        var self = this;
+        sound._node.bufferSource = Howler2.ctx.createBufferSource();
+        sound._node.bufferSource.buffer = cache[self._src];
+        if (sound._panner) {
+          sound._node.bufferSource.connect(sound._panner);
+        } else {
+          sound._node.bufferSource.connect(sound._node);
+        }
+        sound._node.bufferSource.loop = sound._loop;
+        if (sound._loop) {
+          sound._node.bufferSource.loopStart = sound._start || 0;
+          sound._node.bufferSource.loopEnd = sound._stop || 0;
+        }
+        sound._node.bufferSource.playbackRate.setValueAtTime(sound._rate, Howler2.ctx.currentTime);
+        return self;
+      },
+      /**
+       * Prevent memory leaks by cleaning up the buffer source after playback.
+       * @param  {Object} node Sound's audio node containing the buffer source.
+       * @return {Howl}
+       */
+      _cleanBuffer: function(node) {
+        var self = this;
+        var isIOS = Howler2._navigator && Howler2._navigator.vendor.indexOf("Apple") >= 0;
+        if (!node.bufferSource) {
+          return self;
+        }
+        if (Howler2._scratchBuffer && node.bufferSource) {
+          node.bufferSource.onended = null;
+          node.bufferSource.disconnect(0);
+          if (isIOS) {
+            try {
+              node.bufferSource.buffer = Howler2._scratchBuffer;
+            } catch (e) {
+            }
+          }
+        }
+        node.bufferSource = null;
+        return self;
+      },
+      /**
+       * Set the source to a 0-second silence to stop any downloading (except in IE).
+       * @param  {Object} node Audio node to clear.
+       */
+      _clearSound: function(node) {
+        var checkIE = /MSIE |Trident\//.test(Howler2._navigator && Howler2._navigator.userAgent);
+        if (!checkIE) {
+          node.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+        }
+      }
+    };
+    var Sound2 = function(howl) {
+      this._parent = howl;
+      this.init();
+    };
+    Sound2.prototype = {
+      /**
+       * Initialize a new Sound object.
+       * @return {Sound}
+       */
+      init: function() {
+        var self = this;
+        var parent = self._parent;
+        self._muted = parent._muted;
+        self._loop = parent._loop;
+        self._volume = parent._volume;
+        self._rate = parent._rate;
+        self._seek = 0;
+        self._paused = true;
+        self._ended = true;
+        self._sprite = "__default";
+        self._id = ++Howler2._counter;
+        parent._sounds.push(self);
+        self.create();
+        return self;
+      },
+      /**
+       * Create and setup a new sound object, whether HTML5 Audio or Web Audio.
+       * @return {Sound}
+       */
+      create: function() {
+        var self = this;
+        var parent = self._parent;
+        var volume = Howler2._muted || self._muted || self._parent._muted ? 0 : self._volume;
+        if (parent._webAudio) {
+          self._node = typeof Howler2.ctx.createGain === "undefined" ? Howler2.ctx.createGainNode() : Howler2.ctx.createGain();
+          self._node.gain.setValueAtTime(volume, Howler2.ctx.currentTime);
+          self._node.paused = true;
+          self._node.connect(Howler2.masterGain);
+        } else if (!Howler2.noAudio) {
+          self._node = Howler2._obtainHtml5Audio();
+          self._errorFn = self._errorListener.bind(self);
+          self._node.addEventListener("error", self._errorFn, false);
+          self._loadFn = self._loadListener.bind(self);
+          self._node.addEventListener(Howler2._canPlayEvent, self._loadFn, false);
+          self._endFn = self._endListener.bind(self);
+          self._node.addEventListener("ended", self._endFn, false);
+          self._node.src = parent._src;
+          self._node.preload = parent._preload === true ? "auto" : parent._preload;
+          self._node.volume = volume * Howler2.volume();
+          self._node.load();
+        }
+        return self;
+      },
+      /**
+       * Reset the parameters of this sound to the original state (for recycle).
+       * @return {Sound}
+       */
+      reset: function() {
+        var self = this;
+        var parent = self._parent;
+        self._muted = parent._muted;
+        self._loop = parent._loop;
+        self._volume = parent._volume;
+        self._rate = parent._rate;
+        self._seek = 0;
+        self._rateSeek = 0;
+        self._paused = true;
+        self._ended = true;
+        self._sprite = "__default";
+        self._id = ++Howler2._counter;
+        return self;
+      },
+      /**
+       * HTML5 Audio error listener callback.
+       */
+      _errorListener: function() {
+        var self = this;
+        self._parent._emit("loaderror", self._id, self._node.error ? self._node.error.code : 0);
+        self._node.removeEventListener("error", self._errorFn, false);
+      },
+      /**
+       * HTML5 Audio canplaythrough listener callback.
+       */
+      _loadListener: function() {
+        var self = this;
+        var parent = self._parent;
+        parent._duration = Math.ceil(self._node.duration * 10) / 10;
+        if (Object.keys(parent._sprite).length === 0) {
+          parent._sprite = { __default: [0, parent._duration * 1e3] };
+        }
+        if (parent._state !== "loaded") {
+          parent._state = "loaded";
+          parent._emit("load");
+          parent._loadQueue();
+        }
+        self._node.removeEventListener(Howler2._canPlayEvent, self._loadFn, false);
+      },
+      /**
+       * HTML5 Audio ended listener callback.
+       */
+      _endListener: function() {
+        var self = this;
+        var parent = self._parent;
+        if (parent._duration === Infinity) {
+          parent._duration = Math.ceil(self._node.duration * 10) / 10;
+          if (parent._sprite.__default[1] === Infinity) {
+            parent._sprite.__default[1] = parent._duration * 1e3;
+          }
+          parent._ended(self);
+        }
+        self._node.removeEventListener("ended", self._endFn, false);
+      }
+    };
+    var cache = {};
+    var loadBuffer = function(self) {
+      var url = self._src;
+      if (cache[url]) {
+        self._duration = cache[url].duration;
+        loadSound(self);
+        return;
+      }
+      if (/^data:[^;]+;base64,/.test(url)) {
+        var data = atob(url.split(",")[1]);
+        var dataView = new Uint8Array(data.length);
+        for (var i = 0; i < data.length; ++i) {
+          dataView[i] = data.charCodeAt(i);
+        }
+        decodeAudioData(dataView.buffer, self);
+      } else {
+        var xhr = new XMLHttpRequest();
+        xhr.open(self._xhr.method, url, true);
+        xhr.withCredentials = self._xhr.withCredentials;
+        xhr.responseType = "arraybuffer";
+        if (self._xhr.headers) {
+          Object.keys(self._xhr.headers).forEach(function(key) {
+            xhr.setRequestHeader(key, self._xhr.headers[key]);
+          });
+        }
+        xhr.onload = function() {
+          var code = (xhr.status + "")[0];
+          if (code !== "0" && code !== "2" && code !== "3") {
+            self._emit("loaderror", null, "Failed loading audio file with status: " + xhr.status + ".");
+            return;
+          }
+          decodeAudioData(xhr.response, self);
+        };
+        xhr.onerror = function() {
+          if (self._webAudio) {
+            self._html5 = true;
+            self._webAudio = false;
+            self._sounds = [];
+            delete cache[url];
+            self.load();
+          }
+        };
+        safeXhrSend(xhr);
+      }
+    };
+    var safeXhrSend = function(xhr) {
+      try {
+        xhr.send();
+      } catch (e) {
+        xhr.onerror();
+      }
+    };
+    var decodeAudioData = function(arraybuffer, self) {
+      var error = function() {
+        self._emit("loaderror", null, "Decoding audio data failed.");
+      };
+      var success = function(buffer) {
+        if (buffer && self._sounds.length > 0) {
+          cache[self._src] = buffer;
+          loadSound(self, buffer);
+        } else {
+          error();
+        }
+      };
+      if (typeof Promise !== "undefined" && Howler2.ctx.decodeAudioData.length === 1) {
+        Howler2.ctx.decodeAudioData(arraybuffer).then(success).catch(error);
+      } else {
+        Howler2.ctx.decodeAudioData(arraybuffer, success, error);
+      }
+    };
+    var loadSound = function(self, buffer) {
+      if (buffer && !self._duration) {
+        self._duration = buffer.duration;
+      }
+      if (Object.keys(self._sprite).length === 0) {
+        self._sprite = { __default: [0, self._duration * 1e3] };
+      }
+      if (self._state !== "loaded") {
+        self._state = "loaded";
+        self._emit("load");
+        self._loadQueue();
+      }
+    };
+    var setupAudioContext = function() {
+      if (!Howler2.usingWebAudio) {
+        return;
+      }
+      try {
+        if (typeof AudioContext !== "undefined") {
+          Howler2.ctx = new AudioContext();
+        } else if (typeof webkitAudioContext !== "undefined") {
+          Howler2.ctx = new webkitAudioContext();
+        } else {
+          Howler2.usingWebAudio = false;
+        }
+      } catch (e) {
+        Howler2.usingWebAudio = false;
+      }
+      if (!Howler2.ctx) {
+        Howler2.usingWebAudio = false;
+      }
+      var iOS = /iP(hone|od|ad)/.test(Howler2._navigator && Howler2._navigator.platform);
+      var appVersion = Howler2._navigator && Howler2._navigator.appVersion.match(/OS (\d+)_(\d+)_?(\d+)?/);
+      var version = appVersion ? parseInt(appVersion[1], 10) : null;
+      if (iOS && version && version < 9) {
+        var safari = /safari/.test(Howler2._navigator && Howler2._navigator.userAgent.toLowerCase());
+        if (Howler2._navigator && !safari) {
+          Howler2.usingWebAudio = false;
+        }
+      }
+      if (Howler2.usingWebAudio) {
+        Howler2.masterGain = typeof Howler2.ctx.createGain === "undefined" ? Howler2.ctx.createGainNode() : Howler2.ctx.createGain();
+        Howler2.masterGain.gain.setValueAtTime(Howler2._muted ? 0 : Howler2._volume, Howler2.ctx.currentTime);
+        Howler2.masterGain.connect(Howler2.ctx.destination);
+      }
+      Howler2._setup();
+    };
+    {
+      exports.Howler = Howler2;
+      exports.Howl = Howl2;
+    }
+    if (typeof commonjsGlobal !== "undefined") {
+      commonjsGlobal.HowlerGlobal = HowlerGlobal2;
+      commonjsGlobal.Howler = Howler2;
+      commonjsGlobal.Howl = Howl2;
+      commonjsGlobal.Sound = Sound2;
+    } else if (typeof window !== "undefined") {
+      window.HowlerGlobal = HowlerGlobal2;
+      window.Howler = Howler2;
+      window.Howl = Howl2;
+      window.Sound = Sound2;
+    }
+  })();
+  /*!
+   *  Spatial Plugin - Adds support for stereo and 3D audio where Web Audio is supported.
+   *  
+   *  howler.js v2.2.4
+   *  howlerjs.com
+   *
+   *  (c) 2013-2020, James Simpson of GoldFire Studios
+   *  goldfirestudios.com
+   *
+   *  MIT License
+   */
+  (function() {
+    HowlerGlobal.prototype._pos = [0, 0, 0];
+    HowlerGlobal.prototype._orientation = [0, 0, -1, 0, 1, 0];
+    HowlerGlobal.prototype.stereo = function(pan) {
+      var self = this;
+      if (!self.ctx || !self.ctx.listener) {
+        return self;
+      }
+      for (var i = self._howls.length - 1; i >= 0; i--) {
+        self._howls[i].stereo(pan);
+      }
+      return self;
+    };
+    HowlerGlobal.prototype.pos = function(x, y, z) {
+      var self = this;
+      if (!self.ctx || !self.ctx.listener) {
+        return self;
+      }
+      y = typeof y !== "number" ? self._pos[1] : y;
+      z = typeof z !== "number" ? self._pos[2] : z;
+      if (typeof x === "number") {
+        self._pos = [x, y, z];
+        if (typeof self.ctx.listener.positionX !== "undefined") {
+          self.ctx.listener.positionX.setTargetAtTime(self._pos[0], Howler.ctx.currentTime, 0.1);
+          self.ctx.listener.positionY.setTargetAtTime(self._pos[1], Howler.ctx.currentTime, 0.1);
+          self.ctx.listener.positionZ.setTargetAtTime(self._pos[2], Howler.ctx.currentTime, 0.1);
+        } else {
+          self.ctx.listener.setPosition(self._pos[0], self._pos[1], self._pos[2]);
+        }
+      } else {
+        return self._pos;
+      }
+      return self;
+    };
+    HowlerGlobal.prototype.orientation = function(x, y, z, xUp, yUp, zUp) {
+      var self = this;
+      if (!self.ctx || !self.ctx.listener) {
+        return self;
+      }
+      var or = self._orientation;
+      y = typeof y !== "number" ? or[1] : y;
+      z = typeof z !== "number" ? or[2] : z;
+      xUp = typeof xUp !== "number" ? or[3] : xUp;
+      yUp = typeof yUp !== "number" ? or[4] : yUp;
+      zUp = typeof zUp !== "number" ? or[5] : zUp;
+      if (typeof x === "number") {
+        self._orientation = [x, y, z, xUp, yUp, zUp];
+        if (typeof self.ctx.listener.forwardX !== "undefined") {
+          self.ctx.listener.forwardX.setTargetAtTime(x, Howler.ctx.currentTime, 0.1);
+          self.ctx.listener.forwardY.setTargetAtTime(y, Howler.ctx.currentTime, 0.1);
+          self.ctx.listener.forwardZ.setTargetAtTime(z, Howler.ctx.currentTime, 0.1);
+          self.ctx.listener.upX.setTargetAtTime(xUp, Howler.ctx.currentTime, 0.1);
+          self.ctx.listener.upY.setTargetAtTime(yUp, Howler.ctx.currentTime, 0.1);
+          self.ctx.listener.upZ.setTargetAtTime(zUp, Howler.ctx.currentTime, 0.1);
+        } else {
+          self.ctx.listener.setOrientation(x, y, z, xUp, yUp, zUp);
+        }
+      } else {
+        return or;
+      }
+      return self;
+    };
+    Howl.prototype.init = /* @__PURE__ */ function(_super) {
+      return function(o) {
+        var self = this;
+        self._orientation = o.orientation || [1, 0, 0];
+        self._stereo = o.stereo || null;
+        self._pos = o.pos || null;
+        self._pannerAttr = {
+          coneInnerAngle: typeof o.coneInnerAngle !== "undefined" ? o.coneInnerAngle : 360,
+          coneOuterAngle: typeof o.coneOuterAngle !== "undefined" ? o.coneOuterAngle : 360,
+          coneOuterGain: typeof o.coneOuterGain !== "undefined" ? o.coneOuterGain : 0,
+          distanceModel: typeof o.distanceModel !== "undefined" ? o.distanceModel : "inverse",
+          maxDistance: typeof o.maxDistance !== "undefined" ? o.maxDistance : 1e4,
+          panningModel: typeof o.panningModel !== "undefined" ? o.panningModel : "HRTF",
+          refDistance: typeof o.refDistance !== "undefined" ? o.refDistance : 1,
+          rolloffFactor: typeof o.rolloffFactor !== "undefined" ? o.rolloffFactor : 1
+        };
+        self._onstereo = o.onstereo ? [{ fn: o.onstereo }] : [];
+        self._onpos = o.onpos ? [{ fn: o.onpos }] : [];
+        self._onorientation = o.onorientation ? [{ fn: o.onorientation }] : [];
+        return _super.call(this, o);
+      };
+    }(Howl.prototype.init);
+    Howl.prototype.stereo = function(pan, id) {
+      var self = this;
+      if (!self._webAudio) {
+        return self;
+      }
+      if (self._state !== "loaded") {
+        self._queue.push({
+          event: "stereo",
+          action: function() {
+            self.stereo(pan, id);
+          }
+        });
+        return self;
+      }
+      var pannerType = typeof Howler.ctx.createStereoPanner === "undefined" ? "spatial" : "stereo";
+      if (typeof id === "undefined") {
+        if (typeof pan === "number") {
+          self._stereo = pan;
+          self._pos = [pan, 0, 0];
+        } else {
+          return self._stereo;
+        }
+      }
+      var ids = self._getSoundIds(id);
+      for (var i = 0; i < ids.length; i++) {
+        var sound = self._soundById(ids[i]);
+        if (sound) {
+          if (typeof pan === "number") {
+            sound._stereo = pan;
+            sound._pos = [pan, 0, 0];
+            if (sound._node) {
+              sound._pannerAttr.panningModel = "equalpower";
+              if (!sound._panner || !sound._panner.pan) {
+                setupPanner(sound, pannerType);
+              }
+              if (pannerType === "spatial") {
+                if (typeof sound._panner.positionX !== "undefined") {
+                  sound._panner.positionX.setValueAtTime(pan, Howler.ctx.currentTime);
+                  sound._panner.positionY.setValueAtTime(0, Howler.ctx.currentTime);
+                  sound._panner.positionZ.setValueAtTime(0, Howler.ctx.currentTime);
+                } else {
+                  sound._panner.setPosition(pan, 0, 0);
+                }
+              } else {
+                sound._panner.pan.setValueAtTime(pan, Howler.ctx.currentTime);
+              }
+            }
+            self._emit("stereo", sound._id);
+          } else {
+            return sound._stereo;
+          }
+        }
+      }
+      return self;
+    };
+    Howl.prototype.pos = function(x, y, z, id) {
+      var self = this;
+      if (!self._webAudio) {
+        return self;
+      }
+      if (self._state !== "loaded") {
+        self._queue.push({
+          event: "pos",
+          action: function() {
+            self.pos(x, y, z, id);
+          }
+        });
+        return self;
+      }
+      y = typeof y !== "number" ? 0 : y;
+      z = typeof z !== "number" ? -0.5 : z;
+      if (typeof id === "undefined") {
+        if (typeof x === "number") {
+          self._pos = [x, y, z];
+        } else {
+          return self._pos;
+        }
+      }
+      var ids = self._getSoundIds(id);
+      for (var i = 0; i < ids.length; i++) {
+        var sound = self._soundById(ids[i]);
+        if (sound) {
+          if (typeof x === "number") {
+            sound._pos = [x, y, z];
+            if (sound._node) {
+              if (!sound._panner || sound._panner.pan) {
+                setupPanner(sound, "spatial");
+              }
+              if (typeof sound._panner.positionX !== "undefined") {
+                sound._panner.positionX.setValueAtTime(x, Howler.ctx.currentTime);
+                sound._panner.positionY.setValueAtTime(y, Howler.ctx.currentTime);
+                sound._panner.positionZ.setValueAtTime(z, Howler.ctx.currentTime);
+              } else {
+                sound._panner.setPosition(x, y, z);
+              }
+            }
+            self._emit("pos", sound._id);
+          } else {
+            return sound._pos;
+          }
+        }
+      }
+      return self;
+    };
+    Howl.prototype.orientation = function(x, y, z, id) {
+      var self = this;
+      if (!self._webAudio) {
+        return self;
+      }
+      if (self._state !== "loaded") {
+        self._queue.push({
+          event: "orientation",
+          action: function() {
+            self.orientation(x, y, z, id);
+          }
+        });
+        return self;
+      }
+      y = typeof y !== "number" ? self._orientation[1] : y;
+      z = typeof z !== "number" ? self._orientation[2] : z;
+      if (typeof id === "undefined") {
+        if (typeof x === "number") {
+          self._orientation = [x, y, z];
+        } else {
+          return self._orientation;
+        }
+      }
+      var ids = self._getSoundIds(id);
+      for (var i = 0; i < ids.length; i++) {
+        var sound = self._soundById(ids[i]);
+        if (sound) {
+          if (typeof x === "number") {
+            sound._orientation = [x, y, z];
+            if (sound._node) {
+              if (!sound._panner) {
+                if (!sound._pos) {
+                  sound._pos = self._pos || [0, 0, -0.5];
+                }
+                setupPanner(sound, "spatial");
+              }
+              if (typeof sound._panner.orientationX !== "undefined") {
+                sound._panner.orientationX.setValueAtTime(x, Howler.ctx.currentTime);
+                sound._panner.orientationY.setValueAtTime(y, Howler.ctx.currentTime);
+                sound._panner.orientationZ.setValueAtTime(z, Howler.ctx.currentTime);
+              } else {
+                sound._panner.setOrientation(x, y, z);
+              }
+            }
+            self._emit("orientation", sound._id);
+          } else {
+            return sound._orientation;
+          }
+        }
+      }
+      return self;
+    };
+    Howl.prototype.pannerAttr = function() {
+      var self = this;
+      var args = arguments;
+      var o, id, sound;
+      if (!self._webAudio) {
+        return self;
+      }
+      if (args.length === 0) {
+        return self._pannerAttr;
+      } else if (args.length === 1) {
+        if (typeof args[0] === "object") {
+          o = args[0];
+          if (typeof id === "undefined") {
+            if (!o.pannerAttr) {
+              o.pannerAttr = {
+                coneInnerAngle: o.coneInnerAngle,
+                coneOuterAngle: o.coneOuterAngle,
+                coneOuterGain: o.coneOuterGain,
+                distanceModel: o.distanceModel,
+                maxDistance: o.maxDistance,
+                refDistance: o.refDistance,
+                rolloffFactor: o.rolloffFactor,
+                panningModel: o.panningModel
+              };
+            }
+            self._pannerAttr = {
+              coneInnerAngle: typeof o.pannerAttr.coneInnerAngle !== "undefined" ? o.pannerAttr.coneInnerAngle : self._coneInnerAngle,
+              coneOuterAngle: typeof o.pannerAttr.coneOuterAngle !== "undefined" ? o.pannerAttr.coneOuterAngle : self._coneOuterAngle,
+              coneOuterGain: typeof o.pannerAttr.coneOuterGain !== "undefined" ? o.pannerAttr.coneOuterGain : self._coneOuterGain,
+              distanceModel: typeof o.pannerAttr.distanceModel !== "undefined" ? o.pannerAttr.distanceModel : self._distanceModel,
+              maxDistance: typeof o.pannerAttr.maxDistance !== "undefined" ? o.pannerAttr.maxDistance : self._maxDistance,
+              refDistance: typeof o.pannerAttr.refDistance !== "undefined" ? o.pannerAttr.refDistance : self._refDistance,
+              rolloffFactor: typeof o.pannerAttr.rolloffFactor !== "undefined" ? o.pannerAttr.rolloffFactor : self._rolloffFactor,
+              panningModel: typeof o.pannerAttr.panningModel !== "undefined" ? o.pannerAttr.panningModel : self._panningModel
+            };
+          }
+        } else {
+          sound = self._soundById(parseInt(args[0], 10));
+          return sound ? sound._pannerAttr : self._pannerAttr;
+        }
+      } else if (args.length === 2) {
+        o = args[0];
+        id = parseInt(args[1], 10);
+      }
+      var ids = self._getSoundIds(id);
+      for (var i = 0; i < ids.length; i++) {
+        sound = self._soundById(ids[i]);
+        if (sound) {
+          var pa = sound._pannerAttr;
+          pa = {
+            coneInnerAngle: typeof o.coneInnerAngle !== "undefined" ? o.coneInnerAngle : pa.coneInnerAngle,
+            coneOuterAngle: typeof o.coneOuterAngle !== "undefined" ? o.coneOuterAngle : pa.coneOuterAngle,
+            coneOuterGain: typeof o.coneOuterGain !== "undefined" ? o.coneOuterGain : pa.coneOuterGain,
+            distanceModel: typeof o.distanceModel !== "undefined" ? o.distanceModel : pa.distanceModel,
+            maxDistance: typeof o.maxDistance !== "undefined" ? o.maxDistance : pa.maxDistance,
+            refDistance: typeof o.refDistance !== "undefined" ? o.refDistance : pa.refDistance,
+            rolloffFactor: typeof o.rolloffFactor !== "undefined" ? o.rolloffFactor : pa.rolloffFactor,
+            panningModel: typeof o.panningModel !== "undefined" ? o.panningModel : pa.panningModel
+          };
+          var panner = sound._panner;
+          if (!panner) {
+            if (!sound._pos) {
+              sound._pos = self._pos || [0, 0, -0.5];
+            }
+            setupPanner(sound, "spatial");
+            panner = sound._panner;
+          }
+          panner.coneInnerAngle = pa.coneInnerAngle;
+          panner.coneOuterAngle = pa.coneOuterAngle;
+          panner.coneOuterGain = pa.coneOuterGain;
+          panner.distanceModel = pa.distanceModel;
+          panner.maxDistance = pa.maxDistance;
+          panner.refDistance = pa.refDistance;
+          panner.rolloffFactor = pa.rolloffFactor;
+          panner.panningModel = pa.panningModel;
+        }
+      }
+      return self;
+    };
+    Sound.prototype.init = /* @__PURE__ */ function(_super) {
+      return function() {
+        var self = this;
+        var parent = self._parent;
+        self._orientation = parent._orientation;
+        self._stereo = parent._stereo;
+        self._pos = parent._pos;
+        self._pannerAttr = parent._pannerAttr;
+        _super.call(this);
+        if (self._stereo) {
+          parent.stereo(self._stereo);
+        } else if (self._pos) {
+          parent.pos(self._pos[0], self._pos[1], self._pos[2], self._id);
+        }
+      };
+    }(Sound.prototype.init);
+    Sound.prototype.reset = /* @__PURE__ */ function(_super) {
+      return function() {
+        var self = this;
+        var parent = self._parent;
+        self._orientation = parent._orientation;
+        self._stereo = parent._stereo;
+        self._pos = parent._pos;
+        self._pannerAttr = parent._pannerAttr;
+        if (self._stereo) {
+          parent.stereo(self._stereo);
+        } else if (self._pos) {
+          parent.pos(self._pos[0], self._pos[1], self._pos[2], self._id);
+        } else if (self._panner) {
+          self._panner.disconnect(0);
+          self._panner = void 0;
+          parent._refreshBuffer(self);
+        }
+        return _super.call(this);
+      };
+    }(Sound.prototype.reset);
+    var setupPanner = function(sound, type) {
+      type = type || "spatial";
+      if (type === "spatial") {
+        sound._panner = Howler.ctx.createPanner();
+        sound._panner.coneInnerAngle = sound._pannerAttr.coneInnerAngle;
+        sound._panner.coneOuterAngle = sound._pannerAttr.coneOuterAngle;
+        sound._panner.coneOuterGain = sound._pannerAttr.coneOuterGain;
+        sound._panner.distanceModel = sound._pannerAttr.distanceModel;
+        sound._panner.maxDistance = sound._pannerAttr.maxDistance;
+        sound._panner.refDistance = sound._pannerAttr.refDistance;
+        sound._panner.rolloffFactor = sound._pannerAttr.rolloffFactor;
+        sound._panner.panningModel = sound._pannerAttr.panningModel;
+        if (typeof sound._panner.positionX !== "undefined") {
+          sound._panner.positionX.setValueAtTime(sound._pos[0], Howler.ctx.currentTime);
+          sound._panner.positionY.setValueAtTime(sound._pos[1], Howler.ctx.currentTime);
+          sound._panner.positionZ.setValueAtTime(sound._pos[2], Howler.ctx.currentTime);
+        } else {
+          sound._panner.setPosition(sound._pos[0], sound._pos[1], sound._pos[2]);
+        }
+        if (typeof sound._panner.orientationX !== "undefined") {
+          sound._panner.orientationX.setValueAtTime(sound._orientation[0], Howler.ctx.currentTime);
+          sound._panner.orientationY.setValueAtTime(sound._orientation[1], Howler.ctx.currentTime);
+          sound._panner.orientationZ.setValueAtTime(sound._orientation[2], Howler.ctx.currentTime);
+        } else {
+          sound._panner.setOrientation(sound._orientation[0], sound._orientation[1], sound._orientation[2]);
+        }
+      } else {
+        sound._panner = Howler.ctx.createStereoPanner();
+        sound._panner.pan.setValueAtTime(sound._stereo, Howler.ctx.currentTime);
+      }
+      sound._panner.connect(sound._node);
+      if (!sound._paused) {
+        sound._parent.pause(sound._id, true).play(sound._id, true);
+      }
+    };
+  })();
+})(howler);
+class AudioEngine {
+  constructor() {
+    this.sounds = /* @__PURE__ */ new Map();
+    this.currentSound = null;
+    this.previousSound = null;
+    this.isPlaying = false;
+    this.currentHotspotId = null;
+    this.preloadQueue = [];
+    this.isPreloading = false;
+    this.preloadedCount = 0;
+    this.maxPreloadCount = 5;
+    this.crossfadeEnabled = true;
+    this.crossfadeDuration = 500;
+    this.isCrossfading = false;
+    this.masterVolume = 0.8;
+    this.isMuted = false;
+    this.placeholderUrl = "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBiuBzvLZiTYIG2m98OScTgwOUarm7blmFgU7k9n1unEiBC13yO/eizEIHWq+8+OWTAkPVqzq67JlGgBGqOLwvW0eBSuJ0fXYgjQHF2m+9N+PWw4KU6vn57RiGAA+nODyvmkfBjiS1/TNeSsFG3TI7+CMMAgZbsHy55ZNDAlVre3psmYVAEWo4vK+bCAELIHO8tiJOAcZaLvt559NEAxQqOPwtmMcBjiS1/PMeS0GI3fH8N+RQAoUXrTp66hVFApGnt/yvmwhBiuBzvLZiTYIG2m98OScTgwOUarm7blmFgU7k9n1unEiBC13yO/eizAJHWq+8+OWTAkPVqzq67RmGgBGqOLyvmwhBjiS1/PMeS0GI3fH8N+RQAoUXrTp66hVFApGnt/yvmwhBiuBzvLZiTYIG2m98OScTgwO";
+    this.placeholderDuration = 2e3;
+    this.onPlaybackStart = null;
+    this.onPlaybackEnd = null;
+    this.onProgress = null;
+    this.onError = null;
+    this.onCrossfadeStart = null;
+    this.onCrossfadeEnd = null;
+    howler.Howler.autoUnlock = true;
+    howler.Howler.html5PoolSize = 10;
+    howler.Howler.usingWebAudio = true;
+    this.state = "idle";
+    console.log("AudioEngine initialized");
+  }
+  /**
+  * Resume audio context after user interaction
+  */
+  async resumeContext() {
+    if (howler.Howler.ctx && howler.Howler.ctx.state === "suspended") {
+      try {
+        await howler.Howler.ctx.resume();
+        console.log("AudioContext resumed");
+      } catch (error) {
+        console.error("Failed to resume AudioContext:", error);
+      }
+    }
+  }
+  /**
+   * Preload audio for a set of hotspots
+   */
+  async preloadHotspots(hotspots) {
+    const audioUrls = hotspots.filter((h) => h.audioUrl).map((h) => ({ id: h.id, url: h.audioUrl }));
+    this.preloadQueue.push(...audioUrls);
+    if (!this.isPreloading) {
+      this.processPreloadQueue();
+    }
+  }
+  /**
+   * Process preload queue
+   */
+  async processPreloadQueue() {
+    this.isPreloading = true;
+    while (this.preloadQueue.length > 0 && this.preloadedCount < this.maxPreloadCount) {
+      const { id, url } = this.preloadQueue.shift();
+      if (!this.sounds.has(id)) {
+        await this.loadSound(id, url);
+        this.preloadedCount++;
+      }
+    }
+    this.isPreloading = false;
+  }
+  /**
+   * Load a sound (with placeholder fallback)
+   */
+  async loadSound(id, url) {
+    return new Promise((resolve) => {
+      const testAudio = new Audio();
+      testAudio.addEventListener("error", () => {
+        if (!url.includes("example.com")) {
+          console.log(`Audio not found for ${id}, using placeholder`);
+        }
+        this.createSound(id, this.placeholderUrl, true);
+        resolve();
+      });
+      testAudio.addEventListener("canplaythrough", () => {
+        this.createSound(id, url, false);
+        resolve();
+      });
+      testAudio.src = url;
+    });
+  }
+  /**
+   * Create Howl sound object
+   */
+  createSound(id, url, isPlaceholder = false) {
+    const sound = new howler.Howl({
+      src: [url],
+      html5: true,
+      preload: true,
+      volume: this.masterVolume,
+      onload: () => {
+        console.log(`Sound loaded: ${id} (placeholder: ${isPlaceholder})`);
+      },
+      onend: () => this.handlePlaybackEnd(id),
+      onloaderror: (soundId, error) => {
+        console.error(`Failed to load sound ${id}:`, error);
+        if (this.onError) {
+          this.onError(id, error);
+        }
+      },
+      onplayerror: (soundId, error) => {
+        console.error(`Failed to play sound ${id}:`, error);
+        if (this.onError) {
+          this.onError(id, error);
+        }
+      }
+    });
+    this.sounds.set(id, {
+      howl: sound,
+      isPlaceholder,
+      duration: isPlaceholder ? this.placeholderDuration : null
+    });
+  }
+  /**
+   * Play audio for a specific hotspot
+   */
+  async play(hotspotId) {
+    await this.resumeContext();
+    if (this.currentHotspotId === hotspotId && this.currentSound) {
+      if (this.isPlaying) {
+        this.pause();
+      } else {
+        this.resume();
+      }
+      return;
+    }
+    if (!this.sounds.has(hotspotId)) {
+      this.state = "loading";
+      await this.loadSound(hotspotId, `/audio/hotspot_${hotspotId}.mp3`);
+    }
+    const soundData = this.sounds.get(hotspotId);
+    if (!soundData) {
+      console.error(`No sound found for hotspot: ${hotspotId}`);
+      return;
+    }
+    const newSound = soundData.howl;
+    if (this.crossfadeEnabled && this.currentSound && this.isPlaying) {
+      this.crossfade(this.currentSound, newSound, hotspotId);
+    } else {
+      if (this.currentSound) {
+        this.currentSound.stop();
+      }
+      this.currentSound = newSound;
+      this.currentHotspotId = hotspotId;
+      this.currentSound.play();
+      this.isPlaying = true;
+      this.state = "playing";
+      if (this.onPlaybackStart) {
+        this.onPlaybackStart(hotspotId);
+      }
+      this.startProgressTracking();
+    }
+  }
+  /**
+   * Crossfade between two sounds
+   */
+  crossfade(fromSound, toSound, toHotspotId) {
+    if (this.isCrossfading) return;
+    console.log(`Crossfading to hotspot: ${toHotspotId}`);
+    this.isCrossfading = true;
+    this.state = "crossfading";
+    const duration = this.crossfadeDuration;
+    const steps = 20;
+    const stepDuration = duration / steps;
+    let currentStep = 0;
+    if (this.onCrossfadeStart) {
+      this.onCrossfadeStart(this.currentHotspotId, toHotspotId);
+    }
+    toSound.volume(0);
+    toSound.play();
+    const fadeInterval = setInterval(() => {
+      currentStep++;
+      const progress = currentStep / steps;
+      fromSound.volume(this.masterVolume * (1 - progress));
+      toSound.volume(this.masterVolume * progress);
+      if (currentStep >= steps) {
+        clearInterval(fadeInterval);
+        fromSound.stop();
+        fromSound.volume(this.masterVolume);
+        this.previousSound = fromSound;
+        this.currentSound = toSound;
+        this.currentHotspotId = toHotspotId;
+        this.isCrossfading = false;
+        this.state = "playing";
+        if (this.onCrossfadeEnd) {
+          this.onCrossfadeEnd(toHotspotId);
+        }
+        this.startProgressTracking();
+      }
+    }, stepDuration);
+  }
+  /**
+   * Pause current playback
+   */
+  pause() {
+    if (this.currentSound && this.isPlaying) {
+      this.currentSound.pause();
+      this.isPlaying = false;
+      this.state = "paused";
+      this.stopProgressTracking();
+      console.log("Playback paused");
+    }
+  }
+  /**
+   * Resume playback
+   */
+  resume() {
+    if (this.currentSound && !this.isPlaying) {
+      this.currentSound.play();
+      this.isPlaying = true;
+      this.state = "playing";
+      this.startProgressTracking();
+      console.log("Playback resumed");
+    }
+  }
+  /**
+   * Stop all playback
+   */
+  stop() {
+    if (this.currentSound) {
+      this.currentSound.stop();
+      this.currentSound = null;
+      this.currentHotspotId = null;
+      this.isPlaying = false;
+      this.state = "idle";
+      this.stopProgressTracking();
+      console.log("Playback stopped");
+    }
+  }
+  /**
+   * Skip forward/backward
+   */
+  skip(seconds) {
+    if (this.currentSound && this.currentSound.playing()) {
+      const currentTime = this.currentSound.seek() || 0;
+      const duration = this.currentSound.duration();
+      const newTime = Math.max(0, Math.min(duration, currentTime + seconds));
+      this.currentSound.seek(newTime);
+      console.log(`Skipped to ${newTime.toFixed(1)}s`);
+    }
+  }
+  /**
+   * Set master volume
+   */
+  setVolume(volume) {
+    this.masterVolume = Math.max(0, Math.min(1, volume));
+    howler.Howler.volume(this.masterVolume);
+    console.log(`Master volume set to ${(this.masterVolume * 100).toFixed(0)}%`);
+  }
+  /**
+   * Toggle mute
+   */
+  toggleMute() {
+    this.isMuted = !this.isMuted;
+    howler.Howler.mute(this.isMuted);
+    console.log(`Audio ${this.isMuted ? "muted" : "unmuted"}`);
+    return this.isMuted;
+  }
+  /**
+   * Get current playback progress
+   */
+  getProgress() {
+    if (!this.currentSound) return { current: 0, duration: 0, percent: 0 };
+    const current = this.currentSound.seek() || 0;
+    const soundData = this.sounds.get(this.currentHotspotId);
+    const duration = (soundData == null ? void 0 : soundData.isPlaceholder) ? this.placeholderDuration / 1e3 : this.currentSound.duration() || 0;
+    const percent = duration > 0 ? current / duration * 100 : 0;
+    return { current, duration, percent };
+  }
+  /**
+   * Seek to specific time
+   */
+  seekTo(timeInSeconds) {
+    if (this.currentSound && this.currentSound.playing()) {
+      this.currentSound.seek(timeInSeconds);
+    }
+  }
+  /**
+   * Seek to percentage
+   */
+  seekToPercent(percent) {
+    if (this.currentSound) {
+      const duration = this.currentSound.duration();
+      const time = percent / 100 * duration;
+      this.seekTo(time);
+    }
+  }
+  /**
+   * Start progress tracking
+   */
+  startProgressTracking() {
+    this.stopProgressTracking();
+    this.progressInterval = setInterval(() => {
+      if (this.onProgress && this.currentSound && this.isPlaying) {
+        const progress = this.getProgress();
+        this.onProgress(progress);
+      }
+    }, 100);
+  }
+  /**
+   * Stop progress tracking
+   */
+  stopProgressTracking() {
+    if (this.progressInterval) {
+      clearInterval(this.progressInterval);
+      this.progressInterval = null;
+    }
+  }
+  /**
+   * Handle playback end
+   */
+  handlePlaybackEnd(hotspotId) {
+    console.log(`Playback ended for hotspot: ${hotspotId}`);
+    if (hotspotId === this.currentHotspotId) {
+      this.isPlaying = false;
+      this.state = "idle";
+      this.stopProgressTracking();
+      if (this.onPlaybackEnd) {
+        this.onPlaybackEnd(hotspotId);
+      }
+    }
+  }
+  /**
+   * Get current state
+   */
+  getState() {
+    return {
+      state: this.state,
+      isPlaying: this.isPlaying,
+      currentHotspotId: this.currentHotspotId,
+      isMuted: this.isMuted,
+      volume: this.masterVolume,
+      isCrossfading: this.isCrossfading,
+      preloadedCount: this.sounds.size,
+      progress: this.getProgress()
+    };
+  }
+  /**
+   * Enable/disable crossfade
+   */
+  setCrossfade(enabled, duration = 500) {
+    this.crossfadeEnabled = enabled;
+    this.crossfadeDuration = Math.max(100, Math.min(2e3, duration));
+    console.log(`Crossfade ${enabled ? "enabled" : "disabled"} (${this.crossfadeDuration}ms)`);
+  }
+  /**
+   * Clean up specific sound
+   */
+  unloadSound(hotspotId) {
+    const soundData = this.sounds.get(hotspotId);
+    if (soundData) {
+      soundData.howl.unload();
+      this.sounds.delete(hotspotId);
+      this.preloadedCount = Math.max(0, this.preloadedCount - 1);
+    }
+  }
+  /**
+   * Clean up resources
+   */
+  destroy() {
+    this.stop();
+    this.stopProgressTracking();
+    this.sounds.forEach((soundData) => {
+      soundData.howl.unload();
+    });
+    this.sounds.clear();
+    this.preloadQueue = [];
+    this.preloadedCount = 0;
+    this.isPreloading = false;
+    console.log("AudioEngine destroyed");
+  }
+  /**
+  * Play temporal mode feedback sounds
+  * These are separate from narration audio
+  */
+  playTemporalSound(type, frequency, duration = 50) {
+    if (!frequency || isNaN(frequency) || !isFinite(frequency)) {
+      console.warn(`Invalid frequency for temporal sound: ${frequency}`);
+      frequency = 1e3;
+    }
+    if (!duration || isNaN(duration) || duration <= 0) {
+      duration = 50;
+    }
+    this.resumeContext();
+    if (!this.uiAudioContext) {
+      this.uiAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    try {
+      const ctx = this.uiAudioContext;
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.value = Math.min(frequency * 1.5, 2e3);
+      oscillator.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      oscillator.type = type === "explore" ? "sine" : "sine";
+      oscillator.frequency.value = frequency;
+      const now = ctx.currentTime;
+      const attack = 0.01;
+      const decay = duration / 1e3;
+      const baseVolume = frequency > 1500 ? 0.05 : 0.08;
+      gainNode.gain.setValueAtTime(0, now);
+      gainNode.gain.linearRampToValueAtTime(baseVolume, now + attack);
+      gainNode.gain.exponentialRampToValueAtTime(1e-3, now + decay);
+      oscillator.start(now);
+      oscillator.stop(now + decay);
+      console.log(`Temporal sound played: ${type} at ${frequency}Hz for ${duration}ms`);
+    } catch (error) {
+      console.error("Error playing temporal sound:", error);
+    }
+  }
+  /**
+   * Convenience methods for temporal feedback sounds
+   */
+  playTemporalTick(size = 0.5) {
+    const validSize = !isNaN(size) && isFinite(size) ? Math.min(1, Math.max(0, size)) : 0.5;
+    const frequency = 1200 + 400 * validSize;
+    this.playTemporalSound("explore", frequency, 40);
+  }
+  playTemporalBoop() {
+    this.playTemporalSound("preview", 600, 80);
+  }
+  playTemporalThunk(size = 0.5) {
+    const validSize = !isNaN(size) && isFinite(size) ? Math.min(1, Math.max(0, size)) : 0.5;
+    const frequency = 150 + 100 * (1 - validSize);
+    this.playTemporalSound("activate", frequency, 120);
+  }
+}
+class ImageOverlayManager {
+  constructor() {
+    this.overlays = /* @__PURE__ */ new Map();
+    this.activeOverlay = null;
+    this.preloadQueue = [];
+    this.isPreloading = false;
+    this.maxPreloadCount = 3;
+    this.preloadedImages = /* @__PURE__ */ new Map();
+    this.onOverlayOpen = null;
+    this.onOverlayClose = null;
+    this.onImageLoaded = null;
+    this.onImageError = null;
+    console.log("ImageOverlayManager initialized");
+  }
+  /**
+   * Load overlay data from hotspots
+   */
+  loadHotspots(hotspots) {
+    hotspots.forEach((hotspot) => {
+      if (hotspot.image_url_1) {
+        this.overlays.set(hotspot.id, {
+          hotspotId: hotspot.id,
+          imageUrls: [hotspot.image_url_1],
+          // Array for future multi-image support
+          autoReveal: hotspot.overlay_auto_reveal || false,
+          displayMode: hotspot.overlay_display_mode || "modal",
+          showButton: hotspot.show_images_button !== false,
+          access: hotspot.overlay_access || "free",
+          isLoaded: false
+        });
+      }
+    });
+    console.log(`Loaded ${this.overlays.size} image overlays`);
+  }
+  /**
+   * Preload images for visible hotspots
+   */
+  async preloadImages(visibleHotspotIds) {
+    const imagesToPreload = [];
+    visibleHotspotIds.forEach((id) => {
+      const overlay = this.overlays.get(id);
+      if (overlay && !overlay.isLoaded) {
+        overlay.imageUrls.forEach((url) => {
+          if (!this.preloadedImages.has(url)) {
+            imagesToPreload.push({ url, hotspotId: id });
+          }
+        });
+      }
+    });
+    this.preloadQueue.push(...imagesToPreload);
+    if (!this.isPreloading && this.preloadQueue.length > 0) {
+      this.processPreloadQueue();
+    }
+  }
+  /**
+   * Process preload queue
+   */
+  async processPreloadQueue() {
+    this.isPreloading = true;
+    while (this.preloadQueue.length > 0 && this.preloadedImages.size < this.maxPreloadCount) {
+      const { url, hotspotId } = this.preloadQueue.shift();
+      try {
+        await this.loadImage(url, hotspotId);
+      } catch (error) {
+        console.error(`Failed to preload image: ${url}`, error);
+      }
+    }
+    this.isPreloading = false;
+  }
+  /**
+   * Load a single image
+   */
+  loadImage(url, hotspotId) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        this.preloadedImages.set(url, img);
+        const overlay = this.overlays.get(hotspotId);
+        if (overlay) {
+          overlay.isLoaded = true;
+        }
+        if (this.onImageLoaded) {
+          this.onImageLoaded(url, hotspotId);
+        }
+        console.log(`Image loaded: ${url}`);
+        resolve(img);
+      };
+      img.onerror = (error) => {
+        if (this.onImageError) {
+          this.onImageError(url, hotspotId, error);
+        }
+        console.error(`Failed to load image: ${url}`);
+        reject(error);
+      };
+      img.crossOrigin = "anonymous";
+      img.src = url;
+    });
+  }
+  /**
+   * Check if overlay should auto-reveal
+   */
+  shouldAutoReveal(hotspotId) {
+    const overlay = this.overlays.get(hotspotId);
+    return overlay ? overlay.autoReveal : false;
+  }
+  /**
+   * Check if button should be shown
+   */
+  shouldShowButton(hotspotId) {
+    const overlay = this.overlays.get(hotspotId);
+    return overlay ? overlay.showButton : true;
+  }
+  /**
+   * Get overlay data
+   */
+  getOverlay(hotspotId) {
+    return this.overlays.get(hotspotId);
+  }
+  /**
+   * Open overlay
+   */
+  openOverlay(hotspotId) {
+    const overlay = this.overlays.get(hotspotId);
+    if (!overlay) {
+      console.warn(`No overlay found for hotspot: ${hotspotId}`);
+      return null;
+    }
+    if (this.activeOverlay) {
+      this.closeOverlay();
+    }
+    this.activeOverlay = hotspotId;
+    if (!overlay.isLoaded) {
+      const url = overlay.imageUrls[0];
+      this.loadImage(url, hotspotId).catch(console.error);
+    }
+    if (this.onOverlayOpen) {
+      this.onOverlayOpen(hotspotId, overlay);
+    }
+    return overlay;
+  }
+  /**
+   * Close overlay
+   */
+  closeOverlay() {
+    if (this.activeOverlay) {
+      const hotspotId = this.activeOverlay;
+      this.activeOverlay = null;
+      if (this.onOverlayClose) {
+        this.onOverlayClose(hotspotId);
+      }
+    }
+  }
+  /**
+   * Get image for URL
+   */
+  getImage(url) {
+    return this.preloadedImages.get(url);
+  }
+  /**
+   * Check access level
+   */
+  hasAccess(hotspotId, userLevel = "free") {
+    const overlay = this.overlays.get(hotspotId);
+    if (!overlay) return false;
+    const accessLevels = {
+      "free": 0,
+      "gated": 1,
+      "supporter": 2
+    };
+    const requiredLevel = accessLevels[overlay.access] || 0;
+    const currentLevel = accessLevels[userLevel] || 0;
+    return currentLevel >= requiredLevel;
+  }
+  /**
+   * Clean up specific images
+   */
+  unloadImages(hotspotIds) {
+    hotspotIds.forEach((id) => {
+      const overlay = this.overlays.get(id);
+      if (overlay) {
+        overlay.imageUrls.forEach((url) => {
+          this.preloadedImages.delete(url);
+        });
+        overlay.isLoaded = false;
+      }
+    });
+  }
+  /**
+   * Get metrics
+   */
+  getMetrics() {
+    return {
+      totalOverlays: this.overlays.size,
+      preloadedImages: this.preloadedImages.size,
+      queueLength: this.preloadQueue.length,
+      activeOverlay: this.activeOverlay
+    };
+  }
+  /**
+   * Destroy and clean up
+   */
+  destroy() {
+    this.closeOverlay();
+    this.overlays.clear();
+    this.preloadedImages.clear();
+    this.preloadQueue = [];
+    console.log("ImageOverlayManager destroyed");
+  }
+}
+class LowZoomOptimizer {
+  constructor(viewer, isMobile2 = false) {
+    this.viewer = viewer;
+    this.isMobile = isMobile2;
+    this.isActive = true;
+    this.isZooming = false;
+    this.lastZoomLevel = null;
+    this.zoomStartTime = null;
+    this.cinematicMode = false;
+    this.LOW_ZOOM_THRESHOLD = 2;
+    this.CRITICAL_ZOOM_THRESHOLD = 1;
+    this.originalSettings = {};
+    this.isOptimizing = false;
+    this.setupEventHandlers();
+  }
+  setupEventHandlers() {
+    if (!this.viewer) return;
+    this.viewer.addHandler("zoom", (event) => {
+      if (!this.isActive) return;
+      this.handleZoomChange(event);
+    });
+    this.viewer.addHandler("pan", (event) => {
+      if (!this.isActive) return;
+      this.handlePanAtLowZoom(event);
+    });
+    this.viewer.addHandler("animation-start", () => {
+      if (!this.isActive) return;
+      this.handleAnimationStart();
+    });
+    this.viewer.addHandler("animation-finish", () => {
+      if (!this.isActive) return;
+      this.handleAnimationFinish();
+    });
+    if (this.viewer.drawer && this.viewer.drawer.getType() !== "webgl") {
+      this.setupTileDrawingOptimization();
+    }
+  }
+  handleZoomChange(event) {
+    const currentZoom = event.zoom || this.viewer.viewport.getZoom();
+    this.lastZoomLevel = currentZoom;
+    if (this.cinematicMode) {
+      console.log("LowZoomOptimizer: Skipping zoom optimization - cinematic mode active");
+      return;
+    }
+    if (currentZoom < this.CRITICAL_ZOOM_THRESHOLD) {
+      this.applyCriticalZoomOptimization();
+    } else if (currentZoom < this.LOW_ZOOM_THRESHOLD) {
+      this.applyLowZoomOptimization();
+    } else {
+      this.restoreNormalOptimization();
+    }
+  }
+  handlePanAtLowZoom(event) {
+    const currentZoom = this.viewer.viewport.getZoom();
+    if (currentZoom < this.LOW_ZOOM_THRESHOLD) {
+      if (this.viewer.imageLoader) {
+        const originalLimit = this.viewer.imageLoader.jobLimit;
+        this.viewer.imageLoader.jobLimit = this.isMobile ? 1 : 2;
+        setTimeout(() => {
+          if (this.viewer.imageLoader) {
+            this.viewer.imageLoader.jobLimit = originalLimit;
+          }
+        }, 50);
+      }
+    }
+  }
+  handleAnimationStart() {
+    this.isZooming = true;
+    this.zoomStartTime = performance.now();
+    if (this.cinematicMode) {
+      console.log("LowZoomOptimizer: Skipping animation optimization - cinematic mode active");
+      return;
+    }
+    if (!this.isActive) {
+      console.log("LowZoomOptimizer: Skipping optimization - disabled");
+      return;
+    }
+    const currentZoom = this.viewer.viewport.getZoom();
+    if (currentZoom < this.LOW_ZOOM_THRESHOLD) {
+      if (!this.isMobile && this.viewer.imageLoader) {
+        this.viewer.imageLoader.clear();
+      }
+      this.storeOriginalSpringSettings();
+      this.optimizeSpringSettings();
+    }
+  }
+  handleAnimationFinish() {
+    this.isZooming = false;
+    if (this.zoomStartTime) {
+      performance.now() - this.zoomStartTime;
+      this.zoomStartTime = null;
+    }
+    if (this.cinematicMode) {
+      console.log("LowZoomOptimizer: Skipping spring restoration - cinematic mode active");
+      return;
+    }
+    if (!this.isActive) {
+      console.log("LowZoomOptimizer: Skipping spring restoration - disabled");
+      return;
+    }
+    this.restoreOriginalSpringSettings();
+  }
+  applyCriticalZoomOptimization() {
+    if (this.isOptimizing) return;
+    this.isOptimizing = true;
+    if (Object.keys(this.originalSettings).length === 0) {
+      this.storeOriginalSettings();
+    }
+    if (this.viewer.imageLoader) {
+      this.viewer.imageLoader.jobLimit = 1;
+    }
+    this.viewer.imageSmoothingEnabled = false;
+    this.viewer.immediateRender = true;
+    if (this.isMobile) {
+      this.viewer.maxTilesPerFrame = 1;
+      this.viewer.blendTime = 0;
+      this.viewer.alwaysBlend = false;
+    }
+  }
+  applyLowZoomOptimization() {
+    if (this.isOptimizing) return;
+    this.isOptimizing = true;
+    if (Object.keys(this.originalSettings).length === 0) {
+      this.storeOriginalSettings();
+    }
+    if (this.viewer.imageLoader) {
+      this.viewer.imageLoader.jobLimit = this.isMobile ? 1 : 2;
+    }
+    if (this.isMobile) {
+      this.viewer.maxTilesPerFrame = 1;
+      this.viewer.blendTime = 0;
+    } else {
+      this.viewer.maxTilesPerFrame = 2;
+      this.viewer.blendTime = 0;
+    }
+  }
+  restoreNormalOptimization() {
+    if (!this.isOptimizing) return;
+    this.restoreOriginalSettings();
+    this.isOptimizing = false;
+  }
+  // PERFORMANCE FIX: Removed all complex RAF scheduling that added latency
+  setupTileDrawingOptimization() {
+    let tileCounter = 0;
+    this.viewer.addHandler("tile-drawing", (event) => {
+      if (!this.isActive) return;
+      const zoom = this.viewer.viewport.getZoom();
+      event.tile;
+      const level = event.tile.level;
+      if (zoom < this.LOW_ZOOM_THRESHOLD) {
+        tileCounter++;
+        const skipRatio = zoom < this.CRITICAL_ZOOM_THRESHOLD ? 2 : 1;
+        if (skipRatio > 0 && tileCounter % (skipRatio + 1) !== 0) {
+          event.preventDefaultAction = true;
+          return;
+        }
+        const screenSize = event.tile.size * zoom;
+        if (screenSize < (this.isMobile ? 32 : 24)) {
+          event.preventDefaultAction = true;
+          return;
+        }
+      }
+      if (this.isZooming) {
+        const optimalLevel = Math.floor(Math.log2(zoom));
+        if (Math.abs(level - optimalLevel) > 2) {
+          event.preventDefaultAction = true;
+          return;
+        }
+      }
+    });
+  }
+  // PERFORMANCE FIX: Removed all batching and deferred operations that added latency
+  storeOriginalSettings() {
+    var _a;
+    this.originalSettings = {
+      imageLoaderLimit: (_a = this.viewer.imageLoader) == null ? void 0 : _a.jobLimit,
+      maxTilesPerFrame: this.viewer.maxTilesPerFrame,
+      blendTime: this.viewer.blendTime,
+      alwaysBlend: this.viewer.alwaysBlend,
+      imageSmoothingEnabled: this.viewer.imageSmoothingEnabled,
+      immediateRender: this.viewer.immediateRender
+    };
+  }
+  restoreOriginalSettings() {
+    if (Object.keys(this.originalSettings).length === 0) return;
+    Object.keys(this.originalSettings).forEach((key) => {
+      const value = this.originalSettings[key];
+      if (value !== void 0) {
+        if (key === "imageLoaderLimit" && this.viewer.imageLoader) {
+          this.viewer.imageLoader.jobLimit = value;
+        } else if (this.viewer[key] !== void 0) {
+          this.viewer[key] = value;
+        }
+      }
+    });
+  }
+  storeOriginalSpringSettings() {
+    if (!this.originalSpringSettings) {
+      this.originalSpringSettings = {
+        animationTime: this.viewer.animationTime,
+        springStiffness: this.viewer.springStiffness,
+        centerXAnimationTime: this.viewer.viewport.centerSpringX.animationTime,
+        centerYAnimationTime: this.viewer.viewport.centerSpringY.animationTime,
+        zoomAnimationTime: this.viewer.viewport.zoomSpring.animationTime,
+        centerXStiffness: this.viewer.viewport.centerSpringX.springStiffness,
+        centerYStiffness: this.viewer.viewport.centerSpringY.springStiffness,
+        zoomStiffness: this.viewer.viewport.zoomSpring.springStiffness
+      };
+    }
+  }
+  optimizeSpringSettings() {
+    if (this.cinematicMode) {
+      console.log("LowZoomOptimizer: Preserving springs - cinematic mode active");
+      return;
+    }
+    const animTime = this.isMobile ? 0.25 : 0.2;
+    const stiffness = this.isMobile ? 15 : 18;
+    this.viewer.animationTime = animTime;
+    this.viewer.springStiffness = stiffness;
+    this.viewer.viewport.centerSpringX.animationTime = animTime;
+    this.viewer.viewport.centerSpringY.animationTime = animTime;
+    this.viewer.viewport.zoomSpring.animationTime = animTime;
+    this.viewer.viewport.centerSpringX.springStiffness = stiffness;
+    this.viewer.viewport.centerSpringY.springStiffness = stiffness;
+    this.viewer.viewport.zoomSpring.springStiffness = stiffness;
+  }
+  restoreOriginalSpringSettings() {
+    if (!this.originalSpringSettings) return;
+    const settings = this.originalSpringSettings;
+    this.viewer.animationTime = settings.animationTime;
+    this.viewer.springStiffness = settings.springStiffness;
+    this.viewer.viewport.centerSpringX.animationTime = settings.centerXAnimationTime;
+    this.viewer.viewport.centerSpringY.animationTime = settings.centerYAnimationTime;
+    this.viewer.viewport.zoomSpring.animationTime = settings.zoomAnimationTime;
+    this.viewer.viewport.centerSpringX.springStiffness = settings.centerXStiffness;
+    this.viewer.viewport.centerSpringY.springStiffness = settings.centerYStiffness;
+    this.viewer.viewport.zoomSpring.springStiffness = settings.zoomStiffness;
+    this.originalSpringSettings = null;
+  }
+  // Research: Dynamic performance monitoring and adjustment
+  monitorPerformance(fps) {
+    if (!this._lastEmergencyTime) {
+      this._lastEmergencyTime = 0;
+    }
+    const now = Date.now();
+    const cooldownPeriod = 5e3;
+    const isSafariDesktop = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) && !/iPad|iPhone|iPod/.test(navigator.userAgent);
+    const threshold = isSafariDesktop ? 10 : this.isMobile ? 15 : 25;
+    if (fps < threshold && fps > 0 && now - this._lastEmergencyTime > cooldownPeriod) {
+      console.warn(`LowZoomOptimizer: Low FPS detected (${fps}), applying emergency optimization`);
+      this._lastEmergencyTime = now;
+      this.applyEmergencyOptimization();
+    }
+  }
+  applyEmergencyOptimization() {
+    console.warn("LowZoomOptimizer: Applying EMERGENCY optimization");
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    const isSafariDesktop = isSafari && !/iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (this.viewer.imageLoader) {
+      this.viewer.imageLoader.jobLimit = isSafariDesktop ? 2 : 1;
+      if (!isSafari) {
+        this.viewer.imageLoader.clear();
+      }
+    }
+    this.viewer.maxTilesPerFrame = isSafariDesktop ? 2 : 1;
+    this.viewer.blendTime = isSafari ? 0.1 : 0;
+    this.viewer.alwaysBlend = false;
+    this.viewer.immediateRender = true;
+    if (!isSafari && !this.isMobile && this.viewer.world) {
+      const tiledImages = this.viewer.world.getItemCount();
+      for (let i = 0; i < tiledImages; i++) {
+        const tiledImage = this.viewer.world.getItemAt(i);
+        if (tiledImage && tiledImage._tileCache) {
+          setTimeout(() => {
+            tiledImage._tileCache.clearTilesFor(tiledImage);
+          }, 0);
+        }
+      }
+    }
+  }
+  // Public methods for external control
+  enable() {
+    this.isActive = true;
+  }
+  disable() {
+    this.isActive = false;
+    this.restoreNormalOptimization();
+  }
+  destroy() {
+    this.disable();
+    if (this.viewer) {
+      this.viewer.removeAllHandlers("zoom");
+      this.viewer.removeAllHandlers("pan");
+      this.viewer.removeAllHandlers("animation-start");
+      this.viewer.removeAllHandlers("animation-finish");
+      this.viewer.removeAllHandlers("tile-drawing");
+    }
+    console.log("🚀 PERFORMANCE FIXED: LowZoomOptimizer destroyed");
+  }
+  // CINEMATIC FIX: Set cinematic mode to prevent interference with cinematic zooms
+  setCinematicMode(enabled) {
+    this.cinematicMode = enabled;
+    console.log(`LowZoomOptimizer: Cinematic mode ${enabled ? "ENABLED" : "DISABLED"}`);
+    if (enabled) {
+      this.restoreNormalOptimization();
+    }
+  }
+  // Simplified status method
+  getStatus() {
+    return {
+      isActive: this.isActive,
+      isOptimizing: this.isOptimizing,
+      currentZoom: this.lastZoomLevel,
+      isMobile: this.isMobile,
+      cinematicMode: this.cinematicMode,
+      optimizationLevel: this.isOptimizing ? this.lastZoomLevel < this.CRITICAL_ZOOM_THRESHOLD ? "critical" : "low" : "normal",
+      fixed: "PERFORMANCE_OPTIMIZED"
+    };
+  }
+}
+class MemoryManager {
+  constructor(viewer) {
+    __publicField(this, "handleVisibilityChange", () => {
+      if (document.hidden) {
+        console.log("Page hidden - performing cleanup");
+        this.performHighPressureCleanup();
+      }
+    });
+    __publicField(this, "handleFreeze", () => {
+      console.log("Page freezing - emergency cleanup");
+      this.performEmergencyCleanup();
+    });
+    this.viewer = viewer;
+    this.state = {
+      isActive: false,
+      lastCleanup: Date.now(),
+      cleanupCount: 0,
+      memoryPressure: "normal"
+      // normal, high, critical
+    };
+    this.config = {
+      // Memory thresholds (MB)
+      warningThreshold: 100,
+      highThreshold: 150,
+      criticalThreshold: 200,
+      // Cache limits by memory pressure
+      cacheLimits: {
+        normal: { tiles: 500, hotspots: 150 },
+        high: { tiles: 200, hotspots: 100 },
+        critical: { tiles: 50, hotspots: 50 }
+      },
+      // Intervals
+      monitorInterval: 5e3,
+      // Check every 5 seconds
+      cleanupInterval: 3e4,
+      // Cleanup every 30 seconds
+      aggressiveCleanupDelay: 6e4,
+      // Force cleanup every minute
+      // Platform
+      hasMemoryAPI: "memory" in performance,
+      hasGC: typeof window.gc === "function",
+      isMobile: /Android|iPhone|iPad/i.test(navigator.userAgent)
+    };
+    if (this.config.isMobile) {
+      this.config.warningThreshold = 50;
+      this.config.highThreshold = 75;
+      this.config.criticalThreshold = 100;
+      this.config.monitorInterval = 3e3;
+    }
+    this.intervals = {};
+    this.metrics = {
+      currentUsage: 0,
+      peakUsage: 0,
+      cleanups: 0,
+      gcCalls: 0
+    };
+  }
+  start() {
+    if (this.state.isActive) return;
+    this.state.isActive = true;
+    this.intervals.monitor = setInterval(() => this.checkMemory(), this.config.monitorInterval);
+    this.intervals.cleanup = setInterval(() => this.performScheduledCleanup(), this.config.cleanupInterval);
+    this.intervals.aggressive = setInterval(() => this.performAggressiveCleanup(), this.config.aggressiveCleanupDelay);
+    document.addEventListener("visibilitychange", this.handleVisibilityChange);
+    if ("onfreeze" in document) {
+      document.addEventListener("freeze", this.handleFreeze);
+    }
+    console.log("MemoryManager started");
+  }
+  stop() {
+    this.state.isActive = false;
+    Object.values(this.intervals).forEach((interval) => clearInterval(interval));
+    this.intervals = {};
+    document.removeEventListener("visibilitychange", this.handleVisibilityChange);
+    document.removeEventListener("freeze", this.handleFreeze);
+    console.log("MemoryManager stopped");
+  }
+  checkMemory() {
+    if (!this.config.hasMemoryAPI) return;
+    const usage = performance.memory.usedJSHeapSize / 1048576;
+    const limit = performance.memory.jsHeapSizeLimit / 1048576;
+    const percentage = usage / limit * 100;
+    this.metrics.currentUsage = usage;
+    this.metrics.peakUsage = Math.max(this.metrics.peakUsage, usage);
+    const previousPressure = this.state.memoryPressure;
+    if (usage > this.config.criticalThreshold || percentage > 80) {
+      this.state.memoryPressure = "critical";
+    } else if (usage > this.config.highThreshold || percentage > 60) {
+      this.state.memoryPressure = "high";
+    } else {
+      this.state.memoryPressure = "normal";
+    }
+    if (this.state.memoryPressure !== previousPressure) {
+      console.log(`Memory pressure changed: ${previousPressure} → ${this.state.memoryPressure} (${usage.toFixed(0)}MB, ${percentage.toFixed(0)}%)`);
+      switch (this.state.memoryPressure) {
+        case "critical":
+          this.performEmergencyCleanup();
+          break;
+        case "high":
+          this.performHighPressureCleanup();
+          break;
+      }
+    }
+    this.updateCacheLimits();
+  }
+  updateCacheLimits() {
+    const limits = this.config.cacheLimits[this.state.memoryPressure];
+    if (this.viewer.maxImageCacheCount !== limits.tiles) {
+      this.viewer.maxImageCacheCount = limits.tiles;
+      console.log(`Adjusted tile cache limit to ${limits.tiles}`);
+    }
+  }
+  performScheduledCleanup() {
+    if (this.state.memoryPressure === "normal") return;
+    console.log("Performing scheduled cleanup");
+    this.cleanupTileCache();
+    this.metrics.cleanups++;
+  }
+  performHighPressureCleanup() {
+    console.log("High memory pressure - performing cleanup");
+    this.cleanupTileCache(true);
+    if (window.audioEngine && typeof window.audioEngine.destroy === "function") ;
+    this.suggestGC();
+    this.metrics.cleanups++;
+  }
+  performEmergencyCleanup() {
+    var _a;
+    console.warn("CRITICAL: Emergency memory cleanup");
+    const tiledImage = (_a = this.viewer.world) == null ? void 0 : _a.getItemAt(0);
+    if (!tiledImage) return;
+    if (tiledImage._tileCache) {
+      tiledImage._tileCache.clearTilesFor(tiledImage);
+    }
+    this.viewer.maxImageCacheCount = 30;
+    if (window.tileOptimizer) {
+      window.tileOptimizer.clearOldTiles();
+    }
+    if (window.spatialIndex) {
+      window.spatialIndex.queryCache.clear();
+    }
+    this.forceGC();
+    this.clearUnusedImages();
+    this.metrics.cleanups++;
+    this.state.lastCleanup = Date.now();
+  }
+  performAggressiveCleanup() {
+    if (!this.state.isActive) return;
+    if (this.metrics.currentUsage > this.config.warningThreshold) {
+      console.log("Performing aggressive cleanup");
+      this.cleanupTileCache(true);
+      this.clearUnusedImages();
+      this.suggestGC();
+    }
+  }
+  cleanupTileCache(aggressive = false) {
+    var _a, _b;
+    const tiledImage = (_a = this.viewer.world) == null ? void 0 : _a.getItemAt(0);
+    if (!(tiledImage == null ? void 0 : tiledImage._tileCache)) return;
+    const cache = tiledImage._tileCache;
+    const cacheSize = ((_b = cache._tilesLoaded) == null ? void 0 : _b.length) || cache._imagesLoadedCount || 0;
+    if (aggressive || cacheSize > this.config.cacheLimits[this.state.memoryPressure].tiles) {
+      const targetSize = aggressive ? Math.floor(this.config.cacheLimits[this.state.memoryPressure].tiles * 0.5) : this.config.cacheLimits[this.state.memoryPressure].tiles;
+      const tilesToRemove = cacheSize - targetSize;
+      if (tilesToRemove > 0) {
+        console.log(`Removing ${tilesToRemove} tiles from cache (current: ${cacheSize})`);
+        cache.clearTilesFor(tiledImage);
+      }
+    }
+  }
+  clearUnusedImages() {
+    const images = document.querySelectorAll("img");
+    let cleared = 0;
+    images.forEach((img) => {
+      if (!this.isElementVisible(img) && img.src) {
+        img.removeAttribute("src");
+        cleared++;
+      }
+    });
+    if (cleared > 0) {
+      console.log(`Cleared ${cleared} unused images`);
+    }
+  }
+  isElementVisible(element) {
+    const rect = element.getBoundingClientRect();
+    return rect.top >= 0 && rect.left >= 0 && rect.bottom <= window.innerHeight && rect.right <= window.innerWidth;
+  }
+  suggestGC() {
+    if (this.config.hasGC) {
+      console.log("Suggesting garbage collection");
+      if ("requestIdleCallback" in window) {
+        requestIdleCallback(() => {
+          window.gc();
+          this.metrics.gcCalls++;
+        });
+      } else {
+        setTimeout(() => {
+          window.gc();
+          this.metrics.gcCalls++;
+        }, 100);
+      }
+    }
+  }
+  forceGC() {
+    if (this.config.hasGC) {
+      console.log("Forcing immediate garbage collection");
+      window.gc();
+      this.metrics.gcCalls++;
+    }
+  }
+  getMetrics() {
+    const metrics = {
+      ...this.metrics,
+      memoryPressure: this.state.memoryPressure,
+      cacheLimits: this.config.cacheLimits[this.state.memoryPressure]
+    };
+    if (this.config.hasMemoryAPI) {
+      const limit = performance.memory.jsHeapSizeLimit / 1048576;
+      metrics.usagePercentage = (this.metrics.currentUsage / limit * 100).toFixed(1) + "%";
+      metrics.totalLimit = limit.toFixed(0) + "MB";
+    }
+    return metrics;
+  }
+  destroy() {
+    this.stop();
+    this.viewer = null;
+  }
+}
+class MouseWheelSmoothing {
+  constructor(viewer, config = {}) {
+    this.viewer = viewer;
+    this.config = {
+      throttleMs: config.throttleMs || 16,
+      // 60 FPS throttling
+      zoomStep: config.zoomStep || 0.02,
+      // Small steps for smooth zoom
+      enabled: config.enabled !== false,
+      // Default enabled
+      ...config
+    };
+    this.lastEventTime = 0;
+    this.pendingZoom = 0;
+    this.throttleTimeout = null;
+    this.isEnabled = this.config.enabled;
+    this.init();
+  }
+  init() {
+    if (!this.viewer || !this.isEnabled) return;
+    this.viewer.addHandler("canvas-scroll", this.handleScroll.bind(this));
+    console.log("Mouse wheel smoothing initialized:", {
+      throttleMs: this.config.throttleMs,
+      zoomStep: this.config.zoomStep
+    });
+  }
+  handleScroll(event) {
+    if (!this.isEnabled) return;
+    event.preventDefault = true;
+    const now = performance.now();
+    const deltaY = this.normalizeWheelDelta(event.originalEvent);
+    const zoomDirection = Math.sign(-deltaY);
+    const zoomAmount = this.config.zoomStep * Math.abs(zoomDirection);
+    this.pendingZoom += zoomAmount * zoomDirection;
+    if (now - this.lastEventTime >= this.config.throttleMs) {
+      this.applyPendingZoom();
+      this.lastEventTime = now;
+    } else {
+      if (this.throttleTimeout) {
+        clearTimeout(this.throttleTimeout);
+      }
+      this.throttleTimeout = setTimeout(() => {
+        this.applyPendingZoom();
+        this.lastEventTime = performance.now();
+      }, this.config.throttleMs);
+    }
+  }
+  normalizeWheelDelta(event) {
+    const LINE_HEIGHT = 40;
+    let deltaY = 0;
+    if ("deltaY" in event) {
+      deltaY = event.deltaY;
+    } else if ("wheelDelta" in event) {
+      deltaY = -event.wheelDelta / 120 * LINE_HEIGHT;
+    }
+    if (event.deltaMode === 1) {
+      deltaY *= LINE_HEIGHT;
+    }
+    return deltaY;
+  }
+  applyPendingZoom() {
+    if (Math.abs(this.pendingZoom) < 1e-3) {
+      this.pendingZoom = 0;
+      return;
+    }
+    const currentZoom = this.viewer.viewport.getZoom();
+    const targetZoom = currentZoom * (1 + this.pendingZoom);
+    const clampedZoom = Math.max(
+      this.viewer.viewport.getMinZoom(),
+      Math.min(this.viewer.viewport.getMaxZoom(), targetZoom)
+    );
+    this.viewer.viewport.zoomTo(clampedZoom);
+    this.viewer.viewport.applyConstraints();
+    this.pendingZoom = 0;
+  }
+  updateConfig(newConfig) {
+    this.config = { ...this.config, ...newConfig };
+    console.log("Mouse wheel smoothing config updated:", this.config);
+  }
+  enable() {
+    this.isEnabled = true;
+    console.log("Mouse wheel smoothing enabled");
+  }
+  disable() {
+    this.isEnabled = false;
+    if (this.throttleTimeout) {
+      clearTimeout(this.throttleTimeout);
+      this.throttleTimeout = null;
+    }
+    console.log("Mouse wheel smoothing disabled");
+  }
+  destroy() {
+    this.disable();
+  }
+}
+class OrganicVariations {
+  constructor() {
+    this.variationCache = /* @__PURE__ */ new Map();
+    this.durationVariation = 0.1;
+    this.easingVariation = 0.05;
+    this.startPointVariation = 0.15;
+    this.debugMode = false;
+    this.enableDebugMode = () => {
+      this.debugMode = true;
+      this.durationVariation = 0.5;
+      this.easingVariation = 0.25;
+      this.startPointVariation = 0.5;
+      this.clearAllVariations();
+      console.log("[OrganicVariations] 🔥 EXTREME DEBUG MODE enabled - variations are now VERY obvious:");
+      console.log("  - Duration: ±50% (1.1s to 3.3s instead of 2.2s)");
+      console.log("  - Easing: ±25% control point variation");
+      console.log("  - Start Point: 0-50% of path length");
+      console.log("  - Hover over multiple hotspots to see the differences!");
+    };
+    this.disableDebugMode = () => {
+      this.debugMode = false;
+      this.durationVariation = 0.1;
+      this.easingVariation = 0.05;
+      this.startPointVariation = 0.15;
+      this.clearAllVariations();
+      console.log("[OrganicVariations] Debug mode disabled - variations are back to subtle");
+    };
+  }
+  /**
+   * Get or create variations for a specific hotspot
+   * Cached to maintain consistency during hover/unhover cycles
+   */
+  getVariations(hotspotId) {
+    if (!this.variationCache.has(hotspotId)) {
+      this.variationCache.set(hotspotId, this.generateVariations());
+    }
+    return this.variationCache.get(hotspotId);
+  }
+  /**
+   * Generate new random variations
+   */
+  generateVariations() {
+    return {
+      durationMultiplier: this.generateDurationMultiplier(),
+      easingAdjustment: this.generateEasingAdjustment(),
+      startPointOffset: this.generateStartPointOffset(),
+      // Timestamp to allow refreshing variations after some time
+      timestamp: Date.now()
+    };
+  }
+  /**
+   * Generate duration multiplier (0.9 to 1.1 for ±10%)
+   */
+  generateDurationMultiplier() {
+    const min = 1 - this.durationVariation;
+    const max = 1 + this.durationVariation;
+    return min + Math.random() * (max - min);
+  }
+  /**
+   * Generate easing curve adjustment
+   * Slightly modifies the control points of the cubic-bezier
+   */
+  generateEasingAdjustment() {
+    return {
+      x1: (Math.random() - 0.5) * this.easingVariation * 2,
+      y1: (Math.random() - 0.5) * this.easingVariation * 2,
+      x2: (Math.random() - 0.5) * this.easingVariation * 2,
+      y2: (Math.random() - 0.5) * this.easingVariation * 2
+    };
+  }
+  /**
+   * Generate start point offset (0 to 15% of path)
+   */
+  generateStartPointOffset() {
+    return Math.random() * this.startPointVariation;
+  }
+  /**
+   * Apply duration variation to base duration
+   */
+  applyDurationVariation(baseDuration, hotspotId) {
+    const variations = this.getVariations(hotspotId);
+    if (Date.now() - variations.timestamp > 3e4) {
+      this.variationCache.delete(hotspotId);
+      return this.applyDurationVariation(baseDuration, hotspotId);
+    }
+    return baseDuration * variations.durationMultiplier;
+  }
+  /**
+   * Apply easing variation to base easing curve
+   * Takes a cubic-bezier string and returns a modified one
+   */
+  applyEasingVariation(baseEasing, hotspotId) {
+    const variations = this.getVariations(hotspotId);
+    const match = baseEasing.match(/cubic-bezier\(([\d.]+),\s*([\d.]+),\s*([\d.]+),\s*([\d.]+)\)/);
+    if (!match) return baseEasing;
+    const x1 = parseFloat(match[1]) + variations.easingAdjustment.x1;
+    const y1 = parseFloat(match[2]) + variations.easingAdjustment.y1;
+    const x2 = parseFloat(match[3]) + variations.easingAdjustment.x2;
+    const y2 = parseFloat(match[4]) + variations.easingAdjustment.y2;
+    const clamp = (val) => Math.max(0, Math.min(1, val));
+    return `cubic-bezier(${clamp(x1)}, ${clamp(y1)}, ${clamp(x2)}, ${clamp(y2)})`;
+  }
+  /**
+   * Calculate varied stroke dash values for different start points
+   * This creates the effect of starting the stroke from different positions
+   */
+  getVariedStrokeDashValues(pathLength, hotspotId) {
+    const variations = this.getVariations(hotspotId);
+    pathLength * variations.startPointOffset;
+    return {
+      dashArray: pathLength,
+      dashOffset: pathLength
+    };
+  }
+  /**
+   * Clear variations for a hotspot (useful when changing animation styles)
+   */
+  clearVariations(hotspotId) {
+    this.variationCache.delete(hotspotId);
+  }
+  /**
+   * Clear all cached variations
+   */
+  clearAllVariations() {
+    this.variationCache.clear();
+  }
+}
+const organicVariations = new OrganicVariations();
+if (typeof window !== "undefined") {
+  window.organicVariations = organicVariations;
+  window.testVariations = {
+    enableDebugMode: () => organicVariations.enableDebugMode(),
+    disableDebugMode: () => organicVariations.disableDebugMode(),
+    showCache: () => {
+      const cache = [];
+      organicVariations.variationCache.forEach((v, id) => {
+        cache.push({
+          hotspotId: id,
+          duration: `×${v.durationMultiplier.toFixed(3)}`,
+          startOffset: `${(v.startPointOffset * 100).toFixed(1)}%`,
+          age: `${((Date.now() - v.timestamp) / 1e3).toFixed(1)}s`
+        });
+      });
+      console.table(cache);
+      return `${cache.length} variations cached`;
+    },
+    clear: () => {
+      organicVariations.clearAllVariations();
+      return "All variations cleared";
+    }
+  };
+}
+const DEBUG_ENABLED = typeof window !== "undefined" && (window.DEBUG || localStorage.getItem("debugLevel") === "1" || new URLSearchParams(window.location.search).has("debug"));
+const LogLevel = {
+  DEBUG: 0,
+  INFO: 1,
+  WARN: 2,
+  ERROR: 3
+};
+let currentLogLevel = LogLevel.WARN;
+class Logger {
+  constructor(prefix = "") {
+    this.prefix = prefix;
+  }
+  _shouldLog(level) {
+    return DEBUG_ENABLED && level >= currentLogLevel;
+  }
+  _formatMessage(message, ...args) {
+    (/* @__PURE__ */ new Date()).toISOString();
+    const prefixStr = this.prefix ? `[${this.prefix}] ` : "";
+    return [`${prefixStr}${message}`, ...args];
+  }
+  debug(message, ...args) {
+    if (this._shouldLog(LogLevel.DEBUG)) {
+      console.log(...this._formatMessage(message, ...args));
+    }
+  }
+  info(message, ...args) {
+    if (this._shouldLog(LogLevel.INFO)) {
+      console.info(...this._formatMessage(message, ...args));
+    }
+  }
+  warn(message, ...args) {
+    if (this._shouldLog(LogLevel.WARN)) {
+      console.warn(...this._formatMessage(message, ...args));
+    }
+  }
+  error(message, ...args) {
+    if (this._shouldLog(LogLevel.ERROR)) {
+      console.error(...this._formatMessage(message, ...args));
+    }
+  }
+  // Special method for performance-critical paths
+  perf(message, ...args) {
+    if (DEBUG_ENABLED && window.DEBUG_PERFORMANCE) {
+      console.log(`[PERF] ${this.prefix ? `[${this.prefix}] ` : ""}${message}`, ...args);
+    }
+  }
+  // Create a child logger with additional prefix
+  child(childPrefix) {
+    const newPrefix = this.prefix ? `${this.prefix}:${childPrefix}` : childPrefix;
+    return new Logger(newPrefix);
+  }
+}
+function createLogger(prefix) {
+  return new Logger(prefix);
+}
+class NetworkAdaptiveManager {
+  constructor(viewer) {
+    this.viewer = viewer;
+    this.enabled = false;
+    this.currentQuality = "high";
+    this.networkType = "4g";
+    this.saveDataMode = false;
+    this.qualityLevels = {
+      "slow-2g": {
+        imageLoaderLimit: 1,
+        maxImageCacheCount: 15,
+        maxTilesPerFrame: 1,
+        jpegQuality: 30,
+        preload: false,
+        animationTime: 0.5,
+        springStiffness: 8
+      },
+      "2g": {
+        imageLoaderLimit: 1,
+        maxImageCacheCount: 20,
+        maxTilesPerFrame: 1,
+        jpegQuality: 50,
+        preload: false,
+        animationTime: 0.4,
+        springStiffness: 10
+      },
+      "3g": {
+        imageLoaderLimit: 1,
+        maxImageCacheCount: 50,
+        maxTilesPerFrame: 2,
+        jpegQuality: 70,
+        preload: true,
+        animationTime: 0.3,
+        springStiffness: 12
+      },
+      "4g": {
+        imageLoaderLimit: 2,
+        maxImageCacheCount: 100,
+        maxTilesPerFrame: 2,
+        jpegQuality: 85,
+        preload: true,
+        animationTime: 0.3,
+        springStiffness: 12
+      },
+      "wifi": {
+        imageLoaderLimit: 3,
+        maxImageCacheCount: 150,
+        maxTilesPerFrame: 3,
+        jpegQuality: 90,
+        preload: true,
+        animationTime: 0.3,
+        springStiffness: 12
+      }
+    };
+    this.performanceMetrics = {
+      lastCheck: 0,
+      avgLoadTime: 0,
+      samples: []
+    };
+    this.onNetworkChange = null;
+  }
+  /**
+   * Initialize network detection and monitoring
+   */
+  initialize() {
+    if (this.enabled) return;
+    console.log("[NetworkAdaptive] Initializing network detection...");
+    if ("connection" in navigator) {
+      this.setupNetworkAPI();
+    } else {
+      console.log("[NetworkAdaptive] Network API not available, using Safari fallback");
+      this.setupSafariFallback();
+    }
+    this.checkDataSaver();
+    this.applyNetworkSettings();
+    this.enabled = true;
+  }
+  /**
+   * Setup Network Information API monitoring
+   */
+  setupNetworkAPI() {
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (connection) {
+      this.networkType = connection.effectiveType || "4g";
+      this.saveDataMode = connection.saveData || false;
+      console.log("[NetworkAdaptive] Network detected:", this.networkType, "Save data:", this.saveDataMode);
+      connection.addEventListener("change", () => {
+        const newType = connection.effectiveType || "4g";
+        const newSaveData = connection.saveData || false;
+        if (newType !== this.networkType || newSaveData !== this.saveDataMode) {
+          console.log("[NetworkAdaptive] Network changed from", this.networkType, "to", newType);
+          this.networkType = newType;
+          this.saveDataMode = newSaveData;
+          this.applyNetworkSettings();
+        }
+      });
+      if (connection.downlink) {
+        console.log("[NetworkAdaptive] Downlink speed:", connection.downlink, "Mbps");
+        if (connection.downlink < 0.5) {
+          this.networkType = "slow-2g";
+        } else if (connection.downlink < 1) {
+          this.networkType = "2g";
+        } else if (connection.downlink < 5) {
+          this.networkType = "3g";
+        }
+      }
+    }
+  }
+  /**
+   * Safari fallback: Estimate network speed using resource timing
+   */
+  setupSafariFallback() {
+    this.estimateNetworkSpeed();
+    setInterval(() => {
+      this.estimateNetworkSpeed();
+    }, 3e4);
+    if (this.viewer) {
+      this.viewer.addHandler("tile-loaded", (event) => {
+        this.trackTileLoadTime(event);
+      });
+    }
+  }
+  /**
+   * Estimate network speed for Safari
+   */
+  async estimateNetworkSpeed() {
+    try {
+      const testUrl = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
+      const startTime = performance.now();
+      const img = new Image();
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = testUrl;
+      });
+      const loadTime = performance.now() - startTime;
+      this.performanceMetrics.samples.push(loadTime);
+      if (this.performanceMetrics.samples.length > 10) {
+        this.performanceMetrics.samples.shift();
+      }
+      const avgTime = this.performanceMetrics.samples.reduce((a, b) => a + b, 0) / this.performanceMetrics.samples.length;
+      this.performanceMetrics.avgLoadTime = avgTime;
+      let estimatedType = "4g";
+      if (avgTime > 500) {
+        estimatedType = "slow-2g";
+      } else if (avgTime > 300) {
+        estimatedType = "2g";
+      } else if (avgTime > 150) {
+        estimatedType = "3g";
+      } else if (avgTime > 50) {
+        estimatedType = "4g";
+      } else {
+        estimatedType = "wifi";
+      }
+      if (estimatedType !== this.networkType) {
+        console.log("[NetworkAdaptive] Safari: Network estimated as", estimatedType, "(avg load time:", avgTime.toFixed(2), "ms)");
+        this.networkType = estimatedType;
+        this.applyNetworkSettings();
+      }
+    } catch (error) {
+      console.warn("[NetworkAdaptive] Failed to estimate network speed:", error);
+    }
+  }
+  /**
+   * Track actual tile load times for better estimation
+   */
+  trackTileLoadTime(event) {
+    if (!event.tiledImage || !event.tile) return;
+    const loadTime = event.tile.loadTime || 0;
+    if (loadTime > 0) {
+      this.performanceMetrics.samples.push(loadTime);
+      if (this.performanceMetrics.samples.length > 20) {
+        this.performanceMetrics.samples.shift();
+      }
+      const avgTime = this.performanceMetrics.samples.reduce((a, b) => a + b, 0) / this.performanceMetrics.samples.length;
+      let estimatedType = "wifi";
+      if (avgTime > 2e3) {
+        estimatedType = "slow-2g";
+      } else if (avgTime > 1e3) {
+        estimatedType = "2g";
+      } else if (avgTime > 500) {
+        estimatedType = "3g";
+      } else if (avgTime > 200) {
+        estimatedType = "4g";
+      }
+      if (estimatedType !== this.networkType) {
+        console.log("[NetworkAdaptive] Adjusting based on tile load times:", estimatedType, "(avg:", avgTime.toFixed(2), "ms)");
+        this.networkType = estimatedType;
+        this.applyNetworkSettings();
+      }
+    }
+  }
+  /**
+   * Check if data saver mode is enabled
+   */
+  checkDataSaver() {
+    if ("connection" in navigator && navigator.connection) {
+      this.saveDataMode = navigator.connection.saveData || false;
+    }
+    if (window.matchMedia) {
+      const prefersReducedData = window.matchMedia("(prefers-reduced-data: reduce)");
+      if (prefersReducedData.matches) {
+        this.saveDataMode = true;
+      }
+    }
+    if (this.saveDataMode) {
+      console.log("[NetworkAdaptive] Data saver mode detected");
+    }
+  }
+  /**
+   * Apply network-optimized settings to viewer
+   */
+  applyNetworkSettings() {
+    if (!this.viewer) return;
+    const settings = this.qualityLevels[this.networkType] || this.qualityLevels["4g"];
+    if (this.saveDataMode) {
+      settings.jpegQuality = Math.min(40, settings.jpegQuality);
+      settings.preload = false;
+      settings.maxImageCacheCount = Math.min(20, settings.maxImageCacheCount);
+      settings.imageLoaderLimit = 1;
+      console.log("[NetworkAdaptive] Data saver mode active - reducing quality");
+    }
+    console.log("[NetworkAdaptive] Applying settings for", this.networkType, ":", settings);
+    if (this.viewer.drawer) {
+      this.viewer.imageLoaderLimit = settings.imageLoaderLimit;
+      this.viewer.maxImageCacheCount = settings.maxImageCacheCount;
+      if (this.viewer.viewport) {
+        this.viewer.viewport.animationTime = settings.animationTime;
+        this.viewer.viewport.springStiffness = settings.springStiffness;
+      }
+    }
+    const oldQuality = this.currentQuality;
+    if (this.networkType === "slow-2g" || this.networkType === "2g") {
+      this.currentQuality = "low";
+    } else if (this.networkType === "3g") {
+      this.currentQuality = "medium";
+    } else {
+      this.currentQuality = "high";
+    }
+    if (this.onNetworkChange && oldQuality !== this.currentQuality) {
+      this.onNetworkChange(this.networkType, this.currentQuality);
+    }
+    this.showNetworkNotification();
+  }
+  /**
+   * Show network status notification to user
+   */
+  showNetworkNotification() {
+    let notification = document.getElementById("network-notification");
+    if (!notification) {
+      notification = document.createElement("div");
+      notification.id = "network-notification";
+      notification.style.cssText = `
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 10px 15px;
+                border-radius: 5px;
+                font-size: 14px;
+                z-index: 10000;
+                opacity: 0;
+                transition: opacity 0.3s;
+                pointer-events: none;
+            `;
+      document.body.appendChild(notification);
+    }
+    let message = "";
+    let icon = "";
+    switch (this.networkType) {
+      case "slow-2g":
+        message = "Very slow connection - Quality reduced";
+        icon = "🐌";
+        break;
+      case "2g":
+        message = "Slow connection - Quality reduced";
+        icon = "🐢";
+        break;
+      case "3g":
+        message = "Moderate connection - Balanced quality";
+        icon = "📶";
+        break;
+      case "4g":
+        message = "Good connection";
+        icon = "📶";
+        break;
+      case "wifi":
+        message = "Excellent connection";
+        icon = "📶";
+        break;
+    }
+    if (this.saveDataMode) {
+      message += " (Data saver on)";
+      icon = "💾";
+    }
+    notification.textContent = `${icon} ${message}`;
+    notification.style.opacity = "1";
+    setTimeout(() => {
+      notification.style.opacity = "0";
+    }, 3e3);
+  }
+  /**
+   * Get current network status
+   */
+  getStatus() {
+    return {
+      enabled: this.enabled,
+      networkType: this.networkType,
+      quality: this.currentQuality,
+      saveDataMode: this.saveDataMode,
+      settings: this.qualityLevels[this.networkType]
+    };
+  }
+  /**
+   * Manually set network type (for testing)
+   */
+  setNetworkType(type) {
+    if (this.qualityLevels[type]) {
+      console.log("[NetworkAdaptive] Manually setting network type to:", type);
+      this.networkType = type;
+      this.applyNetworkSettings();
+    }
+  }
+  /**
+   * Cleanup
+   */
+  destroy() {
+    this.enabled = false;
+    const notification = document.getElementById("network-notification");
+    if (notification) {
+      notification.remove();
+    }
+    if ("connection" in navigator && navigator.connection) {
+      navigator.connection.removeEventListener("change", this.applyNetworkSettings);
+    }
+  }
+}
+class PerformanceMonitor {
+  constructor(viewer) {
+    this.viewer = viewer;
+    this.isMonitoring = false;
+    this.frameCount = 0;
+    this.lastTime = performance.now();
+    this.fpsHistory = [];
+    this.frameTimes = [];
+    const isMobile2 = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    this.thresholds = {
+      fps: {
+        target: isMobile2 ? 45 : 60,
+        // Target 45 FPS on mobile
+        good: isMobile2 ? 35 : 50,
+        // Good at 35 FPS
+        acceptable: isMobile2 ? 25 : 35,
+        // Acceptable at 25 FPS
+        poor: isMobile2 ? 20 : 25,
+        // Poor at 20 FPS
+        critical: isMobile2 ? 15 : 15
+        // Critical remains at 15
+      },
+      frameTime: { target: isMobile2 ? 22 : 16.67, warning: 40 },
+      // 45 FPS target on mobile
+      memory: { warning: isMobile2 ? 200 : 300, critical: isMobile2 ? 300 : 400 }
+    };
+    this.metrics = this.getDefaultMetrics();
+    this.performanceHistory = [];
+    this.loadTimes = [];
+    this.config = {
+      historySize: { fps: 60, performance: 300, frameTimes: 60, loadTimes: 50 },
+      intervals: { monitoring: 250, debug: 100 },
+      optimization: { cooldown: 1e3 }
+    };
+    this.lastOptimization = Date.now();
+    this.intervals = {};
+  }
+  getDefaultMetrics() {
+    return {
+      currentFPS: 60,
+      averageFPS: 60,
+      minFPS: 60,
+      maxFPS: 60,
+      frameTime: 16.67,
+      maxFrameTime: 16.67,
+      droppedFrames: 0,
+      tileLoadTime: 0,
+      visibleTiles: 0,
+      cachedTiles: 0,
+      tilesLoading: 0,
+      memoryUsage: 0,
+      memoryLimit: 0,
+      gcCount: 0,
+      renderMode: "static",
+      drawCalls: 0,
+      canvasSize: 0,
+      zoomLevel: 1,
+      viewportCoverage: 0,
+      hotspotCount: 0,
+      performanceScore: 100
+    };
+  }
+  start() {
+    if (this.isMonitoring) return;
+    this.isMonitoring = true;
+    this.lastTime = performance.now();
+    this.measureFrame();
+    this.intervals.monitoring = setInterval(() => {
+      this.updateMetrics();
+      this.analyzePerformance();
+    }, this.config.intervals.monitoring);
+    this.setupEventHandlers();
+    console.log("Performance monitoring started - Target: 60 FPS");
+  }
+  stop() {
+    this.isMonitoring = false;
+    Object.values(this.intervals).forEach((interval) => clearInterval(interval));
+    this.intervals = {};
+    if (this.rafId) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+    }
+    this.removeEventHandlers();
+    console.log("Performance monitoring stopped");
+  }
+  pauseMonitoring() {
+    this.isPaused = true;
+    console.log("Performance monitoring paused");
+  }
+  resumeMonitoring() {
+    this.isPaused = false;
+    console.log("Performance monitoring resumed");
+  }
+  setupEventHandlers() {
+    const handlers = {
+      "tile-loaded": this.onTileLoaded,
+      "tile-load-failed": this.onTileLoadFailed,
+      "animation-start": () => this.metrics.renderMode = "animating",
+      "animation-finish": () => this.metrics.renderMode = "static"
+    };
+    Object.entries(handlers).forEach(
+      ([event, handler]) => this.viewer.addHandler(event, handler.bind(this))
+    );
+  }
+  removeEventHandlers() {
+    ["tile-loaded", "tile-load-failed", "animation-start", "animation-finish"].forEach((event) => this.viewer.removeAllHandlers(event));
+  }
+  measureFrame() {
+    if (!this.isMonitoring || this.isPaused) return;
+    const currentTime = performance.now();
+    const deltaTime = currentTime - this.lastTime;
+    this.updateFrameMetrics(deltaTime);
+    this.lastTime = currentTime;
+    this.frameCount++;
+    this.rafId = requestAnimationFrame(() => this.measureFrame());
+  }
+  updateFrameMetrics(deltaTime) {
+    this.frameTimes.push(deltaTime);
+    this.trimArray(this.frameTimes, this.config.historySize.frameTimes);
+    if (deltaTime > 0) {
+      const instantFPS = 1e3 / deltaTime;
+      this.fpsHistory.push(instantFPS);
+      this.trimArray(this.fpsHistory, this.config.historySize.fps);
+      this.metrics.currentFPS = instantFPS;
+      if (deltaTime > 20) this.metrics.droppedFrames++;
+    }
+  }
+  updateMetrics() {
+    this.updateFPSMetrics();
+    this.updateFrameTimeMetrics();
+    this.updateViewerMetrics();
+    this.updateTileMetrics();
+    this.updateMemoryMetrics();
+    this.calculatePerformanceScore();
+    this.trackPerformanceHistory();
+  }
+  updateFPSMetrics() {
+    if (this.fpsHistory.length === 0) return;
+    this.metrics.averageFPS = Math.round(this.average(this.fpsHistory));
+    this.metrics.minFPS = Math.round(Math.min(...this.fpsHistory));
+    this.metrics.maxFPS = Math.round(Math.max(...this.fpsHistory));
+  }
+  updateFrameTimeMetrics() {
+    if (this.frameTimes.length === 0) return;
+    this.metrics.frameTime = this.average(this.frameTimes).toFixed(2);
+    this.metrics.maxFrameTime = Math.max(...this.frameTimes).toFixed(2);
+  }
+  updateViewerMetrics() {
+    this.metrics.zoomLevel = this.viewer.viewport.getZoom(true).toFixed(2);
+    const canvas = this.viewer.drawer.canvas;
+    if (canvas) {
+      this.metrics.canvasSize = `${canvas.width}×${canvas.height}`;
+    }
+    const viewport = this.viewer.viewport;
+    const bounds = viewport.getBounds();
+    const homeBounds = this.viewer.world.getHomeBounds();
+    const coverage = bounds.width * bounds.height / (homeBounds.width * homeBounds.height);
+    this.metrics.viewportCoverage = Math.min(100, coverage * 100).toFixed(1);
+  }
+  updateTileMetrics() {
+    var _a, _b;
+    const world = this.viewer.world;
+    if (world.getItemCount() === 0) return;
+    const tiledImage = world.getItemAt(0);
+    if (!tiledImage) return;
+    this.metrics.visibleTiles = ((_a = tiledImage._tilesToDraw) == null ? void 0 : _a.length) || 0;
+    if (tiledImage._tileCache) {
+      const cache = tiledImage._tileCache;
+      this.metrics.cachedTiles = ((_b = cache._tilesLoaded) == null ? void 0 : _b.length) || cache._imagesLoadedCount || 0;
+    }
+    if (window.tileOptimizer) {
+      this.metrics.tilesLoading = window.tileOptimizer.getStats().loadingCount;
+    }
+  }
+  updateMemoryMetrics() {
+    if (!performance.memory) return;
+    this.metrics.memoryUsage = Math.round(performance.memory.usedJSHeapSize / 1048576);
+    this.metrics.memoryLimit = Math.round(performance.memory.jsHeapSizeLimit / 1048576);
+  }
+  calculatePerformanceScore() {
+    const { fps, frameTime, memory } = this.thresholds;
+    const scores = {
+      fps: Math.min(100, this.metrics.averageFPS / fps.target * 100) * 0.5,
+      frameTime: Math.min(100, frameTime.target / parseFloat(this.metrics.frameTime) * 100) * 0.2,
+      memory: this.metrics.memoryLimit > 0 ? Math.max(0, Math.min(100, (1 - this.metrics.memoryUsage / this.metrics.memoryLimit) * 100)) * 0.2 : 20,
+      droppedFrames: Math.max(0, 100 - Math.min(100, this.metrics.droppedFrames * 2)) * 0.1
+    };
+    this.metrics.performanceScore = Math.round(Object.values(scores).reduce((a, b) => a + b, 0));
+  }
+  trackPerformanceHistory() {
+    this.performanceHistory.push({
+      timestamp: Date.now(),
+      fps: this.metrics.averageFPS,
+      memory: this.metrics.memoryUsage,
+      tiles: this.metrics.visibleTiles,
+      score: this.metrics.performanceScore
+    });
+    this.trimArray(this.performanceHistory, this.config.historySize.performance);
+  }
+  analyzePerformance() {
+    const now = Date.now();
+    if (now - this.lastOptimization < this.config.optimization.cooldown) return;
+    const { fps } = this.thresholds;
+    const avgFPS = this.metrics.averageFPS;
+    const score = this.metrics.performanceScore;
+    const trend = this.getPerformanceTrend();
+    const optimizations = [
+      { condition: avgFPS < fps.critical || score < 30, action: this.applyCriticalOptimizations, log: "CRITICAL" },
+      { condition: avgFPS < fps.poor || score < 50, action: this.applyAggressiveOptimizations, log: "Poor" },
+      { condition: avgFPS < fps.good || score < 80, action: this.applyModerateOptimizations, log: "Below target" },
+      {
+        condition: avgFPS > fps.target && score > 90 && (trend === "improving" || trend === "stable"),
+        action: this.restoreQualitySettings,
+        log: null
+      }
+    ];
+    for (const opt of optimizations) {
+      if (opt.condition) {
+        if (opt.log) console[opt.log === "CRITICAL" ? "error" : "warn"](
+          `${opt.log} performance: Score ${score}, FPS: ${avgFPS}`
+        );
+        opt.action.call(this);
+        this.lastOptimization = now;
+        break;
+      }
+    }
+  }
+  getPerformanceTrend() {
+    if (this.performanceHistory.length < 20) return "stable";
+    const recent = this.performanceHistory.slice(-10);
+    const older = this.performanceHistory.slice(-20, -10);
+    const recentAvg = this.average(recent.map((p) => p.score));
+    const olderAvg = this.average(older.map((p) => p.score));
+    const diff = recentAvg - olderAvg;
+    return diff > 5 ? "improving" : diff < -5 ? "declining" : "stable";
+  }
+  applyCriticalOptimizations() {
+    Object.assign(this.viewer, {
+      imageLoaderLimit: 2,
+      maxImageCacheCount: 100,
+      smoothTileEdgesMinZoom: Infinity,
+      alwaysBlend: false,
+      immediateRender: true,
+      animationTime: 0.5,
+      springStiffness: 10
+    });
+    if (window.gc) window.gc();
+    console.log("Applied critical performance optimizations");
+  }
+  applyAggressiveOptimizations() {
+    this.viewer.imageLoaderLimit = Math.max(3, this.viewer.imageLoaderLimit - 1);
+    this.viewer.maxImageCacheCount = Math.max(200, this.viewer.maxImageCacheCount - 50);
+    this.viewer.animationTime = Math.max(0.8, this.viewer.animationTime - 0.1);
+    console.log("Applied aggressive performance optimizations");
+  }
+  applyModerateOptimizations() {
+    if (this.viewer.imageLoaderLimit > 4) {
+      this.viewer.imageLoaderLimit--;
+      console.log("Applied moderate performance optimizations");
+    }
+  }
+  restoreQualitySettings() {
+    var _a;
+    const config = (_a = window.performanceConfig) == null ? void 0 : _a.viewer;
+    if (!config) return;
+    const settings = [
+      { prop: "imageLoaderLimit", delta: 1, op: "increase" },
+      { prop: "maxImageCacheCount", delta: 50, op: "increase" },
+      { prop: "animationTime", delta: 0.1, op: "decrease" }
+    ];
+    settings.forEach(({ prop, delta, op }) => {
+      const current = this.viewer[prop];
+      const target = config[prop];
+      if (op === "increase" && current < target) {
+        this.viewer[prop] = Math.min(target, current + delta);
+      } else if (op === "decrease" && current > target) {
+        this.viewer[prop] = Math.max(target, current - delta);
+      }
+    });
+  }
+  onTileLoaded(event) {
+    var _a;
+    if ((_a = event.tile) == null ? void 0 : _a.loadTime) {
+      this.metrics.tileLoadTime = this.metrics.tileLoadTime * 0.9 + event.tile.loadTime * 0.1;
+    }
+  }
+  onTileLoadFailed(event) {
+    console.warn("Tile load failed:", event.tile);
+  }
+  trackLoadTime(loadTime) {
+    this.loadTimes.push(loadTime);
+    this.trimArray(this.loadTimes, this.config.historySize.loadTimes);
+    this.averageLoadTime = this.average(this.loadTimes);
+  }
+  getMetrics() {
+    const level = this.getPerformanceLevel();
+    return {
+      ...this.metrics,
+      instantFPS: this.metrics.currentFPS,
+      // Add instantFPS for real-time monitoring
+      performanceLevel: level,
+      trend: this.getPerformanceTrend(),
+      warnings: this.getWarnings(),
+      recommendations: this.getRecommendations()
+    };
+  }
+  getPerformanceLevel() {
+    const { averageFPS: fps, performanceScore: score } = this.metrics;
+    const { fps: thresholds } = this.thresholds;
+    const levels = [
+      { name: "excellent", condition: fps >= thresholds.target && score >= 90 },
+      { name: "good", condition: fps >= thresholds.good && score >= 80 },
+      { name: "acceptable", condition: fps >= thresholds.acceptable && score >= 60 },
+      { name: "poor", condition: fps >= thresholds.poor && score >= 40 },
+      { name: "critical", condition: true }
+    ];
+    return levels.find((l) => l.condition).name;
+  }
+  getWarnings() {
+    const m = this.metrics;
+    const t = this.thresholds;
+    const checks = [
+      { condition: m.averageFPS < t.fps.poor, message: `Low FPS: ${m.averageFPS} (target: ${t.fps.target})` },
+      // Only warn below 25 FPS
+      { condition: m.droppedFrames > 200, message: `Dropped frames: ${m.droppedFrames}` },
+      // More tolerance
+      { condition: parseFloat(m.frameTime) > t.frameTime.warning, message: `High frame time: ${m.frameTime}ms` },
+      { condition: m.memoryUsage > t.memory.critical, message: `High memory: ${m.memoryUsage}MB` },
+      { condition: m.cachedTiles > 3e3, message: `Large cache: ${m.cachedTiles} tiles` },
+      // Higher threshold
+      { condition: m.tileLoadTime > 500, message: `Slow tile loading: ${Math.round(m.tileLoadTime)}ms` }
+      // More tolerance
+    ];
+    return checks.filter((c) => c.condition).map((c) => c.message);
+  }
+  getRecommendations() {
+    const recs = [];
+    const m = this.metrics;
+    const t = this.thresholds;
+    if (m.averageFPS < t.fps.acceptable) {
+      if (m.renderMode === "animating") recs.push("Reduce animation time for smoother transitions");
+      if (m.cachedTiles > 1e3) recs.push("Clear tile cache to free memory");
+      if (m.visibleTiles > 50) recs.push("Zoom in to reduce visible tiles");
+    }
+    if (m.memoryUsage > t.memory.warning) recs.push("Consider reloading the page to clear memory");
+    if (m.tileLoadTime > 200) recs.push("Check network connection or reduce concurrent tile loads");
+    return recs;
+  }
+  enableDebugOverlay() {
+    if (this.debugOverlay) return;
+    this.debugOverlay = document.createElement("div");
+    this.debugOverlay.style.cssText = `
+            position: fixed; top: 10px; right: 10px; background: rgba(0, 0, 0, 0.85);
+            color: white; padding: 12px; font-family: 'SF Mono', Monaco, monospace;
+            font-size: 11px; border-radius: 6px; z-index: 9999; min-width: 180px;
+            backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        `;
+    document.body.appendChild(this.debugOverlay);
+    this.intervals.debug = setInterval(() => this.updateDebugOverlay(), this.config.intervals.debug);
+  }
+  updateDebugOverlay() {
+    if (!this.isMonitoring || !this.debugOverlay) return;
+    const m = this.getMetrics();
+    const levelColors = {
+      excellent: "#4CAF50",
+      good: "#8BC34A",
+      acceptable: "#FFC107",
+      poor: "#FF9800",
+      critical: "#F44336"
+    };
+    const fpsColor = m.currentFPS < 55 ? "#FF9800" : "#4CAF50";
+    const memoryColor = m.memoryUsage > 250 ? "#FF9800" : "#4CAF50";
+    this.debugOverlay.innerHTML = `
+            <div style="font-weight: bold; margin-bottom: 8px; font-size: 12px;">
+                Performance Monitor
+                <span style="float: right; color: ${levelColors[m.performanceLevel]};">
+                    ${m.performanceScore}%
+                </span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>FPS:</span>
+                <span style="color: ${fpsColor};">
+                    ${m.currentFPS.toFixed(0)} (avg: ${m.averageFPS})
+                </span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>Zoom:</span>
+                <span>${m.zoomLevel}x</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>Memory:</span>
+                <span style="color: ${memoryColor};">
+                    ${m.memoryUsage}MB
+                </span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>Status:</span>
+                <span style="color: ${levelColors[m.performanceLevel]}; font-weight: 500;">
+                    ${m.performanceLevel}
+                </span>
+            </div>
+        `;
+  }
+  disableDebugOverlay() {
+    if (this.debugOverlay) {
+      this.debugOverlay.remove();
+      this.debugOverlay = null;
+    }
+    if (this.intervals.debug) {
+      clearInterval(this.intervals.debug);
+      delete this.intervals.debug;
+    }
+  }
+  // Utility methods
+  average(arr) {
+    return arr.reduce((a, b) => a + b, 0) / arr.length;
+  }
+  trimArray(arr, maxLength) {
+    while (arr.length > maxLength) arr.shift();
+  }
+}
+class RenderOptimizer {
+  constructor(viewer) {
+    this.viewer = viewer;
+    this.state = {
+      isZoomingActive: false,
+      lastBlendTime: null,
+      lastStiffness: null,
+      isAnimating: false,
+      isZooming: false,
+      isPanning: false,
+      renderMode: "static",
+      consecutiveStaticFrames: 0,
+      canvasOptimized: false,
+      lastFrameTime: performance.now(),
+      isCinematicZoom: false,
+      frameSkipCount: 0
+    };
+    this.lastInteraction = Date.now();
+    this.lastZoomLevel = null;
+    this.lastCenter = null;
+    this.lastOptimizationTime = 0;
+    this.zoomStartLevel = null;
+    this.zoomVelocity = 0;
+    this.config = {
+      animationEndDelay: 80,
+      // Slightly longer for stability
+      pixelPerfectDelay: 50,
+      zoomThreshold: 5e-3,
+      // Less sensitive to avoid flickering
+      panThreshold: 5e-3,
+      smoothTransitionDuration: 150,
+      staticFramesBeforeOptimize: 5,
+      optimizationCooldown: 100,
+      forceGPU: true,
+      frameSkipThreshold: 33,
+      // Only skip if > 33ms (30 FPS)
+      zoomVelocityThreshold: 0.03
+    };
+    this.timers = {};
+    this.setupEventHandlers();
+    this.applyInitialOptimizations();
+    this.setupAggressiveZoomOptimization();
+    window.renderOptimizer = this;
+  }
+  setupEventHandlers() {
+    const handlers = {
+      "animation-start": () => this.handleAnimationStart(),
+      "animation-finish": () => this.handleAnimationFinish(),
+      "animation": () => this.handleAnimation(),
+      "viewport-change": () => this.handleViewportChange(),
+      "canvas-press": () => this.handleInteraction("press"),
+      "canvas-drag": () => this.handleInteraction("drag"),
+      "canvas-drag-end": () => this.handleInteraction("drag-end"),
+      "canvas-scroll": () => this.handleInteraction("scroll"),
+      "canvas-pinch": () => this.handleInteraction("pinch")
+    };
+    Object.entries(handlers).forEach(
+      ([event, handler]) => this.viewer.addHandler(event, handler)
+    );
+  }
+  applyInitialOptimizations() {
+    const container = this.viewer.container;
+    if (container) {
+      Object.assign(container.style, {
+        transform: "translateZ(0)",
+        willChange: "transform",
+        backfaceVisibility: "hidden",
+        perspective: "1000px"
+      });
+    }
+    setTimeout(() => this.applyCanvasOptimizations(), 100);
+  }
+  handleAnimationStart() {
+    this.clearTimers();
+    this.state.isAnimating = true;
+    this.state.consecutiveStaticFrames = 0;
+    this.setRenderMode("animation");
+  }
+  handleAnimationFinish() {
+    this.state.isAnimating = false;
+    this.timers.animationEnd = setTimeout(() => {
+      if (!this.isCurrentlyAnimating()) {
+        this.setRenderMode("static");
+      }
+    }, this.config.animationEndDelay);
+  }
+  handleAnimation() {
+    const now = performance.now();
+    const frameTime = now - this.state.lastFrameTime;
+    this.state.lastFrameTime = now;
+    const zoom = this.viewer.viewport.getZoom();
+    if (zoom < 3 && frameTime > 20 && this.state.isZooming) {
+      this.state.frameSkipCount++;
+      if (this.state.frameSkipCount % 2 === 0) {
+        return;
+      }
+    } else {
+      this.state.frameSkipCount = 0;
+    }
+    const timeSinceInteraction = Date.now() - this.lastInteraction;
+    if (timeSinceInteraction > 100 && !this.isCurrentlyAnimating()) {
+      this.state.consecutiveStaticFrames++;
+      if (this.state.consecutiveStaticFrames >= this.config.staticFramesBeforeOptimize) {
+        this.setRenderMode("static");
+      }
+    } else {
+      this.state.consecutiveStaticFrames = 0;
+    }
+  }
+  setupAggressiveZoomOptimization() {
+    let zoomDebounceTimer = null;
+    let isActivelyZooming = false;
+    this.viewer.addHandler("zoom", () => {
+      if (!isActivelyZooming) {
+        isActivelyZooming = true;
+        if (this.viewer.drawer && this.viewer.drawer.context) {
+          const ctx = this.viewer.drawer.context;
+          ctx.imageSmoothingEnabled = false;
+          ctx.globalAlpha = 1;
+        }
+        this.viewer.skipTileDrawing = true;
+      }
+      if (zoomDebounceTimer) {
+        clearTimeout(zoomDebounceTimer);
+      }
+      zoomDebounceTimer = setTimeout(() => {
+        isActivelyZooming = false;
+        if (this.viewer.drawer && this.viewer.drawer.context) {
+          const ctx = this.viewer.drawer.context;
+          ctx.imageSmoothingEnabled = true;
+          ctx.globalAlpha = 1;
+        }
+        this.viewer.skipTileDrawing = false;
+        this.viewer.forceRedraw();
+        zoomDebounceTimer = null;
+      }, 150);
+    });
+  }
+  handleViewportChange() {
+    const currentZoom = this.viewer.viewport.getZoom(true);
+    const currentCenter = this.viewer.viewport.getCenter(true);
+    if (this.lastZoomLevel !== null) {
+      const zoomDelta = Math.abs(currentZoom - this.lastZoomLevel);
+      this.zoomVelocity = this.zoomVelocity * 0.7 + zoomDelta * 0.3;
+      this.state.isZooming = zoomDelta > this.config.zoomThreshold || this.zoomVelocity > this.config.zoomVelocityThreshold;
+      this.applyZoomOptimizations(this.state.isZooming);
+      if (this.state.isZooming) {
+        this.lastInteraction = Date.now();
+        if (!this.zoomStartLevel) {
+          this.zoomStartLevel = this.lastZoomLevel;
+        }
+      } else if (this.zoomStartLevel) {
+        this.zoomStartLevel = null;
+        this.scheduleStaticMode();
+      }
+    }
+    if (this.lastCenter !== null) {
+      const panDelta = Math.sqrt(
+        Math.pow(currentCenter.x - this.lastCenter.x, 2) + Math.pow(currentCenter.y - this.lastCenter.y, 2)
+      );
+      this.state.isPanning = panDelta > this.config.panThreshold;
+      if (this.state.isPanning) {
+        this.lastInteraction = Date.now();
+      }
+    }
+    this.lastZoomLevel = currentZoom;
+    this.lastCenter = currentCenter;
+  }
+  applyZoomOptimizations(isZooming) {
+    var _a, _b;
+    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      return;
+    }
+    const config = (_b = (_a = window.performanceConfig) == null ? void 0 : _a.renderOptimization) == null ? void 0 : _b.zoomOptimizations;
+    if (!config) return;
+    if (isZooming && !this.state.isZoomingActive) {
+      this.state.isZoomingActive = true;
+      if (this.viewer.world.getItemCount() > 0) {
+        const tiledImage = this.viewer.world.getItemAt(0);
+        if (tiledImage) {
+          this.state.lastBlendTime = 0;
+          tiledImage.blendTime = 0;
+        }
+      }
+      this.state.lastStiffness = this.viewer.viewport.zoomSpring.springStiffness;
+      this.viewer.viewport.zoomSpring.springStiffness = 10;
+      this.viewer.viewport.centerSpringX.springStiffness = 10;
+      this.viewer.viewport.centerSpringY.springStiffness = 10;
+      this.viewer.immediateRender = true;
+      if (window.tileCleanupManager) {
+        window.tileCleanupManager.pauseCleanup(2e3);
+      }
+    } else if (!isZooming && this.state.isZoomingActive) {
+      this.state.isZoomingActive = false;
+      if (this.viewer.world.getItemCount() > 0) {
+        const tiledImage = this.viewer.world.getItemAt(0);
+        if (tiledImage) {
+          tiledImage.blendTime = 0;
+        }
+      }
+      if (this.state.lastStiffness !== null) {
+        this.viewer.viewport.zoomSpring.springStiffness = this.state.lastStiffness;
+        this.viewer.viewport.centerSpringX.springStiffness = this.state.lastStiffness;
+        this.viewer.viewport.centerSpringY.springStiffness = this.state.lastStiffness;
+      }
+      this.viewer.immediateRender = false;
+    }
+  }
+  handleInteraction(type) {
+    var _a;
+    this.lastInteraction = Date.now();
+    const actions = {
+      "press": () => this.setRenderMode("animation"),
+      "drag": () => {
+        this.state.isPanning = true;
+        this.setRenderMode("animation");
+      },
+      "drag-end": () => {
+        this.state.isPanning = false;
+        this.scheduleStaticMode();
+      },
+      "scroll": () => {
+        this.state.isZooming = true;
+        this.setRenderMode("animation");
+      },
+      "pinch": () => {
+        this.state.isZooming = true;
+        this.setRenderMode("animation");
+      }
+    };
+    (_a = actions[type]) == null ? void 0 : _a.call(actions);
+  }
+  setRenderMode(mode) {
+    var _a, _b;
+    if (this.state.renderMode === mode) return;
+    const previousMode = this.state.renderMode;
+    this.state.renderMode = mode;
+    if (mode === "animation") {
+      this.removeCanvasOptimizations();
+      this.disablePixelPerfect();
+    } else if (mode === "static") {
+      requestAnimationFrame(() => {
+        this.applyCanvasOptimizations();
+        this.enablePixelPerfect();
+      });
+    }
+    if ((_b = (_a = window.performanceConfig) == null ? void 0 : _a.debug) == null ? void 0 : _b.logPerformance) {
+      console.log(`Render mode: ${previousMode} → ${mode}`);
+    }
+  }
+  scheduleStaticMode() {
+    this.clearTimers();
+    this.timers.interaction = setTimeout(() => {
+      if (!this.isCurrentlyAnimating()) {
+        this.setRenderMode("static");
+      }
+    }, this.config.animationEndDelay);
+  }
+  applyCanvasOptimizations() {
+    var _a, _b;
+    const now = Date.now();
+    if (now - this.lastOptimizationTime < this.config.optimizationCooldown) return;
+    const canvas = (_a = this.viewer.drawer) == null ? void 0 : _a.canvas;
+    const context = (_b = this.viewer.drawer) == null ? void 0 : _b.context;
+    if (!canvas || !context) return;
+    Object.assign(canvas.style, {
+      transform: "translateZ(0)",
+      willChange: "transform",
+      backfaceVisibility: "hidden"
+    });
+    this.setContextSmoothing(context, true);
+    context.imageSmoothingQuality = "high";
+    this.state.canvasOptimized = true;
+    this.lastOptimizationTime = now;
+  }
+  removeCanvasOptimizations() {
+    var _a;
+    const context = (_a = this.viewer.drawer) == null ? void 0 : _a.context;
+    if (!context) return;
+    this.setContextSmoothing(context, true);
+    context.imageSmoothingQuality = "medium";
+    this.state.canvasOptimized = false;
+  }
+  setContextSmoothing(context, enabled) {
+    const props = [
+      "imageSmoothingEnabled",
+      "msImageSmoothingEnabled",
+      "webkitImageSmoothingEnabled",
+      "mozImageSmoothingEnabled"
+    ];
+    props.forEach((prop) => {
+      if (prop in context) context[prop] = enabled;
+    });
+  }
+  clearTimers() {
+    Object.entries(this.timers).forEach(([key, timer]) => {
+      clearTimeout(timer);
+      delete this.timers[key];
+    });
+  }
+  disablePixelPerfect() {
+    this.applyTileStyles({
+      imageRendering: "auto",
+      filter: "none",
+      transform: "translateZ(0)"
+    });
+  }
+  enablePixelPerfect() {
+    if (this.state.renderMode !== "static") return;
+    requestAnimationFrame(() => {
+      this.applyTileStyles({
+        imageRendering: "auto",
+        // Let browser decide
+        transform: "translateZ(0)",
+        willChange: "auto",
+        backfaceVisibility: "hidden"
+      });
+    });
+  }
+  applyTileStyles(styles) {
+    const tiles = this.viewer.container.querySelectorAll(".openseadragon-tile");
+    tiles.forEach((tile) => Object.assign(tile.style, styles));
+  }
+  isCurrentlyAnimating() {
+    return this.state.isAnimating || this.state.isZooming || this.state.isPanning;
+  }
+  getRenderMode() {
+    return this.state.renderMode;
+  }
+  getStatus() {
+    return {
+      ...this.state,
+      timeSinceInteraction: Date.now() - this.lastInteraction,
+      zoomVelocity: this.zoomVelocity.toFixed(4),
+      isOptimized: this.state.canvasOptimized
+    };
+  }
+  updateConfig(newConfig) {
+    Object.assign(this.config, newConfig);
+  }
+  startCinematicZoom() {
+    const isMobile2 = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile2) {
+      console.log("Skipping ALL cinematic zoom optimizations on mobile");
+      this.state.isCinematicZoom = false;
+      return;
+    }
+    this.state.isCinematicZoom = true;
+    this.cinematicBackup = {
+      immediateRender: this.viewer.immediateRender,
+      maxTilesPerFrame: this.viewer.maxTilesPerFrame,
+      smoothTileEdges: this.viewer.smoothTileEdgesMinZoom,
+      preserveViewport: this.viewer.preserveViewport
+    };
+    this.viewer.immediateRender = true;
+    this.viewer.maxTilesPerFrame = 2;
+    this.viewer.smoothTileEdgesMinZoom = Infinity;
+    this.viewer.preserveViewport = true;
+    if (this.viewer.imageLoader) {
+      this.viewer.imageLoader.jobLimit = 1;
+    }
+    if (window.canvasOverlayManager) {
+      window.canvasOverlayManager.prepareForZoom();
+    }
+    console.log("Cinematic zoom optimization started");
+  }
+  endCinematicZoom() {
+    var _a, _b;
+    if (!this.state.isCinematicZoom) return;
+    this.state.isCinematicZoom = false;
+    if (this.cinematicBackup) {
+      this.viewer.immediateRender = this.cinematicBackup.immediateRender;
+      this.viewer.maxTilesPerFrame = this.cinematicBackup.maxTilesPerFrame;
+      this.viewer.smoothTileEdgesMinZoom = this.cinematicBackup.smoothTileEdges;
+      if (this.viewer.imageLoader) {
+        this.viewer.imageLoader.jobLimit = ((_b = (_a = window.performanceConfig) == null ? void 0 : _a.viewer) == null ? void 0 : _b.imageLoaderLimit) || 6;
+      }
+    }
+    this.viewer.forceRedraw();
+    if (window.canvasOverlayManager) {
+      window.canvasOverlayManager.endZoom();
+    }
+    console.log("Cinematic zoom optimization ended");
+  }
+  destroy() {
+    this.clearTimers();
+    [
+      "animation-start",
+      "animation-finish",
+      "animation",
+      "viewport-change",
+      "canvas-press",
+      "canvas-drag",
+      "canvas-drag-end",
+      "canvas-scroll",
+      "canvas-pinch"
+    ].forEach((event) => this.viewer.removeAllHandlers(event));
+    this.removeCanvasOptimizations();
+    this.viewer = null;
+  }
+}
+class SafariPerformanceOptimizer {
+  constructor(viewer) {
+    this.viewer = viewer;
+    this.isInteracting = false;
+    this.highQualityTimeout = null;
+    this.basePixelRatio = window.devicePixelRatio || 1;
+    this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+    this.lastInteractionStart = 0;
+    this.interactionCount = 0;
+    this.averageFPS = 60;
+    this.lastPosition = null;
+    this.velocity = 0;
+    this.velocityBuffer = [];
+    this.velocityCheckInterval = null;
+    this.scalingFactor = this.isIOS ? 0.5 : 0.35;
+    this.restoreDelay = this.isIOS ? 300 : 300;
+    console.log("SafariPerformanceOptimizer initialized:", {
+      isSafari: this.isSafari,
+      isIOS: this.isIOS,
+      basePixelRatio: this.basePixelRatio,
+      scalingFactor: this.scalingFactor
+    });
+    if (this.isSafari) {
+      this.setupEventHandlers();
+      this.applyInitialOptimizations();
+    }
+  }
+  setupEventHandlers() {
+    let interactionDebounce = null;
+    const debouncedStart = () => {
+      if (interactionDebounce) clearTimeout(interactionDebounce);
+      interactionDebounce = setTimeout(() => {
+        this.startInteraction();
+      }, 16);
+    };
+    this.viewer.addHandler("animation-start", debouncedStart);
+    this.viewer.addHandler("pan", debouncedStart);
+    this.viewer.addHandler("zoom", debouncedStart);
+    if (this.isIOS) {
+      this.viewer.addHandler("canvas-pinch", debouncedStart);
+    }
+    this.viewer.addHandler("animation-finish", () => this.endInteraction());
+    const canvas = this.viewer.canvas;
+    if (canvas) {
+      canvas.addEventListener("touchstart", debouncedStart, { passive: true });
+      canvas.addEventListener("mousedown", debouncedStart, { passive: true });
+    }
+  }
+  applyInitialOptimizations() {
+    if (this.viewer.drawer && this.viewer.drawer.canvas) {
+      const canvas = this.viewer.drawer.canvas;
+      if (this.isIOS) {
+        const viewportSize = this.viewer.viewport.getContainerSize();
+        const pixelRatio = this.viewer.drawer.pixelRatio || this.basePixelRatio;
+        canvas.width = Math.floor(viewportSize.x * pixelRatio);
+        canvas.height = Math.floor(viewportSize.y * pixelRatio);
+        console.log("iOS Canvas Fix: Initial dimensions floored to prevent oversizing", {
+          width: canvas.width,
+          height: canvas.height,
+          pixelRatio,
+          originalWidth: viewportSize.x * pixelRatio,
+          originalHeight: viewportSize.y * pixelRatio
+        });
+      }
+      canvas.style.transform = "translateZ(0)";
+      canvas.style.willChange = "transform";
+      canvas.style.backfaceVisibility = "hidden";
+      canvas.style.webkitBackfaceVisibility = "hidden";
+      canvas.style.outline = "none";
+    }
+    if (this.viewer.drawer && this.viewer.drawer.context) {
+      const ctx = this.viewer.drawer.context;
+      ctx.imageSmoothingEnabled = false;
+      ctx.webkitImageSmoothingEnabled = false;
+    }
+  }
+  startInteraction() {
+    var _a;
+    if (!this.isSafari || this.isInteracting) return;
+    this.isInteracting = true;
+    this.lastInteractionStart = performance.now();
+    this.interactionCount++;
+    this.velocityBuffer = [];
+    this.lastPosition = null;
+    if (this.velocityCheckInterval) {
+      clearInterval(this.velocityCheckInterval);
+    }
+    this.velocityCheckInterval = setInterval(() => {
+      this.updateVelocity();
+    }, 16);
+    clearTimeout(this.highQualityTimeout);
+    if (!this.originalPixelRatio && this.viewer.drawer) {
+      this.originalPixelRatio = this.viewer.drawer.pixelRatio || this.basePixelRatio;
+    }
+    const reducedRatio = this.originalPixelRatio * this.scalingFactor;
+    console.log("Safari: Reducing render quality for interaction", {
+      from: this.originalPixelRatio,
+      to: reducedRatio,
+      scalingFactor: this.scalingFactor
+    });
+    if (this.viewer.drawer) {
+      this.viewer.drawer.pixelRatio = reducedRatio;
+      if (this.viewer.drawer.canvas) {
+        const viewportSize = this.viewer.viewport.getContainerSize();
+        this.viewer.drawer.canvas.width = Math.floor(viewportSize.x * reducedRatio);
+        this.viewer.drawer.canvas.height = Math.floor(viewportSize.y * reducedRatio);
+      }
+    }
+    if (this.viewer.drawer) {
+      if (this.viewer.drawer.context) {
+        this.viewer.drawer.context.imageSmoothingEnabled = false;
+        this.viewer.drawer.context.webkitImageSmoothingEnabled = false;
+      }
+      this.viewer.immediateRender = true;
+      this.viewer.blendTime = 0;
+      this.viewer.alwaysBlend = false;
+      this.originalSettings = {
+        immediateRender: this.viewer.immediateRender,
+        blendTime: this.viewer.blendTime,
+        alwaysBlend: this.viewer.alwaysBlend,
+        imageLoaderLimit: (_a = this.viewer.imageLoader) == null ? void 0 : _a.jobLimit
+      };
+    }
+    if (this.viewer.imageLoader) {
+      this.viewer.imageLoader.jobLimit = 1;
+    }
+    if (this.viewer.world) {
+      const tiledImage = this.viewer.world.getItemAt(0);
+      if (tiledImage) {
+        tiledImage.skipLevelIfLargerThan = 0.9;
+      }
+    }
+    if (this.averageFPS < 15 && this.scalingFactor <= 0.2) {
+      console.log("Safari: ULTRA PERFORMANCE MODE activated");
+      this.viewer.minPixelRatio = 2;
+      this.viewer.maxTilesPerFrame = 1;
+      this.viewer.visibilityRatio = 1;
+      if (window.nativeHotspotRenderer) {
+        window.nativeHotspotRenderer.performanceMode = true;
+      }
+    }
+    if (this.viewer.tileCache) {
+      const cache = this.viewer.tileCache;
+      this.originalCacheSize = cache._maxImageCacheCount;
+      cache._maxImageCacheCount = Math.floor(this.originalCacheSize * 0.3);
+    }
+    this.viewer.forceRedraw();
+  }
+  endInteraction() {
+    if (!this.isSafari || !this.isInteracting) return;
+    this.isInteracting = false;
+    if (this.velocityCheckInterval) {
+      clearInterval(this.velocityCheckInterval);
+      this.velocityCheckInterval = null;
+    }
+    const duration = performance.now() - this.lastInteractionStart;
+    console.log(`Safari: Interaction ended (duration: ${duration.toFixed(0)}ms)`);
+    this.highQualityTimeout = setTimeout(() => {
+      const restoreRatio = this.originalPixelRatio || this.basePixelRatio;
+      console.log("Safari: Restoring full render quality", {
+        to: restoreRatio
+      });
+      if (this.viewer.drawer) {
+        this.viewer.drawer.pixelRatio = restoreRatio;
+        if (this.viewer.drawer.canvas) {
+          const viewportSize = this.viewer.viewport.getContainerSize();
+          this.viewer.drawer.canvas.width = Math.floor(viewportSize.x * restoreRatio);
+          this.viewer.drawer.canvas.height = Math.floor(viewportSize.y * restoreRatio);
+        }
+      }
+      if (this.originalSettings) {
+        this.viewer.immediateRender = this.originalSettings.immediateRender !== void 0 ? this.originalSettings.immediateRender : false;
+        this.viewer.blendTime = this.originalSettings.blendTime !== void 0 ? this.originalSettings.blendTime : 0.5;
+        this.viewer.alwaysBlend = this.originalSettings.alwaysBlend !== void 0 ? this.originalSettings.alwaysBlend : false;
+        if (this.viewer.imageLoader && this.originalSettings.imageLoaderLimit) {
+          this.viewer.imageLoader.jobLimit = this.originalSettings.imageLoaderLimit;
+        }
+      }
+      if (this.viewer.drawer && this.viewer.drawer.context) {
+        this.viewer.drawer.context.imageSmoothingEnabled = true;
+        this.viewer.drawer.context.webkitImageSmoothingEnabled = true;
+      }
+      if (this.viewer.world) {
+        const tiledImage = this.viewer.world.getItemAt(0);
+        if (tiledImage) {
+          tiledImage.skipLevelIfLargerThan = Infinity;
+        }
+      }
+      if (this.viewer.tileCache && this.originalCacheSize) {
+        this.viewer.tileCache._maxImageCacheCount = this.originalCacheSize;
+      }
+      this.viewer.forceRedraw();
+    }, this.restoreDelay);
+  }
+  /**
+   * Calculate velocity and adjust quality based on movement speed
+   */
+  updateVelocity() {
+    if (!this.viewer.viewport) return;
+    const currentPosition = this.viewer.viewport.getCenter();
+    if (this.lastPosition) {
+      const deltaX = currentPosition.x - this.lastPosition.x;
+      const deltaY = currentPosition.y - this.lastPosition.y;
+      const frameVelocity = Math.sqrt(deltaX * deltaX + deltaY * deltaY) * 1e3;
+      this.velocityBuffer.push(frameVelocity);
+      if (this.velocityBuffer.length > 3) {
+        this.velocityBuffer.shift();
+      }
+      this.velocity = this.velocityBuffer.reduce((a, b) => a + b, 0) / this.velocityBuffer.length;
+      let targetScaling;
+      if (this.velocity > 10) {
+        targetScaling = 0.5;
+      } else if (this.velocity > 5) {
+        targetScaling = 0.65;
+      } else if (this.velocity > 2) {
+        targetScaling = 0.75;
+      } else {
+        targetScaling = 0.85;
+      }
+      this.scalingFactor = this.scalingFactor * 0.7 + targetScaling * 0.3;
+      if (this.isInteracting && this.viewer.drawer) {
+        const newPixelRatio = (this.originalPixelRatio || this.basePixelRatio) * this.scalingFactor;
+        if (Math.abs(this.viewer.drawer.pixelRatio - newPixelRatio) > 0.05) {
+          this.viewer.drawer.pixelRatio = newPixelRatio;
+          if (this.viewer.drawer.canvas) {
+            const viewportSize = this.viewer.viewport.getContainerSize();
+            this.viewer.drawer.canvas.width = Math.floor(viewportSize.x * newPixelRatio);
+            this.viewer.drawer.canvas.height = Math.floor(viewportSize.y * newPixelRatio);
+          }
+        }
+      }
+    }
+    this.lastPosition = currentPosition;
+  }
+  /**
+   * Dynamically adjust scaling factor based on performance
+   */
+  updatePerformanceMetrics(currentFPS, isInteracting = false) {
+    this.averageFPS = this.averageFPS * 0.9 + currentFPS * 0.1;
+    if (this.averageFPS < 20 && this.scalingFactor > 0.4) {
+      this.scalingFactor = 0.4;
+      if (isInteracting) {
+        console.log(`Safari: EMERGENCY - Reduced scaling factor to ${this.scalingFactor} due to very low FPS`);
+      }
+    } else if (this.averageFPS < 30 && this.scalingFactor > 0.4) {
+      this.scalingFactor = Math.max(0.4, this.scalingFactor - 0.1);
+      if (isInteracting) {
+        console.log(`Safari: Reduced scaling factor to ${this.scalingFactor} due to low FPS`);
+      }
+    } else if (this.averageFPS > 50 && this.scalingFactor < 0.75) {
+      this.scalingFactor = Math.min(0.75, this.scalingFactor + 0.05);
+      if (isInteracting) {
+        console.log(`Safari: Increased scaling factor to ${this.scalingFactor} due to good FPS`);
+      }
+    }
+  }
+  /**
+   * Force optimization (for testing)
+   */
+  forceOptimization(enable) {
+    if (enable) {
+      this.startInteraction();
+      clearTimeout(this.highQualityTimeout);
+    } else {
+      this.isInteracting = false;
+      this.endInteraction();
+    }
+  }
+  /**
+   * Get current optimization state
+   */
+  getState() {
+    const currentPixelRatio = this.viewer.drawer ? this.viewer.drawer.pixelRatio : this.basePixelRatio;
+    return {
+      isActive: this.isSafari,
+      isInteracting: this.isInteracting,
+      currentPixelRatio,
+      basePixelRatio: this.basePixelRatio,
+      scalingFactor: this.scalingFactor,
+      averageFPS: this.averageFPS.toFixed(1),
+      platform: this.isIOS ? "iOS Safari" : "Desktop Safari"
+    };
+  }
+  /**
+   * Cleanup
+   */
+  destroy() {
+    clearTimeout(this.highQualityTimeout);
+    if (this.velocityCheckInterval) {
+      clearInterval(this.velocityCheckInterval);
+    }
+  }
+}
+class FlatQueue {
+  constructor() {
+    this.ids = [];
+    this.values = [];
+    this.length = 0;
+  }
+  clear() {
+    this.length = 0;
+  }
+  push(id, value) {
+    let pos = this.length++;
+    while (pos > 0) {
+      const parent = pos - 1 >> 1;
+      const parentValue = this.values[parent];
+      if (value >= parentValue) break;
+      this.ids[pos] = this.ids[parent];
+      this.values[pos] = parentValue;
+      pos = parent;
+    }
+    this.ids[pos] = id;
+    this.values[pos] = value;
+  }
+  pop() {
+    if (this.length === 0) return void 0;
+    const top = this.ids[0];
+    this.length--;
+    if (this.length > 0) {
+      const id = this.ids[0] = this.ids[this.length];
+      const value = this.values[0] = this.values[this.length];
+      const halfLength = this.length >> 1;
+      let pos = 0;
+      while (pos < halfLength) {
+        let left = (pos << 1) + 1;
+        const right = left + 1;
+        let bestIndex = this.ids[left];
+        let bestValue = this.values[left];
+        const rightValue = this.values[right];
+        if (right < this.length && rightValue < bestValue) {
+          left = right;
+          bestIndex = this.ids[right];
+          bestValue = rightValue;
+        }
+        if (bestValue >= value) break;
+        this.ids[pos] = bestIndex;
+        this.values[pos] = bestValue;
+        pos = left;
+      }
+      this.ids[pos] = id;
+      this.values[pos] = value;
+    }
+    return top;
+  }
+  peek() {
+    if (this.length === 0) return void 0;
+    return this.ids[0];
+  }
+  peekValue() {
+    if (this.length === 0) return void 0;
+    return this.values[0];
+  }
+  shrink() {
+    this.ids.length = this.values.length = this.length;
+  }
+}
+const ARRAY_TYPES = [Int8Array, Uint8Array, Uint8ClampedArray, Int16Array, Uint16Array, Int32Array, Uint32Array, Float32Array, Float64Array];
+const VERSION = 3;
+class Flatbush {
+  /**
+   * Recreate a Flatbush index from raw `ArrayBuffer` or `SharedArrayBuffer` data.
+   * @param {ArrayBufferLike} data
+   * @param {number} [byteOffset=0] byte offset to the start of the Flatbush buffer in the referenced ArrayBuffer.
+   * @returns {Flatbush} index
+   */
+  static from(data, byteOffset = 0) {
+    if (byteOffset % 8 !== 0) {
+      throw new Error("byteOffset must be 8-byte aligned.");
+    }
+    if (!data || data.byteLength === void 0 || data.buffer) {
+      throw new Error("Data must be an instance of ArrayBuffer or SharedArrayBuffer.");
+    }
+    const [magic, versionAndType] = new Uint8Array(data, byteOffset + 0, 2);
+    if (magic !== 251) {
+      throw new Error("Data does not appear to be in a Flatbush format.");
+    }
+    const version = versionAndType >> 4;
+    if (version !== VERSION) {
+      throw new Error(`Got v${version} data when expected v${VERSION}.`);
+    }
+    const ArrayType = ARRAY_TYPES[versionAndType & 15];
+    if (!ArrayType) {
+      throw new Error("Unrecognized array type.");
+    }
+    const [nodeSize] = new Uint16Array(data, byteOffset + 2, 1);
+    const [numItems] = new Uint32Array(data, byteOffset + 4, 1);
+    return new Flatbush(numItems, nodeSize, ArrayType, void 0, data, byteOffset);
+  }
+  /**
+   * Create a Flatbush index that will hold a given number of items.
+   * @param {number} numItems
+   * @param {number} [nodeSize=16] Size of the tree node (16 by default).
+   * @param {TypedArrayConstructor} [ArrayType=Float64Array] The array type used for coordinates storage (`Float64Array` by default).
+   * @param {ArrayBufferConstructor | SharedArrayBufferConstructor} [ArrayBufferType=ArrayBuffer] The array buffer type used to store data (`ArrayBuffer` by default).
+   * @param {ArrayBufferLike} [data] (Only used internally)
+   * @param {number} [byteOffset=0] (Only used internally)
+   */
+  constructor(numItems, nodeSize = 16, ArrayType = Float64Array, ArrayBufferType = ArrayBuffer, data, byteOffset = 0) {
+    if (numItems === void 0) throw new Error("Missing required argument: numItems.");
+    if (isNaN(numItems) || numItems <= 0) throw new Error(`Unexpected numItems value: ${numItems}.`);
+    this.numItems = +numItems;
+    this.nodeSize = Math.min(Math.max(+nodeSize, 2), 65535);
+    this.byteOffset = byteOffset;
+    let n = numItems;
+    let numNodes = n;
+    this._levelBounds = [n * 4];
+    do {
+      n = Math.ceil(n / this.nodeSize);
+      numNodes += n;
+      this._levelBounds.push(numNodes * 4);
+    } while (n !== 1);
+    this.ArrayType = ArrayType;
+    this.IndexArrayType = numNodes < 16384 ? Uint16Array : Uint32Array;
+    const arrayTypeIndex = ARRAY_TYPES.indexOf(ArrayType);
+    const nodesByteSize = numNodes * 4 * ArrayType.BYTES_PER_ELEMENT;
+    if (arrayTypeIndex < 0) {
+      throw new Error(`Unexpected typed array class: ${ArrayType}.`);
+    }
+    if (data) {
+      this.data = data;
+      this._boxes = new ArrayType(data, byteOffset + 8, numNodes * 4);
+      this._indices = new this.IndexArrayType(data, byteOffset + 8 + nodesByteSize, numNodes);
+      this._pos = numNodes * 4;
+      this.minX = this._boxes[this._pos - 4];
+      this.minY = this._boxes[this._pos - 3];
+      this.maxX = this._boxes[this._pos - 2];
+      this.maxY = this._boxes[this._pos - 1];
+    } else {
+      const data2 = this.data = new ArrayBufferType(8 + nodesByteSize + numNodes * this.IndexArrayType.BYTES_PER_ELEMENT);
+      this._boxes = new ArrayType(data2, 8, numNodes * 4);
+      this._indices = new this.IndexArrayType(data2, 8 + nodesByteSize, numNodes);
+      this._pos = 0;
+      this.minX = Infinity;
+      this.minY = Infinity;
+      this.maxX = -Infinity;
+      this.maxY = -Infinity;
+      new Uint8Array(data2, 0, 2).set([251, (VERSION << 4) + arrayTypeIndex]);
+      new Uint16Array(data2, 2, 1)[0] = nodeSize;
+      new Uint32Array(data2, 4, 1)[0] = numItems;
+    }
+    this._queue = new FlatQueue();
+  }
+  /**
+   * Add a given rectangle to the index.
+   * @param {number} minX
+   * @param {number} minY
+   * @param {number} maxX
+   * @param {number} maxY
+   * @returns {number} A zero-based, incremental number that represents the newly added rectangle.
+   */
+  add(minX, minY, maxX = minX, maxY = minY) {
+    const index = this._pos >> 2;
+    const boxes = this._boxes;
+    this._indices[index] = index;
+    boxes[this._pos++] = minX;
+    boxes[this._pos++] = minY;
+    boxes[this._pos++] = maxX;
+    boxes[this._pos++] = maxY;
+    if (minX < this.minX) this.minX = minX;
+    if (minY < this.minY) this.minY = minY;
+    if (maxX > this.maxX) this.maxX = maxX;
+    if (maxY > this.maxY) this.maxY = maxY;
+    return index;
+  }
+  /** Perform indexing of the added rectangles. */
+  finish() {
+    if (this._pos >> 2 !== this.numItems) {
+      throw new Error(`Added ${this._pos >> 2} items when expected ${this.numItems}.`);
+    }
+    const boxes = this._boxes;
+    if (this.numItems <= this.nodeSize) {
+      boxes[this._pos++] = this.minX;
+      boxes[this._pos++] = this.minY;
+      boxes[this._pos++] = this.maxX;
+      boxes[this._pos++] = this.maxY;
+      return;
+    }
+    const width = this.maxX - this.minX || 1;
+    const height = this.maxY - this.minY || 1;
+    const hilbertValues = new Uint32Array(this.numItems);
+    const hilbertMax = (1 << 16) - 1;
+    for (let i = 0, pos = 0; i < this.numItems; i++) {
+      const minX = boxes[pos++];
+      const minY = boxes[pos++];
+      const maxX = boxes[pos++];
+      const maxY = boxes[pos++];
+      const x = Math.floor(hilbertMax * ((minX + maxX) / 2 - this.minX) / width);
+      const y = Math.floor(hilbertMax * ((minY + maxY) / 2 - this.minY) / height);
+      hilbertValues[i] = hilbert(x, y);
+    }
+    sort(hilbertValues, boxes, this._indices, 0, this.numItems - 1, this.nodeSize);
+    for (let i = 0, pos = 0; i < this._levelBounds.length - 1; i++) {
+      const end = this._levelBounds[i];
+      while (pos < end) {
+        const nodeIndex = pos;
+        let nodeMinX = boxes[pos++];
+        let nodeMinY = boxes[pos++];
+        let nodeMaxX = boxes[pos++];
+        let nodeMaxY = boxes[pos++];
+        for (let j = 1; j < this.nodeSize && pos < end; j++) {
+          nodeMinX = Math.min(nodeMinX, boxes[pos++]);
+          nodeMinY = Math.min(nodeMinY, boxes[pos++]);
+          nodeMaxX = Math.max(nodeMaxX, boxes[pos++]);
+          nodeMaxY = Math.max(nodeMaxY, boxes[pos++]);
+        }
+        this._indices[this._pos >> 2] = nodeIndex;
+        boxes[this._pos++] = nodeMinX;
+        boxes[this._pos++] = nodeMinY;
+        boxes[this._pos++] = nodeMaxX;
+        boxes[this._pos++] = nodeMaxY;
+      }
+    }
+  }
+  /**
+   * Search the index by a bounding box.
+   * @param {number} minX
+   * @param {number} minY
+   * @param {number} maxX
+   * @param {number} maxY
+   * @param {(index: number) => boolean} [filterFn] An optional function for filtering the results.
+   * @returns {number[]} An array of indices of items intersecting or touching the given bounding box.
+   */
+  search(minX, minY, maxX, maxY, filterFn) {
+    if (this._pos !== this._boxes.length) {
+      throw new Error("Data not yet indexed - call index.finish().");
+    }
+    let nodeIndex = this._boxes.length - 4;
+    const queue = [];
+    const results = [];
+    while (nodeIndex !== void 0) {
+      const end = Math.min(nodeIndex + this.nodeSize * 4, upperBound(nodeIndex, this._levelBounds));
+      for (let pos = nodeIndex; pos < end; pos += 4) {
+        if (maxX < this._boxes[pos]) continue;
+        if (maxY < this._boxes[pos + 1]) continue;
+        if (minX > this._boxes[pos + 2]) continue;
+        if (minY > this._boxes[pos + 3]) continue;
+        const index = this._indices[pos >> 2] | 0;
+        if (nodeIndex >= this.numItems * 4) {
+          queue.push(index);
+        } else if (filterFn === void 0 || filterFn(index)) {
+          results.push(index);
+        }
+      }
+      nodeIndex = queue.pop();
+    }
+    return results;
+  }
+  /**
+   * Search items in order of distance from the given point.
+   * @param {number} x
+   * @param {number} y
+   * @param {number} [maxResults=Infinity]
+   * @param {number} [maxDistance=Infinity]
+   * @param {(index: number) => boolean} [filterFn] An optional function for filtering the results.
+   * @returns {number[]} An array of indices of items found.
+   */
+  neighbors(x, y, maxResults = Infinity, maxDistance = Infinity, filterFn) {
+    if (this._pos !== this._boxes.length) {
+      throw new Error("Data not yet indexed - call index.finish().");
+    }
+    let nodeIndex = this._boxes.length - 4;
+    const q = this._queue;
+    const results = [];
+    const maxDistSquared = maxDistance * maxDistance;
+    outer: while (nodeIndex !== void 0) {
+      const end = Math.min(nodeIndex + this.nodeSize * 4, upperBound(nodeIndex, this._levelBounds));
+      for (let pos = nodeIndex; pos < end; pos += 4) {
+        const index = this._indices[pos >> 2] | 0;
+        const minX = this._boxes[pos];
+        const minY = this._boxes[pos + 1];
+        const maxX = this._boxes[pos + 2];
+        const maxY = this._boxes[pos + 3];
+        const dx = x < minX ? minX - x : x > maxX ? x - maxX : 0;
+        const dy = y < minY ? minY - y : y > maxY ? y - maxY : 0;
+        const dist = dx * dx + dy * dy;
+        if (dist > maxDistSquared) continue;
+        if (nodeIndex >= this.numItems * 4) {
+          q.push(index << 1, dist);
+        } else if (filterFn === void 0 || filterFn(index)) {
+          q.push((index << 1) + 1, dist);
+        }
+      }
+      while (q.length && q.peek() & 1) {
+        const dist = q.peekValue();
+        if (dist > maxDistSquared) break outer;
+        results.push(q.pop() >> 1);
+        if (results.length === maxResults) break outer;
+      }
+      nodeIndex = q.length ? q.pop() >> 1 : void 0;
+    }
+    q.clear();
+    return results;
+  }
+}
+function upperBound(value, arr) {
+  let i = 0;
+  let j = arr.length - 1;
+  while (i < j) {
+    const m = i + j >> 1;
+    if (arr[m] > value) {
+      j = m;
+    } else {
+      i = m + 1;
+    }
+  }
+  return arr[i];
+}
+function sort(values, boxes, indices, left, right, nodeSize) {
+  if (Math.floor(left / nodeSize) >= Math.floor(right / nodeSize)) return;
+  const start = values[left];
+  const mid = values[left + right >> 1];
+  const end = values[right];
+  let pivot = end;
+  const x = Math.max(start, mid);
+  if (end > x) {
+    pivot = x;
+  } else if (x === start) {
+    pivot = Math.max(mid, end);
+  } else if (x === mid) {
+    pivot = Math.max(start, end);
+  }
+  let i = left - 1;
+  let j = right + 1;
+  while (true) {
+    do
+      i++;
+    while (values[i] < pivot);
+    do
+      j--;
+    while (values[j] > pivot);
+    if (i >= j) break;
+    swap(values, boxes, indices, i, j);
+  }
+  sort(values, boxes, indices, left, j, nodeSize);
+  sort(values, boxes, indices, j + 1, right, nodeSize);
+}
+function swap(values, boxes, indices, i, j) {
+  const temp = values[i];
+  values[i] = values[j];
+  values[j] = temp;
+  const k = 4 * i;
+  const m = 4 * j;
+  const a = boxes[k];
+  const b = boxes[k + 1];
+  const c = boxes[k + 2];
+  const d = boxes[k + 3];
+  boxes[k] = boxes[m];
+  boxes[k + 1] = boxes[m + 1];
+  boxes[k + 2] = boxes[m + 2];
+  boxes[k + 3] = boxes[m + 3];
+  boxes[m] = a;
+  boxes[m + 1] = b;
+  boxes[m + 2] = c;
+  boxes[m + 3] = d;
+  const e = indices[i];
+  indices[i] = indices[j];
+  indices[j] = e;
+}
+function hilbert(x, y) {
+  let a = x ^ y;
+  let b = 65535 ^ a;
+  let c = 65535 ^ (x | y);
+  let d = x & (y ^ 65535);
+  let A = a | b >> 1;
+  let B = a >> 1 ^ a;
+  let C = c >> 1 ^ b & d >> 1 ^ c;
+  let D = a & c >> 1 ^ d >> 1 ^ d;
+  a = A;
+  b = B;
+  c = C;
+  d = D;
+  A = a & a >> 2 ^ b & b >> 2;
+  B = a & b >> 2 ^ b & (a ^ b) >> 2;
+  C ^= a & c >> 2 ^ b & d >> 2;
+  D ^= b & c >> 2 ^ (a ^ b) & d >> 2;
+  a = A;
+  b = B;
+  c = C;
+  d = D;
+  A = a & a >> 4 ^ b & b >> 4;
+  B = a & b >> 4 ^ b & (a ^ b) >> 4;
+  C ^= a & c >> 4 ^ b & d >> 4;
+  D ^= b & c >> 4 ^ (a ^ b) & d >> 4;
+  a = A;
+  b = B;
+  c = C;
+  d = D;
+  C ^= a & c >> 8 ^ b & d >> 8;
+  D ^= b & c >> 8 ^ (a ^ b) & d >> 8;
+  a = C ^ C >> 1;
+  b = D ^ D >> 1;
+  let i0 = x ^ y;
+  let i1 = b | 65535 ^ (i0 | a);
+  i0 = (i0 | i0 << 8) & 16711935;
+  i0 = (i0 | i0 << 4) & 252645135;
+  i0 = (i0 | i0 << 2) & 858993459;
+  i0 = (i0 | i0 << 1) & 1431655765;
+  i1 = (i1 | i1 << 8) & 16711935;
+  i1 = (i1 | i1 << 4) & 252645135;
+  i1 = (i1 | i1 << 2) & 858993459;
+  i1 = (i1 | i1 << 1) & 1431655765;
+  return (i1 << 1 | i0) >>> 0;
+}
+class SpatialIndex {
+  constructor() {
+    this.index = null;
+    this.hotspots = [];
+    this.hotspotsMap = /* @__PURE__ */ new Map();
+    this.centerPoints = [];
+    this.queryCache = /* @__PURE__ */ new Map();
+    this.cacheSize = 50;
+    this.lastCacheClear = Date.now();
+  }
+  /**
+   * Load hotspots with optimized Flatbush indexing
+   */
+  loadHotspots(hotspotData2) {
+    const startTime = performance.now();
+    this.hotspots = [];
+    this.hotspotsMap.clear();
+    this.centerPoints = [];
+    this.queryCache.clear();
+    const numItems = hotspotData2.length;
+    this.index = new Flatbush(numItems);
+    hotspotData2.forEach((hotspot, idx) => {
+      const bbox = this.calculateBoundingBox(hotspot.coordinates);
+      const centerX = (bbox.minX + bbox.maxX) / 2;
+      const centerY = (bbox.minY + bbox.maxY) / 2;
+      const hotspotWithBbox = {
+        ...hotspot,
+        bbox,
+        center: { x: centerX, y: centerY },
+        index: idx
+      };
+      this.hotspots.push(hotspotWithBbox);
+      this.hotspotsMap.set(hotspot.id, hotspotWithBbox);
+      this.centerPoints.push([centerX, centerY]);
+      this.index.add(bbox.minX, bbox.minY, bbox.maxX, bbox.maxY);
+    });
+    this.index.finish();
+    const loadTime = performance.now() - startTime;
+    console.log(`[Flatbush] Spatial index built in ${loadTime.toFixed(2)}ms for ${numItems} hotspots`);
+  }
+  /**
+   * Query with caching for repeated viewport queries
+   * Flatbush optimization: 30% faster than RBush for box queries
+   */
+  queryViewport(bounds, zoom = 1) {
+    const key = `${bounds.minX.toFixed(2)},${bounds.minY.toFixed(2)},${bounds.maxX.toFixed(2)},${bounds.maxY.toFixed(2)},${zoom.toFixed(2)}`;
+    if (this.queryCache.has(key)) {
+      return this.queryCache.get(key);
+    }
+    if (Date.now() - this.lastCacheClear > 1e3) {
+      this.queryCache.clear();
+      this.lastCacheClear = Date.now();
+    }
+    const indices = this.index.search(
+      bounds.minX,
+      bounds.minY,
+      bounds.maxX,
+      bounds.maxY
+    );
+    const hotspots = indices.map((idx) => this.hotspots[idx]);
+    if (this.queryCache.size < this.cacheSize) {
+      this.queryCache.set(key, hotspots);
+    }
+    return hotspots;
+  }
+  /**
+   * Optimized point-in-hotspot test
+   * Flatbush optimization: Uses efficient point query
+   */
+  getHotspotAtPoint(x, y) {
+    const indices = this.index.search(x, y, x, y);
+    for (const idx of indices) {
+      const hotspot = this.hotspots[idx];
+      if (this.isPointInHotspot(x, y, hotspot)) {
+        return hotspot;
+      }
+    }
+    return null;
+  }
+  /**
+   * Find nearby hotspots within radius (NEW METHOD)
+   * Optimized for mobile tap-to-reveal using center points
+   * Target: < 5ms for 647 hotspots
+   */
+  findNearbyHotspots(x, y, radius = 200, maxResults = 10) {
+    const startTime = performance.now();
+    const indices = this.index.search(
+      x - radius,
+      y - radius,
+      x + radius,
+      y + radius
+    );
+    const hotspotsWithDistance = [];
+    for (const idx of indices) {
+      const hotspot = this.hotspots[idx];
+      const dx = hotspot.center.x - x;
+      const dy = hotspot.center.y - y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance <= radius) {
+        hotspotsWithDistance.push({ hotspot, distance });
+      }
+    }
+    hotspotsWithDistance.sort((a, b) => a.distance - b.distance);
+    const results = hotspotsWithDistance.slice(0, maxResults).map((item) => item.hotspot);
+    const searchTime = performance.now() - startTime;
+    if (searchTime > 5) {
+      console.warn(`[Flatbush] Slow nearby search: ${searchTime.toFixed(2)}ms for ${results.length} results`);
+    }
+    return results;
+  }
+  /**
+   * Find adjacent/contiguous hotspots forming a group around tap point
+   * This method selects hotspots that are "côte à côte" (side by side)
+   * instead of just the nearest ones by distance
+   */
+  findAdjacentHotspots(x, y, maxResults = 10, adjacencyThreshold = 100) {
+    const startTime = performance.now();
+    const searchRadius = 500;
+    const indices = this.index.search(
+      x - searchRadius,
+      y - searchRadius,
+      x + searchRadius,
+      y + searchRadius
+    );
+    let closestHotspot = null;
+    let minDistance = Infinity;
+    for (const idx of indices) {
+      const hotspot = this.hotspots[idx];
+      const dx = hotspot.center.x - x;
+      const dy = hotspot.center.y - y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestHotspot = hotspot;
+      }
+    }
+    if (!closestHotspot) {
+      console.log("[SpatialIndex] No hotspot found near tap point");
+      return [];
+    }
+    const selected = /* @__PURE__ */ new Set([closestHotspot.id]);
+    const toProcess = [closestHotspot];
+    const result = [closestHotspot];
+    while (toProcess.length > 0 && result.length < maxResults) {
+      const current = toProcess.shift();
+      const neighbors = this.findAdjacentNeighbors(current, adjacencyThreshold);
+      for (const neighbor of neighbors) {
+        if (!selected.has(neighbor.id) && result.length < maxResults) {
+          selected.add(neighbor.id);
+          result.push(neighbor);
+          toProcess.push(neighbor);
+        }
+      }
+    }
+    const searchTime = performance.now() - startTime;
+    console.log(`[SpatialIndex] Found ${result.length} adjacent hotspots in ${searchTime.toFixed(2)}ms`);
+    return result;
+  }
+  /**
+   * Find hotspots adjacent to a given hotspot
+   * Two hotspots are considered adjacent if their bounding boxes are close
+   */
+  findAdjacentNeighbors(hotspot, threshold = 100) {
+    const bbox = hotspot.bbox;
+    const indices = this.index.search(
+      bbox.minX - threshold,
+      bbox.minY - threshold,
+      bbox.maxX + threshold,
+      bbox.maxY + threshold
+    );
+    const neighbors = [];
+    for (const idx of indices) {
+      const candidate = this.hotspots[idx];
+      if (candidate.id === hotspot.id) continue;
+      if (this.areBoundingBoxesAdjacent(bbox, candidate.bbox, threshold)) {
+        neighbors.push(candidate);
+      }
+    }
+    neighbors.sort((a, b) => {
+      const distA = Math.sqrt(
+        Math.pow(a.center.x - hotspot.center.x, 2) + Math.pow(a.center.y - hotspot.center.y, 2)
+      );
+      const distB = Math.sqrt(
+        Math.pow(b.center.x - hotspot.center.x, 2) + Math.pow(b.center.y - hotspot.center.y, 2)
+      );
+      return distA - distB;
+    });
+    return neighbors;
+  }
+  /**
+   * Check if two bounding boxes are adjacent or close enough
+   */
+  areBoundingBoxesAdjacent(bbox1, bbox2, threshold) {
+    const xGap = Math.max(0, Math.max(bbox1.minX, bbox2.minX) - Math.min(bbox1.maxX, bbox2.maxX));
+    const yGap = Math.max(0, Math.max(bbox1.minY, bbox2.minY) - Math.min(bbox1.maxY, bbox2.maxY));
+    return xGap < threshold && yGap < threshold;
+  }
+  /**
+   * Calculate bounding box
+   */
+  calculateBoundingBox(coordinates) {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    const processPoints = (points) => {
+      for (const point of points) {
+        minX = Math.min(minX, point[0]);
+        minY = Math.min(minY, point[1]);
+        maxX = Math.max(maxX, point[0]);
+        maxY = Math.max(maxY, point[1]);
+      }
+    };
+    if (coordinates.length > 0 && typeof coordinates[0][0] === "number") {
+      processPoints(coordinates);
+    } else {
+      for (const polygon of coordinates) {
+        processPoints(polygon);
+      }
+    }
+    return { minX, minY, maxX, maxY };
+  }
+  /**
+   * Point-in-polygon test
+   */
+  isPointInHotspot(x, y, hotspot) {
+    if (hotspot.shape === "polygon") {
+      return this.pointInPolygon(x, y, hotspot.coordinates);
+    } else if (hotspot.shape === "multipolygon") {
+      return hotspot.coordinates.some(
+        (polygon) => this.pointInPolygon(x, y, polygon)
+      );
+    }
+    return false;
+  }
+  /**
+   * Optimized ray casting algorithm
+   */
+  pointInPolygon(x, y, polygon) {
+    let inside = false;
+    const n = polygon.length;
+    let p1x = polygon[0][0];
+    let p1y = polygon[0][1];
+    for (let i = 1; i <= n; i++) {
+      const p2x = polygon[i % n][0];
+      const p2y = polygon[i % n][1];
+      if (y > Math.min(p1y, p2y)) {
+        if (y <= Math.max(p1y, p2y)) {
+          if (x <= Math.max(p1x, p2x)) {
+            if (p1y !== p2y) {
+              const xinters = (y - p1y) * (p2x - p1x) / (p2y - p1y) + p1x;
+              if (p1x === p2x || x <= xinters) {
+                inside = !inside;
+              }
+            }
+          }
+        }
+      }
+      p1x = p2x;
+      p1y = p2y;
+    }
+    return inside;
+  }
+  /**
+   * Get all hotspots
+   */
+  getAllHotspots() {
+    return this.hotspots;
+  }
+  /**
+   * Get hotspot by ID
+   */
+  getHotspotById(id) {
+    return this.hotspotsMap.get(id);
+  }
+  /**
+   * Clear all data
+   */
+  clear() {
+    this.index = null;
+    this.hotspots = [];
+    this.hotspotsMap.clear();
+    this.centerPoints = [];
+    this.queryCache.clear();
+  }
+}
+class TileCleanupManager {
+  constructor(viewer) {
+    this.viewer = viewer;
+    this.state = {
+      isActive: false,
+      lastCleanup: Date.now(),
+      lastDeepCleanup: Date.now(),
+      cleanupCount: 0,
+      tilesRemoved: 0,
+      currentPressure: "normal"
+      // normal, elevated, high, critical
+    };
+    this.config = {
+      // Cleanup intervals
+      normalCleanupInterval: 3e4,
+      // 30 seconds
+      elevatedCleanupInterval: 15e3,
+      // 15 seconds
+      highCleanupInterval: 5e3,
+      // 5 seconds
+      criticalCleanupInterval: 1e3,
+      // 1 second
+      deepCleanupInterval: 6e4,
+      // 1 minute
+      // Tile age thresholds (ms)
+      maxTileAge: {
+        normal: 6e4,
+        // 1 minute
+        elevated: 3e4,
+        // 30 seconds
+        high: 15e3,
+        // 15 seconds
+        critical: 5e3
+        // 5 seconds
+      },
+      // Cache size thresholds
+      cacheThresholds: {
+        normal: 400,
+        elevated: 200,
+        high: 100,
+        critical: 50
+      },
+      // Viewport distance for keeping tiles (in viewport units)
+      keepDistance: {
+        normal: 2,
+        // Keep tiles within 2x viewport
+        elevated: 1.5,
+        high: 1.2,
+        critical: 1
+        // Only visible tiles
+      },
+      // Performance thresholds
+      fpsThresholds: {
+        good: 55,
+        acceptable: 40,
+        poor: 25,
+        critical: 10
+        // Much lower threshold for mobile to avoid aggressive cleanup
+      }
+    };
+    this.intervals = {};
+    this.tileAccessTimes = /* @__PURE__ */ new Map();
+    this.metrics = {
+      totalCleaned: 0,
+      lastCleanupDuration: 0,
+      averageCleanupTime: 0,
+      cleanupRuns: 0
+    };
+    this.handleTileLoaded = this.handleTileLoaded.bind(this);
+    this.handleViewportChange = this.handleViewportChange.bind(this);
+  }
+  start() {
+    if (this.state.isActive) return;
+    this.state.isActive = true;
+    this.viewer.addHandler("tile-loaded", this.handleTileLoaded);
+    this.viewer.addHandler("viewport-change", this.handleViewportChange);
+    this.updateCleanupInterval();
+    this.intervals.deepCleanup = setInterval(() => this.performDeepCleanup(), this.config.deepCleanupInterval);
+    this.intervals.monitor = setInterval(() => this.monitorPerformance(), 2e3);
+    console.log("TileCleanupManager started");
+  }
+  stop() {
+    this.state.isActive = false;
+    this.viewer.removeHandler("tile-loaded", this.handleTileLoaded);
+    this.viewer.removeHandler("viewport-change", this.handleViewportChange);
+    Object.values(this.intervals).forEach((interval) => clearInterval(interval));
+    this.intervals = {};
+    this.tileAccessTimes.clear();
+    console.log("TileCleanupManager stopped");
+  }
+  handleTileLoaded(event) {
+    if (!event.tile) return;
+    const tileKey = this.getTileKey(event.tile);
+    this.tileAccessTimes.set(tileKey, Date.now());
+  }
+  handleViewportChange() {
+    var _a;
+    const tiledImage = (_a = this.viewer.world) == null ? void 0 : _a.getItemAt(0);
+    if (!tiledImage || !tiledImage._tilesToDraw) return;
+    const now = Date.now();
+    tiledImage._tilesToDraw.forEach((tile) => {
+      const tileKey = this.getTileKey(tile);
+      this.tileAccessTimes.set(tileKey, now);
+    });
+  }
+  getTileKey(tile) {
+    return `${tile.level}_${tile.x}_${tile.y}`;
+  }
+  monitorPerformance() {
+    var _a, _b;
+    const fps = ((_b = (_a = window.performanceMonitor) == null ? void 0 : _a.getMetrics()) == null ? void 0 : _b.averageFPS) || 60;
+    const previousPressure = this.state.currentPressure;
+    const isMobile2 = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile2) {
+      if (fps < 10) {
+        this.state.currentPressure = "critical";
+      } else if (fps < 15) {
+        this.state.currentPressure = "high";
+      } else if (fps < 25) {
+        this.state.currentPressure = "elevated";
+      } else {
+        this.state.currentPressure = "normal";
+      }
+    } else {
+      if (fps < this.config.fpsThresholds.critical) {
+        this.state.currentPressure = "critical";
+      } else if (fps < this.config.fpsThresholds.poor) {
+        this.state.currentPressure = "high";
+      } else if (fps < this.config.fpsThresholds.acceptable) {
+        this.state.currentPressure = "elevated";
+      } else {
+        this.state.currentPressure = "normal";
+      }
+    }
+    if (previousPressure !== this.state.currentPressure) {
+      console.log(`Tile cleanup pressure changed: ${previousPressure} → ${this.state.currentPressure} (FPS: ${fps})`);
+      this.updateCleanupInterval();
+      if (this.state.currentPressure === "critical") {
+        this.performCleanup();
+      }
+    }
+  }
+  updateCleanupInterval() {
+    if (this.intervals.cleanup) {
+      clearInterval(this.intervals.cleanup);
+    }
+    const intervalMap = {
+      normal: this.config.normalCleanupInterval,
+      elevated: this.config.elevatedCleanupInterval,
+      high: this.config.highCleanupInterval,
+      critical: this.config.criticalCleanupInterval
+    };
+    const interval = intervalMap[this.state.currentPressure];
+    this.intervals.cleanup = setInterval(() => this.performCleanup(), interval);
+  }
+  performCleanup() {
+    var _a;
+    if (!this.state.isActive) return;
+    const isMobile2 = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile2) {
+      const isStable = this.viewer.viewport.getZoom() === this.viewer.viewport.zoomSpring.target.value && this.viewer.viewport.getCenter().equals(this.viewer.viewport.centerSpringX.target.value);
+      if (!isStable) {
+        console.log("Skipping tile cleanup on mobile - viewport changing");
+        return;
+      }
+    }
+    const startTime = performance.now();
+    const tiledImage = (_a = this.viewer.world) == null ? void 0 : _a.getItemAt(0);
+    if (!tiledImage || !tiledImage._tileCache) return;
+    const isAnimating = this.viewer.isAnimating || window.renderOptimizer && window.renderOptimizer.isCurrentlyAnimating() || this.viewer.viewport.zoomSpring.current.value !== this.viewer.viewport.zoomSpring.target.value;
+    if (isAnimating) {
+      return;
+    }
+    const pressure = this.state.currentPressure;
+    const maxAge = this.config.maxTileAge[pressure];
+    const cacheThreshold = this.config.cacheThresholds[pressure];
+    const keepDistance = this.config.keepDistance[pressure];
+    const now = Date.now();
+    const viewport = this.viewer.viewport;
+    const bounds = viewport.getBounds();
+    const expandedBounds = {
+      x: bounds.x - bounds.width * (keepDistance - 1) / 2,
+      y: bounds.y - bounds.height * (keepDistance - 1) / 2,
+      width: bounds.width * keepDistance,
+      height: bounds.height * keepDistance
+    };
+    const cache = tiledImage._tileCache;
+    const cachedTiles = cache._tilesLoaded || [];
+    const currentCacheSize = cachedTiles.length;
+    if (currentCacheSize === 0) return;
+    const visibleTiles = /* @__PURE__ */ new Set();
+    if (tiledImage._tilesToDraw) {
+      tiledImage._tilesToDraw.forEach((tile) => {
+        const tileKey = this.getTileKey(tile);
+        visibleTiles.add(tileKey);
+      });
+    }
+    const tilesToRemove = [];
+    cachedTiles.forEach((tile) => {
+      const tileKey = this.getTileKey(tile);
+      if (visibleTiles.has(tileKey)) {
+        return;
+      }
+      const lastAccess = this.tileAccessTimes.get(tileKey) || 0;
+      const age = now - lastAccess;
+      let shouldRemove = false;
+      if (age > maxAge) {
+        shouldRemove = true;
+      }
+      if (!shouldRemove && pressure !== "normal") {
+        const tileBounds = tile.bounds;
+        if (tileBounds) {
+          const isInExpandedView = !(tileBounds.x + tileBounds.width < expandedBounds.x || tileBounds.x > expandedBounds.x + expandedBounds.width || tileBounds.y + tileBounds.height < expandedBounds.y || tileBounds.y > expandedBounds.y + expandedBounds.height);
+          if (!isInExpandedView) {
+            shouldRemove = true;
+          }
+        }
+      }
+      if (shouldRemove) {
+        tilesToRemove.push(tile);
+      }
+    });
+    if (currentCacheSize > cacheThreshold) {
+      const remainingToRemove = currentCacheSize - cacheThreshold;
+      if (remainingToRemove > tilesToRemove.length) {
+        const remainingTiles = cachedTiles.filter((tile) => {
+          const tileKey = this.getTileKey(tile);
+          return !tilesToRemove.includes(tile) && !visibleTiles.has(tileKey);
+        });
+        remainingTiles.sort((a, b) => {
+          const aKey = this.getTileKey(a);
+          const bKey = this.getTileKey(b);
+          const aTime = this.tileAccessTimes.get(aKey) || 0;
+          const bTime = this.tileAccessTimes.get(bKey) || 0;
+          return aTime - bTime;
+        });
+        const additionalToRemove = remainingToRemove - tilesToRemove.length;
+        tilesToRemove.push(...remainingTiles.slice(0, additionalToRemove));
+      }
+    }
+    if (tilesToRemove.length > 0) {
+      tilesToRemove.forEach((tile) => {
+        const tileKey = this.getTileKey(tile);
+        this.tileAccessTimes.delete(tileKey);
+        if (tile.unload) {
+          tile.unload();
+        }
+      });
+      this.state.tilesRemoved += tilesToRemove.length;
+      this.metrics.totalCleaned += tilesToRemove.length;
+      console.log(`Cleaned ${tilesToRemove.length} tiles (pressure: ${pressure}, cache was: ${currentCacheSize}, kept ${visibleTiles.size} visible)`);
+    }
+    const duration = performance.now() - startTime;
+    this.metrics.lastCleanupDuration = duration;
+    this.metrics.cleanupRuns++;
+    this.metrics.averageCleanupTime = (this.metrics.averageCleanupTime * (this.metrics.cleanupRuns - 1) + duration) / this.metrics.cleanupRuns;
+    this.state.lastCleanup = now;
+    this.state.cleanupCount++;
+  }
+  performDeepCleanup() {
+    if (!this.state.isActive) return;
+    const isAnimating = this.viewer.isAnimating || window.renderOptimizer && window.renderOptimizer.isCurrentlyAnimating() || this.viewer.viewport.zoomSpring.current.value !== this.viewer.viewport.zoomSpring.target.value;
+    if (isAnimating) {
+      console.log("Skipping deep cleanup during animation");
+      return;
+    }
+    console.log("Performing deep tile cleanup");
+    const startTime = performance.now();
+    const now = Date.now();
+    const maxTrackingAge = 3e5;
+    const keysToDelete = [];
+    this.tileAccessTimes.forEach((time, key) => {
+      if (now - time > maxTrackingAge) {
+        keysToDelete.push(key);
+      }
+    });
+    keysToDelete.forEach((key) => this.tileAccessTimes.delete(key));
+    if (window.gc) {
+      window.gc();
+      console.log("Forced garbage collection after deep cleanup");
+    }
+    const duration = performance.now() - startTime;
+    this.state.lastDeepCleanup = now;
+    console.log(`Deep cleanup completed in ${duration.toFixed(2)}ms, cleared ${keysToDelete.length} old tracking entries`);
+  }
+  forceCleanup() {
+    console.log("Forcing immediate tile cleanup");
+    this.performCleanup();
+  }
+  getMetrics() {
+    var _a, _b, _c;
+    const tiledImage = (_a = this.viewer.world) == null ? void 0 : _a.getItemAt(0);
+    const currentCacheSize = ((_c = (_b = tiledImage == null ? void 0 : tiledImage._tileCache) == null ? void 0 : _b._tilesLoaded) == null ? void 0 : _c.length) || 0;
+    return {
+      ...this.metrics,
+      currentCacheSize,
+      pressure: this.state.currentPressure,
+      cleanupCount: this.state.cleanupCount,
+      tilesRemoved: this.state.tilesRemoved,
+      trackingSize: this.tileAccessTimes.size,
+      cacheThreshold: this.config.cacheThresholds[this.state.currentPressure]
+    };
+  }
+  setPressure(pressure) {
+    if (["normal", "elevated", "high", "critical"].includes(pressure)) {
+      this.state.currentPressure = pressure;
+      this.updateCleanupInterval();
+    }
+  }
+  pauseCleanup(duration = 1e3) {
+    if (this.intervals.cleanup) {
+      clearInterval(this.intervals.cleanup);
+      setTimeout(() => {
+        if (this.state.isActive) {
+          this.updateCleanupInterval();
+        }
+      }, duration);
+    }
+  }
+  destroy() {
+    this.stop();
+    this.viewer = null;
+    this.tileAccessTimes.clear();
+  }
+}
+class TileWorkerManager {
+  constructor(viewer) {
+    this.viewer = viewer;
+    this.worker = null;
+    this.isInitialized = false;
+    this.state = {
+      pendingRequests: /* @__PURE__ */ new Map(),
+      requestId: 0,
+      workerReady: false,
+      capabilities: null,
+      lastError: null
+    };
+    this.config = {
+      workerPath: "/tile-worker.js",
+      maxRetries: 3,
+      retryDelay: 1e3,
+      requestTimeout: 1e4,
+      maxCacheSize: 200,
+      enableOffscreenCanvas: true
+    };
+    this.metrics = {
+      requestsSent: 0,
+      requestsCompleted: 0,
+      requestsFailed: 0,
+      cacheHits: 0,
+      averageProcessTime: 0,
+      totalProcessTime: 0
+    };
+    this.handleWorkerMessage = this.handleWorkerMessage.bind(this);
+    this.handleWorkerError = this.handleWorkerError.bind(this);
+  }
+  async initialize() {
+    if (this.isInitialized) return;
+    try {
+      if (typeof Worker === "undefined") {
+        throw new Error("Web Workers not supported");
+      }
+      this.worker = new Worker(this.config.workerPath);
+      this.worker.onmessage = this.handleWorkerMessage;
+      this.worker.onerror = this.handleWorkerError;
+      await this.waitForWorkerReady();
+      await this.sendToWorker("init", {
+        config: {
+          maxCacheSize: this.config.maxCacheSize
+        }
+      });
+      this.isInitialized = true;
+      console.log("TileWorkerManager initialized with capabilities:", this.state.capabilities);
+    } catch (error) {
+      console.error("Failed to initialize TileWorkerManager:", error);
+      this.state.lastError = error;
+      throw error;
+    }
+  }
+  async processTile(tile, priority = 2) {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+    const requestId = this.generateRequestId();
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        this.state.pendingRequests.delete(requestId);
+        this.metrics.requestsFailed++;
+        reject(new Error("Tile processing timeout"));
+      }, this.config.requestTimeout);
+      this.state.pendingRequests.set(requestId, {
+        resolve,
+        reject,
+        timeout,
+        startTime: performance.now(),
+        tile
+      });
+      this.worker.postMessage({
+        type: "process-tile",
+        requestId,
+        data: {
+          tile: this.serializeTile(tile),
+          priority
+        }
+      });
+      this.metrics.requestsSent++;
+    });
+  }
+  async processBatch(tiles, priorities = []) {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+    const requestId = this.generateRequestId();
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        this.state.pendingRequests.delete(requestId);
+        this.metrics.requestsFailed++;
+        reject(new Error("Batch processing timeout"));
+      }, this.config.requestTimeout * tiles.length);
+      this.state.pendingRequests.set(requestId, {
+        resolve,
+        reject,
+        timeout,
+        startTime: performance.now(),
+        tiles
+      });
+      this.worker.postMessage({
+        type: "batch-process",
+        requestId,
+        data: {
+          tiles: tiles.map((t) => this.serializeTile(t)),
+          priorities
+        }
+      });
+      this.metrics.requestsSent++;
+    });
+  }
+  async prioritizeTiles(tiles, viewport) {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+    if (tiles.length > 100) {
+      console.log("TileWorkerManager: Too many tiles, using simple priority");
+      const simplePriorities = tiles.map((tile) => {
+        const centerX = (tile.bounds.minX + tile.bounds.maxX) / 2;
+        const centerY = (tile.bounds.minY + tile.bounds.maxY) / 2;
+        const viewportCenterX = (viewport.bounds.minX + viewport.bounds.maxX) / 2;
+        const viewportCenterY = (viewport.bounds.minY + viewport.bounds.maxY) / 2;
+        const distance = Math.sqrt(
+          Math.pow(centerX - viewportCenterX, 2) + Math.pow(centerY - viewportCenterY, 2)
+        );
+        return distance < 0.5 ? 0 : distance < 1 ? 1 : 2;
+      });
+      return {
+        tiles,
+        priorities: simplePriorities
+      };
+    }
+    const requestId = this.generateRequestId();
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        this.state.pendingRequests.delete(requestId);
+        resolve({
+          tiles,
+          priorities: tiles.map(() => 1)
+        });
+      }, 50);
+      this.state.pendingRequests.set(requestId, {
+        resolve,
+        reject,
+        timeout
+      });
+      this.worker.postMessage({
+        type: "prioritize",
+        requestId,
+        data: {
+          tiles: tiles.map((t) => this.serializeTile(t)),
+          viewport: {
+            bounds: viewport.bounds,
+            zoom: viewport.zoom
+          }
+        }
+      });
+    });
+  }
+  clearCache(selective = false, maxAge = null) {
+    if (!this.worker) return;
+    this.worker.postMessage({
+      type: "clear-cache",
+      data: { selective, maxAge }
+    });
+  }
+  async getStats() {
+    if (!this.isInitialized) {
+      return this.metrics;
+    }
+    const requestId = this.generateRequestId();
+    return new Promise((resolve) => {
+      const timeout = setTimeout(() => {
+        this.state.pendingRequests.delete(requestId);
+        resolve(this.metrics);
+      }, 1e3);
+      this.state.pendingRequests.set(requestId, {
+        resolve,
+        reject: () => {
+        },
+        timeout
+      });
+      this.worker.postMessage({
+        type: "get-stats",
+        requestId
+      });
+    });
+  }
+  handleWorkerMessage(event) {
+    const { type, requestId, data } = event.data;
+    switch (type) {
+      case "ready":
+        this.state.workerReady = true;
+        break;
+      case "initialized":
+        this.state.capabilities = data.capabilities;
+        this.handleRequestComplete(requestId, data);
+        break;
+      case "tile-ready":
+        this.handleTileReady(requestId, data);
+        break;
+      case "tile-error":
+        this.handleTileError(requestId, data);
+        break;
+      case "batch-complete":
+        this.handleRequestComplete(requestId, data);
+        break;
+      case "priorities-calculated":
+        this.handleRequestComplete(requestId, data);
+        break;
+      case "stats":
+        this.handleStatsReceived(requestId, data);
+        break;
+      case "cache-cleared":
+        console.log("Worker cache cleared:", data);
+        break;
+      default:
+        console.warn("Unknown worker message type:", type);
+    }
+  }
+  handleWorkerError(error) {
+    console.error("Worker error:", error);
+    this.state.lastError = error;
+    this.state.pendingRequests.forEach((request, id) => {
+      clearTimeout(request.timeout);
+      request.reject(error);
+    });
+    this.state.pendingRequests.clear();
+    this.isInitialized = false;
+    setTimeout(() => this.initialize(), this.config.retryDelay);
+  }
+  handleTileReady(requestId, data) {
+    const request = this.state.pendingRequests.get(requestId);
+    if (!request) return;
+    clearTimeout(request.timeout);
+    this.state.pendingRequests.delete(requestId);
+    const processTime = performance.now() - request.startTime;
+    this.updateMetrics(processTime, data.cached);
+    request.resolve({
+      ...data,
+      processingTime: processTime
+    });
+  }
+  handleTileError(requestId, data) {
+    const request = this.state.pendingRequests.get(requestId);
+    if (!request) return;
+    clearTimeout(request.timeout);
+    this.state.pendingRequests.delete(requestId);
+    this.metrics.requestsFailed++;
+    request.reject(new Error(data.error));
+  }
+  handleRequestComplete(requestId, data) {
+    const request = this.state.pendingRequests.get(requestId);
+    if (!request) return;
+    clearTimeout(request.timeout);
+    this.state.pendingRequests.delete(requestId);
+    request.resolve(data);
+  }
+  handleStatsReceived(requestId, workerStats) {
+    const request = this.state.pendingRequests.get(requestId);
+    if (!request) return;
+    clearTimeout(request.timeout);
+    this.state.pendingRequests.delete(requestId);
+    const combinedStats = {
+      ...this.metrics,
+      worker: workerStats
+    };
+    request.resolve(combinedStats);
+  }
+  updateMetrics(processTime, cached) {
+    this.metrics.requestsCompleted++;
+    if (cached) {
+      this.metrics.cacheHits++;
+    }
+    this.metrics.totalProcessTime += processTime;
+    this.metrics.averageProcessTime = this.metrics.totalProcessTime / this.metrics.requestsCompleted;
+  }
+  serializeTile(tile) {
+    return {
+      level: tile.level,
+      x: tile.x,
+      y: tile.y,
+      bounds: tile.bounds ? {
+        minX: tile.bounds.x || tile.bounds.minX,
+        minY: tile.bounds.y || tile.bounds.minY,
+        maxX: (tile.bounds.x || tile.bounds.minX) + (tile.bounds.width || 0),
+        maxY: (tile.bounds.y || tile.bounds.minY) + (tile.bounds.height || 0)
+      } : null,
+      url: tile.url || null
+    };
+  }
+  generateRequestId() {
+    return ++this.state.requestId;
+  }
+  async waitForWorkerReady() {
+    return new Promise((resolve) => {
+      if (this.state.workerReady) {
+        resolve();
+        return;
+      }
+      const checkInterval = setInterval(() => {
+        if (this.state.workerReady) {
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 100);
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        resolve();
+      }, 5e3);
+    });
+  }
+  async sendToWorker(type, data) {
+    const requestId = this.generateRequestId();
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        this.state.pendingRequests.delete(requestId);
+        reject(new Error(`Worker request timeout: ${type}`));
+      }, 5e3);
+      this.state.pendingRequests.set(requestId, {
+        resolve,
+        reject,
+        timeout
+      });
+      this.worker.postMessage({
+        type,
+        requestId,
+        data
+      });
+    });
+  }
+  destroy() {
+    if (this.worker) {
+      this.state.pendingRequests.forEach((request) => {
+        clearTimeout(request.timeout);
+        request.reject(new Error("Worker destroyed"));
+      });
+      this.state.pendingRequests.clear();
+      this.worker.terminate();
+      this.worker = null;
+    }
+    this.isInitialized = false;
+    this.viewer = null;
+  }
+}
+class TileOptimizer {
+  constructor(viewer) {
+    this.viewer = viewer;
+    this.state = {
+      isActive: false,
+      tileQueue: [],
+      loadingTiles: /* @__PURE__ */ new Set(),
+      tilePriorities: /* @__PURE__ */ new Map(),
+      loadTimes: [],
+      averageLoadTime: 0,
+      lastCleanup: Date.now(),
+      useWorker: true,
+      // Enable Web Worker by default
+      workerReady: false
+    };
+    this.config = {
+      predictiveRadius: 1.5,
+      priorityLevels: 5,
+      maxConcurrentLoads: 6,
+      cleanupInterval: 3e4,
+      tileTimeout: 1e4,
+      maxLoadTimeHistory: 50,
+      adaptiveLoading: true,
+      webpSupport: this.detectWebPSupport(),
+      workerBatchSize: 10,
+      // Process tiles in batches
+      workerEnabled: true
+    };
+    this.intervals = {};
+    this.workerManager = null;
+    if (this.config.workerEnabled) {
+      this.initializeWorker();
+    }
+    this.workerMetrics = {
+      tilesProcessedByWorker: 0,
+      workerProcessingTime: 0,
+      workerErrors: 0
+    };
+    this.handleViewportChange = this.handleViewportChange.bind(this);
+  }
+  async initializeWorker() {
+    try {
+      this.workerManager = new TileWorkerManager(this.viewer);
+      await this.workerManager.initialize();
+      this.state.workerReady = true;
+      console.log("TileOptimizer: Web Worker initialized successfully");
+    } catch (error) {
+      console.warn("TileOptimizer: Failed to initialize Web Worker, falling back to main thread", error);
+      this.state.useWorker = false;
+      this.state.workerReady = false;
+    }
+  }
+  start() {
+    if (this.state.isActive) return;
+    this.state.isActive = true;
+    setTimeout(() => {
+      this.viewer.addHandler("viewport-change", this.handleViewportChange);
+    }, 100);
+    this.intervals.cleanup = setInterval(() => this.performCleanup(), this.config.cleanupInterval);
+    this.intervals.queue = setInterval(() => this.processQueue(), 50);
+    this.intervals.worker = setInterval(() => this.processWorkerBatch(), 100);
+    console.log("TileOptimizer started with Web Worker support:", this.state.workerReady);
+  }
+  stop() {
+    this.state.isActive = false;
+    this.viewer.removeHandler("viewport-change", this.handleViewportChange);
+    Object.values(this.intervals).forEach((interval) => clearInterval(interval));
+    this.intervals = {};
+    this.state.tileQueue = [];
+    this.state.loadingTiles.clear();
+    this.state.tilePriorities.clear();
+    if (this.workerManager) {
+      this.workerManager.destroy();
+      this.workerManager = null;
+    }
+    console.log("TileOptimizer stopped");
+  }
+  handleViewportChange() {
+    if (this.viewer.isAnimating() || window.renderOptimizer && window.renderOptimizer.state.isCinematicZoom) {
+      return;
+    }
+    this.predictiveLoad();
+    if (this.state.workerReady && this.state.tileQueue.length > 0) {
+      if ("requestIdleCallback" in window) {
+        requestIdleCallback(() => {
+          if (!this.viewer.isAnimating()) {
+            this.updateWorkerPriorities();
+          }
+        }, { timeout: 100 });
+      } else {
+        setTimeout(() => {
+          if (!this.viewer.isAnimating()) {
+            this.updateWorkerPriorities();
+          }
+        }, 50);
+      }
+    }
+  }
+  shouldSkipPredictiveLoad() {
+    if (this.viewer.isAnimating()) return true;
+    if (window.renderOptimizer && window.renderOptimizer.state.isCinematicZoom) return true;
+    if (this.state.tileQueue.length > 100) return true;
+    return false;
+  }
+  async updateWorkerPriorities() {
+    try {
+      const viewport = this.viewer.viewport;
+      const bounds = viewport.getBounds();
+      const viewportData = {
+        bounds: {
+          minX: bounds.x,
+          minY: bounds.y,
+          maxX: bounds.x + bounds.width,
+          maxY: bounds.y + bounds.height
+        },
+        zoom: viewport.getZoom()
+      };
+      const tiles = this.state.tileQueue.slice(0, 50);
+      const result = await this.workerManager.prioritizeTiles(tiles, viewportData);
+      if (result.tiles && result.priorities) {
+        result.tiles.forEach((tile, index) => {
+          const priority = result.priorities[index];
+          const queueItem = this.state.tileQueue.find(
+            (item) => item.level === tile.level && item.x === tile.x && item.y === tile.y
+          );
+          if (queueItem) {
+            queueItem.priority = priority;
+          }
+        });
+        this.sortQueue();
+      }
+    } catch (error) {
+      console.warn("Failed to update worker priorities:", error);
+    }
+  }
+  calculateTilePriority(level, x, y) {
+    const viewport = this.viewer.viewport;
+    const bounds = viewport.getBounds();
+    const center = viewport.getCenter();
+    const zoom = viewport.getZoom();
+    if (zoom < 2) {
+      const tileWidth2 = this.viewer.source.getTileWidth(level);
+      const pixelSize = tileWidth2 * zoom;
+      if (pixelSize < 32) return 999;
+    }
+    const tileWidth = this.viewer.source.getTileWidth(level);
+    const tileHeight = this.viewer.source.getTileHeight ? this.viewer.source.getTileHeight(level) : tileWidth;
+    const tileCenterX = (x + 0.5) * tileWidth / this.viewer.source.width;
+    const tileCenterY = (y + 0.5) * tileHeight / this.viewer.source.height;
+    const distance = Math.sqrt(
+      Math.pow(tileCenterX - center.x, 2) + Math.pow(tileCenterY - center.y, 2)
+    );
+    const tileRect = {
+      left: x * tileWidth / this.viewer.source.width,
+      top: y * tileHeight / this.viewer.source.height,
+      right: (x + 1) * tileWidth / this.viewer.source.width,
+      bottom: (y + 1) * tileHeight / this.viewer.source.height
+    };
+    const isVisible = !(tileRect.right < bounds.x || tileRect.left > bounds.x + bounds.width || tileRect.bottom < bounds.y || tileRect.top > bounds.y + bounds.height);
+    if (isVisible) {
+      if (zoom < 3) {
+        const centerDistance = Math.abs(tileCenterX - center.x) + Math.abs(tileCenterY - center.y);
+        return centerDistance < 0.2 ? 0 : 1;
+      }
+      return 0;
+    }
+    if (distance < bounds.width * this.config.predictiveRadius) return 1;
+    return 2;
+  }
+  enqueueTile(level, x, y, priority) {
+    const tileKey = `${level}_${x}_${y}`;
+    if (this.state.loadingTiles.has(tileKey)) return;
+    const existingIndex = this.state.tileQueue.findIndex((item) => item.key === tileKey);
+    if (existingIndex >= 0) {
+      if (priority < this.state.tileQueue[existingIndex].priority) {
+        this.state.tileQueue[existingIndex].priority = priority;
+        this.sortQueue();
+      }
+      return;
+    }
+    const tileItem = {
+      level,
+      x,
+      y,
+      key: tileKey,
+      priority,
+      timestamp: Date.now(),
+      bounds: this.calculateTileBounds(level, x, y)
+    };
+    this.state.tileQueue.push(tileItem);
+    this.sortQueue();
+  }
+  calculateTileBounds(level, x, y) {
+    const tileWidth = this.viewer.source.getTileWidth(level);
+    const tileHeight = this.viewer.source.getTileHeight ? this.viewer.source.getTileHeight(level) : tileWidth;
+    const sourceWidth = this.viewer.source.width;
+    const sourceHeight = this.viewer.source.height;
+    return {
+      minX: x * tileWidth / sourceWidth,
+      minY: y * tileHeight / sourceHeight,
+      maxX: (x + 1) * tileWidth / sourceWidth,
+      maxY: (y + 1) * tileHeight / sourceHeight
+    };
+  }
+  async processWorkerBatch() {
+    if (!this.state.isActive || !this.state.workerReady || this.state.tileQueue.length === 0) return;
+    const highPriorityTiles = this.state.tileQueue.filter((tile) => tile.priority <= 1).slice(0, this.config.workerBatchSize);
+    if (highPriorityTiles.length === 0) return;
+    try {
+      const priorities = highPriorityTiles.map((t) => t.priority);
+      const startTime = performance.now();
+      await this.workerManager.processBatch(highPriorityTiles, priorities);
+      const processingTime = performance.now() - startTime;
+      this.workerMetrics.tilesProcessedByWorker += highPriorityTiles.length;
+      this.workerMetrics.workerProcessingTime += processingTime;
+      highPriorityTiles.forEach((tile) => {
+        const index = this.state.tileQueue.findIndex((t) => t.key === tile.key);
+        if (index >= 0) {
+          this.state.tileQueue.splice(index, 1);
+        }
+      });
+    } catch (error) {
+      console.error("Worker batch processing failed:", error);
+      this.workerMetrics.workerErrors++;
+    }
+  }
+  processQueue() {
+    var _a;
+    if (!this.state.isActive || this.state.tileQueue.length === 0 || this.state.loadingTiles.size >= this.config.maxConcurrentLoads) return;
+    const tiledImage = (_a = this.viewer.world) == null ? void 0 : _a.getItemAt(0);
+    if (!tiledImage) return;
+    while (this.state.loadingTiles.size < this.config.maxConcurrentLoads && this.state.tileQueue.length > 0) {
+      const item = this.state.tileQueue.shift();
+      if (Date.now() - item.timestamp > this.config.tileTimeout) continue;
+      this.state.loadingTiles.add(item.key);
+      this.viewer.forceRedraw();
+    }
+  }
+  sortQueue() {
+    this.state.tileQueue.sort((a, b) => {
+      if (a.priority !== b.priority) {
+        return a.priority - b.priority;
+      }
+      return a.timestamp - b.timestamp;
+    });
+  }
+  predictiveLoad() {
+    var _a;
+    if (this.shouldSkipPredictiveLoad()) {
+      return;
+    }
+    const tiledImage = (_a = this.viewer.world) == null ? void 0 : _a.getItemAt(0);
+    if (!tiledImage || !this.viewer.source) return;
+    const viewport = this.viewer.viewport;
+    const bounds = viewport.getBounds();
+    const expandedBounds = {
+      x: bounds.x - bounds.width * (this.config.predictiveRadius - 1) / 2,
+      y: bounds.y - bounds.height * (this.config.predictiveRadius - 1) / 2,
+      width: bounds.width * this.config.predictiveRadius,
+      height: bounds.height * this.config.predictiveRadius
+    };
+    const zoom = viewport.getZoom();
+    const level = Math.max(0, Math.min(
+      Math.floor(Math.log2(zoom)),
+      this.viewer.source.maxLevel || 14
+    ));
+    const tileWidth = this.viewer.source.getTileWidth(level);
+    const tileHeight = this.viewer.source.getTileHeight ? this.viewer.source.getTileHeight(level) : tileWidth;
+    const sourceWidth = this.viewer.source.width;
+    const sourceHeight = this.viewer.source.height;
+    const tileRange = {
+      startX: Math.max(0, Math.floor(expandedBounds.x * sourceWidth / tileWidth)),
+      endX: Math.min(
+        Math.ceil(sourceWidth / tileWidth) - 1,
+        Math.ceil((expandedBounds.x + expandedBounds.width) * sourceWidth / tileWidth)
+      ),
+      startY: Math.max(0, Math.floor(expandedBounds.y * sourceHeight / tileHeight)),
+      endY: Math.min(
+        Math.ceil(sourceHeight / tileHeight) - 1,
+        Math.ceil((expandedBounds.y + expandedBounds.height) * sourceHeight / tileHeight)
+      )
+    };
+    for (let x = tileRange.startX; x <= tileRange.endX; x++) {
+      for (let y = tileRange.startY; y <= tileRange.endY; y++) {
+        const priority = this.calculateTilePriority(level, x, y);
+        this.enqueueTile(level, x, y, priority);
+      }
+    }
+  }
+  trackLoadTime(loadTime) {
+    this.state.loadTimes.push(loadTime);
+    if (this.state.loadTimes.length > this.config.maxLoadTimeHistory) {
+      this.state.loadTimes.shift();
+    }
+    this.state.averageLoadTime = this.state.loadTimes.reduce((a, b) => a + b, 0) / this.state.loadTimes.length;
+    this.adjustLoadingStrategy();
+  }
+  removeTileFromLoading(tileKey) {
+    this.state.loadingTiles.delete(tileKey);
+  }
+  get loadingTiles() {
+    return this.state.loadingTiles;
+  }
+  adjustLoadingStrategy() {
+    const avgTime = this.state.averageLoadTime;
+    const currentLoads = this.config.maxConcurrentLoads;
+    const isMobile2 = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const maxLoads = isMobile2 ? 4 : 8;
+    if (avgTime > 500 && currentLoads > 2) {
+      this.config.maxConcurrentLoads--;
+      console.log(`Reduced concurrent loads to ${this.config.maxConcurrentLoads} (avg: ${avgTime.toFixed(0)}ms)`);
+    } else if (avgTime < 200 && currentLoads < maxLoads) {
+      this.config.maxConcurrentLoads++;
+      console.log(`Increased concurrent loads to ${this.config.maxConcurrentLoads} (avg: ${avgTime.toFixed(0)}ms)`);
+    }
+  }
+  performCleanup() {
+    const now = Date.now();
+    this.state.tileQueue = this.state.tileQueue.filter(
+      (item) => now - item.timestamp < this.config.tileTimeout
+    );
+    this.state.loadingTiles.clear();
+    this.state.lastCleanup = now;
+    if (this.workerManager) {
+      this.workerManager.clearCache(true, 6e4);
+    }
+  }
+  clearOldTiles() {
+    this.performCleanup();
+    if (window.gc) window.gc();
+  }
+  detectWebPSupport() {
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 1;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "rgba(0,0,0,0)";
+    ctx.fillRect(0, 0, 1, 1);
+    try {
+      return canvas.toDataURL("image/webp").indexOf("image/webp") === 5;
+    } catch (e) {
+      return false;
+    }
+  }
+  async getStats() {
+    const workerStats = this.workerManager ? await this.workerManager.getStats() : null;
+    return {
+      queueLength: this.state.tileQueue.length,
+      loadingCount: this.state.loadingTiles.size,
+      averageLoadTime: this.state.averageLoadTime.toFixed(0) + "ms",
+      maxConcurrentLoads: this.config.maxConcurrentLoads,
+      webpSupported: this.config.webpSupport,
+      workerEnabled: this.state.workerReady,
+      workerMetrics: {
+        ...this.workerMetrics,
+        averageWorkerTime: this.workerMetrics.tilesProcessedByWorker > 0 ? (this.workerMetrics.workerProcessingTime / this.workerMetrics.tilesProcessedByWorker).toFixed(2) + "ms" : "0ms"
+      },
+      workerStats
+    };
+  }
+}
+class FrameBudgetManager {
+  constructor(targetFPS = 60) {
+    this.targetFPS = targetFPS;
+    this.targetFrameTime = 1e3 / targetFPS;
+    this.frameTimings = new Float32Array(120);
+    this.frameIndex = 0;
+    this.frameCount = 0;
+    this.currentFPS = targetFPS;
+    this.averageFPS = targetFPS;
+    this.percentile95FPS = targetFPS;
+    this.lastFrameStart = performance.now();
+    this.currentFrameStart = performance.now();
+    this.frameTimeUsed = 0;
+    this.budgetRemaining = this.targetFrameTime;
+    this.emaAlpha = 0.1;
+    this.emaFPS = targetFPS;
+    this.degradeThreshold = 0.8;
+    this.upgradeThreshold = 0.6;
+    this.onQualityAdjust = null;
+    this.performanceSamples = [];
+    this.isStable = false;
+  }
+  /**
+   * Start tracking a new frame
+   */
+  startFrame() {
+    this.lastFrameStart = this.currentFrameStart;
+    this.currentFrameStart = performance.now();
+    const lastFrameTime = this.currentFrameStart - this.lastFrameStart;
+    this.frameTimings[this.frameIndex] = lastFrameTime;
+    this.frameIndex = (this.frameIndex + 1) % this.frameTimings.length;
+    this.frameCount = Math.min(this.frameCount + 1, this.frameTimings.length);
+    this.updateStatistics();
+    this.frameTimeUsed = 0;
+    this.budgetRemaining = this.targetFrameTime;
+    return {
+      targetFrameTime: this.targetFrameTime,
+      budgetRemaining: this.budgetRemaining,
+      isOverBudget: false,
+      shouldDegrade: false
+    };
+  }
+  /**
+   * End frame and check if over budget
+   */
+  endFrame() {
+    const frameEndTime = performance.now();
+    this.frameTimeUsed = frameEndTime - this.currentFrameStart;
+    const budgetUsageRatio = this.frameTimeUsed / this.targetFrameTime;
+    const isOverBudget = budgetUsageRatio > 1;
+    const shouldDegrade = budgetUsageRatio > this.degradeThreshold;
+    const canUpgrade = budgetUsageRatio < this.upgradeThreshold && this.isStable;
+    if (this.onQualityAdjust && this.frameCount > 30) {
+      if (shouldDegrade && this.averageFPS < this.targetFPS * 0.9) {
+        this.onQualityAdjust("degrade", this.averageFPS);
+      } else if (canUpgrade && this.averageFPS > this.targetFPS * 0.95) {
+        this.onQualityAdjust("upgrade", this.averageFPS);
+      }
+    }
+    return {
+      frameTimeUsed: this.frameTimeUsed,
+      budgetUsageRatio,
+      isOverBudget,
+      shouldDegrade,
+      canUpgrade
+    };
+  }
+  /**
+   * Check remaining budget during frame
+   */
+  checkBudget() {
+    const currentTime = performance.now();
+    this.frameTimeUsed = currentTime - this.currentFrameStart;
+    this.budgetRemaining = Math.max(0, this.targetFrameTime - this.frameTimeUsed);
+    return {
+      timeUsed: this.frameTimeUsed,
+      budgetRemaining: this.budgetRemaining,
+      isOverBudget: this.budgetRemaining <= 0
+    };
+  }
+  /**
+   * Update FPS statistics
+   */
+  updateStatistics() {
+    if (this.frameCount < 2) return;
+    const lastFrameTime = this.frameTimings[(this.frameIndex - 1 + this.frameTimings.length) % this.frameTimings.length];
+    this.currentFPS = lastFrameTime > 0 ? 1e3 / lastFrameTime : this.targetFPS;
+    this.emaFPS = this.emaAlpha * this.currentFPS + (1 - this.emaAlpha) * this.emaFPS;
+    let totalTime = 0;
+    const samplesToUse = Math.min(this.frameCount, 60);
+    for (let i = 0; i < samplesToUse; i++) {
+      const idx = (this.frameIndex - 1 - i + this.frameTimings.length) % this.frameTimings.length;
+      totalTime += this.frameTimings[idx];
+    }
+    this.averageFPS = samplesToUse > 0 ? samplesToUse * 1e3 / totalTime : this.targetFPS;
+    if (this.frameCount >= 30) {
+      const sortedTimings = new Float32Array(samplesToUse);
+      for (let i = 0; i < samplesToUse; i++) {
+        const idx = (this.frameIndex - 1 - i + this.frameTimings.length) % this.frameTimings.length;
+        sortedTimings[i] = this.frameTimings[idx];
+      }
+      sortedTimings.sort();
+      const percentileIndex = Math.floor(samplesToUse * 0.95);
+      const percentileTime = sortedTimings[percentileIndex];
+      this.percentile95FPS = percentileTime > 0 ? 1e3 / percentileTime : this.targetFPS;
+    }
+    this.checkStability();
+  }
+  /**
+   * Check if performance is stable
+   */
+  checkStability() {
+    if (this.frameCount < 60) {
+      this.isStable = false;
+      return;
+    }
+    const recentSamples = 30;
+    let sum = 0;
+    let sumSquares = 0;
+    for (let i = 0; i < recentSamples; i++) {
+      const idx = (this.frameIndex - 1 - i + this.frameTimings.length) % this.frameTimings.length;
+      const timing = this.frameTimings[idx];
+      sum += timing;
+      sumSquares += timing * timing;
+    }
+    const mean = sum / recentSamples;
+    const variance = sumSquares / recentSamples - mean * mean;
+    const stdDev = Math.sqrt(variance);
+    const coefficientOfVariation = stdDev / mean;
+    this.isStable = coefficientOfVariation < 0.15;
+  }
+  /**
+   * Get current performance metrics
+   */
+  getMetrics() {
+    return {
+      currentFPS: Math.round(this.currentFPS),
+      averageFPS: Math.round(this.averageFPS),
+      smoothFPS: Math.round(this.emaFPS),
+      percentile95FPS: Math.round(this.percentile95FPS),
+      targetFPS: this.targetFPS,
+      isStable: this.isStable,
+      frameCount: this.frameCount
+    };
+  }
+  /**
+   * Predict if an operation will fit in remaining budget
+   */
+  canPerformOperation(estimatedMs) {
+    const budget = this.checkBudget();
+    return budget.budgetRemaining >= estimatedMs;
+  }
+  /**
+   * Reset statistics (useful when changing quality tiers)
+   */
+  reset() {
+    this.frameTimings.fill(this.targetFrameTime);
+    this.frameIndex = 0;
+    this.frameCount = 0;
+    this.currentFPS = this.targetFPS;
+    this.averageFPS = this.targetFPS;
+    this.emaFPS = this.targetFPS;
+    this.percentile95FPS = this.targetFPS;
+    this.isStable = false;
+  }
+  /**
+   * Set new target FPS (when switching quality tiers)
+   */
+  setTargetFPS(newTargetFPS) {
+    this.targetFPS = newTargetFPS;
+    this.targetFrameTime = 1e3 / newTargetFPS;
+    this.reset();
+  }
+}
+class CrossPlatformDetection {
+  constructor() {
+    this.platform = this.detectPlatform();
+    this.browser = this.detectBrowser();
+    this.deviceMemory = navigator.deviceMemory || null;
+    this.hardwareConcurrency = navigator.hardwareConcurrency || 4;
+    this.pixelRatio = window.devicePixelRatio || 1;
+    this.screenWidth = window.screen.width * this.pixelRatio;
+    this.screenHeight = window.screen.height * this.pixelRatio;
+    this.gpuTier = null;
+    this.gpuInfo = null;
+    this.performanceTier = null;
+    this.tierDetails = null;
+    this.isOnBattery = false;
+    this.batteryLevel = 1;
+    this.initBatteryMonitoring();
+  }
+  /**
+   * Detect platform type
+   */
+  detectPlatform() {
+    const ua = navigator.userAgent;
+    if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) return "ios";
+    if (/Android/i.test(ua)) return "android";
+    if (/Windows/i.test(ua)) return "windows";
+    if (/Mac/i.test(ua)) return "mac";
+    if (/Linux/i.test(ua)) return "linux";
+    return "unknown";
+  }
+  /**
+   * Detect browser type
+   */
+  detectBrowser() {
+    const ua = navigator.userAgent;
+    if (/Chrome/i.test(ua) && !/Edge/i.test(ua)) return "chrome";
+    if (/Firefox/i.test(ua)) return "firefox";
+    if (/^((?!chrome|android).)*safari/i.test(ua)) return "safari";
+    if (/Edge/i.test(ua)) return "edge";
+    return "unknown";
+  }
+  /**
+   * Initialize battery monitoring
+   */
+  async initBatteryMonitoring() {
+    if ("getBattery" in navigator) {
+      try {
+        const battery = await navigator.getBattery();
+        this.isOnBattery = !battery.charging;
+        this.batteryLevel = battery.level;
+        battery.addEventListener("chargingchange", () => {
+          this.isOnBattery = !battery.charging;
+        });
+        battery.addEventListener("levelchange", () => {
+          this.batteryLevel = battery.level;
+        });
+      } catch (e) {
+        console.log("Battery API not available");
+      }
+    }
+  }
+  /**
+   * Detect GPU capabilities
+   * In a real implementation, this would use the detect-gpu library
+   * For now, we'll use a simplified detection
+   */
+  async detectGPU() {
+    const canvas = document.createElement("canvas");
+    const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+    if (gl) {
+      const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+      if (debugInfo) {
+        const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+        const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+        this.gpuInfo = {
+          vendor,
+          renderer
+        };
+        this.gpuTier = this.classifyGPU(vendor, renderer);
+      }
+    }
+    canvas.remove();
+    return this.gpuTier;
+  }
+  /**
+   * Classify GPU into tiers
+   */
+  classifyGPU(vendor, renderer) {
+    const rendererLower = renderer.toLowerCase();
+    if (rendererLower.includes("nvidia") && (rendererLower.includes("rtx") || rendererLower.includes("gtx 1080") || rendererLower.includes("gtx 1070"))) {
+      return "high";
+    }
+    if (rendererLower.includes("apple") && (rendererLower.includes("m1") || rendererLower.includes("m2") || rendererLower.includes("m3"))) {
+      return "high";
+    }
+    if (rendererLower.includes("mali-") || rendererLower.includes("adreno") || rendererLower.includes("powervr")) {
+      if (rendererLower.includes("adreno 6") || rendererLower.includes("mali-g7")) {
+        return "medium";
+      }
+      return "low";
+    }
+    if (rendererLower.includes("intel")) {
+      if (rendererLower.includes("iris")) {
+        return "medium";
+      }
+      return "low";
+    }
+    return "medium";
+  }
+  /**
+   * Run performance benchmark
+   */
+  async runBenchmark() {
+    const canvas = document.createElement("canvas");
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return 0;
+    const iterations = 1e3;
+    const startTime = performance.now();
+    for (let i = 0; i < iterations; i++) {
+      ctx.fillStyle = `rgba(${i % 255}, ${i * 2 % 255}, ${i * 3 % 255}, 0.5)`;
+      ctx.beginPath();
+      ctx.arc(
+        Math.random() * canvas.width,
+        Math.random() * canvas.height,
+        Math.random() * 20 + 5,
+        0,
+        Math.PI * 2
+      );
+      ctx.fill();
+    }
+    const endTime = performance.now();
+    const totalTime = endTime - startTime;
+    canvas.remove();
+    return iterations / totalTime * 1e3;
+  }
+  /**
+   * Determine performance tier based on all factors
+   */
+  async determinePerformanceTier() {
+    await this.detectGPU();
+    const benchmarkScore = await this.runBenchmark();
+    let score = 0;
+    if (this.gpuTier === "high") score += 30;
+    else if (this.gpuTier === "medium") score += 20;
+    else score += 10;
+    if (benchmarkScore > 1e4) score += 30;
+    else if (benchmarkScore > 5e3) score += 20;
+    else if (benchmarkScore > 2e3) score += 10;
+    else score += 5;
+    if (this.hardwareConcurrency >= 8) score += 10;
+    else if (this.hardwareConcurrency >= 4) score += 5;
+    if (this.deviceMemory >= 8) score += 10;
+    else if (this.deviceMemory >= 4) score += 5;
+    if (isMobile()) score -= 20;
+    if (this.browser === "safari") score -= 10;
+    if (this.isOnBattery) score -= 5;
+    if (this.batteryLevel < 0.2) score -= 10;
+    if (this.pixelRatio > 2) score -= 5;
+    if (score >= 60) {
+      this.performanceTier = "premium";
+    } else if (score >= 35) {
+      this.performanceTier = "optimized";
+    } else {
+      this.performanceTier = "essential";
+    }
+    this.tierDetails = {
+      score,
+      benchmarkScore,
+      factors: {
+        gpuTier: this.gpuTier,
+        platform: this.platform,
+        browser: this.browser,
+        isMobile: isMobile(),
+        cores: this.hardwareConcurrency,
+        memory: this.deviceMemory,
+        pixelRatio: this.pixelRatio,
+        isOnBattery: this.isOnBattery,
+        batteryLevel: this.batteryLevel
+      }
+    };
+    return this.performanceTier;
+  }
+  /**
+   * Get recommended settings for current tier
+   */
+  getTierSettings() {
+    const settings = {
+      premium: {
+        targetFPS: 60,
+        flowFieldResolution: 15,
+        maxParticles: 8e3,
+        particleTrails: true,
+        splineQuality: "high",
+        parallaxLayers: 3,
+        zoomDuration: { min: 600, max: 900 },
+        // Reduced from 800-1200
+        effects: ["flowField", "particles", "lissajous", "parallax"],
+        debugPath: false
+        // Disabled for performance
+      },
+      optimized: {
+        targetFPS: 45,
+        flowFieldResolution: 25,
+        maxParticles: 2e3,
+        particleTrails: false,
+        splineQuality: "medium",
+        parallaxLayers: 1,
+        zoomDuration: { min: 500, max: 700 },
+        // Reduced from 600-900
+        effects: ["flowField", "particles"]
+      },
+      essential: {
+        targetFPS: 30,
+        flowFieldResolution: 40,
+        maxParticles: 500,
+        particleTrails: false,
+        splineQuality: "low",
+        parallaxLayers: 0,
+        zoomDuration: { min: 400, max: 600 },
+        // Reduced from 500-700
+        effects: ["flowField", "simpleCurves"]
+        // Added flowField to maintain organic movement
+      }
+    };
+    return settings[this.performanceTier] || settings.essential;
+  }
+  /**
+   * Check if specific feature should be enabled
+   */
+  shouldEnableFeature(feature) {
+    const tierSettings = this.getTierSettings();
+    return tierSettings.effects.includes(feature);
+  }
+  /**
+   * Get all detection results
+   */
+  getCapabilities() {
+    return {
+      tier: this.performanceTier,
+      tierDetails: this.tierDetails,
+      platform: this.platform,
+      browser: this.browser,
+      gpu: {
+        tier: this.gpuTier,
+        info: this.gpuInfo
+      },
+      device: {
+        cores: this.hardwareConcurrency,
+        memory: this.deviceMemory,
+        pixelRatio: this.pixelRatio,
+        screenResolution: `${this.screenWidth}x${this.screenHeight}`
+      },
+      power: {
+        isOnBattery: this.isOnBattery,
+        batteryLevel: this.batteryLevel
+      },
+      settings: this.getTierSettings()
+    };
+  }
+}
+class ConsciousnessEffectsOverlay {
+  constructor(viewer) {
+    this.viewer = viewer;
+    this.canvas = null;
+    this.ctx = null;
+    this.isActive = false;
+    this.createOverlay();
+  }
+  /**
+   * Create overlay canvas
+   */
+  createOverlay() {
+    this.canvas = document.createElement("canvas");
+    this.canvas.style.position = "absolute";
+    this.canvas.style.top = "0";
+    this.canvas.style.left = "0";
+    this.canvas.style.pointerEvents = "none";
+    this.canvas.style.zIndex = "10";
+    this.canvas.style.opacity = "0";
+    this.canvas.style.transition = "opacity 0.3s ease-out";
+    this.viewer.element.appendChild(this.canvas);
+    this.ctx = this.canvas.getContext("2d", {
+      alpha: true,
+      desynchronized: true,
+      // Better performance
+      willReadFrequently: false
+    });
+    this.updateSize();
+    this.viewer.addHandler("resize", () => this.updateSize());
+  }
+  /**
+   * Update canvas size to match viewer
+   */
+  updateSize() {
+    const container = this.viewer.element;
+    this.canvas.width = container.clientWidth;
+    this.canvas.height = container.clientHeight;
+  }
+  /**
+   * Show overlay with fade in
+   */
+  show() {
+    this.isActive = true;
+    this.canvas.style.opacity = "1";
+  }
+  /**
+   * Hide overlay with fade out
+   */
+  hide() {
+    this.isActive = false;
+    this.canvas.style.opacity = "0";
+    setTimeout(() => {
+      if (!this.isActive) {
+        this.clear();
+      }
+    }, 300);
+  }
+  /**
+   * Clear the canvas
+   */
+  clear() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+  /**
+   * Get canvas context for rendering
+   */
+  getContext() {
+    return this.ctx;
+  }
+  /**
+   * Convert viewport coordinates to canvas coordinates
+   */
+  viewportToCanvas(viewportPoint) {
+    const point = new OpenSeadragon.Point(viewportPoint.x, viewportPoint.y);
+    const pixel = this.viewer.viewport.viewportToViewerElementCoordinates(point);
+    return {
+      x: pixel.x,
+      y: pixel.y
+    };
+  }
+  /**
+   * Destroy overlay
+   */
+  destroy() {
+    if (this.canvas && this.canvas.parentNode) {
+      this.canvas.parentNode.removeChild(this.canvas);
+    }
+    this.canvas = null;
+    this.ctx = null;
+  }
+}
+class AdaptiveZoomRenderer {
+  constructor(viewer) {
+    this.viewer = viewer;
+    this.detector = new CrossPlatformDetection();
+    this.frameBudget = null;
+    this.effectsOverlay = new ConsciousnessEffectsOverlay(viewer);
+    this.currentTier = null;
+    this.currentSettings = null;
+    this.isInitialized = false;
+    this.qualityController = {
+      degradeCount: 0,
+      upgradeCount: 0,
+      lastAdjustment: 0,
+      cooldownMs: 2e3
+      // Wait 2s between adjustments
+    };
+    this.flowField = null;
+    this.particleSystem = null;
+    this.splineRenderer = null;
+    this.isAnimating = false;
+    this.currentAnimation = null;
+    this.onTierChange = null;
+  }
+  /**
+   * Initialize the adaptive renderer
+   */
+  async initialize() {
+    console.log("🎯 Initializing AdaptiveZoomRenderer...");
+    this.currentTier = await this.detector.determinePerformanceTier();
+    this.currentSettings = this.detector.getTierSettings();
+    console.log(`📊 Performance tier detected: ${this.currentTier}`, this.detector.getCapabilities());
+    this.frameBudget = new FrameBudgetManager(this.currentSettings.targetFPS);
+    this.frameBudget.onQualityAdjust = this.handleQualityAdjustment.bind(this);
+    await this.initializeEffectSystems();
+    this.isInitialized = true;
+    if (this.onTierChange) {
+      this.onTierChange(this.currentTier, this.currentSettings);
+    }
+    return this.currentTier;
+  }
+  /**
+   * Initialize effect systems based on current tier
+   */
+  async initializeEffectSystems() {
+    const effects = this.currentSettings.effects;
+    if (effects.includes("flowField")) {
+      const { default: SimplexFlowField } = await __vitePreload(async () => {
+        const { default: SimplexFlowField2 } = await import("./SimplexFlowField-DBpA6Hih.js");
+        return { default: SimplexFlowField2 };
+      }, true ? [] : void 0);
+      this.flowField = new SimplexFlowField({
+        resolution: this.currentSettings.flowFieldResolution,
+        viewer: this.viewer
+      });
+    }
+    if (effects.includes("particles")) {
+      const { default: OptimizedParticleSystem } = await __vitePreload(async () => {
+        const { default: OptimizedParticleSystem2 } = await import("./OptimizedParticleSystem-ZLRH1w-_.js");
+        return { default: OptimizedParticleSystem2 };
+      }, true ? [] : void 0);
+      this.particleSystem = new OptimizedParticleSystem({
+        maxParticles: this.currentSettings.maxParticles,
+        hasTrails: this.currentSettings.particleTrails
+      });
+    }
+    const { default: SplineRenderer } = await __vitePreload(async () => {
+      const { default: SplineRenderer2 } = await import("./SplineRenderer-DG5_XSLv.js");
+      return { default: SplineRenderer2 };
+    }, true ? [] : void 0);
+    this.splineRenderer = new SplineRenderer({
+      quality: this.currentSettings.splineQuality
+    });
+  }
+  /**
+   * Handle quality adjustment requests from frame budget
+   */
+  handleQualityAdjustment(direction, currentFPS) {
+    const now = Date.now();
+    if (now - this.qualityController.lastAdjustment < this.qualityController.cooldownMs) {
+      return;
+    }
+    if (direction === "degrade") {
+      this.qualityController.degradeCount++;
+      this.qualityController.upgradeCount = 0;
+      if (this.qualityController.degradeCount >= 3) {
+        this.degradeTier();
+      } else {
+        this.reduceEffects();
+      }
+    } else {
+      this.qualityController.upgradeCount++;
+      this.qualityController.degradeCount = 0;
+      if (this.qualityController.upgradeCount >= 10) {
+        this.upgradeTier();
+      }
+    }
+    this.qualityController.lastAdjustment = now;
+  }
+  /**
+   * Degrade to lower performance tier
+   */
+  async degradeTier() {
+    const tiers = ["premium", "optimized", "essential"];
+    const currentIndex = tiers.indexOf(this.currentTier);
+    if (currentIndex < tiers.length - 1) {
+      console.warn(`📉 Degrading from ${this.currentTier} to ${tiers[currentIndex + 1]} tier`);
+      this.currentTier = tiers[currentIndex + 1];
+      this.currentSettings = this.detector.getTierSettings();
+      await this.initializeEffectSystems();
+      this.frameBudget.setTargetFPS(this.currentSettings.targetFPS);
+      this.qualityController.degradeCount = 0;
+      if (this.onTierChange) {
+        this.onTierChange(this.currentTier, this.currentSettings);
+      }
+    }
+  }
+  /**
+   * Upgrade to higher performance tier
+   */
+  async upgradeTier() {
+    const tiers = ["premium", "optimized", "essential"];
+    const currentIndex = tiers.indexOf(this.currentTier);
+    if (currentIndex > 0 && this.detector.batteryLevel > 0.3) {
+      console.log(`📈 Upgrading from ${this.currentTier} to ${tiers[currentIndex - 1]} tier`);
+      this.currentTier = tiers[currentIndex - 1];
+      this.currentSettings = this.detector.getTierSettings();
+      await this.initializeEffectSystems();
+      this.frameBudget.setTargetFPS(this.currentSettings.targetFPS);
+      this.qualityController.upgradeCount = 0;
+      if (this.onTierChange) {
+        this.onTierChange(this.currentTier, this.currentSettings);
+      }
+    }
+  }
+  /**
+   * Reduce effects within current tier
+   */
+  reduceEffects() {
+    if (this.particleSystem && this.particleSystem.getActiveCount() > 100) {
+      const newMax = Math.floor(this.particleSystem.maxParticles * 0.75);
+      this.particleSystem.setMaxParticles(newMax);
+      console.log(`🎨 Reduced particles to ${newMax}`);
+    }
+    if (this.flowField && this.flowField.resolution < 50) {
+      this.flowField.setResolution(this.flowField.resolution + 5);
+      console.log(`🌊 Reduced flow field resolution to ${this.flowField.resolution}`);
+    }
+  }
+  /**
+   * Perform adaptive zoom animation
+   */
+  async performZoom(startBounds, targetBounds, options = {}) {
+    console.log("🎯 AdaptiveZoomRenderer.performZoom called", { startBounds, targetBounds, options });
+    if (!this.isInitialized) {
+      console.log("🔄 Initializing adaptive renderer...");
+      await this.initialize();
+    }
+    if (this.isAnimating) {
+      console.warn("Animation already in progress");
+      return;
+    }
+    this.isAnimating = true;
+    if (this.frameBudget) {
+      this.frameBudget.reset();
+      console.log("🔄 Frame budget reset at animation start");
+    }
+    const metrics = this.frameBudget.getMetrics();
+    console.log(`📊 FPS Check: frameCount=${metrics.frameCount}, averageFPS=${metrics.averageFPS}, forceConsciousness=${options.forceConsciousness}`);
+    if (!options.forceConsciousness && metrics.frameCount > 120 && // Increased from 60 to 120 frames
+    metrics.averageFPS < 25 && // Lowered threshold from 30 to 25
+    metrics.averageFPS > 0) {
+      console.warn(`⚠️ Low FPS detected (${metrics.averageFPS}), using fallback zoom`);
+      this.isAnimating = false;
+      return "fallback";
+    }
+    if (metrics.frameCount <= 120) {
+      console.log(`🎬 Starting consciousness zoom (warming up, ${metrics.frameCount} frames so far)`);
+    } else {
+      console.log(`🎬 Starting consciousness zoom (FPS check passed: ${metrics.averageFPS} FPS)`);
+    }
+    const animation = this.prepareAnimation(startBounds, targetBounds, options);
+    this.currentAnimation = animation;
+    const startTime = performance.now();
+    const animate = (currentTime) => {
+      const budget = this.frameBudget.startFrame();
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / animation.duration, 1);
+      const easedProgress = animation.easing(progress);
+      const currentPosition = this.interpolatePosition(
+        animation.startPosition,
+        animation.targetPosition,
+        easedProgress
+      );
+      if (budget.budgetRemaining > 5 && Math.floor(progress * 100) % 5 === 0) {
+        this.renderEffects(currentPosition, easedProgress, animation);
+      }
+      this.applyZoomToViewer(currentPosition);
+      const frameResult = this.frameBudget.endFrame();
+      if (Math.random() < 5e-3) {
+        const metrics2 = this.frameBudget.getMetrics();
+        console.log(`📊 Animation performance: ${metrics2.averageFPS} FPS, frame ${metrics2.frameCount}`);
+      }
+      if (progress < 1) {
+        if (!frameResult.isOverBudget || frameResult.budgetUsageRatio < 1.5) {
+          requestAnimationFrame(animate);
+        } else {
+          setTimeout(() => requestAnimationFrame(animate), 16);
+        }
+      } else {
+        console.log("✅ AdaptiveZoomRenderer animation complete, calling completeAnimation");
+        this.completeAnimation();
+      }
+    };
+    requestAnimationFrame(animate);
+    return new Promise((resolve) => {
+      this.animationCompleteCallback = resolve;
+    });
+  }
+  /**
+   * Prepare animation configuration based on tier
+   */
+  prepareAnimation(startBounds, targetBounds, options) {
+    var _a;
+    const settings = this.currentSettings;
+    const distance = this.calculateZoomDistance(startBounds, targetBounds);
+    const baseDuration = this.mapDistanceToDuration(distance, settings.zoomDuration);
+    const duration = options.duration || baseDuration;
+    const easing = this.getEasingFunction(options.easing || "consciousness");
+    let flowPath = null;
+    if (this.flowField && this.detector.shouldEnableFeature("flowField")) {
+      console.log("🌊 Creating flow field path for consciousness zoom");
+      flowPath = this.flowField.calculatePath(startBounds, targetBounds);
+      console.log("✅ Flow path created:", flowPath ? "Success" : "Failed");
+    } else {
+      console.log("⚠️ Flow field not available:", {
+        hasFlowField: !!this.flowField,
+        shouldEnable: this.detector.shouldEnableFeature("flowField"),
+        effects: (_a = this.currentSettings) == null ? void 0 : _a.effects
+      });
+    }
+    return {
+      startPosition: {
+        center: startBounds.getCenter(),
+        zoom: this.viewer.viewport.getZoom()
+      },
+      targetPosition: {
+        center: targetBounds.getCenter(),
+        zoom: this.calculateTargetZoom(targetBounds)
+      },
+      duration,
+      easing,
+      flowPath,
+      settings
+    };
+  }
+  /**
+   * Calculate target zoom with fallback
+   */
+  calculateTargetZoom(targetBounds) {
+    if (this.viewer.viewport.getZoomForBounds) {
+      return this.viewer.viewport.getZoomForBounds(targetBounds);
+    } else {
+      const viewportBounds = this.viewer.viewport.getBounds();
+      const currentZoom = this.viewer.viewport.getZoom();
+      const xZoom = viewportBounds.width / targetBounds.width;
+      const yZoom = viewportBounds.height / targetBounds.height;
+      return Math.min(xZoom, yZoom) * currentZoom;
+    }
+  }
+  /**
+   * Calculate zoom distance for duration mapping
+   */
+  calculateZoomDistance(startBounds, targetBounds) {
+    const startCenter = startBounds.getCenter();
+    const targetCenter = targetBounds.getCenter();
+    const spatialDistance = Math.sqrt(
+      Math.pow(targetCenter.x - startCenter.x, 2) + Math.pow(targetCenter.y - startCenter.y, 2)
+    );
+    const startZoom = this.viewer.viewport.getZoom();
+    const targetZoom = this.calculateTargetZoom(targetBounds);
+    const zoomRatio = Math.abs(Math.log(targetZoom / startZoom));
+    return spatialDistance + zoomRatio * 0.5;
+  }
+  /**
+   * Map distance to duration within tier bounds
+   */
+  mapDistanceToDuration(distance, durationBounds) {
+    const normalizedDistance = Math.min(distance / 5, 1);
+    return durationBounds.min + (durationBounds.max - durationBounds.min) * normalizedDistance;
+  }
+  /**
+   * Get easing function with biological motion curves
+   */
+  getEasingFunction(name) {
+    var _a, _b, _c, _d;
+    const easings = {
+      // Consciousness stream - organic flow
+      consciousness: (t) => {
+        const x1 = 0.15, y1 = 0.4, x2 = 0.32, y2 = 0.88;
+        return this.cubicBezier(x1, y1, x2, y2, t);
+      },
+      // Standard zoom - versatile for all situations
+      standard: (t) => {
+        const x1 = 0.4, y1 = 0, x2 = 0.2, y2 = 1;
+        return this.cubicBezier(x1, y1, x2, y2, t);
+      },
+      // Zoom in - deceleration at end for detail focus
+      zoomIn: (t) => {
+        const x1 = 0, y1 = 0, x2 = 0.2, y2 = 1;
+        return this.cubicBezier(x1, y1, x2, y2, t);
+      },
+      // Zoom out - acceleration for overview return
+      zoomOut: (t) => {
+        const x1 = 0.4, y1 = 0, x2 = 1, y2 = 1;
+        return this.cubicBezier(x1, y1, x2, y2, t);
+      },
+      // Meditative - very smooth and contemplative
+      meditative: (t) => {
+        const x1 = 0.18, y1 = 0.35, x2 = 0.35, y2 = 0.9;
+        return this.cubicBezier(x1, y1, x2, y2, t);
+      },
+      // Dynamic - more energetic movement
+      dynamic: (t) => {
+        const x1 = 0.22, y1 = 0.25, x2 = 0.38, y2 = 0.85;
+        return this.cubicBezier(x1, y1, x2, y2, t);
+      },
+      // Linear fallback
+      linear: (t) => t
+    };
+    if (name === "auto") {
+      const zoomDirection = ((_b = (_a = this.currentAnimation) == null ? void 0 : _a.targetPosition) == null ? void 0 : _b.zoom) > ((_d = (_c = this.currentAnimation) == null ? void 0 : _c.startPosition) == null ? void 0 : _d.zoom) ? "in" : "out";
+      name = zoomDirection === "in" ? "zoomIn" : "zoomOut";
+    }
+    return easings[name] || easings.consciousness;
+  }
+  /**
+   * Cubic bezier implementation for smooth curves
+   */
+  cubicBezier(x1, y1, x2, y2, t) {
+    const epsilon = 1e-3;
+    let x = t;
+    for (let i = 0; i < 8; i++) {
+      const cx = 3 * x1;
+      const bx = 3 * (x2 - x1) - cx;
+      const ax = 1 - cx - bx;
+      const currentX = ((ax * x + bx) * x + cx) * x;
+      const dx = currentX - t;
+      if (Math.abs(dx) < epsilon) break;
+      const df = (3 * ax * x + 2 * bx) * x + cx;
+      if (Math.abs(df) < epsilon) break;
+      x -= dx / df;
+    }
+    const cy = 3 * y1;
+    const by = 3 * (y2 - y1) - cy;
+    const ay = 1 - cy - by;
+    return ((ay * x + by) * x + cy) * x;
+  }
+  /**
+   * Interpolate position with optional flow field influence
+   */
+  interpolatePosition(start, target, progress) {
+    let center = {
+      x: start.center.x + (target.center.x - start.center.x) * progress,
+      y: start.center.y + (target.center.y - start.center.y) * progress
+    };
+    if (this.currentAnimation.flowPath && this.currentAnimation.flowPath.getInfluence) {
+      const frameKey = Math.floor(progress * 200);
+      if (!this.flowCache || this.flowCache.key !== frameKey) {
+        const flowInfluence = this.currentAnimation.flowPath.getInfluence(progress);
+        const dampening = Math.sin(progress * Math.PI);
+        const influenceStrength = 0.3 * dampening;
+        this.flowCache = {
+          key: frameKey,
+          x: flowInfluence.x * influenceStrength,
+          y: flowInfluence.y * influenceStrength
+        };
+      }
+      center.x += this.flowCache.x;
+      center.y += this.flowCache.y;
+      if (progress < 0.01) {
+        console.log("🌊 Flow field active with caching for consciousness zoom");
+      }
+    }
+    const logStart = Math.log(start.zoom);
+    const logTarget = Math.log(target.zoom);
+    const logZoom = logStart + (logTarget - logStart) * progress;
+    const zoom = Math.exp(logZoom);
+    return { center, zoom };
+  }
+  /**
+   * Render visual effects
+   */
+  renderEffects(position, progress, animation) {
+    var _a;
+    const isSafari = this.detector.browser === "safari";
+    if (isSafari && this.frameBudget.getMetrics().averageFPS < 45) {
+      return;
+    }
+    const ctx = this.effectsOverlay.getContext();
+    if (!ctx) return;
+    this.effectsOverlay.clear();
+    if ((_a = this.currentSettings) == null ? void 0 : _a.debugPath) {
+      this.drawZoomPath(ctx, animation, progress);
+    }
+    this.effectsOverlay.viewportToCanvas({
+      x: position.center.x,
+      y: position.center.y
+    });
+  }
+  /**
+   * Apply zoom to OpenSeadragon viewer
+   */
+  applyZoomToViewer(position) {
+    this.viewer.viewport.silenceMultiUpdate = true;
+    this.viewer.viewport.panTo(position.center, true);
+    this.viewer.viewport.zoomTo(position.zoom, null, true);
+    this.viewer.viewport.silenceMultiUpdate = false;
+    this.viewer.viewport.applyConstraints();
+  }
+  /**
+   * Draw zoom path for debugging
+   */
+  drawZoomPath(ctx, animation, currentProgress) {
+    ctx.save();
+    ctx.strokeStyle = "rgba(255, 0, 255, 0.5)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    const samples = 50;
+    for (let i = 0; i <= samples; i++) {
+      const t = i / samples;
+      const pos = this.interpolatePosition(
+        animation.startPosition,
+        animation.targetPosition,
+        t
+      );
+      const canvasPos = this.effectsOverlay.viewportToCanvas({
+        x: pos.center.x,
+        y: pos.center.y
+      });
+      if (i === 0) {
+        ctx.moveTo(canvasPos.x, canvasPos.y);
+      } else {
+        ctx.lineTo(canvasPos.x, canvasPos.y);
+      }
+      if (Math.abs(t - currentProgress) < 0.02) {
+        ctx.fillStyle = "rgba(255, 255, 0, 0.8)";
+        ctx.fillRect(canvasPos.x - 5, canvasPos.y - 5, 10, 10);
+      }
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+  /**
+   * Complete animation
+   */
+  completeAnimation() {
+    console.log("🏁 AdaptiveZoomRenderer.completeAnimation called");
+    this.isAnimating = false;
+    this.currentAnimation = null;
+    if (this.particleSystem) {
+      this.particleSystem.clear();
+    }
+    this.qualityController.degradeCount = 0;
+    this.qualityController.upgradeCount = 0;
+    if (this.frameBudget) {
+      this.frameBudget.reset();
+      console.log("🔄 Frame budget metrics reset for next animation");
+    }
+    if (this.detector.browser === "safari") {
+      if (this.flowField) {
+        this.flowField.fieldCache.clear();
+      }
+      const canvas = this.viewer.drawer.canvas;
+      if (canvas && canvas.getContext) {
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.clearRect(0, 0, 1, 1);
+        }
+      }
+    }
+    if (this.animationCompleteCallback) {
+      console.log("🔄 Calling animation complete callback");
+      this.animationCompleteCallback();
+      this.animationCompleteCallback = null;
+    } else {
+      console.warn("⚠️ No animation complete callback found");
+    }
+  }
+  /**
+   * Get current performance metrics
+   */
+  getMetrics() {
+    return {
+      tier: this.currentTier,
+      settings: this.currentSettings,
+      fps: this.frameBudget ? this.frameBudget.getMetrics() : null,
+      capabilities: this.detector.getCapabilities()
+    };
+  }
+  /**
+   * Cleanup
+   */
+  destroy() {
+    if (this.flowField) this.flowField.destroy();
+    if (this.particleSystem) this.particleSystem.destroy();
+    if (this.splineRenderer) this.splineRenderer.destroy();
+    if (this.effectsOverlay) this.effectsOverlay.destroy();
+  }
+}
+class CinematicZoomManager {
+  constructor(viewer, components) {
+    this.viewer = viewer;
+    this.components = components;
+    this.isAnimating = false;
+    this.animationEndHandlers = [];
+    this.debugMode = true;
+    this.reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    this.adaptiveRenderer = new AdaptiveZoomRenderer(viewer);
+    this.adaptiveRenderer.onTierChange = (tier, settings) => {
+      console.log(`🎨 Zoom renderer tier changed to: ${tier}`, settings);
+    };
+    console.log("🚀 Auto-initializing adaptive renderer...");
+    this.adaptiveRenderer.initialize().then((tier) => {
+      console.log(`✅ Adaptive renderer initialized with tier: ${tier}`);
+    }).catch((err) => {
+      console.error("❌ Failed to auto-initialize adaptive renderer:", err);
+    });
+    this.SPRING_PHYSICS = {
+      desktop: {
+        tension: this.reducedMotion ? 100 : 50,
+        // Much lower for gliding (was 170)
+        friction: this.reducedMotion ? 20 : 14,
+        // Lower damping (was 26)
+        mass: 1.8,
+        // Higher mass for inertia (was 1)
+        precision: 1e-3
+        // Precision threshold
+      },
+      mobile: {
+        tension: this.reducedMotion ? 120 : 60,
+        // Lower tension (was 200)
+        friction: this.reducedMotion ? 25 : 16,
+        // Lower damping (was 30)
+        mass: 1.5,
+        // Higher mass (was 1)
+        precision: 1e-3
+      }
+    };
+    this.CONTEMPLATIVE_SPRING = {
+      stiffness: 4.4,
+      // For 3s duration
+      damping: 0.75,
+      // 0.7-0.8 range for smooth motion
+      mass: 2
+      // Higher mass for realistic inertia
+    };
+    this.STABLE_SPRING_CONFIG = {
+      desktop: {
+        animationTime: this.reducedMotion ? 0.3 : 1,
+        springStiffness: this.reducedMotion ? 12 : 6.5,
+        damping: 0.85
+      },
+      mobile: {
+        animationTime: this.reducedMotion ? 0.2 : 0.8,
+        springStiffness: this.reducedMotion ? 15 : 8,
+        damping: 0.9
+      }
+    };
+    this.CONVERGENCE_THRESHOLD = 1e-3;
+    this.OSCILLATION_THRESHOLD = 0.01;
+    this.setupDiagnostics();
+    this.setupAccessibility();
+  }
+  /**
+   * Setup accessibility features
+   */
+  setupAccessibility() {
+    window.matchMedia("(prefers-reduced-motion: reduce)").addEventListener("change", (e) => {
+      this.reducedMotion = e.matches;
+      this.updateSpringConfig();
+    });
+    this.createAriaAnnouncer();
+  }
+  /**
+   * Update spring configuration based on reduced motion preference
+   */
+  updateSpringConfig() {
+    const isMobile2 = /Android|iPhone|iPad/i.test(navigator.userAgent);
+    const config = isMobile2 ? this.STABLE_SPRING_CONFIG.mobile : this.STABLE_SPRING_CONFIG.desktop;
+    if (this.reducedMotion) {
+      config.animationTime = isMobile2 ? 0.2 : 0.3;
+      config.springStiffness = isMobile2 ? 15 : 12;
+    } else {
+      config.animationTime = isMobile2 ? 0.8 : 1;
+      config.springStiffness = isMobile2 ? 8 : 6.5;
+    }
+  }
+  /**
+   * Create ARIA announcer for screen reader notifications
+   */
+  createAriaAnnouncer() {
+    const announcer = document.createElement("div");
+    announcer.setAttribute("aria-live", "polite");
+    announcer.setAttribute("aria-atomic", "true");
+    announcer.className = "sr-only";
+    announcer.style.cssText = `
+            position: absolute;
+            left: -10000px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        `;
+    document.body.appendChild(announcer);
+    this.ariaAnnouncer = announcer;
+  }
+  /**
+   * Announce zoom changes to screen readers
+   */
+  announceZoomChange(message) {
+    if (this.ariaAnnouncer) {
+      this.ariaAnnouncer.textContent = message;
+      setTimeout(() => {
+        this.ariaAnnouncer.textContent = "";
+      }, 1e3);
+    }
+  }
+  /**
+   * Setup diagnostic monitoring
+   */
+  setupDiagnostics() {
+    if (!this.viewer) return;
+    let oscillationCount = 0;
+    let zoomHistory = [];
+    this.viewer.addHandler("zoom", (event) => {
+      if (!this.isAnimating) return;
+      const currentZoom = event.zoom;
+      zoomHistory.push(currentZoom);
+      if (zoomHistory.length > 10) {
+        zoomHistory.shift();
+      }
+      if (zoomHistory.length >= 3) {
+        const [z1, z2, z3] = zoomHistory.slice(-3);
+        if (z2 > z1 && z3 < z2 || z2 < z1 && z3 > z2) {
+          oscillationCount++;
+          if (oscillationCount >= 2 && this.debugMode) {
+            console.warn("🔴 Oscillation detected!", {
+              pattern: [z1, z2, z3],
+              count: oscillationCount
+            });
+          }
+        }
+      }
+    });
+  }
+  /**
+   * Perform a stable cinematic zoom with optional multi-stage animation
+   */
+  async performCinematicZoom(targetBounds, options = {}) {
+    if (this.isAnimating) {
+      console.log("Cinematic zoom already in progress");
+      if (this.animationStartTime && Date.now() - this.animationStartTime > 5e3) {
+        console.warn("Animation seems stuck, forcing reset");
+        this.isAnimating = false;
+      } else {
+        return;
+      }
+    }
+    if (options.type === "consciousness" || options.mode === "consciousness") {
+      return this.performConsciousnessZoom(targetBounds, options);
+    }
+    const isMobile2 = /Android|iPhone|iPad/i.test(navigator.userAgent);
+    const baseConfig = isMobile2 ? this.STABLE_SPRING_CONFIG.mobile : this.STABLE_SPRING_CONFIG.desktop;
+    if (options.stages && !this.reducedMotion) {
+      return this.performMultiStageZoom(targetBounds, options.stages, baseConfig);
+    }
+    const animConfig = {
+      ...baseConfig,
+      ...options,
+      onComplete: options.onComplete || (() => {
+      })
+    };
+    this.isAnimating = true;
+    this.animationStartTime = Date.now();
+    this.disableInterferingComponents();
+    const originalSettings = this.storeOriginalSettings();
+    this.applyStableSpringConfig(animConfig);
+    const zoomParams = this.calculateZoomParameters(targetBounds);
+    if (this.debugMode) {
+      console.log("🎯 Starting stable cinematic zoom:", {
+        currentZoom: this.viewer.viewport.getZoom(),
+        targetZoom: zoomParams.zoom,
+        config: animConfig
+      });
+    }
+    this.executeStableZoom(zoomParams, animConfig, originalSettings);
+    return new Promise((resolve) => {
+      this.animationEndHandlers.push(resolve);
+    });
+  }
+  /**
+   * Perform consciousness stream zoom animation
+   * Uses adaptive renderer with flow fields and organic movement
+   */
+  async performConsciousnessZoom(targetBounds, options = {}) {
+    console.log("🌊 Starting consciousness stream zoom");
+    this.isAnimating = true;
+    this.animationStartTime = Date.now();
+    try {
+      if (!this.adaptiveRenderer) {
+        console.error("❌ Adaptive renderer not created!");
+        this.isAnimating = false;
+        return;
+      }
+      if (!this.adaptiveRenderer.isInitialized) {
+        console.log("🔄 Initializing adaptive renderer...");
+        const tier = await this.adaptiveRenderer.initialize();
+        console.log(`🎯 Adaptive renderer initialized with tier: ${tier}`);
+      }
+      const currentBounds = this.viewer.viewport.getBounds();
+      const zoomOptions = {
+        ...options,
+        easing: options.easing || "consciousness",
+        forceConsciousness: options.forceConsciousness || false,
+        onComplete: () => {
+          this.isAnimating = false;
+          if (options.onComplete) options.onComplete();
+        }
+      };
+      this.disableInterferingComponents();
+      const originalSettings = this.storeOriginalSettings();
+      console.log("🚀 Calling adaptiveRenderer.performZoom with:", {
+        currentBounds,
+        targetBounds,
+        zoomOptions
+      });
+      const result = await this.adaptiveRenderer.performZoom(
+        currentBounds,
+        targetBounds,
+        zoomOptions
+      );
+      if (result === "fallback") {
+        console.warn("⚠️ Falling back to spring physics zoom");
+        this.isAnimating = false;
+        return this.performCinematicZoom(targetBounds, {
+          ...options,
+          type: "spring"
+          // Ensure we don't loop back to consciousness mode
+        });
+      }
+      console.log("🎯 Consciousness zoom promise resolved, completing animation");
+      if (zoomOptions.onComplete) {
+        console.log("🔄 Calling onComplete callback from zoomOptions");
+        zoomOptions.onComplete();
+      }
+      this.completeAnimation(originalSettings, zoomOptions);
+      return;
+    } catch (error) {
+      console.error("❌ Consciousness zoom error:", error);
+      this.isAnimating = false;
+      console.warn("⚠️ Falling back to spring physics zoom due to error");
+      return this.performCinematicZoom(targetBounds, {
+        ...options,
+        type: "spring"
+        // Ensure we don't loop back to consciousness mode
+      });
+    }
+  }
+  /**
+   * Perform adaptive zoom with automatic zoom-out-pan-zoom-in for long distances
+   * Based on research: distances < 3x viewport use direct zoom, longer distances use 3-phase approach
+   */
+  async performAdaptiveZoom(targetBounds, options = {}) {
+    const currentBounds = this.viewer.viewport.getBounds();
+    const currentZoom = this.viewer.viewport.getZoom();
+    const targetZoom = this.calculateTargetZoom(targetBounds);
+    const viewportDiagonal = Math.sqrt(
+      Math.pow(currentBounds.width, 2) + Math.pow(currentBounds.height, 2)
+    );
+    const currentCenter = currentBounds.getCenter();
+    const targetCenter = targetBounds.getCenter();
+    const distance = Math.sqrt(
+      Math.pow(targetCenter.x - currentCenter.x, 2) + Math.pow(targetCenter.y - currentCenter.y, 2)
+    );
+    const normalizedDistance = distance / viewportDiagonal;
+    console.log("🎯 Adaptive zoom analysis:", {
+      normalizedDistance,
+      threshold: 3,
+      currentZoom,
+      targetZoom,
+      strategy: normalizedDistance < 3 ? "direct" : "zoom-out-pan-zoom-in"
+    });
+    if (normalizedDistance < 3) {
+      console.log("📍 Using direct zoom for short distance");
+      if (options.type === "consciousness") {
+        return this.performConsciousnessZoom(targetBounds, options);
+      }
+      return this.performCinematicZoom(targetBounds, options);
+    }
+    console.log("🔄 Using zoom-out-pan-zoom-in for long distance");
+    const minZoom = Math.min(currentZoom, targetZoom);
+    const maxAllowedZoom = this.viewer.viewport.getMaxZoom();
+    const minAllowedZoom = this.viewer.viewport.getMinZoom();
+    const distanceFactor = Math.min(0.3 + 0.4 * normalizedDistance / 10, 0.7);
+    let intermediateZoom = minZoom * distanceFactor;
+    intermediateZoom = Math.max(intermediateZoom, minAllowedZoom * 1.5);
+    intermediateZoom = Math.min(intermediateZoom, maxAllowedZoom * 0.1);
+    intermediateZoom = Math.min(intermediateZoom, minZoom * 0.8);
+    console.log("📐 Intermediate zoom calculation:", {
+      minZoom,
+      distanceFactor,
+      intermediateZoom,
+      minAllowed: this.viewer.viewport.getMinZoom()
+    });
+    const isMobile2 = /Android|iPhone|iPad/i.test(navigator.userAgent);
+    const baseDistance = 3;
+    const duration = 2500 * Math.sqrt(normalizedDistance / baseDistance);
+    const minDuration = isMobile2 ? 1500 : 2e3;
+    const maxDuration = isMobile2 ? 4e3 : 6e3;
+    const totalDuration = Math.max(minDuration, Math.min(duration, maxDuration));
+    console.log("🎨 Contemplative timing calculation:", {
+      normalizedDistance,
+      rawDuration: duration,
+      finalDuration: totalDuration + "ms"
+    });
+    const stages = [
+      {
+        // Phase 1: Zoom out (25% of time)
+        duration: totalDuration * 0.25,
+        zoomFactor: intermediateZoom / currentZoom,
+        centerProgress: 0,
+        // Don't move center yet
+        easing: "contemplativeOut",
+        // Custom easing for art viewing
+        delay: 0,
+        microPause: 30
+        // 30ms pause after phase
+      },
+      {
+        // Phase 2: Pan to target (50% of time) - emphasize the journey
+        duration: totalDuration * 0.5,
+        progress: 1,
+        zoomFactor: 1,
+        // Maintain zoom level
+        useTargetCenter: true,
+        // Move to target center
+        easing: "contemplativePan",
+        // Gentle pan movement
+        delay: 0,
+        microPause: 30
+        // 30ms pause after phase
+      },
+      {
+        // Phase 3: Zoom in (25% of time)
+        duration: totalDuration * 0.25,
+        progress: 1,
+        zoomFactor: targetZoom / intermediateZoom,
+        useTargetCenter: true,
+        // Maintain target center
+        easing: "contemplativeIn",
+        // Satisfying arrival
+        delay: 300,
+        // 300ms pause before final zoom for anticipation
+        microPause: 0
+        // No pause needed at end
+      }
+    ];
+    stages.onComplete = options.onComplete;
+    console.log("🎬 Starting adaptive multi-stage zoom:", {
+      totalDuration: totalDuration + "ms",
+      phases: stages.map((s, i) => `Phase ${i + 1}: ${s.duration}ms`)
+    });
+    return this.performMultiStageZoom(targetBounds, stages, {
+      ...options,
+      type: "adaptive"
+    });
+  }
+  /**
+   * Calculate target zoom level for bounds
+   */
+  calculateTargetZoom(targetBounds) {
+    const viewport = this.viewer.viewport;
+    try {
+      if (viewport.getZoomForBounds) {
+        const zoom = viewport.getZoomForBounds(targetBounds);
+        const minZoom = viewport.getMinZoom();
+        const maxZoom = viewport.getMaxZoom();
+        return Math.max(minZoom, Math.min(maxZoom, zoom));
+      } else {
+        const viewportBounds = viewport.getBounds();
+        const currentZoom = viewport.getZoom();
+        const xZoom = viewportBounds.width / targetBounds.width;
+        const yZoom = viewportBounds.height / targetBounds.height;
+        const zoom = Math.min(xZoom, yZoom) * currentZoom;
+        const minZoom = viewport.getMinZoom();
+        const maxZoom = viewport.getMaxZoom();
+        return Math.max(minZoom, Math.min(maxZoom, zoom));
+      }
+    } catch (error) {
+      console.error("Error calculating target zoom:", error);
+      return viewport.getZoom();
+    }
+  }
+  /**
+   * Perform multi-stage cinematic zoom animation
+   */
+  async performMultiStageZoom(finalBounds, stages, baseConfig) {
+    this.isAnimating = true;
+    this.animationStartTime = Date.now();
+    this.isMultiStage = true;
+    this.totalStages = stages.length;
+    this.currentStageIndex = 0;
+    this.disableInterferingComponents();
+    const originalSettings = this.storeOriginalSettings();
+    const finalParams = this.calculateZoomParameters(finalBounds);
+    const currentZoom = this.viewer.viewport.getZoom();
+    const currentCenter = this.viewer.viewport.getCenter();
+    if (this.multiStageTimeout) {
+      clearTimeout(this.multiStageTimeout);
+    }
+    let stageIndex = 0;
+    const executeNextStage = () => {
+      if (stageIndex >= stages.length) {
+        if (this.isMultiStage) {
+          this.isMultiStage = false;
+          this.completeAnimation(originalSettings, { onComplete: stages.onComplete });
+        }
+        return;
+      }
+      const stage = stages[stageIndex];
+      const isLastStage = stageIndex === stages.length - 1;
+      let stageZoom, stageCenter;
+      const stageCurrentZoom = this.viewer.viewport.getZoom();
+      if (stage.zoomFactor) {
+        stageZoom = stageCurrentZoom * stage.zoomFactor;
+      } else if (stage.progress !== void 0) {
+        stageZoom = currentZoom + (finalParams.zoom - currentZoom) * stage.progress;
+      } else if (isLastStage) {
+        stageZoom = finalParams.zoom;
+      } else {
+        const defaultProgress = (stageIndex + 1) / stages.length;
+        stageZoom = currentZoom + (finalParams.zoom - currentZoom) * defaultProgress;
+      }
+      const minAllowedZoom = this.viewer.viewport.getMinZoom();
+      const maxAllowedZoom = this.viewer.viewport.getMaxZoom();
+      stageZoom = Math.max(minAllowedZoom, Math.min(maxAllowedZoom, stageZoom));
+      if (stage.centerProgress !== void 0) {
+        const centerDiff = {
+          x: finalParams.center.x - currentCenter.x,
+          y: finalParams.center.y - currentCenter.y
+        };
+        stageCenter = new OpenSeadragon.Point(
+          currentCenter.x + centerDiff.x * stage.centerProgress,
+          currentCenter.y + centerDiff.y * stage.centerProgress
+        );
+      } else if (isLastStage || stage.useTargetCenter) {
+        stageCenter = finalParams.center;
+      } else {
+        stageCenter = null;
+      }
+      const stageConfig = {
+        ...baseConfig,
+        animationTime: stage.duration / 1e3 || baseConfig.animationTime,
+        easing: stage.easing || "easeInOutCubic",
+        // Don't complete the whole animation, just this stage
+        skipFinalComplete: stageIndex < stages.length - 1,
+        onComplete: () => {
+          const pauseDuration = stage.microPause || 0;
+          const delayDuration = stage.delay || 0;
+          const totalPause = pauseDuration + delayDuration;
+          if (totalPause > 0 && stageIndex < stages.length - 1) {
+            this.multiStageTimeout = setTimeout(() => {
+              stageIndex++;
+              this.currentStageIndex = stageIndex;
+              executeNextStage();
+            }, totalPause);
+          } else {
+            stageIndex++;
+            this.currentStageIndex = stageIndex;
+            executeNextStage();
+          }
+        }
+      };
+      this.applyStableSpringConfig(stageConfig);
+      const stageParams = {
+        zoom: stageZoom,
+        center: stageCenter,
+        currentZoom: stageCurrentZoom
+      };
+      if (this.debugMode) {
+        console.log(`🎬 Stage ${stageIndex + 1}/${stages.length}:`, {
+          zoom: stageParams.zoom,
+          center: stageCenter ? `(${stageCenter.x.toFixed(3)}, ${stageCenter.y.toFixed(3)})` : "none",
+          duration: stage.duration || "default",
+          easing: stage.easing || "default"
+        });
+      }
+      if (Math.abs(stageZoom - stageCurrentZoom) < 1e-3 && stageCenter) {
+        this.executePanOnly(stageCenter, stageConfig, originalSettings);
+      } else {
+        this.executeStableZoom(stageParams, stageConfig, originalSettings);
+      }
+    };
+    executeNextStage();
+    return new Promise((resolve) => {
+      this.animationEndHandlers.push(resolve);
+    });
+  }
+  /**
+   * Disable components that interfere with smooth animation
+   */
+  disableInterferingComponents() {
+    if (this.components.lowZoomOptimizer) {
+      this.components.lowZoomOptimizer.setCinematicMode(true);
+    }
+    if (this.viewer.imageLoader) {
+      this.viewer.imageLoader.clear();
+    }
+    if (this.components.tileCleanupManager) {
+      this.components.tileCleanupManager.pauseCleanup(3e3);
+    }
+    if (this.components.renderOptimizer) {
+      this.components.renderOptimizer.startCinematicZoom();
+    }
+    if (this.components.predictiveTileLoader) {
+      this.viewer.raiseEvent("animation-start");
+    }
+    if (window.overlayManager && window.overlayManager.disableAutoSwitch) {
+      console.log("🔒 Disabling overlay auto-switch during cinematic zoom");
+      window.overlayManager.disableAutoSwitch = true;
+    }
+  }
+  /**
+   * Store original viewer settings
+   */
+  storeOriginalSettings() {
+    return {
+      animationTime: this.viewer.animationTime,
+      springStiffness: this.viewer.springStiffness,
+      centerXTime: this.viewer.viewport.centerSpringX.animationTime,
+      centerYTime: this.viewer.viewport.centerSpringY.animationTime,
+      zoomTime: this.viewer.viewport.zoomSpring.animationTime,
+      centerXStiffness: this.viewer.viewport.centerSpringX.springStiffness,
+      centerYStiffness: this.viewer.viewport.centerSpringY.springStiffness,
+      zoomStiffness: this.viewer.viewport.zoomSpring.springStiffness
+    };
+  }
+  /**
+   * Apply stable spring configuration
+   */
+  applyStableSpringConfig(config) {
+    this.viewer.animationTime = config.animationTime;
+    this.viewer.springStiffness = config.springStiffness;
+    const springs = [
+      this.viewer.viewport.centerSpringX,
+      this.viewer.viewport.centerSpringY,
+      this.viewer.viewport.zoomSpring
+    ];
+    springs.forEach((spring) => {
+      spring.animationTime = config.animationTime;
+      spring.springStiffness = config.springStiffness;
+      spring.resetTo(spring.current.value);
+    });
+    this.viewer.viewport.applyConstraints();
+  }
+  /**
+   * Calculate zoom parameters for smooth animation
+   */
+  calculateZoomParameters(targetBounds) {
+    const viewport = this.viewer.viewport;
+    const currentZoom = viewport.getZoom();
+    let targetZoom;
+    if (viewport.getZoomForBounds) {
+      targetZoom = viewport.getZoomForBounds(targetBounds);
+    } else {
+      const viewportBounds = viewport.getBounds();
+      const xZoom = viewportBounds.width / targetBounds.width;
+      const yZoom = viewportBounds.height / targetBounds.height;
+      targetZoom = Math.min(xZoom, yZoom) * currentZoom;
+    }
+    const center = targetBounds.getCenter();
+    return {
+      zoom: targetZoom,
+      center: new OpenSeadragon.Point(center.x, center.y),
+      currentZoom,
+      zoomRatio: targetZoom / currentZoom
+    };
+  }
+  /**
+   * Calculate logarithmic interpolation for smooth zoom perception
+   */
+  calculateLogInterpolation(startZoom, endZoom, progress) {
+    const logStart = Math.log(startZoom);
+    const logEnd = Math.log(endZoom);
+    const logCurrent = logStart + (logEnd - logStart) * progress;
+    return Math.exp(logCurrent);
+  }
+  /**
+   * Get easing function by name
+   */
+  getEasingFunction(name) {
+    const easings = {
+      linear: (t) => t,
+      easeInOutCubic: (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
+      easeOutQuart: (t) => 1 - Math.pow(1 - t, 4),
+      easeOutBack: (t) => 1 + 2.70158 * Math.pow(t - 1, 3) + 1.70158 * Math.pow(t - 1, 2),
+      easeInOutQuad: (t) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2,
+      // Special easings for adaptive zoom stages
+      consciousness: (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
+      standard: (t) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2,
+      zoomIn: (t) => 1 - Math.pow(1 - t, 3),
+      zoomOut: (t) => t * t * t,
+      // Contemplative easings based on research (cubic-bezier conversions)
+      // Primary navigation: cubic-bezier(0.25, 0.1, 0.25, 1.0)
+      contemplativeOut: (t) => {
+        const x = t;
+        return x < 0.5 ? 2.2 * x * x : 1 - 2.2 * Math.pow(1 - x, 2);
+      },
+      // Phase transitions: cubic-bezier(0.19, 1, 0.22, 1) 
+      contemplativePan: (t) => {
+        return 1 - Math.pow(1 - t, 2.5);
+      },
+      // Arrival emphasis: cubic-bezier(0.165, 0.84, 0.44, 1)
+      contemplativeIn: (t) => {
+        if (t < 0.5) {
+          return 2.7 * t * t * t;
+        } else {
+          return 1 - 2.7 * Math.pow(1 - t, 3);
+        }
+      }
+    };
+    return easings[name] || easings.easeInOutCubic;
+  }
+  /**
+   * Calculate spring physics progress
+   */
+  calculateSpringProgress(elapsed, springConfig) {
+    const { tension, friction, mass } = springConfig;
+    const omega = Math.sqrt(tension / mass);
+    const zeta = friction / (2 * Math.sqrt(tension * mass));
+    let progress;
+    if (zeta < 1) {
+      const omegaD = omega * Math.sqrt(1 - zeta * zeta);
+      progress = 1 - Math.exp(-zeta * omega * elapsed) * (Math.cos(omegaD * elapsed) + zeta * omega / omegaD * Math.sin(omegaD * elapsed));
+    } else if (zeta === 1) {
+      progress = 1 - Math.exp(-omega * elapsed) * (1 + omega * elapsed);
+    } else {
+      const r1 = -omega * (zeta - Math.sqrt(zeta * zeta - 1));
+      const r2 = -omega * (zeta + Math.sqrt(zeta * zeta - 1));
+      const c1 = r2 / (r2 - r1);
+      const c2 = -r1 / (r2 - r1);
+      progress = 1 - (c1 * Math.exp(r1 * elapsed) + c2 * Math.exp(r2 * elapsed));
+    }
+    return Math.max(0, Math.min(1, progress));
+  }
+  /**
+   * Execute pan-only animation (no zoom change)
+   */
+  executePanOnly(targetCenter, config, originalSettings) {
+    const startTime = performance.now();
+    const startCenter = this.viewer.viewport.getCenter();
+    let animationFrame = null;
+    const easingFn = this.getEasingFunction(config.easing || "easeInOutCubic");
+    const duration = config.animationTime * 1e3;
+    this.applyMotionBlur(true);
+    const animate = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const linearProgress = Math.min(elapsed / duration, 1);
+      const progress = easingFn(linearProgress);
+      const interpolatedCenter = new OpenSeadragon.Point(
+        startCenter.x + (targetCenter.x - startCenter.x) * progress,
+        startCenter.y + (targetCenter.y - startCenter.y) * progress
+      );
+      this.viewer.viewport.panTo(interpolatedCenter, true);
+      if (progress >= 1) {
+        cancelAnimationFrame(animationFrame);
+        this.viewer.viewport.panTo(targetCenter, true);
+        if (this.debugMode) {
+          console.log("✅ Pan-only animation completed:", {
+            duration: elapsed,
+            from: `(${startCenter.x.toFixed(3)}, ${startCenter.y.toFixed(3)})`,
+            to: `(${targetCenter.x.toFixed(3)}, ${targetCenter.y.toFixed(3)})`
+          });
+        }
+        setTimeout(() => {
+          this.applyMotionBlur(false);
+          if (this.animationTimeout) {
+            clearTimeout(this.animationTimeout);
+            this.animationTimeout = null;
+          }
+          if (!config.skipFinalComplete) {
+            this.completeAnimation(originalSettings, config);
+          } else if (config.onComplete) {
+            config.onComplete();
+          }
+        }, 50);
+      } else {
+        animationFrame = requestAnimationFrame(animate);
+      }
+    };
+    animationFrame = requestAnimationFrame(animate);
+    this.animationTimeout = setTimeout(() => {
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+        if (!this.isMultiStage || this.currentStageIndex === this.totalStages - 1) {
+          console.warn("Pan animation timeout");
+        }
+        if (!config.skipFinalComplete) {
+          this.completeAnimation(originalSettings, config);
+        }
+      }
+    }, duration + 1e3);
+  }
+  /**
+   * Execute zoom with spring physics
+   */
+  executeStableZoom(params, config, originalSettings) {
+    const { zoom, center, currentZoom } = params;
+    const isMobile2 = /Android|iPhone|iPad/i.test(navigator.userAgent);
+    const springConfig = isMobile2 ? this.SPRING_PHYSICS.mobile : this.SPRING_PHYSICS.desktop;
+    const useSpringPhysics = config.useSpringPhysics !== false;
+    const startTime = performance.now();
+    const startCenter = this.viewer.viewport.getCenter();
+    let animationFrame = null;
+    let lastProgress = 0;
+    const animate = (currentTime) => {
+      const elapsed = (currentTime - startTime) / 1e3;
+      let progress;
+      if (useSpringPhysics) {
+        progress = this.calculateSpringProgress(elapsed, springConfig);
+      } else {
+        const duration = config.animationTime * 1e3;
+        const linearProgress = Math.min(elapsed * 1e3 / duration, 1);
+        const easingFn = this.getEasingFunction(config.easing || "easeInOutCubic");
+        progress = easingFn(linearProgress);
+      }
+      const interpolatedZoom = this.calculateLogInterpolation(
+        currentZoom,
+        zoom,
+        progress
+      );
+      if (center) {
+        const interpolatedCenter = new OpenSeadragon.Point(
+          startCenter.x + (center.x - startCenter.x) * progress,
+          startCenter.y + (center.y - startCenter.y) * progress
+        );
+        this.viewer.viewport.panTo(interpolatedCenter, true);
+        this.viewer.viewport.zoomTo(interpolatedZoom, null, true);
+      } else {
+        this.viewer.viewport.zoomTo(interpolatedZoom, null, true);
+      }
+      const isComplete = useSpringPhysics ? progress >= 0.995 && Math.abs(progress - lastProgress) < springConfig.precision : progress >= 1;
+      if (isComplete) {
+        cancelAnimationFrame(animationFrame);
+        this.viewer.viewport.zoomTo(zoom, null, true);
+        if (center) {
+          this.viewer.viewport.panTo(center, true);
+        }
+        if (this.debugMode) {
+          console.log("✅ Spring physics zoom completed:", {
+            startZoom: currentZoom,
+            endZoom: zoom,
+            duration: elapsed * 1e3,
+            springConfig: useSpringPhysics ? springConfig : "easing"
+          });
+        }
+        const zoomLevel = Math.round(zoom);
+        this.announceZoomChange(`Zoom completed at ${zoomLevel}x magnification`);
+        setTimeout(() => {
+          if (this.animationTimeout) {
+            clearTimeout(this.animationTimeout);
+            this.animationTimeout = null;
+          }
+          if (!config.skipFinalComplete) {
+            this.completeAnimation(originalSettings, config);
+          } else if (config.onComplete) {
+            config.onComplete();
+          }
+        }, 100);
+      } else {
+        lastProgress = progress;
+        animationFrame = requestAnimationFrame(animate);
+      }
+    };
+    animationFrame = requestAnimationFrame(animate);
+    const maxDuration = 5e3;
+    this.animationTimeout = setTimeout(() => {
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+        if (!this.isMultiStage || this.currentStageIndex === this.totalStages - 1) {
+          console.warn("Animation timeout - forcing completion");
+        }
+        if (!config.skipFinalComplete) {
+          this.completeAnimation(originalSettings, config);
+        }
+      }
+    }, maxDuration);
+  }
+  /**
+   * Apply emergency damping to stop oscillations
+   */
+  applyEmergencyDamping() {
+    const springs = [
+      this.viewer.viewport.centerSpringX,
+      this.viewer.viewport.centerSpringY,
+      this.viewer.viewport.zoomSpring
+    ];
+    springs.forEach((spring) => {
+      spring.springStiffness = Math.min(spring.springStiffness * 1.5, 20);
+      const diff = Math.abs(spring.current.value - spring.target.value);
+      if (diff < this.OSCILLATION_THRESHOLD) {
+        spring.resetTo(spring.target.value);
+      }
+    });
+    if (this.debugMode) {
+      console.log("🟡 Emergency damping applied");
+    }
+  }
+  /**
+   * Complete animation and restore settings
+   */
+  completeAnimation(originalSettings, config) {
+    var _a, _b, _c, _d;
+    this.isAnimating = false;
+    this.animationStartTime = null;
+    if (this.animationTimeout) {
+      clearTimeout(this.animationTimeout);
+      this.animationTimeout = null;
+    }
+    if (this.multiStageTimeout) {
+      clearTimeout(this.multiStageTimeout);
+      this.multiStageTimeout = null;
+    }
+    this.viewer.animationTime = originalSettings.animationTime;
+    this.viewer.springStiffness = originalSettings.springStiffness;
+    this.viewer.viewport.centerSpringX.animationTime = originalSettings.centerXTime;
+    this.viewer.viewport.centerSpringY.animationTime = originalSettings.centerYTime;
+    this.viewer.viewport.zoomSpring.animationTime = originalSettings.zoomTime;
+    this.viewer.viewport.centerSpringX.springStiffness = originalSettings.centerXStiffness;
+    this.viewer.viewport.centerSpringY.springStiffness = originalSettings.centerYStiffness;
+    this.viewer.viewport.zoomSpring.springStiffness = originalSettings.zoomStiffness;
+    if (this.components.lowZoomOptimizer) {
+      this.components.lowZoomOptimizer.setCinematicMode(false);
+    }
+    if (this.components.renderOptimizer) {
+      this.components.renderOptimizer.endCinematicZoom();
+    }
+    if (this.components.predictiveTileLoader) {
+      this.viewer.raiseEvent("animation-finish");
+    }
+    if (window.overlayManager && window.overlayManager.disableAutoSwitch) {
+      console.log("🔓 Re-enabling overlay auto-switch after cinematic zoom");
+      window.overlayManager.disableAutoSwitch = false;
+    }
+    console.log("🔍 Checking renderer for reset:", {
+      hasRenderer: !!this.components.renderer,
+      rendererType: (_b = (_a = this.components.renderer) == null ? void 0 : _a.constructor) == null ? void 0 : _b.name,
+      hasResetMethod: typeof ((_c = this.components.renderer) == null ? void 0 : _c.resetAnimationState) === "function",
+      hasGetResetMethod: typeof ((_d = this.components.renderer) == null ? void 0 : _d.getResetAnimationState) === "function"
+    });
+    if (this.components.renderer) {
+      if (typeof this.components.renderer.resetAnimationState === "function") {
+        console.log("🎯 Safari Fix: Resetting renderer animation state after cinematic zoom");
+        this.components.renderer.resetAnimationState();
+      } else if (typeof this.components.renderer.getResetAnimationState === "function") {
+        console.log("🎯 Safari Fix: Resetting renderer animation state via getResetAnimationState");
+        const resetFunction = this.components.renderer.getResetAnimationState();
+        if (resetFunction) resetFunction();
+      } else {
+        console.warn("⚠️ Cannot reset renderer animation state - method not available");
+      }
+    }
+    if (this.components.overlayManager && typeof this.components.overlayManager.resetAnimationState === "function") {
+      console.log("🎯 Safari Fix: Resetting overlay manager animation state");
+      this.components.overlayManager.resetAnimationState();
+    }
+    if (window.temporalEchoController) {
+      console.log("📱 Mobile Fix: Clearing temporal echo state after cinematic zoom");
+      if (window.temporalEchoController.clearActiveEchoes) {
+        window.temporalEchoController.clearActiveEchoes();
+      }
+      if (window.temporalEchoController.cleanupTimeout) {
+        clearTimeout(window.temporalEchoController.cleanupTimeout);
+        window.temporalEchoController.cleanupTimeout = null;
+      }
+      if (window.temporalEchoController.revealCount !== void 0) {
+        console.log(`📱 Resetting reveal counter from ${window.temporalEchoController.revealCount}`);
+        window.temporalEchoController.revealCount = 0;
+      }
+    }
+    if (window.nativeHotspotRenderer) {
+      console.log("📱 Resetting all hotspot visibility states after zoom");
+      const allHotspots = document.querySelectorAll(".hotspot-visible, .hotspot-echo-active, .hotspot-tree-reveal");
+      allHotspots.forEach((element) => {
+        element.classList.remove("hotspot-echo-active", "hotspot-tree-reveal", "hotspot-echo-reveal");
+        if (element.style.visibility === "visible") {
+          element.style.visibility = "";
+        }
+        if (element.style.display === "block") {
+          element.style.display = "";
+        }
+      });
+    }
+    this.animationEndHandlers.forEach((handler) => handler());
+    this.animationEndHandlers = [];
+    this.viewer.forceRedraw();
+    if (this.viewer && this.viewer.canvas) {
+      console.log("🎯 Restoring focus to viewer canvas");
+      this.viewer.canvas.focus();
+    }
+    if (config.onComplete) {
+      const isMobile2 = /Android|iPhone|iPad/i.test(navigator.userAgent);
+      const postArrivalDelay = isMobile2 ? 400 : 800;
+      setTimeout(() => {
+        config.onComplete();
+      }, postArrivalDelay);
+    }
+  }
+  /**
+   * Apply or remove motion blur effect
+   */
+  applyMotionBlur(enable) {
+    const canvas = this.viewer.canvas;
+    if (!canvas) return;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    const isMobile2 = /Android|iPhone|iPad/i.test(navigator.userAgent);
+    if (isSafari || isMobile2) {
+      return;
+    }
+    if (enable) {
+      canvas.style.filter = "blur(1px)";
+      canvas.style.transition = "filter 200ms ease-in";
+    } else {
+      canvas.style.filter = "blur(0px)";
+      canvas.style.transition = "filter 300ms ease-out";
+      setTimeout(() => {
+        canvas.style.filter = "";
+        canvas.style.transition = "";
+      }, 300);
+    }
+  }
+  /**
+   * Enable debug mode
+   */
+  enableDebug() {
+    this.debugMode = true;
+    console.log("🔍 CinematicZoomManager debug mode enabled");
+  }
+  /**
+   * Get diagnostic info
+   */
+  getDiagnostics() {
+    const springs = [
+      { name: "centerX", spring: this.viewer.viewport.centerSpringX },
+      { name: "centerY", spring: this.viewer.viewport.centerSpringY },
+      { name: "zoom", spring: this.viewer.viewport.zoomSpring }
+    ];
+    return {
+      isAnimating: this.isAnimating,
+      currentZoom: this.viewer.viewport.getZoom(),
+      springs: springs.map(({ name, spring }) => ({
+        name,
+        current: spring.current.value,
+        target: spring.target.value,
+        velocity: Math.abs(spring.current.value - spring.target.value),
+        animationTime: spring.animationTime,
+        stiffness: spring.springStiffness
+      }))
+    };
+  }
+}
+class PredictiveTileLoader {
+  constructor(viewer) {
+    this.viewer = viewer;
+    this.enabled = false;
+    this.prefetchRadius = 2;
+    this.velocityHistory = [];
+    this.maxVelocityHistory = 5;
+    this.lastPosition = null;
+    this.lastUpdateTime = 0;
+    this.stats = {
+      tilesPreloaded: 0,
+      hitRate: 0,
+      predictions: 0,
+      correctPredictions: 0
+    };
+    this.updateInterval = 100;
+    if (this.viewer) {
+      this.initialize();
+    }
+  }
+  initialize() {
+    this.viewer.addHandler("viewport-change", (event) => {
+      if (!this.enabled) return;
+      const now = performance.now();
+      if (now - this.lastUpdateTime < this.updateInterval) {
+        return;
+      }
+      const viewport = event.eventSource.viewport;
+      const currentPosition = viewport.getCenter(true);
+      this.updatePosition(currentPosition);
+      this.lastUpdateTime = now;
+    });
+    console.log("[PredictiveTileLoader] Initialized with prefetch radius:", this.prefetchRadius);
+  }
+  updatePosition(currentPosition) {
+    if (this.lastPosition) {
+      const velocity = {
+        x: currentPosition.x - this.lastPosition.x,
+        y: currentPosition.y - this.lastPosition.y,
+        timestamp: performance.now()
+      };
+      this.velocityHistory.push(velocity);
+      if (this.velocityHistory.length > this.maxVelocityHistory) {
+        this.velocityHistory.shift();
+      }
+      const avgVelocity = this.getAverageVelocity();
+      if (Math.abs(avgVelocity.x) > 1e-3 || Math.abs(avgVelocity.y) > 1e-3) {
+        this.prefetchTiles(currentPosition, avgVelocity);
+      }
+    }
+    this.lastPosition = currentPosition;
+  }
+  getAverageVelocity() {
+    if (this.velocityHistory.length === 0) {
+      return { x: 0, y: 0 };
+    }
+    const sum = this.velocityHistory.reduce((acc, vel) => ({
+      x: acc.x + vel.x,
+      y: acc.y + vel.y
+    }), { x: 0, y: 0 });
+    return {
+      x: sum.x / this.velocityHistory.length,
+      y: sum.y / this.velocityHistory.length
+    };
+  }
+  prefetchTiles(position, velocity) {
+    const futurePosition = {
+      x: position.x + velocity.x * 3,
+      y: position.y + velocity.y * 3
+    };
+    const zoom = this.viewer.viewport.getZoom();
+    const tiledImage = this.viewer.world.getItemAt(0);
+    if (!tiledImage) return;
+    const bounds = this.viewer.viewport.getBounds();
+    const futureBounds = {
+      x: futurePosition.x - bounds.width / 2,
+      y: futurePosition.y - bounds.height / 2,
+      width: bounds.width,
+      height: bounds.height
+    };
+    this.requestTilesInBounds(tiledImage, futureBounds, zoom);
+    this.stats.predictions++;
+  }
+  requestTilesInBounds(tiledImage, bounds, zoom) {
+    try {
+      const currentBounds = this.viewer.viewport.getBounds();
+      const currentZoom = this.viewer.viewport.getZoom();
+      const futureCenter = {
+        x: bounds.x + bounds.width / 2,
+        y: bounds.y + bounds.height / 2
+      };
+      const viewport = this.viewer.viewport;
+      requestAnimationFrame(() => {
+        viewport.panTo(futureCenter, true);
+        requestAnimationFrame(() => {
+          viewport.panTo(viewport.getCenter(currentBounds), true);
+        });
+      });
+      this.stats.tilesPreloaded++;
+    } catch (e) {
+      console.debug("[PredictiveTileLoader] Prefetch error:", e);
+    }
+  }
+  getStats() {
+    return {
+      ...this.stats,
+      hitRate: this.stats.predictions > 0 ? (this.stats.correctPredictions / this.stats.predictions * 100).toFixed(1) + "%" : "N/A",
+      velocityHistorySize: this.velocityHistory.length
+    };
+  }
+  setEnabled(enabled) {
+    this.enabled = enabled;
+    if (!enabled) {
+      this.velocityHistory = [];
+      this.lastPosition = null;
+    }
+    console.log(`[PredictiveTileLoader] ${enabled ? "Enabled" : "Disabled"}`);
+  }
+  reset() {
+    this.velocityHistory = [];
+    this.lastPosition = null;
+    this.stats = {
+      tilesPreloaded: 0,
+      hitRate: 0,
+      predictions: 0,
+      correctPredictions: 0
+    };
+  }
+  destroy() {
+    this.enabled = false;
+    this.reset();
+  }
+}
+class VignetteOverlay {
+  constructor(viewer) {
+    this.viewer = viewer;
+    this.vignetteElement = null;
+    this.isEnabled = true;
+    this.currentOpacity = 0;
+    this.reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isMobile2 = /Android|iPhone|iPad/i.test(navigator.userAgent);
+    this.isEnabled = !isMobile2 && !this.reducedMotion;
+    if (this.isEnabled) {
+      this.createVignetteElement();
+      this.setupEventHandlers();
+    }
+  }
+  /**
+   * Create the vignette overlay element
+   */
+  createVignetteElement() {
+    this.vignetteElement = document.createElement("div");
+    this.vignetteElement.className = "vignette-overlay";
+    this.vignetteElement.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(
+                ellipse at center,
+                transparent 0%,
+                transparent 45%,
+                rgba(0,0,0,0.05) 70%,
+                rgba(0,0,0,0.15) 100%
+            );
+            opacity: 0;
+            transition: opacity 0.5s ease-out;
+            z-index: 10;
+            will-change: opacity;
+        `;
+    this.viewer.element.appendChild(this.vignetteElement);
+  }
+  /**
+   * Setup event handlers for zoom tracking
+   */
+  setupEventHandlers() {
+    this.viewer.addHandler("zoom", (event) => {
+      this.updateVignette(event.zoom);
+    });
+    this.viewer.addHandler("animation-start", () => {
+      if (this.vignetteElement) {
+        this.vignetteElement.style.transition = "opacity 0.3s ease-out";
+      }
+    });
+    this.viewer.addHandler("animation-finish", () => {
+      if (this.vignetteElement) {
+        this.vignetteElement.style.transition = "opacity 0.5s ease-out";
+      }
+    });
+    window.matchMedia("(prefers-reduced-motion: reduce)").addEventListener("change", (e) => {
+      if (e.matches) {
+        this.disable();
+      } else {
+        const isMobile2 = /Android|iPhone|iPad/i.test(navigator.userAgent);
+        if (!isMobile2) {
+          this.enable();
+        }
+      }
+    });
+  }
+  /**
+   * Update vignette opacity based on zoom level
+   */
+  updateVignette(currentZoom) {
+    if (!this.isEnabled || !this.vignetteElement) return;
+    const baseZoom = this.viewer.viewport.getHomeZoom();
+    const maxZoom = this.viewer.viewport.getMaxZoom();
+    const zoomRatio = (currentZoom - baseZoom) / (maxZoom - baseZoom);
+    let opacity = 0;
+    if (zoomRatio > 0.1) {
+      opacity = Math.pow(zoomRatio - 0.1, 1.5) * 0.6;
+      opacity = Math.min(opacity, 0.4);
+    }
+    if (Math.abs(opacity - this.currentOpacity) > 0.01) {
+      this.currentOpacity = opacity;
+      requestAnimationFrame(() => {
+        if (this.vignetteElement) {
+          this.vignetteElement.style.opacity = opacity;
+        }
+      });
+    }
+  }
+  /**
+   * Enable vignette effect
+   */
+  enable() {
+    this.isEnabled = true;
+    if (!this.vignetteElement) {
+      this.createVignetteElement();
+      this.setupEventHandlers();
+    }
+    const currentZoom = this.viewer.viewport.getZoom();
+    this.updateVignette(currentZoom);
+  }
+  /**
+   * Disable vignette effect
+   */
+  disable() {
+    this.isEnabled = false;
+    if (this.vignetteElement) {
+      this.vignetteElement.style.opacity = 0;
+    }
+  }
+  /**
+   * Toggle vignette effect
+   */
+  toggle() {
+    if (this.isEnabled) {
+      this.disable();
+    } else {
+      this.enable();
+    }
+    return this.isEnabled;
+  }
+  /**
+   * Destroy vignette overlay
+   */
+  destroy() {
+    if (this.vignetteElement && this.vignetteElement.parentNode) {
+      this.vignetteElement.parentNode.removeChild(this.vignetteElement);
+      this.vignetteElement = null;
+    }
+  }
+  /**
+   * Get current state
+   */
+  getState() {
+    return {
+      enabled: this.isEnabled,
+      opacity: this.currentOpacity,
+      reducedMotion: this.reducedMotion
+    };
+  }
+}
+class ImmediateZoomHandler {
+  constructor(viewer) {
+    this.viewer = viewer;
+    this.config = {
+      // Base sensitivity at different zoom levels
+      sensitivity: {
+        low: 0.02,
+        // 2% per wheel click at low zoom (<5x)
+        medium: 0.015,
+        // 1.5% per wheel click at medium zoom (5-20x)
+        high: 0.01
+        // 1% per wheel click at high zoom (>20x)
+      },
+      // Zoom level thresholds
+      thresholds: {
+        medium: 5,
+        high: 20
+      },
+      // Mouse wheel produces discrete steps
+      discreteSteps: {
+        zoomIn: 1.12,
+        // 12% zoom in per click
+        zoomOut: 0.89
+        // ~11% zoom out per click (1/1.12)
+      }
+    };
+    this.setupWheelHandler();
+  }
+  /**
+   * Normalize wheel delta across browsers
+   * Based on normalize-wheel library approach
+   */
+  normalizeWheelDelta(event) {
+    let deltaY = event.deltaY;
+    if (event.deltaMode === 1) {
+      deltaY *= 40;
+    } else if (event.deltaMode === 2) {
+      deltaY *= 800;
+    }
+    return deltaY;
+  }
+  /**
+   * Detect if input is from trackpad or mouse
+   */
+  detectInputDevice(event) {
+    if (!Number.isInteger(event.deltaY) || event.deltaX !== 0) {
+      return "trackpad";
+    }
+    return Math.abs(event.deltaY) >= 50 ? "mouse" : "trackpad";
+  }
+  /**
+   * Get adaptive sensitivity based on current zoom level
+   */
+  getAdaptiveSensitivity(currentZoom) {
+    const { sensitivity, thresholds } = this.config;
+    if (currentZoom < thresholds.medium) {
+      return sensitivity.low;
+    } else if (currentZoom < thresholds.high) {
+      return sensitivity.medium;
+    } else {
+      return sensitivity.high;
+    }
+  }
+  /**
+   * Setup the wheel event handler
+   */
+  setupWheelHandler() {
+    const canvas = this.viewer.canvas;
+    this.viewer.removeAllHandlers("canvas-scroll");
+    canvas.addEventListener("wheel", (event) => {
+      event.preventDefault();
+      const device = this.detectInputDevice(event);
+      const currentZoom = this.viewer.viewport.getZoom();
+      const rect = canvas.getBoundingClientRect();
+      const viewportPoint = this.viewer.viewport.pointFromPixel(
+        new OpenSeadragon.Point(
+          event.clientX - rect.left,
+          event.clientY - rect.top
+        )
+      );
+      let zoomFactor;
+      if (device === "mouse") {
+        const { discreteSteps } = this.config;
+        let stepMultiplier = 1;
+        if (currentZoom > 20) {
+          stepMultiplier = 0.5;
+        }
+        if (event.deltaY < 0) {
+          zoomFactor = Math.pow(discreteSteps.zoomIn, stepMultiplier);
+        } else {
+          zoomFactor = Math.pow(discreteSteps.zoomOut, stepMultiplier);
+        }
+      } else {
+        const normalizedDelta = this.normalizeWheelDelta(event);
+        const sensitivity = this.getAdaptiveSensitivity(currentZoom);
+        zoomFactor = Math.exp(-normalizedDelta * sensitivity);
+        zoomFactor = Math.max(0.9, Math.min(1.1, zoomFactor));
+      }
+      this.applyZoom(zoomFactor, viewportPoint);
+    }, { passive: false });
+  }
+  /**
+   * Apply zoom with constraints
+   */
+  applyZoom(zoomFactor, centerPoint) {
+    const currentZoom = this.viewer.viewport.getZoom();
+    const targetZoom = currentZoom * zoomFactor;
+    const minZoom = this.viewer.viewport.getMinZoom();
+    const maxZoom = this.viewer.viewport.getMaxZoom();
+    const constrainedZoom = Math.max(minZoom, Math.min(maxZoom, targetZoom));
+    if (Math.abs(constrainedZoom - currentZoom) > 1e-4) {
+      this.viewer.viewport.zoomTo(constrainedZoom, centerPoint, true);
+      this.viewer.viewport.applyConstraints(true);
+      this.viewer.forceRedraw();
+    }
+  }
+  /**
+   * Update configuration
+   */
+  updateConfig(newConfig) {
+    this.config = { ...this.config, ...newConfig };
+  }
+  /**
+   * Get current configuration
+   */
+  getConfig() {
+    return { ...this.config };
+  }
+  /**
+   * Destroy handler and cleanup
+   */
+  destroy() {
+    this.viewer = null;
+  }
+}
+class ViewportManager {
+  constructor(viewer) {
+    this.viewer = viewer;
+    this.cacheEnabled = true;
+    this.cacheTimeout = 50;
+    this.lastUpdate = 0;
+    this.cachedViewport = null;
+    this.viewportPadding = 0.2;
+    this.metrics = {
+      cacheHits: 0,
+      cacheMisses: 0,
+      lastUpdateDuration: 0,
+      totalUpdates: 0,
+      averageUpdateTime: 0
+    };
+    this.boundUpdate = this.update.bind(this);
+  }
+  /**
+   * Get current viewport data with intelligent caching
+   */
+  getCurrentViewport() {
+    const now = performance.now();
+    if (this.cacheEnabled && this.cachedViewport && now - this.lastUpdate < this.cacheTimeout) {
+      this.metrics.cacheHits++;
+      return this.cachedViewport;
+    }
+    this.metrics.cacheMisses++;
+    return this.update();
+  }
+  /**
+   * Force update viewport data
+   */
+  update() {
+    const startTime = performance.now();
+    const viewport = this.viewer.viewport;
+    const bounds = viewport.getBounds();
+    const topLeft = viewport.viewportToImageCoordinates(bounds.getTopLeft());
+    const bottomRight = viewport.viewportToImageCoordinates(bounds.getBottomRight());
+    const width = bottomRight.x - topLeft.x;
+    const height = bottomRight.y - topLeft.y;
+    const paddingX = width * this.viewportPadding;
+    const paddingY = height * this.viewportPadding;
+    const tiledImage = this.viewer.world.getItemAt(0);
+    const imageSize = tiledImage ? tiledImage.getContentSize() : { x: 1, y: 1 };
+    const paddedBounds = {
+      minX: Math.max(0, topLeft.x - paddingX),
+      minY: Math.max(0, topLeft.y - paddingY),
+      maxX: Math.min(imageSize.x, bottomRight.x + paddingX),
+      maxY: Math.min(imageSize.y, bottomRight.y + paddingY)
+    };
+    const viewportData = {
+      bounds: paddedBounds,
+      zoom: viewport.getZoom(true),
+      center: viewport.getCenter(true),
+      rotation: viewport.getRotation(),
+      containerSize: viewport.getContainerSize(),
+      imageBounds: {
+        minX: topLeft.x,
+        minY: topLeft.y,
+        maxX: bottomRight.x,
+        maxY: bottomRight.y
+      },
+      pixelRatio: this.calculatePixelRatio(),
+      levelOfDetail: this.getLevelOfDetail()
+    };
+    this.cachedViewport = viewportData;
+    this.lastUpdate = performance.now();
+    const updateTime = this.lastUpdate - startTime;
+    this.metrics.lastUpdateDuration = updateTime;
+    this.metrics.totalUpdates++;
+    this.metrics.averageUpdateTime = (this.metrics.averageUpdateTime * (this.metrics.totalUpdates - 1) + updateTime) / this.metrics.totalUpdates;
+    return viewportData;
+  }
+  /**
+   * Check if a point is within the current viewport
+   */
+  isPointInViewport(x, y, usePadding = false) {
+    const viewport = this.getCurrentViewport();
+    const bounds = usePadding ? viewport.bounds : viewport.imageBounds;
+    return x >= bounds.minX && x <= bounds.maxX && y >= bounds.minY && y <= bounds.maxY;
+  }
+  /**
+   * Check if a bounding box intersects the viewport
+   */
+  isBoxInViewport(minX, minY, maxX, maxY, usePadding = true) {
+    const viewport = this.getCurrentViewport();
+    const bounds = usePadding ? viewport.bounds : viewport.imageBounds;
+    return !(maxX < bounds.minX || minX > bounds.maxX || maxY < bounds.minY || minY > bounds.maxY);
+  }
+  /**
+   * Convert image coordinates to viewport pixel coordinates
+   */
+  imageToPixel(imageX, imageY) {
+    const viewportPoint = this.viewer.viewport.imageToViewportCoordinates(
+      new OpenSeadragon.Point(imageX, imageY)
+    );
+    return this.viewer.viewport.pixelFromPoint(viewportPoint);
+  }
+  /**
+   * Convert viewport pixel coordinates to image coordinates
+   */
+  pixelToImage(pixelX, pixelY) {
+    const viewportPoint = this.viewer.viewport.pointFromPixel(
+      new OpenSeadragon.Point(pixelX, pixelY)
+    );
+    return this.viewer.viewport.viewportToImageCoordinates(viewportPoint);
+  }
+  /**
+   * Calculate the current pixel ratio (pixels per image unit)
+   */
+  calculatePixelRatio() {
+    const viewport = this.viewer.viewport;
+    const containerSize = viewport.getContainerSize();
+    const bounds = viewport.getBounds();
+    const tiledImage = this.viewer.world.getItemAt(0);
+    if (!tiledImage) return 1;
+    const imageSize = tiledImage.getContentSize();
+    const viewportWidthInImageUnits = bounds.width * imageSize.x;
+    return containerSize.x / viewportWidthInImageUnits;
+  }
+  /**
+   * Get level of detail based on current zoom
+   */
+  getLevelOfDetail() {
+    const zoom = this.viewer.viewport.getZoom(true);
+    const maxZoom = this.viewer.viewport.getMaxZoom();
+    const normalized = zoom / maxZoom;
+    if (normalized < 0.1) return 0;
+    if (normalized < 0.3) return 1;
+    if (normalized < 0.6) return 2;
+    return 3;
+  }
+  /**
+   * Check if we should render high quality based on zoom level
+   */
+  shouldRenderHighQuality() {
+    return this.getLevelOfDetail() >= 2;
+  }
+  /**
+   * Get viewport area as percentage of total image
+   */
+  getViewportCoverage() {
+    const viewport = this.getCurrentViewport();
+    const tiledImage = this.viewer.world.getItemAt(0);
+    if (!tiledImage) return 1;
+    const imageSize = tiledImage.getContentSize();
+    const viewportArea = (viewport.imageBounds.maxX - viewport.imageBounds.minX) * (viewport.imageBounds.maxY - viewport.imageBounds.minY);
+    const totalArea = imageSize.x * imageSize.y;
+    return viewportArea / totalArea;
+  }
+  /**
+   * Get viewport metrics for performance monitoring
+   */
+  getMetrics() {
+    const cacheEfficiency = this.metrics.cacheHits + this.metrics.cacheMisses > 0 ? this.metrics.cacheHits / (this.metrics.cacheHits + this.metrics.cacheMisses) * 100 : 0;
+    return {
+      ...this.metrics,
+      cacheEfficiency: cacheEfficiency.toFixed(1) + "%",
+      currentZoom: this.viewer.viewport.getZoom(true).toFixed(2),
+      viewportCoverage: (this.getViewportCoverage() * 100).toFixed(1) + "%"
+    };
+  }
+  /**
+   * Reset metrics
+   */
+  resetMetrics() {
+    this.metrics = {
+      cacheHits: 0,
+      cacheMisses: 0,
+      lastUpdateDuration: 0,
+      totalUpdates: 0,
+      averageUpdateTime: 0
+    };
+  }
+  /**
+   * Get visible area in image coordinates
+   */
+  getVisibleImageArea() {
+    const viewport = this.getCurrentViewport();
+    return {
+      x: viewport.imageBounds.minX,
+      y: viewport.imageBounds.minY,
+      width: viewport.imageBounds.maxX - viewport.imageBounds.minX,
+      height: viewport.imageBounds.maxY - viewport.imageBounds.minY
+    };
+  }
+  /**
+   * Enable or disable caching
+   */
+  setCacheEnabled(enabled) {
+    this.cacheEnabled = enabled;
+    if (!enabled) {
+      this.cachedViewport = null;
+    }
+  }
+  /**
+   * Set cache timeout
+   */
+  setCacheTimeout(timeout) {
+    this.cacheTimeout = Math.max(0, timeout);
+  }
+  /**
+   * Set viewport padding for preloading
+   */
+  setViewportPadding(padding) {
+    this.viewportPadding = Math.max(0, Math.min(1, padding));
+  }
+  /**
+   * Clean up
+   */
+  destroy() {
+    this.viewer = null;
+    this.cachedViewport = null;
+  }
+}
+class FrameSkipManager {
+  constructor(viewer, isMobile2 = false) {
+    this.viewer = viewer;
+    this.isMobile = isMobile2;
+    this.enabled = isMobile2;
+    this.targetFPS = isMobile2 ? 45 : 60;
+    this.frameInterval = 1e3 / this.targetFPS;
+    this.lastFrameTime = 0;
+    this.skipCount = 0;
+    this.maxSkipCount = 2;
+    this.frameTimes = [];
+    this.maxFrameTimeSamples = 10;
+    this.isInteracting = false;
+    this.fastMotion = false;
+    if (this.enabled) {
+      this.setupInterceptor();
+      console.log("FrameSkipManager: Enabled for mobile performance");
+    }
+  }
+  setupInterceptor() {
+    if (!this.viewer) return;
+    this.originalForceRedraw = this.viewer.forceRedraw.bind(this.viewer);
+    this.viewer.forceRedraw = () => {
+      if (!this.enabled || this.isInteracting) {
+        return this.originalForceRedraw();
+      }
+      const now = performance.now();
+      const deltaTime = now - this.lastFrameTime;
+      this.updateFrameStats(deltaTime);
+      if (this.shouldSkipFrame(deltaTime)) {
+        this.skipCount++;
+        return;
+      }
+      this.skipCount = 0;
+      this.lastFrameTime = now;
+      return this.originalForceRedraw();
+    };
+    this.viewer.addHandler("animation-start", () => {
+      this.isInteracting = true;
+      this.skipCount = 0;
+    });
+    this.viewer.addHandler("animation-finish", () => {
+      this.isInteracting = false;
+      this.fastMotion = false;
+      this.skipCount = 0;
+      this.originalForceRedraw();
+    });
+    let lastCenter = null;
+    let lastZoom = null;
+    this.viewer.addHandler("viewport-change", () => {
+      if (!this.isInteracting) return;
+      const center = this.viewer.viewport.getCenter();
+      const zoom = this.viewer.viewport.getZoom();
+      if (lastCenter && lastZoom) {
+        const centerDelta = Math.sqrt(
+          Math.pow(center.x - lastCenter.x, 2) + Math.pow(center.y - lastCenter.y, 2)
+        );
+        const zoomDelta = Math.abs(zoom - lastZoom);
+        this.fastMotion = centerDelta > 0.05 || zoomDelta > 0.1;
+      }
+      lastCenter = center;
+      lastZoom = zoom;
+    });
+  }
+  shouldSkipFrame(deltaTime) {
+    if (this.skipCount >= this.maxSkipCount) {
+      return false;
+    }
+    if (deltaTime < this.frameInterval * 0.8) {
+      return true;
+    }
+    if (this.fastMotion && this.getAverageFrameTime() > this.frameInterval * 1.2) {
+      return true;
+    }
+    if (this.getAverageFrameTime() > this.frameInterval * 1.5) {
+      return true;
+    }
+    return false;
+  }
+  updateFrameStats(deltaTime) {
+    this.frameTimes.push(deltaTime);
+    if (this.frameTimes.length > this.maxFrameTimeSamples) {
+      this.frameTimes.shift();
+    }
+  }
+  getAverageFrameTime() {
+    if (this.frameTimes.length === 0) return this.frameInterval;
+    const sum = this.frameTimes.reduce((acc, time) => acc + time, 0);
+    return sum / this.frameTimes.length;
+  }
+  setEnabled(enabled) {
+    this.enabled = enabled;
+    if (!enabled) {
+      this.skipCount = 0;
+      this.isInteracting = false;
+      this.fastMotion = false;
+    }
+    console.log(`FrameSkipManager: ${enabled ? "Enabled" : "Disabled"}`);
+  }
+  getStats() {
+    const avgFrameTime = this.getAverageFrameTime();
+    const estimatedFPS = avgFrameTime > 0 ? 1e3 / avgFrameTime : 0;
+    return {
+      enabled: this.enabled,
+      isInteracting: this.isInteracting,
+      fastMotion: this.fastMotion,
+      currentSkipCount: this.skipCount,
+      averageFrameTime: avgFrameTime.toFixed(2),
+      estimatedFPS: estimatedFPS.toFixed(1),
+      targetFPS: this.targetFPS
+    };
+  }
+  destroy() {
+    if (this.viewer && this.originalForceRedraw) {
+      this.viewer.forceRedraw = this.originalForceRedraw;
+    }
+  }
+}
+const performanceConfig = {
+  qualityPreservation: {
+    minVisibleAreaDesktop: 600,
+    minVisibleAreaMobile: 400,
+    maxZoomForQuality: 15,
+    adaptivePaddingEnabled: true
+  },
+  // OpenSeadragon viewer settings - OPTIMIZED BASED ON RESEARCH FOR 45-60 FPS
+  viewer: {
+    // CRITICAL: Tile loading optimization for mobile
+    imageLoaderLimit: 1,
+    // RESEARCH: Single concurrent tile request prevents saturation
+    maxImageCacheCount: 100,
+    // RESEARCH: Optimal for 4GB RAM devices (~480MB)
+    // Tile loading strategy
+    minPixelRatio: 1,
+    // RESEARCH: Full quality at rest
+    minZoomImageRatio: 0.8,
+    // Conservative tile loading to reduce cascade
+    smoothTileEdgesMinZoom: Infinity,
+    // Complete disable for performance
+    alwaysBlend: false,
+    // CRITICAL: Disable blending for mobile performance
+    // Rendering settings - BALANCED FOR SMOOTH INTERACTIONS
+    immediateRender: true,
+    // CRITICAL: Force immediate rendering
+    preserveViewport: true,
+    preserveImageSizeOnResize: true,
+    visibilityRatio: 1,
+    // RESEARCH: Prevent off-screen rendering
+    subPixelRendering: false,
+    // Disable for performance
+    imageSmoothingEnabled: true,
+    // Keep for clean rendering
+    // Preload settings
+    preload: true,
+    placeholderFillStyle: "transparent",
+    // MOBILE OPTIMIZATION: Reduce rendering overhead
+    // Mobile optimizations from research
+    subPixelRoundingEnabled: false,
+    // MOBILE OPTIMIZATION: Reduce GPU load
+    // RESEARCH-BASED ANIMATION SETTINGS FOR NATURAL FEEL
+    animationTime: 0.3,
+    // RESEARCH: Optimal balance of speed and smoothness
+    springStiffness: 12,
+    // MOBILE OPTIMIZATION: Increased from 10.0 for tighter control
+    blendTime: 0.3,
+    // RESEARCH: Match animationTime for consistency
+    flickEnabled: true,
+    flickMinSpeed: 120,
+    flickMomentum: 0.25,
+    // Zoom settings - OPTIMIZED FOR SMOOTH LOW ZOOM PERFORMANCE
+    zoomPerScroll: 1.1,
+    // Smaller steps reduce tile loading spikes
+    zoomPerClick: 1.5,
+    // Prevent excessive zoom jumps
+    minZoomLevel: 0.8,
+    // Prevent extreme zoom out performance issues
+    maxZoomLevel: 40,
+    defaultZoomLevel: 1.1,
+    // PERFORMANCE-CRITICAL: Limit pixel density to prevent retina scaling issues
+    maxZoomPixelRatio: 1.5,
+    // Research shows 1.5 prevents retina performance issues
+    // Network optimization
+    loadTilesWithAjax: true,
+    ajaxHeaders: {
+      "Cache-Control": "public, max-age=31536000, immutable"
+    },
+    timeout: 6e4,
+    // Shorter timeout
+    // Tile quality settings - LOW ZOOM PERFORMANCE CRITICAL
+    minZoomImageRatio: 0.8,
+    // Conservative tile loading
+    maxTilesPerFrame: 2,
+    // CRITICAL: Limit to 2 for mobile performance
+    tileRetryMax: 1,
+    // Fewer retries
+    tileRetryDelay: 50,
+    // STEP 4: Reduced from 100ms
+    minimumPixelsPerTile: 24,
+    // Skip smaller tiles to reduce load
+    // RESEARCH: Visual artifact elimination settings - fine-tunable via debug
+    artifactElimination: {
+      enableTileCascadePrevention: true,
+      enableBlendingOptimization: true,
+      enableMouseWheelSmoothing: true,
+      enableProgressiveQuality: true
+    },
+    // Rendering
+    compositeOperation: null,
+    smoothImageZoom: false,
+    // Disable for performance
+    // Constraints
+    constrainDuringPan: true,
+    wrapHorizontal: false,
+    wrapVertical: false,
+    // Navigation
+    navigatorAutoResize: true,
+    showNavigator: false,
+    // Drawer selection (will be overridden by browser detection)
+    drawer: "canvas",
+    debugMode: false,
+    // WebGL options when used
+    webglOptions: {
+      antialias: false,
+      // Disable for performance
+      preserveDrawingBuffer: false,
+      premultipliedAlpha: true,
+      powerPreference: "high-performance"
+    }
+  },
+  // Tile settings - 1024px for performance
+  tiles: {
+    tileSize: 1024,
+    overlap: 2,
+    jpegQuality: 85,
+    // Slightly lower for faster loading
+    format: "jpeg",
+    enableWebP: false
+  },
+  // STEP 4 OPTIMIZATION: Hotspot rendering optimized for animation performance
+  hotspots: {
+    batchSize: 20,
+    // STEP 4: Reduced from 25 for faster processing
+    visibilityCheckInterval: 150,
+    // STEP 4: Faster updates (reduced from 200ms)
+    renderDebounceTime: 16,
+    // STEP 4: 60 FPS target (reduced from 32ms)
+    fadeInDuration: 0,
+    // Instant appearance
+    preloadPadding: 0.1,
+    // Minimal padding
+    maxVisibleHotspots: 20,
+    // STEP 4: Further reduced from 25
+    minZoomForHotspots: 4,
+    // Higher threshold - less hotspots at low zoom
+    // STEP 4: New animation-specific settings
+    animationBatchSize: 10,
+    // Process animations in smaller batches
+    animationFrameBudget: 12,
+    // 12ms budget per frame for animations
+    maxConcurrentAnimations: 8
+    // STEP 4: Reduced concurrent animations
+  },
+  // Audio settings
+  audio: {
+    preloadCount: 5,
+    crossfadeDuration: 150,
+    // STEP 4: Reduced from 200ms
+    bufferSize: 5,
+    html5PoolSize: 5,
+    autoUnlock: true
+  },
+  // STEP 4 OPTIMIZATION: Viewport management for faster updates
+  viewport: {
+    cacheEnabled: true,
+    cacheTimeout: 8,
+    // STEP 4: Reduced from 16ms for faster cache
+    updateDebounce: 4,
+    // STEP 4: Reduced from 8ms for quicker updates
+    preloadPadding: 0.15
+    // STEP 4: Reduced from 0.2 to load less
+  },
+  // Memory management
+  memory: {
+    maxCachedImages: 250,
+    // STEP 4: Reduced from 300 for faster GC
+    maxCachedAudio: 8,
+    // STEP 4: Reduced from 10
+    gcInterval: 2e4,
+    // STEP 4: More frequent GC (reduced from 30000ms)
+    lowMemoryThreshold: 80,
+    // STEP 4: Lower threshold (reduced from 100MB)
+    criticalMemoryThreshold: 150
+    // STEP 4: Lower critical threshold (reduced from 200MB)
+  },
+  // Network
+  network: {
+    maxConcurrentRequests: 4,
+    // STEP 4: Reduced from 6 to prevent congestion
+    retryAttempts: 1,
+    retryDelay: 50,
+    // STEP 4: Reduced from 100ms
+    timeout: 45e3,
+    // STEP 4: Reduced from 60000ms
+    useCDN: true
+  },
+  // MOBILE OPTIMIZATION: Critical research-based settings for 45 FPS target
+  mobile: {
+    reduceQuality: false,
+    // Keep quality, optimize elsewhere
+    maxZoomLevel: 20,
+    touchSensitivity: 1,
+    doubleTapDelay: 250,
+    // STEP 4: Reduced from 300ms
+    maxImageCacheCount: 25,
+    // BALANCED: Small cache to prevent constant reloads
+    imageLoaderLimit: 1,
+    // RESEARCH: Single tile loader optimal
+    animationTime: 0.3,
+    // RESEARCH: 0.3s optimal for mobile
+    springStiffness: 12,
+    // MOBILE OPTIMIZATION: Increased for tighter control
+    immediateRender: true,
+    // CRITICAL: Force immediate rendering
+    blendTime: 0.3,
+    // RESEARCH: Match animationTime
+    maxTilesPerFrame: 2,
+    // RESEARCH: Limit simultaneous processing
+    minPixelRatio: 1,
+    // RESEARCH: Full quality at rest
+    minZoomImageRatio: 0.8,
+    // Keep conservative for low zoom
+    visibilityRatio: 1,
+    // RESEARCH: Only visible tiles
+    smoothTileEdgesMinZoom: Infinity,
+    // Complete disable
+    alwaysBlend: false,
+    // CRITICAL: Research shows this causes mobile issues
+    debugMode: false,
+    preserveImageSizeOnResize: true,
+    // Prevent expensive recalculations
+    maxZoomPixelRatio: 1,
+    // EMERGENCY: No retina scaling
+    // STEP 4: ULTRA-OPTIMIZED MOBILE GESTURE SETTINGS
+    constrainDuringPan: true,
+    // Prevent expensive constraint calculations
+    gestureSettingsTouch: {
+      scrollToZoom: false,
+      clickToZoom: false,
+      dblClickToZoom: false,
+      flickEnabled: true,
+      flickMinSpeed: 150,
+      // STEP 4: Higher threshold (increased from 200)
+      flickMomentum: 0.05,
+      // STEP 4: Minimal momentum (reduced from 0.1)
+      pinchToZoom: true,
+      dragToPan: true,
+      pinchRotate: false
+    }
+  },
+  // STEP 4 OPTIMIZATION: Ultra-aggressive render optimization
+  renderOptimization: {
+    enableAdaptiveRendering: true,
+    animationEndDelay: 25,
+    // STEP 4: Ultra-fast transition (reduced from 50ms)
+    pixelPerfectDelay: 15,
+    // STEP 4: Faster pixel perfect (reduced from 30ms)
+    zoomThreshold: 5e-3,
+    // STEP 4: More sensitive to zoom changes
+    panThreshold: 5e-3,
+    // STEP 4: More sensitive to pan changes
+    smoothTransitionDuration: 50,
+    // STEP 4: Much faster transitions (reduced from 100ms)
+    useWebGL: false,
+    // Default to canvas
+    forceIntegerPositions: true,
+    // STEP 4: Ultra-aggressive zoom optimizations
+    zoomOptimizations: {
+      reduceBlendTime: true,
+      targetBlendTime: 0,
+      increaseStiffness: true,
+      targetStiffness: 18,
+      // STEP 4: Even higher stiffness (increased from 12.0)
+      forceImmediateRender: true,
+      disableSmoothing: true,
+      reduceTilesPerFrame: true,
+      targetTilesPerFrame: 2
+      // STEP 4: Reduced from 3
+    }
+  },
+  // Debug
+  debug: {
+    showFPS: false,
+    // Off by default
+    showMetrics: true,
+    logPerformance: false,
+    warnThreshold: {
+      fps: 45,
+      renderTime: 20,
+      // STEP 4: Stricter threshold (reduced from 33ms)
+      visibleHotspots: 100
+      // STEP 4: Lower threshold (reduced from 150)
+    }
+  }
+};
+const detectPlatform = () => {
+  var _a;
+  const ua = navigator.userAgent.toLowerCase();
+  const platform2 = navigator.platform.toLowerCase();
+  return {
+    // Browser detection
+    isSafari: /^((?!chrome|android|crios|fxios).)*safari/i.test(ua),
+    isChrome: /chrome|crios/i.test(ua) && !/edge|edg/i.test(ua),
+    isFirefox: /firefox|fxios/i.test(ua),
+    isEdge: /edge|edg/i.test(ua),
+    // OS detection
+    isIOS: /ipad|iphone|ipod/.test(ua) || platform2 === "macintel" && navigator.maxTouchPoints > 1,
+    isAndroid: /android/.test(ua),
+    isMac: /mac/.test(platform2),
+    isWindows: /win/.test(platform2),
+    // Device capabilities
+    isMobile: /android|iphone|ipad|ipod/i.test(ua) || platform2 === "macintel" && navigator.maxTouchPoints > 1,
+    isTablet: /ipad|android(?!.*mobile)/i.test(ua) || platform2 === "macintel" && navigator.maxTouchPoints > 1,
+    hasTouch: "ontouchstart" in window || navigator.maxTouchPoints > 0,
+    // Performance indicators
+    isLowEndDevice: navigator.hardwareConcurrency <= 2 || navigator.deviceMemory <= 2,
+    isHighEndDevice: navigator.hardwareConcurrency >= 8 && navigator.deviceMemory >= 8,
+    deviceMemory: navigator.deviceMemory || 4,
+    cpuCores: navigator.hardwareConcurrency || 4,
+    connectionType: ((_a = navigator.connection) == null ? void 0 : _a.effectiveType) || "4g",
+    // Display
+    pixelRatio: window.devicePixelRatio || 1,
+    isHighDPI: window.devicePixelRatio > 1.5
+  };
+};
+const applyPlatformOptimizations = () => {
+  const platform2 = detectPlatform();
+  if (platform2.isSafari || platform2.isIOS) {
+    performanceConfig.viewer.drawer = "canvas";
+    if (platform2.isSafari && !platform2.isIOS) {
+      performanceConfig.viewer.imageLoaderLimit = platform2.isHighEndDevice ? 4 : 2;
+      performanceConfig.viewer.maxImageCacheCount = 100;
+      performanceConfig.viewer.maxTilesPerFrame = 3;
+      performanceConfig.viewer.animationTime = 1;
+      performanceConfig.viewer.springStiffness = 7;
+      performanceConfig.viewer.blendTime = 0;
+      performanceConfig.viewer.minPixelRatio = 0.5;
+      performanceConfig.viewer.immediateRender = true;
+    }
+    if (platform2.isIOS) {
+      performanceConfig.viewer.imageLoaderLimit = 2;
+      performanceConfig.viewer.maxImageCacheCount = 100;
+      performanceConfig.viewer.maxTilesPerFrame = 2;
+      performanceConfig.viewer.animationTime = 0.8;
+      performanceConfig.viewer.springStiffness = 8;
+      performanceConfig.viewer.blendTime = 0;
+      performanceConfig.viewer.minPixelRatio = 1;
+      performanceConfig.viewer.immediateRender = true;
+      performanceConfig.viewer.alwaysBlend = false;
+      performanceConfig.viewer.smoothTileEdgesMinZoom = Infinity;
+      performanceConfig.viewer.gestureSettingsTouch = {
+        flickEnabled: true,
+        flickMinSpeed: 120,
+        flickMomentum: 0.35,
+        pinchRotate: false
+        // Disable for performance
+      };
+    }
+    performanceConfig.viewer.imageSmoothingEnabled = false;
+    performanceConfig.viewer.smoothTileEdgesMinZoom = Infinity;
+    performanceConfig.viewer.updatePixelDensityRatio = false;
+    performanceConfig.viewer.placeholderFillStyle = null;
+    performanceConfig.viewer.opacity = 1;
+    performanceConfig.viewer.preload = false;
+    performanceConfig.viewer.compositeOperation = null;
+    performanceConfig.viewer.subPixelRoundingForTransparency = "NEVER";
+    console.log("Safari detected - applied research-based 50-60 FPS optimizations", {
+      platform: platform2.isIOS ? "iOS" : "Desktop",
+      imageLoaderLimit: performanceConfig.viewer.imageLoaderLimit,
+      blendTime: performanceConfig.viewer.blendTime
+    });
+  }
+  if (platform2.isAndroid) {
+    performanceConfig.viewer.drawer = "canvas";
+    performanceConfig.viewer.imageSmoothingEnabled = false;
+    console.log("Android detected - applying STEP 4 optimizations");
+  }
+  if (platform2.isMobile) {
+    Object.assign(performanceConfig.viewer, {
+      // RESEARCH CRITICAL: Force canvas on ALL mobile devices
+      drawer: "canvas",
+      // Research: WebGL causes 15 FPS drop on mobile
+      imageLoaderLimit: 1,
+      // RESEARCH: Single loader optimal for mobile
+      maxImageCacheCount: 100,
+      // RESEARCH: ~480MB tile storage optimal
+      // RESEARCH-BASED: Natural animation settings
+      animationTime: 0.3,
+      // RESEARCH: 0.3s provides natural feel
+      springStiffness: 12,
+      // MOBILE OPTIMIZATION: Increased for tighter control
+      immediateRender: true,
+      // CRITICAL: Eliminate render delays
+      blendTime: 0.3,
+      // RESEARCH: Match animationTime
+      // RESEARCH: Balanced mobile optimizations
+      smoothImageZoom: false,
+      maxTilesPerFrame: 2,
+      // RESEARCH: Limit concurrent processing
+      visibilityRatio: 1,
+      // RESEARCH: Prevent off-screen rendering
+      minPixelRatio: 1,
+      // RESEARCH: Full quality at rest
+      minZoomImageRatio: 0.5,
+      // OPTIMIZED: Load tiles earlier for smoothness
+      smoothTileEdgesMinZoom: Infinity,
+      // Research: Complete disable for performance
+      alwaysBlend: false,
+      // RESEARCH CRITICAL: Major mobile performance killer
+      preserveImageSizeOnResize: true,
+      maxZoomPixelRatio: 1,
+      // STEP 4: No retina scaling for speed
+      // RESEARCH: Additional mobile-specific optimizations
+      imageSmoothingEnabled: false,
+      // Research: Disable for better mobile performance
+      updatePixelDensityRatio: false,
+      // Research: Prevent expensive updates during zoom
+      constrainDuringPan: true,
+      // Research: Prevent expensive calculations
+      subPixelRendering: false,
+      // Research: Disable for better performance
+      minimumPixelsPerTile: 40,
+      // STEP 4: Higher threshold (increased from 32)
+      // STEP 4: ULTRA-OPTIMIZED touch settings
+      gestureSettingsTouch: {
+        scrollToZoom: false,
+        // Research: Prevent scroll conflicts
+        clickToZoom: false,
+        dblClickToZoom: false,
+        flickEnabled: true,
+        flickMinSpeed: 150,
+        // STEP 4: Higher threshold for control
+        flickMomentum: 0.05,
+        // STEP 4: Minimal momentum for responsiveness
+        pinchToZoom: true,
+        dragToPan: true,
+        pinchRotate: false
+        // Research: Disable for performance
+      }
+    });
+    performanceConfig.hotspots.batchSize = 15;
+    performanceConfig.hotspots.maxVisibleHotspots = 15;
+    performanceConfig.hotspots.renderDebounceTime = 8;
+    performanceConfig.memory.maxCachedImages = 30;
+    console.log("Mobile device detected - applied STEP 4 ultra-aggressive optimizations");
+  }
+  if (platform2.isLowEndDevice) {
+    performanceConfig.viewer.animationTime = 0.15;
+    performanceConfig.viewer.springStiffness = 18;
+    performanceConfig.viewer.maxImageCacheCount = Math.min(100, performanceConfig.viewer.maxImageCacheCount);
+    performanceConfig.viewer.imageLoaderLimit = 1;
+    performanceConfig.viewer.maxTilesPerFrame = 1;
+    performanceConfig.memory.maxCachedImages = 100;
+    performanceConfig.network.maxConcurrentRequests = 2;
+    performanceConfig.hotspots.maxVisibleHotspots = 30;
+    performanceConfig.viewer.minPixelRatio = 0.8;
+    console.log("Low-end device detected - applied STEP 4 ultra-conservative settings");
+  }
+  if (platform2.isHighEndDevice && !platform2.isMobile) {
+    performanceConfig.viewer.maxImageCacheCount = 600;
+    performanceConfig.viewer.imageLoaderLimit = 6;
+    performanceConfig.viewer.maxTilesPerFrame = 4;
+    performanceConfig.memory.maxCachedImages = 400;
+    performanceConfig.network.maxConcurrentRequests = 6;
+    performanceConfig.viewer.minPixelRatio = 0.4;
+    performanceConfig.viewer.maxZoomPixelRatio = 8;
+    console.log("High-end device detected - applied STEP 4 balanced performance/quality");
+  }
+  if (platform2.isHighDPI && !platform2.isMobile) {
+    performanceConfig.viewer.minPixelRatio = Math.min(0.5, performanceConfig.viewer.minPixelRatio);
+    performanceConfig.viewer.maxZoomPixelRatio = Math.max(4, platform2.pixelRatio * 2);
+  }
+  if (platform2.connectionType === "slow-2g" || platform2.connectionType === "2g") {
+    performanceConfig.viewer.imageLoaderLimit = 1;
+    performanceConfig.network.maxConcurrentRequests = 1;
+    performanceConfig.viewer.timeout = 9e4;
+    console.log("Slow connection detected - applied STEP 4 minimal network usage");
+  }
+  return platform2;
+};
+const platform = applyPlatformOptimizations();
+function adjustSettingsForPerformance(currentFPS, memoryUsage) {
+  const config = performanceConfig;
+  const isMobile2 = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  const isSafariDesktop = isSafari && !isMobile2;
+  let emergencyThreshold, criticalThreshold, poorThreshold;
+  if (isSafariDesktop) {
+    emergencyThreshold = 8;
+    criticalThreshold = 12;
+    poorThreshold = 20;
+  } else if (isMobile2) {
+    emergencyThreshold = 15;
+    criticalThreshold = 20;
+    poorThreshold = 30;
+  } else {
+    emergencyThreshold = 20;
+    criticalThreshold = 25;
+    poorThreshold = 35;
+  }
+  if (currentFPS < emergencyThreshold && currentFPS > 0) {
+    if (isSafari) {
+      config.viewer.imageLoaderLimit = 1;
+      config.viewer.maxTilesPerFrame = 1;
+      config.viewer.blendTime = 0;
+      config.viewer.maxImageCacheCount = 25;
+      config.viewer.minPixelRatio = 1.2;
+      config.viewer.immediateRender = true;
+      config.viewer.animationTime = 0.5;
+      config.viewer.springStiffness = 10;
+    } else {
+      config.viewer.imageLoaderLimit = 1;
+      config.viewer.maxTilesPerFrame = 1;
+      config.viewer.animationTime = 0.1;
+      config.viewer.springStiffness = 20;
+      config.viewer.immediateRender = true;
+      config.viewer.blendTime = 0;
+      config.viewer.maxImageCacheCount = 25;
+      config.viewer.minPixelRatio = 1;
+    }
+    console.error("SAFARI FIX: Emergency performance mode activated");
+    return "ultra-emergency";
+  }
+  if (currentFPS < criticalThreshold && currentFPS > 0) {
+    config.viewer.imageLoaderLimit = 1;
+    config.viewer.maxTilesPerFrame = 1;
+    config.viewer.animationTime = 0.4;
+    config.viewer.springStiffness = 12;
+    config.viewer.immediateRender = true;
+    config.viewer.blendTime = 0.05;
+    config.viewer.maxImageCacheCount = 60;
+    config.viewer.minPixelRatio = 0.8;
+    console.warn("Critical performance mode activated");
+    return "critical";
+  }
+  if (currentFPS < poorThreshold && currentFPS > 0) {
+    config.viewer.imageLoaderLimit = Math.max(1, config.viewer.imageLoaderLimit - 1);
+    config.viewer.maxTilesPerFrame = Math.max(1, config.viewer.maxTilesPerFrame - 1);
+    config.viewer.animationTime = 0.25;
+    config.viewer.springStiffness = 12;
+    return "reduced";
+  }
+  if (currentFPS > 55) {
+    const targetConfig = platform.isHighEndDevice ? 6 : platform.isMobile ? 1 : 4;
+    if (config.viewer.imageLoaderLimit < targetConfig) {
+      config.viewer.imageLoaderLimit = Math.min(targetConfig, config.viewer.imageLoaderLimit + 1);
+    }
+    if (config.viewer.maxTilesPerFrame < 3) {
+      config.viewer.maxTilesPerFrame = Math.min(3, config.viewer.maxTilesPerFrame + 1);
+    }
+    config.viewer.animationTime = platform.isMobile ? 0.2 : 0.3;
+    config.viewer.springStiffness = platform.isMobile ? 15 : 12;
+    config.viewer.minPixelRatio = platform.isMobile ? 0.8 : 0.5;
+    return "normal";
+  }
+  if (memoryUsage > config.memory.criticalMemoryThreshold) {
+    config.viewer.maxImageCacheCount = Math.max(25, Math.floor(config.viewer.maxImageCacheCount * 0.4));
+    config.hotspots.maxVisibleHotspots = Math.max(10, Math.floor(config.hotspots.maxVisibleHotspots * 0.5));
+    console.warn(`STEP 4: High memory usage: ${memoryUsage}MB - Applied aggressive reduction`);
+    return "memory-limited";
+  }
+  return "normal";
+}
+const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourceConfig = null) => {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+  if (isIOS && isMobileDevice) {
+    drawerType = "canvas";
+    console.log("[CRITICAL] iOS detected: Forcing canvas drawer to prevent tile array corruption at indices 12/13");
+  }
+  if (isMobileDevice) {
+    const isIPadPro = isIOS && window.screen.width >= 1024;
+    const isIPadAir = isIOS && !isIPadPro && window.screen.width >= 820;
+    const isStandardIPad = isIOS && !isIPadPro && !isIPadAir;
+    config.animationTime = isIOS ? 0.2 : 0.3;
+    config.springStiffness = isIOS ? 9 : 10;
+    config.blendTime = isIOS ? 0.2 : 0.3;
+    config.immediateRender = true;
+    if (isIPadPro) {
+      config.imageLoaderLimit = 4;
+      config.maxImageCacheCount = 100;
+      console.log("[iPad Pro Detected] Using optimized settings: 4 concurrent loads, 100 tile cache");
+    } else if (isIPadAir) {
+      config.imageLoaderLimit = 2;
+      config.maxImageCacheCount = 75;
+      console.log("[iPad Air Detected] Using balanced settings: 2 concurrent loads, 75 tile cache");
+    } else if (isStandardIPad) {
+      config.imageLoaderLimit = 1;
+      config.maxImageCacheCount = 30;
+      console.log("[Standard iPad Detected] Using conservative settings: 1 load, 30 tile cache");
+    } else {
+      config.imageLoaderLimit = 1;
+      config.maxImageCacheCount = 100;
+    }
+    config.visibilityRatio = 1;
+    config.maxTilesPerFrame = 2;
+    config.alwaysBlend = false;
+    config.constrainDuringPan = true;
+    config.maxZoomPixelRatio = 1.5;
+    config.imageSmoothingEnabled = false;
+    config.updatePixelDensityRatio = false;
+    config.subPixelRendering = false;
+    config.minimumPixelsPerTile = 32;
+    console.log("Applied research-based mobile optimizations for zoom performance");
+  }
+  return {
+    tileSources: tileSourceConfig || dziUrl,
+    prefixUrl: "https://cdn.jsdelivr.net/npm/openseadragon@5.0.1/build/openseadragon/images/",
+    // Rendering - use browser-specific drawer
+    drawer: drawerType,
+    imageSmoothingEnabled: config.imageSmoothingEnabled,
+    smoothTileEdgesMinZoom: isIOS ? Infinity : config.smoothTileEdgesMinZoom,
+    // CRITICAL: Infinity on iOS prevents corruption
+    alwaysBlend: config.alwaysBlend,
+    placeholderFillStyle: config.placeholderFillStyle,
+    opacity: 1,
+    preload: config.preload,
+    compositeOperation: config.compositeOperation,
+    ...config.drawer === "webgl" ? { webglOptions: config.webglOptions } : {},
+    // Tile loading
+    immediateRender: config.immediateRender,
+    imageLoaderLimit: config.imageLoaderLimit,
+    maxImageCacheCount: config.maxImageCacheCount,
+    timeout: config.timeout,
+    loadTilesWithAjax: config.loadTilesWithAjax,
+    ajaxHeaders: config.ajaxHeaders,
+    // Visibility
+    visibilityRatio: config.visibilityRatio,
+    minPixelRatio: config.minPixelRatio,
+    defaultZoomLevel: config.defaultZoomLevel,
+    minZoomLevel: config.minZoomLevel,
+    maxZoomPixelRatio: config.maxZoomPixelRatio,
+    // Navigation
+    constrainDuringPan: config.constrainDuringPan,
+    wrapHorizontal: config.wrapHorizontal,
+    wrapVertical: config.wrapVertical,
+    // Animation - use config values which are already optimized
+    animationTime: config.animationTime,
+    springStiffness: config.springStiffness,
+    blendTime: config.blendTime,
+    // RESEARCH: Zoom-specific optimizations for low zoom performance
+    zoomPerScroll: isMobileDevice ? 1.2 : 1.1,
+    // Research: Slightly larger steps on mobile for better control
+    zoomPerClick: 1.5,
+    // Research: Prevent excessive zoom jumps
+    // Controls - all disabled for clean interface
+    showNavigationControl: false,
+    showZoomControl: false,
+    showHomeControl: false,
+    showFullPageControl: false,
+    showRotationControl: false,
+    // Input - DISABLED double-click zoom
+    gestureSettingsMouse: {
+      scrollToZoom: true,
+      clickToZoom: false,
+      dblClickToZoom: false,
+      flickEnabled: true,
+      // CRITICAL: Enables immediate stop
+      flickMomentum: 0
+      // No momentum for precise control
+    },
+    gestureSettingsTouch: {
+      scrollToZoom: false,
+      // Research: Prevent scroll conflicts
+      clickToZoom: false,
+      dblClickToZoom: false,
+      flickEnabled: isIOS ? false : config.flickEnabled,
+      // CRITICAL: Disable on iOS to prevent corruption triggers
+      flickMinSpeed: config.flickMinSpeed,
+      flickMomentum: isIOS ? 0 : config.flickMomentum,
+      // CRITICAL: No momentum on iOS
+      pinchToZoom: true,
+      dragToPan: true,
+      pinchRotate: false
+      // Research: Disable for performance
+    },
+    // Touch handling configuration 
+    dblClickDistThreshold: 20,
+    clickDistThreshold: 10,
+    clickTimeThreshold: 300,
+    // Performance
+    debugMode: config.debugMode,
+    crossOriginPolicy: "Anonymous",
+    ajaxWithCredentials: false,
+    preserveViewport: true,
+    // Prevent viewport recalculations
+    preserveImageSizeOnResize: config.preserveImageSizeOnResize,
+    maxTilesPerFrame: config.maxTilesPerFrame,
+    smoothImageZoom: config.smoothImageZoom,
+    // RESEARCH: Canvas synchronization optimizations for low zoom performance
+    subPixelRendering: config.subPixelRendering !== void 0 ? config.subPixelRendering : false,
+    minimumPixelsPerTile: config.minimumPixelsPerTile || (isMobileDevice ? 32 : 24),
+    // Research: Higher threshold for mobile
+    // RESEARCH: Additional low zoom optimizations
+    updatePixelDensityRatio: config.updatePixelDensityRatio !== void 0 ? config.updatePixelDensityRatio : false,
+    smoothTileEdgesMinZoom: isMobileDevice ? Infinity : config.smoothTileEdgesMinZoom,
+    imageSmoothingEnabled: config.imageSmoothingEnabled !== void 0 ? config.imageSmoothingEnabled : !isMobileDevice,
+    // CRITICAL iOS FIX: Prevent canvas focus outline issue
+    useCanvas: isIOS ? false : void 0
+    // Contournement limite canvas iOS (5MB)
+  };
+};
+let cachedHotspots = null;
+async function hotspotData() {
+  if (cachedHotspots) {
+    return cachedHotspots;
+  }
+  try {
+    const response = await fetch(`/data/hotspots.json?t=${Date.now()}`);
+    cachedHotspots = await response.json();
+    console.log(`Loaded ${cachedHotspots.length} hotspots`);
+    return cachedHotspots;
+  } catch (error) {
+    console.error("Failed to load hotspots:", error);
+    cachedHotspots = [];
+    return cachedHotspots;
+  }
+}
+function forceResetViewerState(viewer) {
+  if (!viewer) return;
+  console.log("Forcing viewer state reset to fix flickering...");
+  if (viewer.world) {
+    const tiledImages = viewer.world.getItemCount();
+    for (let i = 0; i < tiledImages; i++) {
+      const tiledImage = viewer.world.getItemAt(i);
+      if (tiledImage) {
+        tiledImage.reset();
+      }
+    }
+  }
+  viewer.viewport.centerSpringX.resetTo(viewer.viewport.centerSpringX.target.value);
+  viewer.viewport.centerSpringY.resetTo(viewer.viewport.centerSpringY.target.value);
+  viewer.viewport.zoomSpring.resetTo(viewer.viewport.zoomSpring.target.value);
+  viewer.viewport.applyConstraints(true);
+  viewer.forceRedraw();
+  setTimeout(() => viewer.forceRedraw(), 50);
+  setTimeout(() => viewer.forceRedraw(), 100);
+  console.log("Viewer state reset completed");
+}
+class AdaptiveQualityManager {
+  constructor(options = {}) {
+    this.viewer = options.viewer;
+    this.targetFPS = options.targetFPS || 30;
+    this.criticalFPS = options.criticalFPS || 20;
+    this.qualityLevels = {
+      HIGH: "high",
+      MEDIUM: "medium",
+      LOW: "low",
+      ULTRA_LOW: "ultra-low"
+    };
+    this.currentQuality = this.qualityLevels.HIGH;
+    this.qualityHistory = [];
+    this.metrics = {
+      fps: [],
+      frameTime: [],
+      memoryUsage: [],
+      cpuUsage: [],
+      temperature: "normal"
+      // normal, warm, hot
+    };
+    this.qualityPresets = {
+      [this.qualityLevels.HIGH]: {
+        maxHotspots: 10,
+        animationDuration: 800,
+        staggerDelay: 12,
+        shadowQuality: "high",
+        rippleComplexity: "full",
+        lodAggressiveness: 1,
+        useGPUEffects: true,
+        maxConcurrentAnimations: 3
+      },
+      [this.qualityLevels.MEDIUM]: {
+        maxHotspots: 8,
+        animationDuration: 600,
+        staggerDelay: 8,
+        shadowQuality: "medium",
+        rippleComplexity: "simple",
+        lodAggressiveness: 1.2,
+        useGPUEffects: true,
+        maxConcurrentAnimations: 2
+      },
+      [this.qualityLevels.LOW]: {
+        maxHotspots: 6,
+        animationDuration: 400,
+        staggerDelay: 5,
+        shadowQuality: "low",
+        rippleComplexity: "minimal",
+        lodAggressiveness: 1.5,
+        useGPUEffects: false,
+        maxConcurrentAnimations: 1
+      },
+      [this.qualityLevels.ULTRA_LOW]: {
+        maxHotspots: 4,
+        animationDuration: 300,
+        staggerDelay: 0,
+        shadowQuality: "none",
+        rippleComplexity: "none",
+        lodAggressiveness: 2,
+        useGPUEffects: false,
+        maxConcurrentAnimations: 1
+      }
+    };
+    this.deviceCapabilities = this.detectDeviceCapabilities();
+    this.frameCount = 0;
+    this.lastFrameTime = performance.now();
+    this.fpsUpdateInterval = 1e3;
+    this.lastFPSUpdate = performance.now();
+    this.adjustmentThresholds = {
+      upgradeThreshold: 5e3,
+      // 5 seconds of good performance
+      downgradeThreshold: 2e3,
+      // 2 seconds of poor performance
+      criticalThreshold: 500
+      // 0.5 seconds of critical performance
+    };
+    this.isMonitoring = false;
+    this.rafId = null;
+    this.onQualityChange = options.onQualityChange || (() => {
+    });
+    console.log("[AdaptiveQualityManager] Initialized with device capabilities:", this.deviceCapabilities);
+  }
+  /**
+   * Detect device capabilities
+   */
+  detectDeviceCapabilities() {
+    const canvas = document.createElement("canvas");
+    const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+    const capabilities = {
+      cores: navigator.hardwareConcurrency || 2,
+      memory: navigator.deviceMemory || 2,
+      // GB
+      connection: navigator.connection ? {
+        effectiveType: navigator.connection.effectiveType,
+        downlink: navigator.connection.downlink
+      } : null,
+      gpu: gl ? {
+        vendor: gl.getParameter(gl.VENDOR),
+        renderer: gl.getParameter(gl.RENDERER)
+      } : null,
+      isMobile: /Android|iPhone|iPad|iPod/i.test(navigator.userAgent),
+      isLowEnd: false
+    };
+    if (capabilities.cores <= 2 || capabilities.memory <= 2) {
+      capabilities.isLowEnd = true;
+    }
+    const userAgent = navigator.userAgent.toLowerCase();
+    const lowEndDevices = ["samsung galaxy a", "samsung galaxy j", "xiaomi redmi", "oppo a", "vivo y"];
+    capabilities.isLowEnd = capabilities.isLowEnd || lowEndDevices.some((device) => userAgent.includes(device));
+    return capabilities;
+  }
+  /**
+   * Start performance monitoring
+   */
+  start() {
+    if (this.isMonitoring) return;
+    this.isMonitoring = true;
+    if (this.deviceCapabilities.isLowEnd) {
+      this.setQuality(this.qualityLevels.LOW);
+    } else if (this.deviceCapabilities.isMobile) {
+      this.setQuality(this.qualityLevels.MEDIUM);
+    }
+    this.monitor();
+    console.log("[AdaptiveQualityManager] Started monitoring");
+  }
+  /**
+   * Main monitoring loop
+   */
+  monitor() {
+    if (!this.isMonitoring) return;
+    const currentTime = performance.now();
+    const deltaTime = currentTime - this.lastFrameTime;
+    this.lastFrameTime = currentTime;
+    this.frameCount++;
+    if (currentTime - this.lastFPSUpdate >= this.fpsUpdateInterval) {
+      const fps = this.frameCount * 1e3 / (currentTime - this.lastFPSUpdate);
+      this.updateMetrics(fps, deltaTime);
+      this.frameCount = 0;
+      this.lastFPSUpdate = currentTime;
+      this.evaluateQualityAdjustment();
+    }
+    this.rafId = requestAnimationFrame(() => this.monitor());
+  }
+  /**
+   * Update performance metrics
+   */
+  updateMetrics(fps, frameTime) {
+    this.metrics.fps.push(fps);
+    if (this.metrics.fps.length > 10) {
+      this.metrics.fps.shift();
+    }
+    this.metrics.frameTime.push(frameTime);
+    if (this.metrics.frameTime.length > 10) {
+      this.metrics.frameTime.shift();
+    }
+    if (performance.memory) {
+      const memoryUsage = performance.memory.usedJSHeapSize / performance.memory.jsHeapSizeLimit;
+      this.metrics.memoryUsage.push(memoryUsage);
+      if (this.metrics.memoryUsage.length > 10) {
+        this.metrics.memoryUsage.shift();
+      }
+    }
+  }
+  /**
+   * Evaluate if quality adjustment is needed
+   */
+  evaluateQualityAdjustment() {
+    const avgFPS = this.getAverageFPS();
+    const currentTime = performance.now();
+    const qualityPerformance = {
+      quality: this.currentQuality,
+      fps: avgFPS,
+      timestamp: currentTime
+    };
+    this.qualityHistory.push(qualityPerformance);
+    if (avgFPS < this.criticalFPS) {
+      const recentHistory = this.qualityHistory.filter(
+        (h) => currentTime - h.timestamp < this.adjustmentThresholds.criticalThreshold
+      );
+      if (recentHistory.every((h) => h.fps < this.criticalFPS)) {
+        this.downgradeQuality("critical");
+        return;
+      }
+    }
+    if (avgFPS < this.targetFPS) {
+      const recentHistory = this.qualityHistory.filter(
+        (h) => currentTime - h.timestamp < this.adjustmentThresholds.downgradeThreshold
+      );
+      if (recentHistory.length > 5 && recentHistory.every((h) => h.fps < this.targetFPS)) {
+        this.downgradeQuality("poor");
+        return;
+      }
+    }
+    if (avgFPS > this.targetFPS + 10) {
+      const recentHistory = this.qualityHistory.filter(
+        (h) => currentTime - h.timestamp < this.adjustmentThresholds.upgradeThreshold
+      );
+      if (recentHistory.length > 10 && recentHistory.every((h) => h.fps > this.targetFPS + 10)) {
+        this.upgradeQuality();
+      }
+    }
+    this.qualityHistory = this.qualityHistory.filter(
+      (h) => currentTime - h.timestamp < 3e4
+      // Keep 30 seconds
+    );
+  }
+  /**
+   * Get average FPS from recent samples
+   */
+  getAverageFPS() {
+    if (this.metrics.fps.length === 0) return this.targetFPS;
+    return this.metrics.fps.reduce((a, b) => a + b, 0) / this.metrics.fps.length;
+  }
+  /**
+   * Downgrade quality level
+   */
+  downgradeQuality(reason = "performance") {
+    const levels = Object.values(this.qualityLevels);
+    const currentIndex = levels.indexOf(this.currentQuality);
+    if (currentIndex < levels.length - 1) {
+      const newQuality = levels[currentIndex + 1];
+      this.setQuality(newQuality);
+      console.warn(`[AdaptiveQualityManager] Downgrading quality to ${newQuality} due to ${reason} performance`);
+    }
+  }
+  /**
+   * Upgrade quality level
+   */
+  upgradeQuality() {
+    const levels = Object.values(this.qualityLevels);
+    const currentIndex = levels.indexOf(this.currentQuality);
+    if (currentIndex > 0) {
+      const newQuality = levels[currentIndex - 1];
+      this.setQuality(newQuality);
+      console.log(`[AdaptiveQualityManager] Upgrading quality to ${newQuality} due to good performance`);
+    }
+  }
+  /**
+   * Set quality level and apply settings
+   */
+  setQuality(quality) {
+    if (!this.qualityPresets[quality]) return;
+    this.currentQuality = quality;
+    const settings = this.qualityPresets[quality];
+    this.applyQualitySettings(settings);
+    this.onQualityChange(quality, settings);
+  }
+  /**
+   * Apply quality settings to various systems
+   */
+  applyQualitySettings(settings) {
+    var _a, _b;
+    if (window.temporalEchoController) {
+      window.temporalEchoController.config.mobileMaxHotspots = settings.maxHotspots;
+      window.temporalEchoController.config.echoDuration = settings.animationDuration;
+      window.temporalEchoController.config.staggerDelay = settings.staggerDelay;
+    }
+    if ((_a = window.temporalEchoController) == null ? void 0 : _a.rippleRenderer) {
+      window.temporalEchoController.rippleRenderer.duration = settings.animationDuration;
+      window.temporalEchoController.rippleRenderer.maxRipples = settings.maxConcurrentAnimations;
+    }
+    if ((_b = window.nativeHotspotRenderer) == null ? void 0 : _b.lodSystem) {
+      window.nativeHotspotRenderer.lodSystem.aggressiveness = settings.lodAggressiveness;
+    }
+    this.updateShadowQuality(settings.shadowQuality);
+    console.log("[AdaptiveQualityManager] Applied quality settings:", settings);
+  }
+  /**
+   * Update shadow rendering quality
+   */
+  updateShadowQuality(quality) {
+  }
+  /**
+   * Force quality level (for testing)
+   */
+  forceQuality(quality) {
+    if (this.qualityPresets[quality]) {
+      this.setQuality(quality);
+      console.log(`[AdaptiveQualityManager] Forced quality to ${quality}`);
+    }
+  }
+  /**
+   * Get current performance metrics
+   */
+  getMetrics() {
+    return {
+      currentQuality: this.currentQuality,
+      averageFPS: this.getAverageFPS(),
+      metrics: this.metrics,
+      deviceCapabilities: this.deviceCapabilities
+    };
+  }
+  /**
+   * Stop monitoring
+   */
+  stop() {
+    this.isMonitoring = false;
+    if (this.rafId) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+    }
+    console.log("[AdaptiveQualityManager] Stopped monitoring");
+  }
+  /**
+   * Destroy the manager
+   */
+  destroy() {
+    this.stop();
+    this.metrics = {
+      fps: [],
+      frameTime: [],
+      memoryUsage: [],
+      cpuUsage: []
+    };
+    this.qualityHistory = [];
+  }
+}
+const adaptiveQualityManager = new AdaptiveQualityManager();
+class ThermalManager {
+  constructor(options = {}) {
+    this.enabled = options.enabled !== false;
+    this.thermalStates = {
+      NORMAL: "normal",
+      // No throttling
+      WARM: "warm",
+      // Light throttling
+      HOT: "hot",
+      // Moderate throttling
+      CRITICAL: "critical"
+      // Heavy throttling
+    };
+    this.currentState = this.thermalStates.NORMAL;
+    this.throttleProfiles = {
+      [this.thermalStates.NORMAL]: {
+        cpuThrottle: 1,
+        // 100% performance
+        animationScale: 1,
+        // Normal animations
+        renderDelay: 0,
+        // No delay
+        maxConcurrent: 10
+        // Max concurrent operations
+      },
+      [this.thermalStates.WARM]: {
+        cpuThrottle: 0.8,
+        // 80% performance
+        animationScale: 0.8,
+        // Slightly faster animations
+        renderDelay: 50,
+        // 50ms delay between operations
+        maxConcurrent: 6
+        // Reduced concurrent operations
+      },
+      [this.thermalStates.HOT]: {
+        cpuThrottle: 0.6,
+        // 60% performance
+        animationScale: 0.5,
+        // Much faster animations
+        renderDelay: 100,
+        // 100ms delay
+        maxConcurrent: 3
+        // Minimal concurrent operations
+      },
+      [this.thermalStates.CRITICAL]: {
+        cpuThrottle: 0.3,
+        // 30% performance
+        animationScale: 0.3,
+        // Minimal animations
+        renderDelay: 200,
+        // 200ms delay
+        maxConcurrent: 1
+        // One operation at a time
+      }
+    };
+    this.performanceHistory = [];
+    this.lastPerformanceCheck = performance.now();
+    this.batteryLevel = 1;
+    this.isCharging = true;
+    this.batteryAPISupported = "getBattery" in navigator;
+    this.thermalEstimation = {
+      sustainedHighPerf: 0,
+      // Time spent at high performance
+      lastHighPerfStart: null,
+      // When high performance started
+      cooldownPeriod: 0
+      // Time spent cooling down
+    };
+    this.onStateChange = options.onStateChange || (() => {
+    });
+    if (this.batteryAPISupported) {
+      this.initBatteryMonitoring();
+    }
+    console.log("[ThermalManager] Initialized", {
+      batteryAPISupported: this.batteryAPISupported
+    });
+  }
+  /**
+   * Initialize battery monitoring
+   */
+  async initBatteryMonitoring() {
+    try {
+      const battery = await navigator.getBattery();
+      this.batteryLevel = battery.level;
+      this.isCharging = battery.charging;
+      battery.addEventListener("levelchange", () => {
+        this.batteryLevel = battery.level;
+        this.evaluateThermalState();
+      });
+      battery.addEventListener("chargingchange", () => {
+        this.isCharging = battery.charging;
+        this.evaluateThermalState();
+      });
+      console.log("[ThermalManager] Battery monitoring initialized", {
+        level: this.batteryLevel,
+        charging: this.isCharging
+      });
+    } catch (error) {
+      console.warn("[ThermalManager] Battery API not available:", error);
+      this.batteryAPISupported = false;
+    }
+  }
+  /**
+   * Update performance metrics
+   */
+  updatePerformance(metrics) {
+    const currentTime = performance.now();
+    this.performanceHistory.push({
+      timestamp: currentTime,
+      fps: metrics.fps,
+      frameTime: metrics.frameTime,
+      memoryUsage: metrics.memoryUsage
+    });
+    this.performanceHistory = this.performanceHistory.filter(
+      (entry) => currentTime - entry.timestamp < 6e4
+    );
+    this.updateThermalEstimation(metrics);
+    this.evaluateThermalState();
+  }
+  /**
+   * Update thermal estimation based on performance patterns
+   */
+  updateThermalEstimation(metrics) {
+    const currentTime = performance.now();
+    const isHighPerformance = metrics.fps > 50 || metrics.frameTime < 20;
+    if (isHighPerformance) {
+      if (!this.thermalEstimation.lastHighPerfStart) {
+        this.thermalEstimation.lastHighPerfStart = currentTime;
+      }
+      this.thermalEstimation.sustainedHighPerf = currentTime - this.thermalEstimation.lastHighPerfStart;
+      this.thermalEstimation.cooldownPeriod = 0;
+    } else {
+      if (this.thermalEstimation.lastHighPerfStart) {
+        this.thermalEstimation.cooldownPeriod += currentTime - this.lastPerformanceCheck;
+      }
+      if (this.thermalEstimation.cooldownPeriod > 1e4) {
+        this.thermalEstimation.lastHighPerfStart = null;
+        this.thermalEstimation.sustainedHighPerf = 0;
+      }
+    }
+    this.lastPerformanceCheck = currentTime;
+  }
+  /**
+   * Evaluate thermal state based on various factors
+   */
+  evaluateThermalState() {
+    let newState = this.thermalStates.NORMAL;
+    const sustainedTime = this.thermalEstimation.sustainedHighPerf;
+    if (sustainedTime > 12e4) {
+      newState = this.thermalStates.CRITICAL;
+    } else if (sustainedTime > 6e4) {
+      newState = this.thermalStates.HOT;
+    } else if (sustainedTime > 3e4) {
+      newState = this.thermalStates.WARM;
+    }
+    if (this.batteryAPISupported) {
+      if (!this.isCharging && this.batteryLevel < 0.2) {
+        newState = this.increaseThrottleState(newState);
+      } else if (this.isCharging && this.batteryLevel > 0.8) {
+        newState = this.decreaseThrottleState(newState);
+      }
+    }
+    const recentPerf = this.getRecentPerformance(5e3);
+    if (recentPerf.avgFPS < 20) {
+      newState = this.increaseThrottleState(newState);
+    }
+    if (recentPerf.avgMemoryUsage > 0.8) {
+      newState = this.increaseThrottleState(newState);
+    }
+    if (newState !== this.currentState) {
+      this.setState(newState);
+    }
+  }
+  /**
+   * Get recent performance metrics
+   */
+  getRecentPerformance(duration) {
+    const currentTime = performance.now();
+    const recent = this.performanceHistory.filter(
+      (entry) => currentTime - entry.timestamp < duration
+    );
+    if (recent.length === 0) {
+      return { avgFPS: 30, avgFrameTime: 33, avgMemoryUsage: 0.5 };
+    }
+    const avgFPS = recent.reduce((sum, e) => sum + e.fps, 0) / recent.length;
+    const avgFrameTime = recent.reduce((sum, e) => sum + e.frameTime, 0) / recent.length;
+    const avgMemoryUsage = recent.reduce((sum, e) => sum + (e.memoryUsage || 0.5), 0) / recent.length;
+    return { avgFPS, avgFrameTime, avgMemoryUsage };
+  }
+  /**
+   * Increase throttle state (more throttling)
+   */
+  increaseThrottleState(state) {
+    const states = Object.values(this.thermalStates);
+    const currentIndex = states.indexOf(state);
+    return states[Math.min(currentIndex + 1, states.length - 1)];
+  }
+  /**
+   * Decrease throttle state (less throttling)
+   */
+  decreaseThrottleState(state) {
+    const states = Object.values(this.thermalStates);
+    const currentIndex = states.indexOf(state);
+    return states[Math.max(currentIndex - 1, 0)];
+  }
+  /**
+   * Set thermal state
+   */
+  setState(state) {
+    const oldState = this.currentState;
+    this.currentState = state;
+    const profile = this.throttleProfiles[state];
+    console.log(`[ThermalManager] State changed: ${oldState} -> ${state}`, profile);
+    this.applyThrottling(profile);
+    this.onStateChange(state, profile);
+  }
+  /**
+   * Apply throttling profile
+   */
+  applyThrottling(profile) {
+    if (window.temporalEchoController) {
+      const baseAnimation = 800;
+      window.temporalEchoController.config.echoDuration = baseAnimation * profile.animationScale;
+    }
+    if (window.nativeHotspotRenderer) {
+      window.nativeHotspotRenderer.renderDelay = profile.renderDelay;
+    }
+    if (window.temporalEchoController) {
+      window.temporalEchoController.config.maxSimultaneous = Math.min(profile.maxConcurrent, 10);
+    }
+  }
+  /**
+   * Force cooldown period
+   */
+  forceCooldown() {
+    console.log("[ThermalManager] Forcing cooldown period");
+    this.thermalEstimation = {
+      sustainedHighPerf: 0,
+      lastHighPerfStart: null,
+      cooldownPeriod: 0
+    };
+    this.setState(this.thermalStates.WARM);
+    setTimeout(() => {
+      if (this.currentState === this.thermalStates.WARM) {
+        this.evaluateThermalState();
+      }
+    }, 1e4);
+  }
+  /**
+   * Get current thermal profile
+   */
+  getCurrentProfile() {
+    return this.throttleProfiles[this.currentState];
+  }
+  /**
+   * Get thermal status
+   */
+  getStatus() {
+    return {
+      state: this.currentState,
+      profile: this.getCurrentProfile(),
+      battery: {
+        level: this.batteryLevel,
+        charging: this.isCharging
+      },
+      thermalEstimation: this.thermalEstimation,
+      recentPerformance: this.getRecentPerformance(1e4)
+    };
+  }
+  /**
+   * Destroy the manager
+   */
+  destroy() {
+    this.performanceHistory = [];
+    this.thermalEstimation = {
+      sustainedHighPerf: 0,
+      lastHighPerfStart: null,
+      cooldownPeriod: 0
+    };
+  }
+}
+const thermalManager = new ThermalManager();
+class PerformanceMonitoringSystem {
+  constructor(options = {}) {
+    this.viewer = options.viewer;
+    this.enabled = options.enabled !== false;
+    this.config = {
+      sampleInterval: 100,
+      // Sample every 100ms
+      reportInterval: 1e3,
+      // Report every second
+      historySize: 60,
+      // Keep 60 seconds of history
+      enableLogging: options.enableLogging || false
+    };
+    this.metrics = {
+      fps: {
+        current: 0,
+        average: 0,
+        min: 60,
+        max: 0,
+        samples: []
+      },
+      frameTime: {
+        current: 0,
+        average: 0,
+        max: 0,
+        samples: []
+      },
+      memory: {
+        used: 0,
+        total: 0,
+        percentage: 0,
+        samples: []
+      },
+      interactions: {
+        tapLatency: [],
+        animationDroppedFrames: 0,
+        totalInteractions: 0
+      },
+      rendering: {
+        hotspotCount: 0,
+        visibleHotspots: 0,
+        activeAnimations: 0,
+        renderCalls: 0
+      }
+    };
+    this.performanceState = {
+      overall: "optimal",
+      // optimal, good, degraded, poor, critical
+      fps: "optimal",
+      memory: "optimal",
+      thermal: "normal",
+      quality: "high"
+    };
+    this.isMonitoring = false;
+    this.frameCount = 0;
+    this.lastFrameTime = performance.now();
+    this.lastReportTime = performance.now();
+    this.rafId = null;
+    this.performanceMarks = /* @__PURE__ */ new Map();
+    this.adaptiveQuality = adaptiveQualityManager;
+    this.thermal = thermalManager;
+    this.onPerformanceReport = options.onPerformanceReport || (() => {
+    });
+    this.onPerformanceWarning = options.onPerformanceWarning || (() => {
+    });
+    console.log("[PerformanceMonitoringSystem] Initialized");
+  }
+  /**
+   * Start monitoring
+   */
+  start() {
+    if (this.isMonitoring) return;
+    this.isMonitoring = true;
+    this.adaptiveQuality.start();
+    this.adaptiveQuality.onQualityChange = (quality, settings) => {
+      this.performanceState.quality = quality;
+      this.handleQualityChange(quality, settings);
+    };
+    this.thermal.onStateChange = (state, profile) => {
+      this.performanceState.thermal = state;
+      this.handleThermalChange(state, profile);
+    };
+    this.monitor();
+    this.startReporting();
+    console.log("[PerformanceMonitoringSystem] Started monitoring");
+  }
+  /**
+   * Main monitoring loop
+   */
+  monitor() {
+    if (!this.isMonitoring) return;
+    const currentTime = performance.now();
+    const deltaTime = currentTime - this.lastFrameTime;
+    this.frameCount++;
+    this.updateFrameMetrics(deltaTime);
+    this.updateMemoryMetrics();
+    this.updateRenderingMetrics();
+    this.lastFrameTime = currentTime;
+    this.rafId = requestAnimationFrame(() => this.monitor());
+  }
+  /**
+   * Update frame-based metrics
+   */
+  updateFrameMetrics(deltaTime) {
+    if (this.frameCount === 1) return;
+    this.metrics.frameTime.current = deltaTime;
+    this.metrics.frameTime.samples.push(deltaTime);
+    if (this.metrics.frameTime.samples.length > this.config.historySize) {
+      this.metrics.frameTime.samples.shift();
+    }
+    if (deltaTime > this.metrics.frameTime.max) {
+      this.metrics.frameTime.max = deltaTime;
+    }
+    if (deltaTime > 33) {
+      this.metrics.interactions.animationDroppedFrames++;
+    }
+  }
+  /**
+   * Update memory metrics
+   */
+  updateMemoryMetrics() {
+    if (!performance.memory) return;
+    const used = performance.memory.usedJSHeapSize;
+    const total = performance.memory.jsHeapSizeLimit;
+    const percentage = used / total;
+    this.metrics.memory.used = used;
+    this.metrics.memory.total = total;
+    this.metrics.memory.percentage = percentage;
+    this.metrics.memory.samples.push(percentage);
+    if (this.metrics.memory.samples.length > this.config.historySize) {
+      this.metrics.memory.samples.shift();
+    }
+    if (percentage > 0.9) {
+      this.performanceState.memory = "critical";
+    } else if (percentage > 0.8) {
+      this.performanceState.memory = "poor";
+    } else if (percentage > 0.7) {
+      this.performanceState.memory = "degraded";
+    } else if (percentage > 0.5) {
+      this.performanceState.memory = "good";
+    } else {
+      this.performanceState.memory = "optimal";
+    }
+  }
+  /**
+   * Update rendering metrics
+   */
+  updateRenderingMetrics() {
+    if (window.nativeHotspotRenderer) {
+      const activeManager = window.nativeHotspotRenderer.activeHotspotManager;
+      if (activeManager) {
+        const stats = activeManager.getStats();
+        this.metrics.rendering.hotspotCount = stats.totalHotspots;
+        this.metrics.rendering.visibleHotspots = stats.activeHotspots;
+      }
+    }
+    if (window.temporalEchoController) {
+      this.metrics.rendering.activeAnimations = window.temporalEchoController.activeEchoes.size;
+    }
+    this.metrics.rendering.renderCalls++;
+  }
+  /**
+   * Start reporting interval
+   */
+  startReporting() {
+    setInterval(() => {
+      if (!this.isMonitoring) return;
+      const currentTime = performance.now();
+      const timeSinceLastReport = currentTime - this.lastReportTime;
+      const fps = this.frameCount * 1e3 / timeSinceLastReport;
+      this.metrics.fps.current = fps;
+      this.metrics.fps.samples.push(fps);
+      if (this.metrics.fps.samples.length > this.config.historySize) {
+        this.metrics.fps.samples.shift();
+      }
+      if (fps < this.metrics.fps.min) this.metrics.fps.min = fps;
+      if (fps > this.metrics.fps.max) this.metrics.fps.max = fps;
+      this.calculateAverages();
+      if (fps < 20) {
+        this.performanceState.fps = "critical";
+      } else if (fps < 25) {
+        this.performanceState.fps = "poor";
+      } else if (fps < 30) {
+        this.performanceState.fps = "degraded";
+      } else if (fps < 45) {
+        this.performanceState.fps = "good";
+      } else {
+        this.performanceState.fps = "optimal";
+      }
+      this.updateOverallState();
+      this.thermal.updatePerformance({
+        fps,
+        frameTime: this.metrics.frameTime.average,
+        memoryUsage: this.metrics.memory.percentage
+      });
+      const report = this.generateReport();
+      this.onPerformanceReport(report);
+      this.checkPerformanceWarnings(report);
+      this.frameCount = 0;
+      this.lastReportTime = currentTime;
+      this.metrics.rendering.renderCalls = 0;
+    }, this.config.reportInterval);
+  }
+  /**
+   * Calculate average metrics
+   */
+  calculateAverages() {
+    if (this.metrics.fps.samples.length > 0) {
+      this.metrics.fps.average = this.metrics.fps.samples.reduce((a, b) => a + b, 0) / this.metrics.fps.samples.length;
+    }
+    if (this.metrics.frameTime.samples.length > 0) {
+      this.metrics.frameTime.average = this.metrics.frameTime.samples.reduce((a, b) => a + b, 0) / this.metrics.frameTime.samples.length;
+    }
+  }
+  /**
+   * Update overall performance state
+   */
+  updateOverallState() {
+    const states = ["critical", "poor", "degraded", "good", "optimal"];
+    const stateValues = {
+      critical: 0,
+      poor: 1,
+      degraded: 2,
+      good: 3,
+      optimal: 4
+    };
+    const worstState = Math.min(
+      stateValues[this.performanceState.fps],
+      stateValues[this.performanceState.memory]
+    );
+    this.performanceState.overall = states[worstState];
+  }
+  /**
+   * Generate performance report
+   */
+  generateReport() {
+    return {
+      timestamp: Date.now(),
+      state: this.performanceState,
+      metrics: {
+        fps: {
+          current: Math.round(this.metrics.fps.current),
+          average: Math.round(this.metrics.fps.average),
+          min: Math.round(this.metrics.fps.min),
+          max: Math.round(this.metrics.fps.max)
+        },
+        frameTime: {
+          current: Math.round(this.metrics.frameTime.current),
+          average: Math.round(this.metrics.frameTime.average),
+          max: Math.round(this.metrics.frameTime.max)
+        },
+        memory: {
+          used: Math.round(this.metrics.memory.used / 1048576),
+          // MB
+          total: Math.round(this.metrics.memory.total / 1048576),
+          // MB
+          percentage: Math.round(this.metrics.memory.percentage * 100)
+        },
+        rendering: {
+          ...this.metrics.rendering,
+          droppedFrames: this.metrics.interactions.animationDroppedFrames
+        }
+      },
+      quality: this.adaptiveQuality.getMetrics(),
+      thermal: this.thermal.getStatus()
+    };
+  }
+  /**
+   * Check for performance warnings
+   */
+  checkPerformanceWarnings(report) {
+    const warnings = [];
+    if (report.state.fps === "critical") {
+      warnings.push({
+        type: "fps",
+        severity: "critical",
+        message: `FPS critically low: ${report.metrics.fps.current}`,
+        suggestion: "Reducing quality settings"
+      });
+    }
+    if (report.metrics.memory.percentage > 85) {
+      warnings.push({
+        type: "memory",
+        severity: "high",
+        message: `Memory usage high: ${report.metrics.memory.percentage}%`,
+        suggestion: "Consider reloading the page"
+      });
+    }
+    if (report.thermal.state === "hot" || report.thermal.state === "critical") {
+      warnings.push({
+        type: "thermal",
+        severity: "high",
+        message: `Device overheating: ${report.thermal.state}`,
+        suggestion: "Performance throttled to prevent damage"
+      });
+    }
+    if (warnings.length > 0) {
+      this.onPerformanceWarning(warnings);
+    }
+  }
+  /**
+   * Handle quality changes
+   */
+  handleQualityChange(quality, settings) {
+    if (this.config.enableLogging) {
+      console.log("[PerformanceMonitoringSystem] Quality changed:", quality, settings);
+    }
+  }
+  /**
+   * Handle thermal changes
+   */
+  handleThermalChange(state, profile) {
+    if (this.config.enableLogging) {
+      console.log("[PerformanceMonitoringSystem] Thermal state changed:", state, profile);
+    }
+  }
+  /**
+   * Mark the start of a performance measurement
+   */
+  markStart(name) {
+    this.performanceMarks.set(name, performance.now());
+  }
+  /**
+   * Mark the end of a performance measurement
+   */
+  markEnd(name) {
+    const startTime = this.performanceMarks.get(name);
+    if (!startTime) return null;
+    const duration = performance.now() - startTime;
+    this.performanceMarks.delete(name);
+    if (name.includes("tap") || name.includes("interaction")) {
+      this.metrics.interactions.tapLatency.push(duration);
+      if (this.metrics.interactions.tapLatency.length > 20) {
+        this.metrics.interactions.tapLatency.shift();
+      }
+      this.metrics.interactions.totalInteractions++;
+    }
+    return duration;
+  }
+  /**
+   * Force garbage collection if available (development only)
+   */
+  forceGC() {
+    if (window.gc) {
+      console.log("[PerformanceMonitoringSystem] Forcing garbage collection");
+      window.gc();
+    }
+  }
+  /**
+   * Get current performance summary
+   */
+  getSummary() {
+    return {
+      fps: Math.round(this.metrics.fps.current),
+      state: this.performanceState.overall,
+      quality: this.performanceState.quality,
+      thermal: this.performanceState.thermal
+    };
+  }
+  /**
+   * Stop monitoring
+   */
+  stop() {
+    this.isMonitoring = false;
+    if (this.rafId) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+    }
+    this.adaptiveQuality.stop();
+    console.log("[PerformanceMonitoringSystem] Stopped monitoring");
+  }
+  /**
+   * Destroy the system
+   */
+  destroy() {
+    this.stop();
+    this.adaptiveQuality.destroy();
+    this.thermal.destroy();
+    this.performanceMarks.clear();
+  }
+}
+const performanceMonitor = new PerformanceMonitoringSystem();
+async function detectImageSupport() {
+  const avifTest = "data:image/avif;base64,AAAAFGZ0eXBhdmlmAAAAAG1pZjEAAACgbWV0YQAAAAAAAAAOcGl0bQAAAAAAAQAAAB5pbG9jAAAAAEQAAAEAAQAAAAEAAAC8AAAAGwAAACNpaW5mAAAAAAABAAAAFWluZmUCAAAAAAEAAGF2MDEAAAAARWlwcnAAAAAoaXBjbwAAABRpc3BlAAAAAAAAAAQAAAAEAAAADGF2MUOBAAAAAAAAFWlwbWEAAAAAAAAAAQABAgECAAAAI21kYXRSAAoIP8R8hAQ0BUAyDWeeUy0JG+QAACANEkA=";
+  const webpTest = "data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoCAAEAAQAcJaQAA3AA/v3AgAA=";
+  const avifSupported = await new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = avifTest;
+  });
+  const webpSupported = await new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img.width === 2 && img.height === 1);
+    img.onerror = () => resolve(false);
+    img.src = webpTest;
+  });
+  const result = {
+    avif: avifSupported,
+    webp: webpSupported
+  };
+  console.log("[ImageFormatDetection] Browser support:", result);
+  return result;
+}
+class AdaptiveFormatTileSource {
+  constructor(viewer, formatSupport) {
+    this.viewer = viewer;
+    this.formats = formatSupport || { webp: false, avif: false };
+    this.baseFormat = "jpg";
+    console.log("[AdaptiveFormatTileSource] Initialized with format support:", this.formats);
+  }
+  /**
+   * Get tile URL with optimal format
+   * @param {number} level - Zoom level
+   * @param {number} x - Tile X coordinate
+   * @param {number} y - Tile Y coordinate
+   * @returns {string} Tile URL with optimal format
+   */
+  getTileUrl(level, x, y) {
+    const format = this.selectOptimalFormat(level);
+    return `/images/tiles/${level}/${x}_${y}.${format}`;
+  }
+  /**
+   * Select optimal format based on zoom level
+   * Higher zoom levels use better compression for bandwidth savings
+   * @param {number} zoomLevel - Current zoom level
+   * @returns {string} Optimal image format
+   */
+  selectOptimalFormat(zoomLevel) {
+    if (zoomLevel >= 12 && this.formats.avif) {
+      return "avif";
+    }
+    if (zoomLevel >= 8 && this.formats.webp) {
+      return "webp";
+    }
+    return this.baseFormat;
+  }
+  /**
+   * Update format support (e.g., after re-detection)
+   * @param {Object} formatSupport - Updated format support
+   */
+  updateFormatSupport(formatSupport) {
+    this.formats = formatSupport;
+    console.log("[AdaptiveFormatTileSource] Updated format support:", this.formats);
+  }
+}
+async function initializeAdaptiveFormats(viewer) {
+  const formatSupport = await detectImageSupport();
+  const adaptiveSource = new AdaptiveFormatTileSource(viewer, formatSupport);
+  window.adaptiveFormatSource = adaptiveSource;
+  return adaptiveSource;
+}
+class IndexedDBTileCache {
+  constructor(maxSizeMB = 200) {
+    this.dbName = "diary-tile-cache";
+    this.version = 1;
+    this.maxSize = maxSizeMB * 1024 * 1024;
+    this.db = null;
+    this.lruMap = /* @__PURE__ */ new Map();
+    this.currentSize = 0;
+    this.enabled = true;
+    this.stats = {
+      hits: 0,
+      misses: 0,
+      stores: 0,
+      evictions: 0
+    };
+    this.initDB();
+  }
+  /**
+   * Initialize IndexedDB database
+   */
+  async initDB() {
+    if (!("indexedDB" in window)) {
+      console.warn("[IndexedDBTileCache] IndexedDB not supported");
+      this.enabled = false;
+      return;
+    }
+    try {
+      const request = indexedDB.open(this.dbName, this.version);
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains("tiles")) {
+          const store = db.createObjectStore("tiles", { keyPath: "id" });
+          store.createIndex("timestamp", "timestamp");
+          store.createIndex("size", "size");
+          console.log("[IndexedDBTileCache] Created tiles object store");
+        }
+        if (!db.objectStoreNames.contains("metadata")) {
+          db.createObjectStore("metadata", { keyPath: "key" });
+        }
+      };
+      request.onsuccess = () => {
+        this.db = request.result;
+        console.log("[IndexedDBTileCache] Database initialized");
+        this.loadMetadata();
+        this.checkStorageQuota();
+      };
+      request.onerror = (event) => {
+        console.error("[IndexedDBTileCache] Database error:", event.target.error);
+        this.enabled = false;
+      };
+    } catch (error) {
+      console.error("[IndexedDBTileCache] Failed to initialize:", error);
+      this.enabled = false;
+    }
+  }
+  /**
+   * Store a tile in the cache
+   * @param {string} key - Unique tile identifier (e.g., "12/345/678.jpg")
+   * @param {Blob} blob - Tile image data
+   */
+  async storeTile(key, blob) {
+    if (!this.enabled || !this.db) return;
+    try {
+      const tileData = {
+        id: key,
+        blob,
+        timestamp: Date.now(),
+        size: blob.size
+      };
+      if (this.currentSize + blob.size > this.maxSize) {
+        await this.evictOldest(blob.size);
+      }
+      const transaction = this.db.transaction(["tiles"], "readwrite");
+      const store = transaction.objectStore("tiles");
+      const request = store.put(tileData);
+      request.onsuccess = () => {
+        this.lruMap.delete(key);
+        this.lruMap.set(key, Date.now());
+        this.currentSize += blob.size;
+        this.stats.stores++;
+        this.saveMetadata();
+      };
+      request.onerror = (event) => {
+        console.error("[IndexedDBTileCache] Store error:", event.target.error);
+      };
+    } catch (error) {
+      console.error("[IndexedDBTileCache] Failed to store tile:", error);
+    }
+  }
+  /**
+   * Retrieve a tile from the cache
+   * @param {string} key - Tile identifier
+   * @returns {Promise<Blob|null>} Tile blob or null if not found
+   */
+  async getTile(key) {
+    if (!this.enabled || !this.db) return null;
+    return new Promise((resolve) => {
+      try {
+        const transaction = this.db.transaction(["tiles"], "readonly");
+        const store = transaction.objectStore("tiles");
+        const request = store.get(key);
+        request.onsuccess = () => {
+          const result = request.result;
+          if (result) {
+            this.lruMap.delete(key);
+            this.lruMap.set(key, Date.now());
+            this.stats.hits++;
+            resolve(result.blob);
+          } else {
+            this.stats.misses++;
+            resolve(null);
+          }
+        };
+        request.onerror = () => {
+          this.stats.misses++;
+          resolve(null);
+        };
+      } catch (error) {
+        console.error("[IndexedDBTileCache] Failed to get tile:", error);
+        resolve(null);
+      }
+    });
+  }
+  /**
+   * Evict oldest tiles to make room
+   * @param {number} bytesNeeded - Space needed for new tile
+   */
+  async evictOldest(bytesNeeded) {
+    const transaction = this.db.transaction(["tiles"], "readwrite");
+    const store = transaction.objectStore("tiles");
+    const index = store.index("timestamp");
+    let bytesFreed = 0;
+    const tilesToDelete = [];
+    const request = index.openCursor();
+    request.onsuccess = (event) => {
+      const cursor = event.target.result;
+      if (cursor && bytesFreed < bytesNeeded) {
+        const tile = cursor.value;
+        tilesToDelete.push(tile.id);
+        bytesFreed += tile.size;
+        cursor.continue();
+      } else {
+        tilesToDelete.forEach((id) => {
+          store.delete(id);
+          this.lruMap.delete(id);
+          this.stats.evictions++;
+        });
+        this.currentSize -= bytesFreed;
+        console.log(`[IndexedDBTileCache] Evicted ${tilesToDelete.length} tiles, freed ${(bytesFreed / 1024).toFixed(2)}KB`);
+      }
+    };
+  }
+  /**
+   * Check storage quota and warn if running low
+   */
+  async checkStorageQuota() {
+    if ("storage" in navigator && "estimate" in navigator.storage) {
+      try {
+        const estimate = await navigator.storage.estimate();
+        const percentUsed = estimate.usage / estimate.quota * 100;
+        if (percentUsed > 80) {
+          console.warn(`[IndexedDBTileCache] Storage usage high: ${percentUsed.toFixed(2)}%`);
+          await this.performCleanup();
+        }
+        console.log(`[IndexedDBTileCache] Storage: ${(estimate.usage / 1024 / 1024).toFixed(2)}MB / ${(estimate.quota / 1024 / 1024).toFixed(2)}MB (${percentUsed.toFixed(2)}%)`);
+      } catch (error) {
+        console.warn("[IndexedDBTileCache] Could not estimate storage:", error);
+      }
+    }
+  }
+  /**
+   * Clean up old tiles (older than 7 days for Safari compatibility)
+   */
+  async performCleanup() {
+    if (!this.db) return;
+    const transaction = this.db.transaction(["tiles"], "readwrite");
+    const store = transaction.objectStore("tiles");
+    const index = store.index("timestamp");
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1e3;
+    const range = IDBKeyRange.upperBound(sevenDaysAgo);
+    const request = index.openCursor(range);
+    let deletedCount = 0;
+    request.onsuccess = (event) => {
+      const cursor = event.target.result;
+      if (cursor) {
+        store.delete(cursor.primaryKey);
+        this.lruMap.delete(cursor.primaryKey);
+        deletedCount++;
+        cursor.continue();
+      } else if (deletedCount > 0) {
+        console.log(`[IndexedDBTileCache] Cleaned up ${deletedCount} old tiles`);
+      }
+    };
+  }
+  /**
+   * Save metadata (current size, stats)
+   */
+  async saveMetadata() {
+    if (!this.db) return;
+    const transaction = this.db.transaction(["metadata"], "readwrite");
+    const store = transaction.objectStore("metadata");
+    store.put({
+      key: "cacheStats",
+      currentSize: this.currentSize,
+      stats: this.stats,
+      lastUpdated: Date.now()
+    });
+  }
+  /**
+   * Load metadata on initialization
+   */
+  async loadMetadata() {
+    if (!this.db) return;
+    const transaction = this.db.transaction(["metadata"], "readonly");
+    const store = transaction.objectStore("metadata");
+    const request = store.get("cacheStats");
+    request.onsuccess = () => {
+      const data = request.result;
+      if (data) {
+        this.currentSize = data.currentSize || 0;
+        this.stats = data.stats || this.stats;
+        console.log("[IndexedDBTileCache] Loaded metadata:", this.stats);
+      }
+    };
+  }
+  /**
+   * Get cache statistics
+   */
+  getStats() {
+    const hitRate = this.stats.hits + this.stats.misses > 0 ? (this.stats.hits / (this.stats.hits + this.stats.misses) * 100).toFixed(2) : 0;
+    return {
+      ...this.stats,
+      hitRate: `${hitRate}%`,
+      sizeUsed: `${(this.currentSize / 1024 / 1024).toFixed(2)}MB`,
+      sizeLimit: `${(this.maxSize / 1024 / 1024).toFixed(2)}MB`
+    };
+  }
+  /**
+   * Clear entire cache
+   */
+  async clearCache() {
+    if (!this.db) return;
+    const transaction = this.db.transaction(["tiles"], "readwrite");
+    const store = transaction.objectStore("tiles");
+    const request = store.clear();
+    request.onsuccess = () => {
+      this.lruMap.clear();
+      this.currentSize = 0;
+      this.stats = {
+        hits: 0,
+        misses: 0,
+        stores: 0,
+        evictions: 0
+      };
+      this.saveMetadata();
+      console.log("[IndexedDBTileCache] Cache cleared");
+    };
+  }
+  /**
+   * Enable/disable cache
+   */
+  setEnabled(enabled) {
+    this.enabled = enabled;
+    console.log(`[IndexedDBTileCache] Cache ${enabled ? "enabled" : "disabled"}`);
+  }
+}
+const tileCache = new IndexedDBTileCache(200);
+window.tileCache = tileCache;
+async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
+  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
+  console.log("initializeViewer called with:", { viewerRef, props, state: !!state, handleHotspotClick: !!handleHotspotClick });
+  const intervals = {};
+  let homeViewport = null;
+  const config = performanceConfig.viewer;
+  const isMobileDevice = isMobile();
+  const tileSize = isMobileDevice ? "512" : "1024";
+  const dziUrl = `/images/tiles/${props.artworkId}_${tileSize}/${props.artworkId}.dzi`;
+  console.log(`[Mobile Optimization] Using ${tileSize}px tiles for ${isMobileDevice ? "mobile" : "desktop"} device`);
+  const tileSourceConfig = {
+    Image: {
+      xmlns: "http://schemas.microsoft.com/deepzoom/2008",
+      Url: `/images/tiles/${props.artworkId}_${tileSize}/${props.artworkId}_files/`,
+      Format: "jpg",
+      Overlap: tileSize === "512" ? "1" : "2",
+      // Mobile: less overlap for efficiency
+      TileSize: tileSize,
+      Size: {
+        Width: "11244",
+        Height: "6543"
+      }
+    },
+    minLevel: tileSize === "512" ? 9 : 8,
+    // Adjust minLevel for different tile sizes
+    maxLevel: tileSize === "512" ? 15 : 14
+    // 512px tiles need more levels
+  };
+  const drawerType = getBrowserOptimalDrawer();
+  const viewerConfigOptions = buildViewerConfig(
+    config,
+    tileSourceConfig,
+    drawerType,
+    isMobileDevice,
+    tileSourceConfig
+  );
+  viewerConfigOptions.springStiffness = 10;
+  viewerConfigOptions.animationTime = 0.3;
+  console.log("[viewerSetup] Creating viewer WITHOUT tileSources to ensure handlers attach first");
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+  if (isIOS) {
+    console.log("[CRITICAL iOS CONFIG]", {
+      drawer: viewerConfigOptions.drawer,
+      smoothTileEdgesMinZoom: viewerConfigOptions.smoothTileEdgesMinZoom,
+      maxImageCacheCount: viewerConfigOptions.maxImageCacheCount,
+      flickEnabled: (_a = viewerConfigOptions.gestureSettingsTouch) == null ? void 0 : _a.flickEnabled,
+      flickMomentum: (_b = viewerConfigOptions.gestureSettingsTouch) == null ? void 0 : _b.flickMomentum,
+      useCanvas: viewerConfigOptions.useCanvas,
+      tileSize
+    });
+  }
+  viewerConfigOptions.drawer = "canvas";
+  viewerConfigOptions.smoothTileEdgesMinZoom = Infinity;
+  viewerConfigOptions.immediateRender = true;
+  viewerConfigOptions.imageSmoothingEnabled = true;
+  viewerConfigOptions.updatePixelDensityRatio = false;
+  viewerConfigOptions.subPixelRendering = false;
+  viewerConfigOptions.blendTime = 0.5;
+  viewerConfigOptions.alwaysBlend = false;
+  console.log("BALANCED: Canvas drawer with optimized smoothing management");
+  if (isMobileDevice) {
+    viewerConfigOptions.imageLoaderLimit = 2;
+    viewerConfigOptions.maxImageCacheCount = 100;
+    viewerConfigOptions.maxTilesPerFrame = 2;
+    viewerConfigOptions.prefetchTiles = true;
+    viewerConfigOptions.subPixelRoundingEnabled = false;
+    viewerConfigOptions.constrainDuringPan = true;
+    viewerConfigOptions.minPixelRatio = 1;
+    viewerConfigOptions.smoothTileEdgesMinZoom = Infinity;
+    console.log("MOBILE PERFORMANCE: Applied research-based optimizations (100 cache, 2 loaders, prefetch enabled)");
+  }
+  console.log("RESEARCH VERIFICATION: Creating viewer with settings:", {
+    drawer: viewerConfigOptions.drawer,
+    imageLoaderLimit: viewerConfigOptions.imageLoaderLimit,
+    maxTilesPerFrame: viewerConfigOptions.maxTilesPerFrame,
+    immediateRender: viewerConfigOptions.immediateRender,
+    animationTime: viewerConfigOptions.animationTime,
+    springStiffness: viewerConfigOptions.springStiffness,
+    isMobile: isMobileDevice
+  });
+  console.log("Creating OpenSeadragon viewer with config:", viewerConfigOptions);
+  const viewer = OpenSeadragon({
+    element: viewerRef,
+    ...viewerConfigOptions,
+    // RESEARCH: Final override to ensure critical settings
+    updatePixelDensityRatio: false,
+    // Research: Prevent expensive updates during zoom
+    drawer: isMobileDevice || isSafari || isIOS ? "canvas" : viewerConfigOptions.drawer,
+    // Final safety check
+    // PHASE 5: Canvas context optimizations for mobile
+    canvasOptions: {
+      alpha: false,
+      // No transparency needed for monochrome art
+      desynchronized: true,
+      // Reduce sync overhead
+      powerPreference: "low-power"
+      // Mobile battery optimization
+    }
+  });
+  console.log("Applying TileCascadeFix for stable tile rendering...");
+  applyTileCascadeFix(OpenSeadragon);
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  const stateSetters = {
+    setIsLoading: (value) => {
+      console.log(`[viewerSetup] Calling setIsLoading(${value})`);
+      state.setIsLoading(value);
+    },
+    setViewerReady: (value) => {
+      console.log(`[viewerSetup] Calling setViewerReady(${value})`);
+      state.setViewerReady(value);
+    }
+  };
+  console.log("[viewerSetup] Current state before open handler:", {
+    isLoading: state.isLoading(),
+    viewerReady: state.viewerReady()
+  });
+  viewer.addHandler("open", () => {
+    console.log("[viewerSetup] OpenSeadragon open event fired!");
+    console.log("[viewerSetup] Current loading state in handler:", state.isLoading());
+    try {
+      const tiledImage = viewer.world.getItemAt(0);
+      if (tiledImage) {
+        const bounds = tiledImage.getBounds();
+        homeViewport = viewer.viewport.getHomeBounds();
+        console.log("[viewerSetup] Home viewport stored:", homeViewport);
+        console.log("[viewerSetup] About to set isLoading to false");
+        if (tiledImage.getFullyLoaded()) {
+          console.log("[viewerSetup] Tiles fully loaded - hiding loading screen immediately");
+          stateSetters.setIsLoading(false);
+          stateSetters.setViewerReady(true);
+        } else {
+          console.log("[viewerSetup] Waiting for tiles to fully load...");
+          tiledImage.addOnceHandler("fully-loaded-change", () => {
+            console.log("[viewerSetup] Tiles now fully loaded - hiding loading screen");
+            stateSetters.setIsLoading(false);
+            stateSetters.setViewerReady(true);
+          });
+          setTimeout(() => {
+            if (state.isLoading()) {
+              console.warn("[viewerSetup] Forcing loading screen hide after 2s wait");
+              stateSetters.setIsLoading(false);
+              stateSetters.setViewerReady(true);
+            }
+          }, 2e3);
+        }
+        if (isIOS) {
+          console.log("[iOS] Tile protection will be handled by global patch");
+          const canvas = viewer.canvas;
+          if (canvas) {
+            canvas.addEventListener("click", () => {
+              canvas.blur();
+              console.log("[iOS Performance] Canvas focus cleared to prevent performance degradation");
+            });
+            canvas.addEventListener("touchstart", () => {
+              canvas.blur();
+            });
+          }
+        }
+      } else {
+        console.error("[viewerSetup] No tiled image found!");
+        stateSetters.setIsLoading(false);
+        stateSetters.setViewerReady(true);
+      }
+    } catch (error) {
+      console.error("[viewerSetup] Error in open handler:", error);
+      stateSetters.setIsLoading(false);
+      stateSetters.setViewerReady(true);
+    }
+  });
+  viewer.addHandler("open-failed", (event) => {
+    console.error("OpenSeadragon open-failed event:", event);
+    state.setIsLoading(false);
+  });
+  viewer.addHandler("tile-load-failed", (event) => {
+    console.error("Tile load failed:", event.tile, event.message);
+  });
+  if (viewer.drawer) {
+    viewer.drawer.imageSmoothingEnabled = true;
+    if (viewer.drawer.context) {
+      viewer.drawer.context.imageSmoothingEnabled = true;
+      viewer.drawer.context.webkitImageSmoothingEnabled = true;
+      viewer.drawer.context.mozImageSmoothingEnabled = true;
+      viewer.drawer.context.msImageSmoothingEnabled = true;
+    }
+  }
+  if (viewer.canvas) {
+    viewer.canvas.style.imageRendering = "pixelated";
+    viewer.canvas.style.imageRendering = "crisp-edges";
+    viewer.canvas.style.imageRendering = "-webkit-optimize-contrast";
+    console.log("[Mobile Performance] Applied pixelated rendering for monochrome art");
+  }
+  const networkAdaptiveManager = new NetworkAdaptiveManager(viewer);
+  networkAdaptiveManager.initialize();
+  console.log("[Mobile Performance] NetworkAdaptiveManager initialized and enabled");
+  const componentsObj = {
+    networkAdaptiveManager,
+    spatialIndex: new SpatialIndex(),
+    viewportManager: new ViewportManager(viewer),
+    audioEngine: new AudioEngine(),
+    performanceMonitor: new PerformanceMonitor(viewer),
+    renderOptimizer: new RenderOptimizer(viewer),
+    tileOptimizer: new TileOptimizer(viewer),
+    memoryManager: new MemoryManager(viewer),
+    tileCleanupManager: new TileCleanupManager(viewer),
+    imageOverlayManager: new ImageOverlayManager(),
+    overlayManager: OverlayManagerFactory.createWithOverride(viewer),
+    lowZoomOptimizer: new LowZoomOptimizer(viewer, isMobileDevice),
+    // RESEARCH: Critical for zoom performance
+    safariPerformanceOptimizer: new SafariPerformanceOptimizer(viewer),
+    // SAFARI FIX: Dynamic resolution scaling
+    frameSkipManager: new FrameSkipManager(viewer, isMobileDevice),
+    // MOBILE: Frame skipping for 45+ FPS
+    // DELAYED INITIALIZATION TO PREVENT STARTUP FREEZE
+    mouseWheelSmoothing: new MouseWheelSmoothing(viewer, ((_c = getTuningState().enableMouseWheelSmoothing) == null ? void 0 : _c.value) ? {
+      throttleMs: ((_d = getTuningState().wheelEventThrottleMs) == null ? void 0 : _d.value) || 16,
+      zoomStep: ((_e = getTuningState().wheelZoomStep) == null ? void 0 : _e.value) || 0.02,
+      enabled: ((_f = getTuningState().enableMouseWheelSmoothing) == null ? void 0 : _f.value) !== false
+    } : { enabled: false })
+  };
+  if (isMobileDevice) {
+    performanceMonitor.viewer = viewer;
+    performanceMonitor.onPerformanceReport = (report) => {
+      if (state.setPerformanceStatus) {
+        state.setPerformanceStatus({
+          fps: report.metrics.fps.current,
+          quality: report.quality.currentQuality,
+          thermal: report.thermal.state
+        });
+      }
+    };
+    performanceMonitor.onPerformanceWarning = (warnings) => {
+      console.warn("[Performance Warning]", warnings);
+    };
+    setTimeout(() => {
+      performanceMonitor.start();
+      console.log("[Mobile Performance] Unified monitoring system started");
+    }, 2e3);
+    componentsObj.unifiedPerformanceMonitor = performanceMonitor;
+  }
+  componentsObj.tileOptimizer.state.isActive = false;
+  setTimeout(() => {
+    componentsObj.tileOptimizer.state.isActive = true;
+  }, 1e3);
+  const cinematicZoomManager = new CinematicZoomManager(viewer, componentsObj);
+  componentsObj.cinematicZoomManager = cinematicZoomManager;
+  const predictiveTileLoader = new PredictiveTileLoader(viewer);
+  componentsObj.predictiveTileLoader = predictiveTileLoader;
+  const vignetteOverlay = new VignetteOverlay(viewer);
+  componentsObj.vignetteOverlay = vignetteOverlay;
+  const immediateZoomHandler = new ImmediateZoomHandler(viewer);
+  componentsObj.immediateZoomHandler = immediateZoomHandler;
+  initializeAdaptiveFormats(viewer).then((adaptiveSource) => {
+    componentsObj.adaptiveFormatSource = adaptiveSource;
+    console.log("[Mobile Performance] Adaptive image formats initialized");
+  }).catch((err) => {
+    console.warn("[Mobile Performance] Failed to initialize adaptive formats:", err);
+  });
+  componentsObj.tileCache = tileCache;
+  console.log("[Mobile Performance] IndexedDB tile cache initialized (200MB limit)");
+  window.cinematicZoomManager = cinematicZoomManager;
+  window.predictiveTileLoader = predictiveTileLoader;
+  window.vignetteOverlay = vignetteOverlay;
+  window.immediateZoomHandler = immediateZoomHandler;
+  if (state.debugLevel() >= 1) {
+    cinematicZoomManager.enableDebug();
+  }
+  state.setComponents(componentsObj);
+  window.performanceMetrics = state.performanceMetrics;
+  console.log("About to initialize overlay manager...");
+  console.log("Is overlay manager present?", !!componentsObj.overlayManager);
+  console.log("Does it have initialize method?", typeof ((_g = componentsObj.overlayManager) == null ? void 0 : _g.initialize));
+  componentsObj.overlayManager.initialize();
+  if (componentsObj.overlayManager.constructor.name === "Canvas2DOverlayManager" && componentsObj.overlayManager.setAutoDeselectThreshold && state.autoDeselectThreshold) {
+    const threshold = state.autoDeselectThreshold();
+    componentsObj.overlayManager.setAutoDeselectThreshold(threshold);
+    console.log("Set auto-deselect threshold on Canvas2D manager:", threshold);
+  }
+  console.log("Overlay manager initialized");
+  console.log("Is initialized flag:", (_h = componentsObj.overlayManager) == null ? void 0 : _h.isInitialized);
+  console.log("Overlay element created?", !!((_i = componentsObj.overlayManager) == null ? void 0 : _i.overlayElement));
+  const actualType = OverlayManagerFactory.getCurrentType();
+  if (actualType && actualType !== state.currentOverlayType()) {
+    console.log("Updating overlay type signal to match actual:", actualType);
+    state.setCurrentOverlayType(actualType);
+  }
+  window.overlayManager = componentsObj.overlayManager;
+  console.log("Overlay manager set on window:", (_j = window.overlayManager) == null ? void 0 : _j.constructor.name);
+  window.audioEngine = componentsObj.audioEngine;
+  componentsObj.audioEngine.onPlaybackEnd = (hotspotId) => {
+    console.log(`Finished playing audio for hotspot ${hotspotId}`);
+  };
+  const hotspots = await hotspotData();
+  componentsObj.spatialIndex.loadHotspots(hotspots);
+  componentsObj.imageOverlayManager.loadHotspots(hotspots);
+  window.viewer = viewer;
+  window.performanceMonitor = componentsObj.performanceMonitor;
+  window.tileOptimizer = componentsObj.tileOptimizer;
+  window.tileCleanupManager = componentsObj.tileCleanupManager;
+  window.lowZoomOptimizer = componentsObj.lowZoomOptimizer;
+  window.safariPerformanceOptimizer = componentsObj.safariPerformanceOptimizer;
+  window.frameSkipManager = componentsObj.frameSkipManager;
+  window.networkAdaptiveManager = componentsObj.networkAdaptiveManager;
+  window.performanceConfig = performanceConfig;
+  window.iosMemoryManager = componentsObj.iosMemoryManager;
+  setupSmoothingUtilities(viewer);
+  applyTuningToViewer(viewer, performanceConfig);
+  setTimeout(() => {
+    var _a2;
+    const actualDrawer = ((_a2 = viewer.drawer) == null ? void 0 : _a2.getType) ? viewer.drawer.getType() : "unknown";
+    console.log("RESEARCH VERIFICATION: Actual drawer in use:", actualDrawer);
+    if ((isMobileDevice || isSafari || isIOS) && actualDrawer !== "canvas") {
+      console.error("CRITICAL: Canvas drawer not applied! Performance will be poor.");
+    } else if ((isMobileDevice || isSafari || isIOS) && actualDrawer === "canvas") {
+      console.log("SUCCESS: Canvas drawer confirmed for mobile/Safari - performance should be optimal");
+    }
+  }, 100);
+  componentsObj.performanceMonitor.start();
+  componentsObj.memoryManager.start();
+  componentsObj.tileOptimizer.start();
+  componentsObj.tileCleanupManager.start();
+  componentsObj.lowZoomOptimizer.enable();
+  if (isIOS) {
+    console.log("===== iOS CRITICAL CONFIGURATION =====");
+    console.log("Drawer type:", ((_k = viewer.drawer) == null ? void 0 : _k.getType) ? viewer.drawer.getType() : "unknown");
+    console.log("Max image cache count:", viewer.maxImageCacheCount);
+    console.log("Smooth tile edges min zoom:", viewer.smoothTileEdgesMinZoom);
+    console.log("=====================================");
+    window.addEventListener("tilecorruption:reload", (event) => {
+      console.error("Tile corruption reload requested", event.detail);
+      if (window.confirm("The image viewer has encountered an error. Would you like to reload?")) {
+        window.location.reload();
+      }
+    });
+  }
+  let isInteracting = false;
+  let lastInteractionTime = 0;
+  const INTERACTION_TIMEOUT = 2e3;
+  viewer.addHandler("animation", () => {
+    isInteracting = true;
+    lastInteractionTime = Date.now();
+  });
+  viewer.addHandler("animation-finish", () => {
+    setTimeout(() => {
+      if (Date.now() - lastInteractionTime >= INTERACTION_TIMEOUT) {
+        isInteracting = false;
+      }
+    }, INTERACTION_TIMEOUT);
+  });
+  const performanceUpdateInterval = setInterval(() => {
+    var _a2;
+    if (componentsObj.performanceMonitor && componentsObj.performanceMonitor.isMonitoring) {
+      const metrics = componentsObj.performanceMonitor.getMetrics();
+      state.setPerformanceMetrics(metrics);
+      const currentZoom = viewer.viewport.getZoom();
+      const shouldShowButton = currentZoom >= 1.8;
+      if (shouldShowButton && !state.showExpandButton()) {
+        state.setExpandButtonFading(false);
+        state.setShowExpandButton(true);
+      } else if (!shouldShowButton && state.showExpandButton() && !state.expandButtonFading()) {
+        state.setExpandButtonFading(true);
+        setTimeout(() => {
+          state.setShowExpandButton(false);
+          state.setExpandButtonFading(false);
+        }, 300);
+      }
+      if (window.nativeHotspotRenderer && typeof window.nativeHotspotRenderer.getPerformanceMetrics === "function") {
+        try {
+          const webglMetrics = window.nativeHotspotRenderer.getPerformanceMetrics();
+          if (webglMetrics && window.nativeHotspotRenderer.constructor.name === "WebGLHotspotRenderer") {
+            if (isInteracting) {
+            }
+            state.setSafariHybridMetrics(webglMetrics);
+          }
+        } catch (error) {
+          console.error("Error getting WebGL metrics:", error);
+        }
+      } else if (((_a2 = window.nativeHotspotRenderer) == null ? void 0 : _a2.constructor.name) !== "WebGLHotspotRenderer") {
+        state.setSafariHybridMetrics(null);
+      }
+      if (componentsObj.lowZoomOptimizer && metrics.averageFPS > 0) {
+        componentsObj.lowZoomOptimizer.monitorPerformance(metrics.averageFPS);
+      }
+      if (componentsObj.safariPerformanceOptimizer && metrics.averageFPS > 0) {
+        componentsObj.safariPerformanceOptimizer.updatePerformanceMetrics(metrics.averageFPS, isInteracting);
+      }
+      if (isInteracting && metrics.averageFPS < 30 && isMobileDevice) ;
+    }
+  }, 500);
+  intervals.performanceUpdate = performanceUpdateInterval;
+  componentsObj.performanceMonitor.disableDebugOverlay();
+  viewer.viewport.centerSpringX.animationTime = performanceConfig.viewer.animationTime;
+  viewer.viewport.centerSpringY.animationTime = performanceConfig.viewer.animationTime;
+  viewer.viewport.zoomSpring.animationTime = performanceConfig.viewer.animationTime;
+  viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
+  viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
+  viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-bNPQl7Vq.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  eventHandlers.setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspots);
+  eventHandlers.setupAdaptiveSprings(viewer, performanceConfig);
+  const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);
+  intervals.handleKeyPress = keyHandler;
+  eventHandlers.setupResizeObserver(viewerRef, viewer, state);
+  console.log("[viewerSetup] All handlers attached, now opening viewer with tileSources:", dziUrl);
+  viewer.open(dziUrl);
+  setTimeout(() => {
+    console.log("[viewerSetup] Forcing initial redraw to ensure clean state");
+    viewer.forceRedraw();
+    viewer.viewport.centerSpringX.resetTo(viewer.viewport.centerSpringX.target.value);
+    viewer.viewport.centerSpringY.resetTo(viewer.viewport.centerSpringY.target.value);
+    viewer.viewport.zoomSpring.resetTo(viewer.viewport.zoomSpring.target.value);
+    viewer.forceRedraw();
+  }, 500);
+  console.log("Returning from initializeViewer:", { viewer: !!viewer, intervals: !!intervals, homeViewport: !!homeViewport });
+  return {
+    viewer,
+    intervals,
+    homeViewport
+  };
+}
+function setupSmoothingUtilities(viewer) {
+  window.forceSmoothingOn = function() {
+    console.log("✅ FORCING SMOOTHING ON");
+    if (viewer && viewer.drawer) {
+      viewer.drawer.imageSmoothingEnabled = true;
+      if (viewer.drawer.context) {
+        const ctx = viewer.drawer.context;
+        ctx.imageSmoothingEnabled = true;
+        ctx.webkitImageSmoothingEnabled = true;
+        ctx.mozImageSmoothingEnabled = true;
+        ctx.msImageSmoothingEnabled = true;
+        console.log("✅ Canvas context smoothing enabled");
+      }
+      if (viewer.canvas) {
+        viewer.canvas.style.imageRendering = "auto";
+        console.log("✅ CSS rendering set to auto");
+      }
+      viewer.forceRedraw();
+      console.log("✅ Forced redraw with smoothing enabled");
+      if (viewer.drawer.context) {
+        console.log("Current imageSmoothingEnabled:", viewer.drawer.context.imageSmoothingEnabled);
+      }
+    } else {
+      console.error("❌ Viewer or drawer not available");
+    }
+  };
+  window.checkSmoothingState = function() {
+    console.group("🧪 SMOOTHING STATE DIAGNOSTIC");
+    if (viewer && viewer.drawer) {
+      console.log("Drawer type:", viewer.drawer.getType ? viewer.drawer.getType() : "unknown");
+      console.log("Drawer imageSmoothingEnabled:", viewer.drawer.imageSmoothingEnabled);
+      if (viewer.drawer.context) {
+        console.log("Context imageSmoothingEnabled:", viewer.drawer.context.imageSmoothingEnabled);
+        console.log("Context webkitImageSmoothingEnabled:", viewer.drawer.context.webkitImageSmoothingEnabled);
+        console.log("Context mozImageSmoothingEnabled:", viewer.drawer.context.mozImageSmoothingEnabled);
+        console.log("Context msImageSmoothingEnabled:", viewer.drawer.context.msImageSmoothingEnabled);
+      } else {
+        console.warn("No context available");
+      }
+      if (viewer.canvas) {
+        console.log("Canvas style.imageRendering:", viewer.canvas.style.imageRendering);
+      }
+      console.log("\nConfiguration:");
+      console.log("imageSmoothingEnabled config:", viewer.imageSmoothingEnabled);
+      console.log("smoothTileEdgesMinZoom:", viewer.smoothTileEdgesMinZoom);
+      console.log("blendTime:", viewer.blendTime);
+      console.log("alwaysBlend:", viewer.alwaysBlend);
+      console.log("immediateRender:", viewer.immediateRender);
+    } else {
+      console.error("Viewer or drawer not available");
+    }
+    console.groupEnd();
+  };
+  window.toggleTileCascadeFix = function(enable) {
+    if (enable) {
+      console.log("🔐 Enabling TileCascadeFix...");
+      applyTileCascadeFix(OpenSeadragon);
+      console.log("✅ TileCascadeFix enabled - single tile level (may cause zoom artifacts)");
+    } else {
+      console.log("🔓 Disabling TileCascadeFix...");
+      removeTileCascadeFix(OpenSeadragon);
+      console.log("✅ TileCascadeFix disabled - smooth blending enabled");
+    }
+    viewer.forceRedraw();
+  };
+  window.applyBalancedSmoothingConfig = function() {
+    console.group("🎯 APPLYING BALANCED SMOOTHING CONFIG");
+    console.log("1️⃣ Ensuring image smoothing is enabled...");
+    window.forceSmoothingOn();
+    console.log("2️⃣ Disabling TileCascadeFix for smooth zoom...");
+    window.toggleTileCascadeFix(false);
+    console.log("3️⃣ Checking blend time...");
+    if (viewer) {
+      console.log("Current blendTime:", viewer.blendTime || 0.5);
+    }
+    console.log("4️⃣ Verifying smoothing state...");
+    window.checkSmoothingState();
+    console.log("\n✅ BALANCED CONFIG APPLIED!");
+    console.log("🖼️ Smooth rendering with tile blending enabled");
+    console.log("🔍 Test by zooming in/out");
+    console.log("📊 If artifacts persist, try toggleTileCascadeFix(true)");
+    console.groupEnd();
+  };
+  window.getCinematicZoomDiagnostics = function() {
+    if (window.cinematicZoomManager) {
+      return window.cinematicZoomManager.getDiagnostics();
+    }
+    console.error("CinematicZoomManager not initialized");
+    return null;
+  };
+  window.fixFlickering = function() {
+    console.log("Applying manual flickering fix...");
+    forceResetViewerState(viewer);
+    removeTileCascadeFix(OpenSeadragon);
+    setTimeout(() => {
+      applyTileCascadeFix(OpenSeadragon);
+      viewer.forceRedraw();
+      console.log("Flickering fix applied");
+    }, 100);
+  };
+  window.testSafariOptimizer = function() {
+    if (!window.safariPerformanceOptimizer) {
+      console.error("SafariPerformanceOptimizer not initialized");
+      return;
+    }
+    const optimizer = window.safariPerformanceOptimizer;
+    console.group("🎯 SAFARI PERFORMANCE OPTIMIZER TEST");
+    const state = optimizer.getState();
+    console.table(state);
+    console.log("\n📊 Testing dynamic resolution scaling...");
+    console.log("1️⃣ Forcing optimization ON");
+    optimizer.forceOptimization(true);
+    setTimeout(() => {
+      console.log("Current pixel ratio:", viewer.viewport.getPixelRatio());
+      console.log("Expected:", state.basePixelRatio * optimizer.scalingFactor);
+      console.log("\n2️⃣ Forcing optimization OFF");
+      optimizer.forceOptimization(false);
+      setTimeout(() => {
+        console.log("Current pixel ratio:", viewer.viewport.getPixelRatio());
+        console.log("Expected:", state.basePixelRatio);
+        console.log("\n✅ Test complete! Try zooming/panning to see dynamic scaling.");
+        console.groupEnd();
+      }, 500);
+    }, 100);
+  };
+  window.getSafariOptimizerState = function() {
+    if (!window.safariPerformanceOptimizer) {
+      console.error("SafariPerformanceOptimizer not initialized");
+      return null;
+    }
+    return window.safariPerformanceOptimizer.getState();
+  };
+}
+const viewerSetup = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  initializeViewer
+}, Symbol.toStringTag, { value: "Module" }));
+export {
+  adjustSettingsForPerformance as a,
+  createLogger as c,
+  organicVariations as o,
+  performanceConfig as p,
+  viewerSetup as v
+};
