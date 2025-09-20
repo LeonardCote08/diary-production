@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-D_bK08px.js","assets/main-D6EELDcY.js","assets/main-DTOzWaBI.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-DuNcGM23.js","assets/main-BaZSwhNH.js","assets/main-DTOzWaBI.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-D6EELDcY.js";
+import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-BaZSwhNH.js";
 var howler = {};
 /*!
  *  howler.js v2.2.4
@@ -2900,7 +2900,8 @@ class LowZoomOptimizer {
       if (!this.isActive) return;
       this.handleAnimationFinish();
     });
-    if (this.viewer.drawer && this.viewer.drawer.getType() !== "webgl") {
+    const isWebGL = this.viewer.drawer && (this.viewer.drawer.constructor.name === "WebGLDrawer" || this.viewer.drawer.webgl || this.viewer.drawer.gl);
+    if (this.viewer.drawer && !isWebGL) {
       this.setupTileDrawingOptimization();
     }
   }
@@ -3716,6 +3717,229 @@ class Logger {
 function createLogger(prefix) {
   return new Logger(prefix);
 }
+class CentralizedEventManager {
+  constructor(options = {}) {
+    this.viewer = options.viewer;
+    this.container = null;
+    this.isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || "ontouchstart" in window;
+    this.onHotspotClick = options.onHotspotClick || (() => {
+    });
+    this.onHotspotHover = options.onHotspotHover || (() => {
+    });
+    this.activePointers = /* @__PURE__ */ new Map();
+    this.isDragging = false;
+    this.dragStartPoint = null;
+    this.dragStartTime = 0;
+    this.currentHoveredId = null;
+    this.clickTimeThreshold = 300;
+    this.clickDistThreshold = this.isMobile ? 15 : 8;
+    this.lastMoveTime = 0;
+    this.moveThrottle = this.isMobile ? 60 : 16;
+    this.handlePointerDown = this.handlePointerDown.bind(this);
+    this.handlePointerMove = this.handlePointerMove.bind(this);
+    this.handlePointerUp = this.handlePointerUp.bind(this);
+    this.eventCount = 0;
+    this.savedListeners = 0;
+  }
+  /**
+   * Initialize with container element
+   */
+  initialize(container) {
+    if (this.container) {
+      this.cleanup();
+    }
+    this.container = container;
+    if (!this.container) {
+      console.warn("CentralizedEventManager: No container provided");
+      return;
+    }
+    this.container.addEventListener("pointerdown", this.handlePointerDown, { passive: true });
+    this.container.addEventListener("pointermove", this.handlePointerMove, { passive: true });
+    this.container.addEventListener("pointerup", this.handlePointerUp, { passive: true });
+    this.disableIndividualListeners();
+    console.log(`[CentralizedEventManager] Initialized - Replaced ${this.savedListeners} individual listeners with 1 delegated listener`);
+  }
+  /**
+   * Disable all individual hotspot listeners
+   */
+  disableIndividualListeners() {
+    const hotspots = document.querySelectorAll("[data-hotspot-id]");
+    let count = 0;
+    hotspots.forEach((element) => {
+      element.onclick = null;
+      element.onmouseenter = null;
+      element.onmouseleave = null;
+      element.ontouchstart = null;
+      element.ontouchend = null;
+      const newElement = element.cloneNode(true);
+      element.parentNode.replaceChild(newElement, element);
+      count++;
+    });
+    this.savedListeners = count * 5;
+    return count;
+  }
+  /**
+   * Handle pointer down - start of interaction
+   */
+  handlePointerDown(event) {
+    this.activePointers.set(event.pointerId, {
+      x: event.clientX,
+      y: event.clientY,
+      timestamp: Date.now()
+    });
+    if (this.activePointers.size > 1) {
+      this.isDragging = false;
+      return;
+    }
+    this.dragStartPoint = { x: event.clientX, y: event.clientY };
+    this.dragStartTime = Date.now();
+    const hotspot = this.findHotspotElement(event.target);
+    if (hotspot) {
+      this.eventCount++;
+      hotspot.getAttribute("data-hotspot-id");
+      if (this.isMobile) {
+        hotspot.classList.add("hotspot-touch-active");
+      }
+    }
+  }
+  /**
+   * Handle pointer move - throttled for performance
+   */
+  handlePointerMove(event) {
+    const now = Date.now();
+    if (now - this.lastMoveTime < this.moveThrottle) {
+      return;
+    }
+    this.lastMoveTime = now;
+    if (this.activePointers.has(event.pointerId)) {
+      this.activePointers.set(event.pointerId, {
+        x: event.clientX,
+        y: event.clientY,
+        timestamp: now
+      });
+    }
+    if (this.dragStartPoint && !this.isDragging) {
+      const dx = event.clientX - this.dragStartPoint.x;
+      const dy = event.clientY - this.dragStartPoint.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance > this.clickDistThreshold) {
+        this.isDragging = true;
+        this.clearHover();
+        return;
+      }
+    }
+    if (this.isMobile || this.isDragging) {
+      return;
+    }
+    const hotspot = this.findHotspotElement(event.target);
+    const hotspotId = hotspot ? hotspot.getAttribute("data-hotspot-id") : null;
+    if (hotspotId !== this.currentHoveredId) {
+      if (this.currentHoveredId) {
+        const prevElement = document.querySelector(`[data-hotspot-id="${this.currentHoveredId}"]`);
+        if (prevElement) {
+          prevElement.classList.remove("hotspot-hover");
+        }
+      }
+      if (hotspotId) {
+        hotspot.classList.add("hotspot-hover");
+        this.onHotspotHover({ id: hotspotId });
+      }
+      this.currentHoveredId = hotspotId;
+      this.eventCount++;
+    }
+  }
+  /**
+   * Handle pointer up - end of interaction
+   */
+  handlePointerUp(event) {
+    const pointer = this.activePointers.get(event.pointerId);
+    if (!pointer) return;
+    if (!this.isDragging && this.dragStartPoint) {
+      const timeDiff = Date.now() - this.dragStartTime;
+      const dx = event.clientX - this.dragStartPoint.x;
+      const dy = event.clientY - this.dragStartPoint.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      if (timeDiff < this.clickTimeThreshold && distance < this.clickDistThreshold) {
+        const hotspot = this.findHotspotElement(event.target);
+        if (hotspot) {
+          const id = hotspot.getAttribute("data-hotspot-id");
+          this.onHotspotClick({ id });
+          this.eventCount++;
+          if (this.isMobile) {
+            hotspot.classList.remove("hotspot-touch-active");
+          }
+        }
+      }
+    }
+    this.activePointers.delete(event.pointerId);
+    if (this.activePointers.size === 0) {
+      this.isDragging = false;
+      this.dragStartPoint = null;
+      this.dragStartTime = 0;
+    }
+  }
+  /**
+   * Find hotspot element from event target
+   */
+  findHotspotElement(target) {
+    let element = target;
+    let maxDepth = 10;
+    while (element && maxDepth > 0) {
+      if (element.hasAttribute && element.hasAttribute("data-hotspot-id")) {
+        return element;
+      }
+      element = element.parentElement;
+      maxDepth--;
+    }
+    return null;
+  }
+  /**
+   * Clear hover state
+   */
+  clearHover() {
+    if (this.currentHoveredId) {
+      const element = document.querySelector(`[data-hotspot-id="${this.currentHoveredId}"]`);
+      if (element) {
+        element.classList.remove("hotspot-hover");
+      }
+      this.currentHoveredId = null;
+    }
+  }
+  /**
+   * Get statistics
+   */
+  getStats() {
+    return {
+      eventsHandled: this.eventCount,
+      listenersReplaced: this.savedListeners,
+      activePointers: this.activePointers.size,
+      currentHovered: this.currentHoveredId,
+      isDragging: this.isDragging
+    };
+  }
+  /**
+   * Clean up
+   */
+  cleanup() {
+    if (this.container) {
+      this.container.removeEventListener("pointerdown", this.handlePointerDown);
+      this.container.removeEventListener("pointermove", this.handlePointerMove);
+      this.container.removeEventListener("pointerup", this.handlePointerUp);
+    }
+    this.clearHover();
+    this.activePointers.clear();
+    console.log("[CentralizedEventManager] Cleaned up");
+  }
+  /**
+   * Destroy
+   */
+  destroy() {
+    this.cleanup();
+    this.container = null;
+    this.viewer = null;
+  }
+}
+new CentralizedEventManager();
 class NetworkAdaptiveManager {
   constructor(viewer) {
     this.viewer = viewer;
@@ -10328,6 +10552,77 @@ const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourc
     // Contournement limite canvas iOS (5MB)
   };
 };
+const getMobileOptimizedConfig = (isMobile2, isIOS) => {
+  const baseConfig = {
+    // Tiles optimization - CRITICAL
+    tileSize: isMobile2 ? 512 : 256,
+    // Larger tiles = fewer HTTP requests
+    // Network optimization
+    imageLoaderLimit: isMobile2 ? 2 : 6,
+    // Reduce concurrent loads on mobile
+    timeout: 3e4,
+    // Memory management - CRITICAL for iOS
+    maxImageCacheCount: isMobile2 ? 50 : 100,
+    // iOS has 200MB limit
+    // Animation optimization
+    blendTime: 0,
+    // CRITICAL: No blending for PNG with transparency
+    springStiffness: isMobile2 ? 6.5 : 8,
+    // Lower for mobile responsiveness
+    animationTime: isMobile2 ? 0.8 : 1.2,
+    // Faster animations on mobile
+    immediateRender: true,
+    // Skip animations when possible
+    // iOS-specific fixes
+    placeholderFillStyle: isIOS ? null : "#000000",
+    // Fix iOS flickering
+    smoothTileEdgesMinZoom: isIOS ? Infinity : 1.1,
+    // Disable edge smoothing on iOS
+    // Performance settings
+    minZoomImageRatio: isMobile2 ? 0.8 : 0.9,
+    // Load tiles slightly earlier
+    maxZoomPixelRatio: isMobile2 ? 2 : 4,
+    // Limit max zoom on mobile
+    pixelsPerWheelLine: 40,
+    // Disable features that impact performance
+    showNavigator: false,
+    showNavigationControl: false,
+    debugMode: false,
+    // Touch optimization
+    gestureSettingsTouch: {
+      scrollToZoom: false,
+      // Prevent conflicts with page scroll
+      clickToZoom: true,
+      dblClickToZoom: true,
+      pinchToZoom: true,
+      flickEnabled: true,
+      flickMinSpeed: isMobile2 ? 100 : 120,
+      flickMomentum: isMobile2 ? 0.15 : 0.25
+    },
+    // Mouse settings (for desktop)
+    gestureSettingsMouse: {
+      scrollToZoom: !isMobile2,
+      clickToZoom: false,
+      dblClickToZoom: true,
+      flickEnabled: false
+    },
+    // Viewport constraints
+    visibilityRatio: isMobile2 ? 0.8 : 1,
+    // Allow some image to be outside viewport
+    constrainDuringPan: true,
+    // CRITICAL: New in 4.1.0 - Tile drawing optimizations
+    maxTilesPerFrame: isMobile2 ? 3 : void 0,
+    // Limit tiles drawn per frame
+    // OpenSeadragon 4.1.0 specific optimizations
+    subPixelRoundingForTransparency: false
+    // Avoid subpixel issues on mobile
+  };
+  if (isIOS) {
+    baseConfig.useCanvas = true;
+    baseConfig.preserveImageSizeOnResize = true;
+  }
+  return baseConfig;
+};
 let cachedHotspots = null;
 async function hotspotData() {
   if (cachedHotspots) {
@@ -11687,15 +11982,23 @@ class IndexedDBTileCache {
 const tileCache = new IndexedDBTileCache(200);
 window.tileCache = tileCache;
 async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
-  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
+  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
   console.log("initializeViewer called with:", { viewerRef, props, state: !!state, handleHotspotClick: !!handleHotspotClick });
   const intervals = {};
   let homeViewport = null;
-  const config = performanceConfig.viewer;
   const isMobileDevice = isMobile();
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const baseConfig = isMobileDevice ? getMobileOptimizedConfig(isMobileDevice, isIOS) : performanceConfig.viewer;
+  console.log("[PERF] Using mobile-optimized config:", isMobileDevice);
+  console.log("[PERF] Config details:", {
+    tileSize: baseConfig.tileSize,
+    imageLoaderLimit: baseConfig.imageLoaderLimit,
+    maxImageCacheCount: baseConfig.maxImageCacheCount,
+    blendTime: baseConfig.blendTime
+  });
   const getOptimalTileSize = () => {
     if (isMobileDevice) {
-      return "256";
+      return baseConfig.tileSize.toString();
     }
     return "1024";
   };
@@ -11727,17 +12030,19 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   }
   const drawerType = getBrowserOptimalDrawer();
   const viewerConfigOptions = buildViewerConfig(
-    config,
+    baseConfig,
+    // Use mobile-optimized config instead of default
     tileSourceConfig,
     drawerType,
     isMobileDevice,
     tileSourceConfig
   );
-  viewerConfigOptions.springStiffness = 10;
-  viewerConfigOptions.animationTime = 0.3;
+  if (isMobileDevice) {
+    Object.assign(viewerConfigOptions, baseConfig);
+    console.log("[PERF] Applied mobile-optimized settings to viewer");
+  }
   console.log("[viewerSetup] Creating viewer WITHOUT tileSources to ensure handlers attach first");
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
   if (isIOS) {
     console.log("[CRITICAL iOS CONFIG]", {
       drawer: viewerConfigOptions.drawer,
@@ -12021,8 +12326,13 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   setupSmoothingUtilities(viewer);
   applyTuningToViewer(viewer, performanceConfig);
   setTimeout(() => {
-    var _a2;
-    const actualDrawer = ((_a2 = viewer.drawer) == null ? void 0 : _a2.getType) ? viewer.drawer.getType() : "unknown";
+    const getDrawerType2 = (drawer) => {
+      if (!drawer) return "unknown";
+      if (drawer.getType) return drawer.getType();
+      if (drawer.constructor.name) return drawer.constructor.name.replace("Drawer", "").toLowerCase();
+      return "canvas";
+    };
+    const actualDrawer = getDrawerType2(viewer.drawer);
     console.log("RESEARCH VERIFICATION: Actual drawer in use:", actualDrawer);
     if ((isMobileDevice || isSafari || isIOS) && actualDrawer !== "canvas") {
       console.error("CRITICAL: Canvas drawer not applied! Performance will be poor.");
@@ -12037,7 +12347,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   componentsObj.lowZoomOptimizer.enable();
   if (isIOS) {
     console.log("===== iOS CRITICAL CONFIGURATION =====");
-    console.log("Drawer type:", ((_k = viewer.drawer) == null ? void 0 : _k.getType) ? viewer.drawer.getType() : "unknown");
+    console.log("Drawer type:", getDrawerType(viewer.drawer));
     console.log("Max image cache count:", viewer.maxImageCacheCount);
     console.log("Smooth tile edges min zoom:", viewer.smoothTileEdgesMinZoom);
     console.log("=====================================");
@@ -12110,7 +12420,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-D_bK08px.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-DuNcGM23.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspots);
   eventHandlers.setupAdaptiveSprings(viewer, performanceConfig);
   const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);
@@ -12160,9 +12470,10 @@ function setupSmoothingUtilities(viewer) {
     }
   };
   window.checkSmoothingState = function() {
+    var _a, _b;
     console.group("🧪 SMOOTHING STATE DIAGNOSTIC");
     if (viewer && viewer.drawer) {
-      console.log("Drawer type:", viewer.drawer.getType ? viewer.drawer.getType() : "unknown");
+      console.log("Drawer type:", ((_b = (_a = viewer.drawer) == null ? void 0 : _a.constructor) == null ? void 0 : _b.name) || "canvas");
       console.log("Drawer imageSmoothingEnabled:", viewer.drawer.imageSmoothingEnabled);
       if (viewer.drawer.context) {
         console.log("Context imageSmoothingEnabled:", viewer.drawer.context.imageSmoothingEnabled);
@@ -12271,6 +12582,7 @@ const viewerSetup = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineP
   initializeViewer
 }, Symbol.toStringTag, { value: "Module" }));
 export {
+  CentralizedEventManager as C,
   adjustSettingsForPerformance as a,
   createLogger as c,
   organicVariations as o,

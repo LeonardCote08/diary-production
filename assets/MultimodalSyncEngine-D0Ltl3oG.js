@@ -1,5 +1,5 @@
-import { g as getHapticManager } from "./HapticManager-CwcpB4W7.js";
-import "./main-D6EELDcY.js";
+import { g as getHapticManager } from "./HapticManager-Dg7XkeUb.js";
+import "./main-BaZSwhNH.js";
 class MultimodalSyncEngine {
   constructor(audioEngine, visualController) {
     this.audioEngine = audioEngine;
