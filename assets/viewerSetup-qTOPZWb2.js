@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-DuNcGM23.js","assets/main-BaZSwhNH.js","assets/main-DTOzWaBI.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-MXFwqqX5.js","assets/main-BLiFCWBE.js","assets/main-DTOzWaBI.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-BaZSwhNH.js";
+import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-BLiFCWBE.js";
 var howler = {};
 /*!
  *  howler.js v2.2.4
@@ -7134,6 +7134,159 @@ class TileOptimizer {
     };
   }
 }
+function applyMobileSafariFix(viewer) {
+  const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent);
+  if (!isIOSSafari) {
+    console.log("MobileSafariFix: Not iOS Safari, skipping fix");
+    return;
+  }
+  console.log("=== APPLYING MOBILE SAFARI FIX ===");
+  viewer.addHandler("update-viewport", function() {
+    const tiledImage = viewer.world.getItemAt(0);
+    if (tiledImage) {
+      if (tiledImage._tilesLoading) {
+        tiledImage._tilesLoading = Math.min(tiledImage._tilesLoading, 2);
+      }
+      if (!tiledImage._resetPatched) {
+        const originalReset = tiledImage.reset;
+        tiledImage.reset = function(hard) {
+          if (hard) {
+            console.log("MobileSafariFix: Preventing hard reset of tiles");
+            return;
+          }
+          return originalReset.call(this, hard);
+        };
+        tiledImage._resetPatched = true;
+      }
+    }
+  });
+  viewer.imageLoaderLimit = 2;
+  viewer.maxTilesPerFrame = 2;
+  viewer.immediateRender = true;
+  viewer.blendTime = 0.2;
+  viewer.alwaysBlend = false;
+  viewer.smoothTileEdgesMinZoom = Infinity;
+  viewer.minPixelRatio = 0.7;
+  viewer.minZoomImageRatio = 0.7;
+  viewer.addHandler("animation-finish", function(event) {
+    if (viewer.immediateRender) {
+      viewer.immediateRender = false;
+      setTimeout(() => {
+        viewer.immediateRender = true;
+      }, 100);
+    }
+  });
+  let isInteracting = false;
+  let interactionTimeout = null;
+  viewer.addHandler("pan", () => {
+    isInteracting = true;
+    clearTimeout(interactionTimeout);
+    interactionTimeout = setTimeout(() => {
+      isInteracting = false;
+    }, 500);
+  });
+  viewer.addHandler("zoom", () => {
+    isInteracting = true;
+    clearTimeout(interactionTimeout);
+    interactionTimeout = setTimeout(() => {
+      isInteracting = false;
+    }, 500);
+  });
+  viewer.addHandler("tile-drawing", (event) => {
+    if (isInteracting) {
+      event.preventDefaultAction = false;
+    }
+  });
+  if (viewer.imageLoader) {
+    const originalClear = viewer.imageLoader.clear;
+    viewer.imageLoader.clear = function() {
+      if (isInteracting) {
+        console.log("MobileSafariFix: Preventing image loader clear during interaction");
+        return;
+      }
+      return originalClear.call(this);
+    };
+  }
+  viewer.addHandler("animation", () => {
+    if (viewer.isAnimating()) {
+      viewer.imageLoaderLimit = 2;
+      viewer.maxTilesPerFrame = 2;
+      viewer.blendTime = 0.2;
+    }
+  });
+  viewer.isIOSSafari = true;
+  console.log("=== MOBILE SAFARI FIX APPLIED ===");
+  console.log("- Tile clearing disabled during interactions");
+  console.log("- Stable tile loading settings");
+  console.log("- Interaction-aware rendering");
+  console.log("- Image loader clearing prevented during interactions");
+}
+function applyIOSTileDisappearFix(viewer) {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+  if (!isIOS) {
+    console.log("IOSTileDisappearFix: Not iOS, skipping fix");
+    return;
+  }
+  console.log("=== APPLYING iOS TILE DISAPPEAR FIX ===");
+  let isPanning = false;
+  let panEndTimer = null;
+  let forceRedrawTimer = null;
+  viewer.addHandler("pan", (event) => {
+    isPanning = true;
+    clearTimeout(panEndTimer);
+    clearTimeout(forceRedrawTimer);
+  });
+  viewer.addHandler("animation-finish", (event) => {
+    if (isPanning) {
+      isPanning = false;
+      requestAnimationFrame(() => {
+        forceRedraw();
+      });
+      panEndTimer = setTimeout(() => {
+        forceRedraw();
+      }, 100);
+      forceRedrawTimer = setTimeout(() => {
+        forceRedraw();
+      }, 250);
+    }
+  });
+  function forceRedraw() {
+    const tiledImage = viewer.world.getItemAt(0);
+    if (!tiledImage) return;
+    tiledImage.update();
+    viewer.forceRedraw();
+    const currentZoom = viewer.viewport.getZoom();
+    viewer.viewport.zoomTo(currentZoom * 1.0001, null, true);
+    viewer.viewport.zoomTo(currentZoom, null, true);
+  }
+  viewer.addHandler("canvas-drag", (event) => {
+    const tiledImage = viewer.world.getItemAt(0);
+    if (tiledImage && tiledImage._tileCache) {
+      tiledImage._tileCache._maxImageCacheCount = 200;
+    }
+  });
+  viewer.addHandler("canvas-drag-end", (event) => {
+    setTimeout(() => {
+      const tiledImage = viewer.world.getItemAt(0);
+      if (tiledImage && tiledImage._tileCache) {
+        tiledImage._tileCache._maxImageCacheCount = 100;
+      }
+    }, 500);
+  });
+  const originalUpdateViewport = viewer.updateViewport;
+  viewer.updateViewport = function() {
+    const result = originalUpdateViewport.call(this);
+    if (!isPanning) {
+      const tiledImage = viewer.world.getItemAt(0);
+      if (tiledImage && tiledImage._tilesToDraw && tiledImage._tilesToDraw.length === 0) {
+        console.warn("iOS: No tiles to draw detected, forcing refresh");
+        forceRedraw();
+      }
+    }
+    return result;
+  };
+  console.log("iOS Tile Disappear Fix applied successfully");
+}
 class FrameBudgetManager {
   constructor(targetFPS = 60) {
     this.targetFPS = targetFPS;
@@ -10417,7 +10570,6 @@ function adjustSettingsForPerformance(currentFPS, memoryUsage) {
 const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourceConfig = null) => {
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
   if (isIOS && isMobileDevice) {
-    drawerType = "canvas";
     console.log("[CRITICAL] iOS detected: Forcing canvas drawer to prevent tile array corruption at indices 12/13");
   }
   if (isMobileDevice) {
@@ -10457,9 +10609,8 @@ const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourc
   }
   return {
     tileSources: tileSourceConfig || dziUrl,
-    prefixUrl: "https://cdn.jsdelivr.net/npm/openseadragon@5.0.1/build/openseadragon/images/",
-    // Rendering - use browser-specific drawer
-    drawer: drawerType,
+    prefixUrl: "https://cdn.jsdelivr.net/npm/openseadragon@4.1.0/build/openseadragon/images/",
+    // OpenSeadragon 4.1.0 always uses canvas drawer (no drawer property)
     imageSmoothingEnabled: config.imageSmoothingEnabled,
     smoothTileEdgesMinZoom: isIOS ? Infinity : config.smoothTileEdgesMinZoom,
     // CRITICAL: Infinity on iOS prevents corruption
@@ -10468,7 +10619,6 @@ const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourc
     opacity: 1,
     preload: config.preload,
     compositeOperation: config.compositeOperation,
-    ...config.drawer === "webgl" ? { webglOptions: config.webglOptions } : {},
     // Tile loading
     immediateRender: config.immediateRender,
     imageLoaderLimit: config.imageLoaderLimit,
@@ -12090,26 +12240,23 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
     isMobile: isMobileDevice
   });
   console.log("Creating OpenSeadragon viewer with config:", viewerConfigOptions);
-  const viewer = OpenSeadragon({
+  const viewerOptions = {
     element: viewerRef,
     ...viewerConfigOptions,
     // RESEARCH: Final override to ensure critical settings
-    updatePixelDensityRatio: false,
+    updatePixelDensityRatio: false
     // Research: Prevent expensive updates during zoom
-    drawer: isMobileDevice || isSafari || isIOS ? "canvas" : viewerConfigOptions.drawer,
-    // Final safety check
-    // PHASE 5: Canvas context optimizations for mobile
-    canvasOptions: {
-      alpha: false,
-      // No transparency needed for monochrome art
-      desynchronized: true,
-      // Reduce sync overhead
-      powerPreference: "low-power"
-      // Mobile battery optimization
-    }
-  });
+  };
+  delete viewerOptions.drawer;
+  console.log("Creating OpenSeadragon 4.1.0 viewer (canvas-only):", viewerOptions);
+  const viewer = OpenSeadragon(viewerOptions);
   console.log("Applying TileCascadeFix for stable tile rendering...");
   applyTileCascadeFix(OpenSeadragon);
+  if (isIOS) {
+    console.log("Applying MobileSafariFix to prevent tile disappearing...");
+    applyMobileSafariFix(viewer);
+    applyIOSTileDisappearFix(viewer);
+  }
   await new Promise((resolve) => setTimeout(resolve, 50));
   const stateSetters = {
     setIsLoading: (value) => {
@@ -12325,14 +12472,14 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   window.iosMemoryManager = componentsObj.iosMemoryManager;
   setupSmoothingUtilities(viewer);
   applyTuningToViewer(viewer, performanceConfig);
+  const getDrawerType = (drawer) => {
+    if (!drawer) return "unknown";
+    if (drawer.getType) return drawer.getType();
+    if (drawer.constructor && drawer.constructor.name) return drawer.constructor.name.replace("Drawer", "").toLowerCase();
+    return "canvas";
+  };
   setTimeout(() => {
-    const getDrawerType2 = (drawer) => {
-      if (!drawer) return "unknown";
-      if (drawer.getType) return drawer.getType();
-      if (drawer.constructor.name) return drawer.constructor.name.replace("Drawer", "").toLowerCase();
-      return "canvas";
-    };
-    const actualDrawer = getDrawerType2(viewer.drawer);
+    const actualDrawer = getDrawerType(viewer.drawer);
     console.log("RESEARCH VERIFICATION: Actual drawer in use:", actualDrawer);
     if ((isMobileDevice || isSafari || isIOS) && actualDrawer !== "canvas") {
       console.error("CRITICAL: Canvas drawer not applied! Performance will be poor.");
@@ -12420,7 +12567,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-DuNcGM23.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-MXFwqqX5.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspots);
   eventHandlers.setupAdaptiveSprings(viewer, performanceConfig);
   const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);
