@@ -1,9 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-C5eYQe8X.js","assets/main-CZUR3iQ4.js","assets/main-DTOzWaBI.css","assets/MinimalistAudioEngine-CG6q-vDi.js","assets/HapticManager-BTdq66LB.js","assets/MultimodalSyncEngine-Dkeo43qq.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-Cs6kS4GP.js","assets/main-gne2WHxm.js","assets/main-DTOzWaBI.css","assets/MinimalistAudioEngine-Dp754Jlo.js","assets/HapticManager-Cd3zKjkO.js","assets/MultimodalSyncEngine-CpUIFfjz.js"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, _ as __vitePreload, i as isMobile, d as OverlayManagerFactory } from "./main-CZUR3iQ4.js";
-import { c as createLogger, o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-Bmao6Hwe.js";
+import { O as OpenSeadragon, _ as __vitePreload, i as isMobile, d as OverlayManagerFactory } from "./main-gne2WHxm.js";
+import { c as createLogger, o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-BDWN2Xm-.js";
 class TemporalModeHandler {
   constructor(options = {}) {
     this.audioEngine = options.audioEngine || window.audioEngine;
@@ -4648,7 +4648,7 @@ class RendererEngine {
     console.log("[RendererEngine] Destroyed");
   }
 }
-const logger = createLogger("StyleManager");
+const logger$1 = createLogger("StyleManager");
 class StyleManager {
   constructor(options) {
     this.viewer = options.viewer;
@@ -4667,7 +4667,7 @@ class StyleManager {
     this.getAnimationDuration = options.getAnimationDuration;
     this.animationsPaused = false;
     this.allowHoverDuringSpotlight = true;
-    logger.debug("Initialized");
+    logger$1.debug("Initialized");
   }
   /**
    * Check if animations are paused
@@ -4679,23 +4679,23 @@ class StyleManager {
    * Pause all animations (for cinematic zoom)
    */
   pauseAllAnimations() {
-    logger.debug("⏸️ pauseAllAnimations called, was:", this.animationsPaused);
+    logger$1.debug("⏸️ pauseAllAnimations called, was:", this.animationsPaused);
     this.animationsPaused = true;
   }
   /**
    * Resume all animations
    */
   resumeAllAnimations() {
-    logger.debug("🎬 resumeAllAnimations called, was:", this.animationsPaused);
+    logger$1.debug("🎬 resumeAllAnimations called, was:", this.animationsPaused);
     this.animationsPaused;
     this.animationsPaused = false;
-    logger.debug("🎬 After setting to false, animationsPaused is now:", this.animationsPaused);
+    logger$1.debug("🎬 After setting to false, animationsPaused is now:", this.animationsPaused);
     if (this.animationsPaused === true) {
-      logger.error("❌ CRITICAL: animationsPaused is still true after setting to false!");
+      logger$1.error("❌ CRITICAL: animationsPaused is still true after setting to false!");
       this.animationsPaused = false;
     }
     const allHotspotGroups = document.querySelectorAll('g[data-animation-active="true"]');
-    logger.debug(`Clearing ${allHotspotGroups.length} stuck animation-active flags`);
+    logger$1.debug(`Clearing ${allHotspotGroups.length} stuck animation-active flags`);
     allHotspotGroups.forEach((group) => {
       const mainPath = group.querySelector(".main-path");
       if (!mainPath || !mainPath.currentAnimation) {
@@ -4704,9 +4704,9 @@ class StyleManager {
     });
     setTimeout(() => {
       if (this.animationsPaused === true) {
-        logger.error("❌ animationsPaused reverted to true after resumeAllAnimations!");
+        logger$1.error("❌ animationsPaused reverted to true after resumeAllAnimations!");
       } else {
-        logger.debug("✅ Animations successfully resumed (confirmed after delay)");
+        logger$1.debug("✅ Animations successfully resumed (confirmed after delay)");
       }
     }, 100);
   }
@@ -4779,7 +4779,7 @@ class StyleManager {
     group.removeAttribute("data-canvas2d-selected");
     if (group.style.display === "none") {
       group.style.display = "";
-      logger.debug(`ensureHotspotVisibility - restored display for hotspot ${hotspotId}`);
+      logger$1.debug(`ensureHotspotVisibility - restored display for hotspot ${hotspotId}`);
     }
     if (group.style.opacity === "0" || !group.style.opacity) {
       group.style.opacity = "";
@@ -4818,7 +4818,7 @@ class StyleManager {
     const currentState = group.getAttribute("data-current-state");
     const animationCompleted = group.getAttribute("data-animation-completed") === "true";
     const animationActive = group.getAttribute("data-animation-active") === "true";
-    logger.debug(`applyStyle called:`, {
+    logger$1.debug(`applyStyle called:`, {
       hotspotId,
       state,
       currentState,
@@ -4829,7 +4829,7 @@ class StyleManager {
     });
     if (window.nativeHotspotRenderer && window.nativeHotspotRenderer.isAutoDeselecting) {
       if (state === "hover") {
-        logger.debug("Skipping hover animation during auto-deselect");
+        logger$1.debug("Skipping hover animation during auto-deselect");
         return;
       }
     }
@@ -4838,7 +4838,7 @@ class StyleManager {
     }
     if (state === "hover" && group.getAttribute("data-hover-maintained") === "true") {
       if (currentState === "hover") {
-        logger.debug(`Skipping hover re-animation for maintained hotspot ${hotspotId}`);
+        logger$1.debug(`Skipping hover re-animation for maintained hotspot ${hotspotId}`);
         return;
       }
     }
@@ -4850,12 +4850,12 @@ class StyleManager {
     const isInSpotlight = this.areAnimationsPaused() && state === "hover" && this.allowHoverDuringSpotlight;
     const useStaticStyle = currentZoom > 8 && !isInSpotlight;
     if (isInSpotlight && currentZoom > 8) {
-      logger.debug("🎯 Spotlight hover detected - bypassing static mode to allow animation at zoom:", currentZoom.toFixed(2));
+      logger$1.debug("🎯 Spotlight hover detected - bypassing static mode to allow animation at zoom:", currentZoom.toFixed(2));
     }
     const stateChanged = currentState !== state;
     const isUserInteraction = state !== "normal" && stateChanged;
     if (currentState === "selected" && state === "hover") {
-      logger.debug(`Transition selected → hover, preserving animation state`);
+      logger$1.debug(`Transition selected → hover, preserving animation state`);
       group.setAttribute("data-was-selected", "true");
     }
     const disableStrokeAnimation = this.temporalRenderer.shouldDisableStrokeAnimation();
@@ -4868,7 +4868,7 @@ class StyleManager {
       return;
     }
     if ((state === "hover" || state === "selected") && useStaticStyle && !this.temporalRenderer.isActive()) {
-      logger.debug("Using static mode at zoom:", currentZoom.toFixed(2), "for state:", state, "(spotlight check:", isInSpotlight, ")");
+      logger$1.debug("Using static mode at zoom:", currentZoom.toFixed(2), "for state:", state, "(spotlight check:", isInSpotlight, ")");
       this.staticRenderer.applyStaticStyle(group, type, state, this.colorScheme);
       return;
     }
@@ -4876,7 +4876,7 @@ class StyleManager {
       const isAnimationActive = group.getAttribute("data-animation-active");
       const animationCompleted2 = group.getAttribute("data-animation-completed") === "true";
       if (state === "selected" && currentState === "hover") {
-        logger.debug(`Transition hover → selected for ${hotspotId}, animationActive=${isAnimationActive}, animationCompleted=${animationCompleted2}`);
+        logger$1.debug(`Transition hover → selected for ${hotspotId}, animationActive=${isAnimationActive}, animationCompleted=${animationCompleted2}`);
         group.setAttribute("data-current-state", "selected");
         group.setAttribute("data-animation-active", "false");
         group.setAttribute("data-animation-completed", "true");
@@ -4894,9 +4894,9 @@ class StyleManager {
         }
       } else if (state === "selected") {
         const wasSelected = group.getAttribute("data-was-selected") === "true";
-        logger.debug(`Direct to selected for ${hotspotId}, wasSelected=${wasSelected}, animationCompleted=${animationCompleted2}`);
+        logger$1.debug(`Direct to selected for ${hotspotId}, wasSelected=${wasSelected}, animationCompleted=${animationCompleted2}`);
         if (wasSelected || animationCompleted2) {
-          logger.debug(`Preventing animation for selected state (wasSelected=${wasSelected}, completed=${animationCompleted2}`);
+          logger$1.debug(`Preventing animation for selected state (wasSelected=${wasSelected}, completed=${animationCompleted2}`);
           group.setAttribute("data-current-state", "selected");
           group.removeAttribute("data-was-selected");
         }
@@ -4922,7 +4922,7 @@ class StyleManager {
           group.style.display = "";
         }
         group.removeAttribute("data-canvas2d-selected");
-        logger.debug(`Canvas2D detected - ensuring visibility for hotspot in hover state`);
+        logger$1.debug(`Canvas2D detected - ensuring visibility for hotspot in hover state`);
       }
       if (this.isSafari && !disableStrokeAnimation) {
         if (state === "selected") {
@@ -5007,10 +5007,10 @@ class StyleManager {
           strokeConfig.stroke = "transparent";
           strokeConfig.strokeWidth = "0";
           strokeConfig.opacity = "0";
-          logger.debug(`Canvas2D detected - making borders transparent for hotspot ${hotspotId}`);
+          logger$1.debug(`Canvas2D detected - making borders transparent for hotspot ${hotspotId}`);
         }
         if (state === "selected") {
-          logger.debug(`Initial style config for selected:`, strokeConfig);
+          logger$1.debug(`Initial style config for selected:`, strokeConfig);
         }
         Object.assign(mainPath.style, strokeConfig);
         void mainPath.offsetWidth;
@@ -5069,7 +5069,7 @@ class StyleManager {
           const selectedHotspot = (_e = this.stateManager) == null ? void 0 : _e.getSelectedHotspot();
           const isCurrentlySelected = selectedHotspot && selectedHotspot.id === hotspotId;
           const animationCompleted2 = group.getAttribute("data-animation-completed") === "true";
-          logger.debug(`Animation check for ${hotspotId}:`, {
+          logger$1.debug(`Animation check for ${hotspotId}:`, {
             state,
             isCurrentlySelected,
             animationCompleted: animationCompleted2,
@@ -5079,8 +5079,8 @@ class StyleManager {
           });
           let shouldExecuteAnimation = false;
           if (state === "selected") {
-            logger.debug(`Selected state - showing stroke immediately for ${hotspotId}`);
-            logger.debug(`BLOCKING animation for selected state`);
+            logger$1.debug(`Selected state - showing stroke immediately for ${hotspotId}`);
+            logger$1.debug(`BLOCKING animation for selected state`);
             mainPath.style.strokeDasharray = "none";
             mainPath.style.strokeDashoffset = "0";
             mainPath.style.opacity = "1.0";
@@ -5090,12 +5090,12 @@ class StyleManager {
             group.removeAttribute("data-was-selected");
             options.skipAnimation = true;
           } else if (state === "hover" && !isCurrentlySelected) {
-            logger.debug(`Starting hover animation for ${hotspotId} (not in spotlight)`);
+            logger$1.debug(`Starting hover animation for ${hotspotId} (not in spotlight)`);
             shouldExecuteAnimation = true;
             group.setAttribute("data-animation-active", "true");
             const isOrganicAnimation2 = this.currentEasingName && this.currentEasingName.toLowerCase().includes("organic") || this.timingEasing && this.timingEasing.includes("organic");
             if (window.DEBUG_ANIMATIONS) {
-              logger.perf(`[Micro-Variations] Animation setup check:`, {
+              logger$1.perf(`[Micro-Variations] Animation setup check:`, {
                 hotspotId,
                 isOrganicAnimation: isOrganicAnimation2,
                 currentEasingName: this.currentEasingName,
@@ -5109,11 +5109,11 @@ class StyleManager {
             void mainPath.offsetWidth;
             if (isOrganicAnimation2 && hotspotId) {
               if (window.DEBUG_ANIMATIONS) {
-                logger.perf(`[Random Start] Organic animation will use random starting point`);
+                logger$1.perf(`[Random Start] Organic animation will use random starting point`);
               }
             }
           } else {
-            logger.debug(`Skipping animation for ${hotspotId} - isCurrentlySelected=${isCurrentlySelected}, state=${state}`);
+            logger$1.debug(`Skipping animation for ${hotspotId} - isCurrentlySelected=${isCurrentlySelected}, state=${state}`);
             mainPath.style.strokeDasharray = "none";
             mainPath.style.strokeDashoffset = "0";
             mainPath.style.opacity = isCanvas2D2 ? "0" : "1.0";
@@ -5121,7 +5121,7 @@ class StyleManager {
           }
           let animationDuration = this.getAnimationDuration(hotspotId);
           if (window.DEBUG_ANIMATIONS) {
-            logger.perf("[DEBUG] Checking for organic animation:", {
+            logger$1.perf("[DEBUG] Checking for organic animation:", {
               currentEasingName: this.currentEasingName,
               timingEasing: this.timingEasing,
               hotspotId,
@@ -5134,7 +5134,7 @@ class StyleManager {
             animationDuration = organicVariations.applyDurationVariation(animationDuration, hotspotId);
             const percentChange = ((animationDuration - originalDuration) / originalDuration * 100).toFixed(1);
             if (window.DEBUG_ANIMATIONS) {
-              logger.perf(`[Micro-Variations] ⏱️ Duration variation for ${hotspotId}: ${originalDuration.toFixed(3)}s → ${animationDuration.toFixed(3)}s (${percentChange}%)`);
+              logger$1.perf(`[Micro-Variations] ⏱️ Duration variation for ${hotspotId}: ${originalDuration.toFixed(3)}s → ${animationDuration.toFixed(3)}s (${percentChange}%)`);
             }
           }
           const currentZoom2 = ((_g = (_f = this.viewer) == null ? void 0 : _f.viewport) == null ? void 0 : _g.getZoom()) || 1;
@@ -5145,10 +5145,10 @@ class StyleManager {
           const animateFunction = () => {
             var _a2;
             if (state === "selected") {
-              logger.debug(`ANIMATION FUNCTION: Blocking animation for selected state`);
+              logger$1.debug(`ANIMATION FUNCTION: Blocking animation for selected state`);
               return;
             }
-            logger.debug(`ANIMATION FUNCTION: Starting animation for ${hotspotId} in ${state} state`);
+            logger$1.debug(`ANIMATION FUNCTION: Starting animation for ${hotspotId} in ${state} state`);
             const overlayManager3 = window.overlayManager || ((_a2 = this.viewer) == null ? void 0 : _a2.overlayManager);
             const isCanvas2DInner = overlayManager3 && overlayManager3.constructor.name === "Canvas2DOverlayManager";
             const maxZoom = 10;
@@ -5169,7 +5169,7 @@ class StyleManager {
               const originalEasing = this.timingEasing;
               animationEasing = organicVariations.applyEasingVariation(this.timingEasing, hotspotId);
               if (window.DEBUG_ANIMATIONS) {
-                logger.perf(`[Micro-Variations] 🎨 Easing variation for ${hotspotId}:`, {
+                logger$1.perf(`[Micro-Variations] 🎨 Easing variation for ${hotspotId}:`, {
                   original: originalEasing,
                   varied: animationEasing
                 });
@@ -5178,7 +5178,7 @@ class StyleManager {
             const pathLength = 100;
             const randomStart = Math.random() * pathLength;
             if (window.DEBUG_ANIMATIONS) {
-              logger.perf(`[Random Start] Rotating dash animation for ${hotspotId}: starting at ${randomStart.toFixed(1)}% of path`);
+              logger$1.perf(`[Random Start] Rotating dash animation for ${hotspotId}: starting at ${randomStart.toFixed(1)}% of path`);
             }
             mainPath.style.strokeDasharray = `0 ${pathLength}`;
             mainPath.style.strokeDashoffset = "0";
@@ -5230,13 +5230,13 @@ class StyleManager {
             });
             const animationStartTime = performance.now();
             if (window.DEBUG_ANIMATIONS) {
-              logger.perf(`[Animation] Stroke animation STARTED for ${group.getAttribute("data-hotspot-id")} at ${animationStartTime.toFixed(0)}ms`);
+              logger$1.perf(`[Animation] Stroke animation STARTED for ${group.getAttribute("data-hotspot-id")} at ${animationStartTime.toFixed(0)}ms`);
             }
             mainPath.currentAnimation.onfinish = () => {
               const animationEndTime = performance.now();
               const actualDuration = animationEndTime - animationStartTime;
               if (window.DEBUG_ANIMATIONS) {
-                logger.perf(`[Animation] Stroke animation FINISHED for ${group.getAttribute("data-hotspot-id")} at ${animationEndTime.toFixed(0)}ms (actual duration: ${actualDuration.toFixed(0)}ms, expected: ${(animationDuration * 1e3).toFixed(0)}ms`);
+                logger$1.perf(`[Animation] Stroke animation FINISHED for ${group.getAttribute("data-hotspot-id")} at ${animationEndTime.toFixed(0)}ms (actual duration: ${actualDuration.toFixed(0)}ms, expected: ${(animationDuration * 1e3).toFixed(0)}ms`);
               }
               mainPath.currentAnimation = null;
               group.setAttribute("data-animation-active", "false");
@@ -5247,7 +5247,7 @@ class StyleManager {
                 mainPath.style.strokeDashoffset = "0";
                 mainPath.style.opacity = finalOpacity;
               } else {
-                logger.debug(`Animation finished but state is now '${currentState2}' - hiding stroke`);
+                logger$1.debug(`Animation finished but state is now '${currentState2}' - hiding stroke`);
                 mainPath.style.strokeDasharray = "none";
                 mainPath.style.strokeDashoffset = "0";
                 mainPath.style.opacity = "0";
@@ -5259,18 +5259,18 @@ class StyleManager {
             return mainPath.currentAnimation.finished;
           };
           if (shouldExecuteAnimation) {
-            logger.debug(`Animation should be executed for ${hotspotId}`);
+            logger$1.debug(`Animation should be executed for ${hotspotId}`);
             if (useQueue) {
-              logger.debug(`🎭 Adding animation to queue for hotspot ${hotspotId}`);
+              logger$1.debug(`🎭 Adding animation to queue for hotspot ${hotspotId}`);
               this.animationQueue.add(group, animateFunction);
             } else {
-              logger.debug(`⚡ QUICK WIN #4: Immediate animation execution for hotspot ${hotspotId}`);
+              logger$1.debug(`⚡ QUICK WIN #4: Immediate animation execution for hotspot ${hotspotId}`);
               animateFunction();
             }
             group.setAttribute("data-animation-active", "true");
             this.memoryManager.registerAnimation(stateKey);
           } else {
-            logger.debug(`Animation execution SKIPPED for ${hotspotId} - shouldExecuteAnimation=${shouldExecuteAnimation}`);
+            logger$1.debug(`Animation execution SKIPPED for ${hotspotId} - shouldExecuteAnimation=${shouldExecuteAnimation}`);
           }
         } else {
           mainPath.style.strokeDasharray = "none";
@@ -5290,7 +5290,7 @@ class StyleManager {
         if (group.style.display === "none") {
           group.style.display = "";
         }
-        logger.debug(`Canvas2D cleanup - restoring normal state for hotspot`);
+        logger$1.debug(`Canvas2D cleanup - restoring normal state for hotspot`);
       }
       if (this.isSafari) {
         this.safariCompat.resetSafariGlowLayers(group);
@@ -5319,7 +5319,7 @@ class StyleManager {
     }
     const targetOpacity = state === "hover" || state === "selected" ? "1" : "0";
     if (state === "selected") {
-      logger.debug(`END OF applyStyle for selected:`, {
+      logger$1.debug(`END OF applyStyle for selected:`, {
         strokeWidth: mainPath == null ? void 0 : mainPath.style.strokeWidth,
         stroke: mainPath == null ? void 0 : mainPath.style.stroke,
         opacity: mainPath == null ? void 0 : mainPath.style.opacity,
@@ -7473,6 +7473,1004 @@ __publicField(_NativeHotspotRenderer, "MAX_CONCURRENT_ANIMATIONS_MOBILE", 8);
 // Reduced from 15
 __publicField(_NativeHotspotRenderer, "HIGH_HOTSPOT_COUNT_THRESHOLD", 100);
 let NativeHotspotRenderer = _NativeHotspotRenderer;
+function quickselect(arr, k, left = 0, right = arr.length - 1, compare = defaultCompare) {
+  while (right > left) {
+    if (right - left > 600) {
+      const n = right - left + 1;
+      const m = k - left + 1;
+      const z = Math.log(n);
+      const s = 0.5 * Math.exp(2 * z / 3);
+      const sd = 0.5 * Math.sqrt(z * s * (n - s) / n) * (m - n / 2 < 0 ? -1 : 1);
+      const newLeft = Math.max(left, Math.floor(k - m * s / n + sd));
+      const newRight = Math.min(right, Math.floor(k + (n - m) * s / n + sd));
+      quickselect(arr, k, newLeft, newRight, compare);
+    }
+    const t = arr[k];
+    let i = left;
+    let j = right;
+    swap(arr, left, k);
+    if (compare(arr[right], t) > 0) swap(arr, left, right);
+    while (i < j) {
+      swap(arr, i, j);
+      i++;
+      j--;
+      while (compare(arr[i], t) < 0) i++;
+      while (compare(arr[j], t) > 0) j--;
+    }
+    if (compare(arr[left], t) === 0) swap(arr, left, j);
+    else {
+      j++;
+      swap(arr, j, right);
+    }
+    if (j <= k) left = j + 1;
+    if (k <= j) right = j - 1;
+  }
+}
+function swap(arr, i, j) {
+  const tmp = arr[i];
+  arr[i] = arr[j];
+  arr[j] = tmp;
+}
+function defaultCompare(a, b) {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+class RBush {
+  constructor(maxEntries = 9) {
+    this._maxEntries = Math.max(4, maxEntries);
+    this._minEntries = Math.max(2, Math.ceil(this._maxEntries * 0.4));
+    this.clear();
+  }
+  all() {
+    return this._all(this.data, []);
+  }
+  search(bbox) {
+    let node = this.data;
+    const result = [];
+    if (!intersects(bbox, node)) return result;
+    const toBBox = this.toBBox;
+    const nodesToSearch = [];
+    while (node) {
+      for (let i = 0; i < node.children.length; i++) {
+        const child = node.children[i];
+        const childBBox = node.leaf ? toBBox(child) : child;
+        if (intersects(bbox, childBBox)) {
+          if (node.leaf) result.push(child);
+          else if (contains(bbox, childBBox)) this._all(child, result);
+          else nodesToSearch.push(child);
+        }
+      }
+      node = nodesToSearch.pop();
+    }
+    return result;
+  }
+  collides(bbox) {
+    let node = this.data;
+    if (!intersects(bbox, node)) return false;
+    const nodesToSearch = [];
+    while (node) {
+      for (let i = 0; i < node.children.length; i++) {
+        const child = node.children[i];
+        const childBBox = node.leaf ? this.toBBox(child) : child;
+        if (intersects(bbox, childBBox)) {
+          if (node.leaf || contains(bbox, childBBox)) return true;
+          nodesToSearch.push(child);
+        }
+      }
+      node = nodesToSearch.pop();
+    }
+    return false;
+  }
+  load(data) {
+    if (!(data && data.length)) return this;
+    if (data.length < this._minEntries) {
+      for (let i = 0; i < data.length; i++) {
+        this.insert(data[i]);
+      }
+      return this;
+    }
+    let node = this._build(data.slice(), 0, data.length - 1, 0);
+    if (!this.data.children.length) {
+      this.data = node;
+    } else if (this.data.height === node.height) {
+      this._splitRoot(this.data, node);
+    } else {
+      if (this.data.height < node.height) {
+        const tmpNode = this.data;
+        this.data = node;
+        node = tmpNode;
+      }
+      this._insert(node, this.data.height - node.height - 1, true);
+    }
+    return this;
+  }
+  insert(item) {
+    if (item) this._insert(item, this.data.height - 1);
+    return this;
+  }
+  clear() {
+    this.data = createNode([]);
+    return this;
+  }
+  remove(item, equalsFn) {
+    if (!item) return this;
+    let node = this.data;
+    const bbox = this.toBBox(item);
+    const path = [];
+    const indexes = [];
+    let i, parent, goingUp;
+    while (node || path.length) {
+      if (!node) {
+        node = path.pop();
+        parent = path[path.length - 1];
+        i = indexes.pop();
+        goingUp = true;
+      }
+      if (node.leaf) {
+        const index = findItem(item, node.children, equalsFn);
+        if (index !== -1) {
+          node.children.splice(index, 1);
+          path.push(node);
+          this._condense(path);
+          return this;
+        }
+      }
+      if (!goingUp && !node.leaf && contains(node, bbox)) {
+        path.push(node);
+        indexes.push(i);
+        i = 0;
+        parent = node;
+        node = node.children[0];
+      } else if (parent) {
+        i++;
+        node = parent.children[i];
+        goingUp = false;
+      } else node = null;
+    }
+    return this;
+  }
+  toBBox(item) {
+    return item;
+  }
+  compareMinX(a, b) {
+    return a.minX - b.minX;
+  }
+  compareMinY(a, b) {
+    return a.minY - b.minY;
+  }
+  toJSON() {
+    return this.data;
+  }
+  fromJSON(data) {
+    this.data = data;
+    return this;
+  }
+  _all(node, result) {
+    const nodesToSearch = [];
+    while (node) {
+      if (node.leaf) result.push(...node.children);
+      else nodesToSearch.push(...node.children);
+      node = nodesToSearch.pop();
+    }
+    return result;
+  }
+  _build(items, left, right, height) {
+    const N = right - left + 1;
+    let M = this._maxEntries;
+    let node;
+    if (N <= M) {
+      node = createNode(items.slice(left, right + 1));
+      calcBBox(node, this.toBBox);
+      return node;
+    }
+    if (!height) {
+      height = Math.ceil(Math.log(N) / Math.log(M));
+      M = Math.ceil(N / Math.pow(M, height - 1));
+    }
+    node = createNode([]);
+    node.leaf = false;
+    node.height = height;
+    const N2 = Math.ceil(N / M);
+    const N1 = N2 * Math.ceil(Math.sqrt(M));
+    multiSelect(items, left, right, N1, this.compareMinX);
+    for (let i = left; i <= right; i += N1) {
+      const right2 = Math.min(i + N1 - 1, right);
+      multiSelect(items, i, right2, N2, this.compareMinY);
+      for (let j = i; j <= right2; j += N2) {
+        const right3 = Math.min(j + N2 - 1, right2);
+        node.children.push(this._build(items, j, right3, height - 1));
+      }
+    }
+    calcBBox(node, this.toBBox);
+    return node;
+  }
+  _chooseSubtree(bbox, node, level, path) {
+    while (true) {
+      path.push(node);
+      if (node.leaf || path.length - 1 === level) break;
+      let minArea = Infinity;
+      let minEnlargement = Infinity;
+      let targetNode;
+      for (let i = 0; i < node.children.length; i++) {
+        const child = node.children[i];
+        const area = bboxArea(child);
+        const enlargement = enlargedArea(bbox, child) - area;
+        if (enlargement < minEnlargement) {
+          minEnlargement = enlargement;
+          minArea = area < minArea ? area : minArea;
+          targetNode = child;
+        } else if (enlargement === minEnlargement) {
+          if (area < minArea) {
+            minArea = area;
+            targetNode = child;
+          }
+        }
+      }
+      node = targetNode || node.children[0];
+    }
+    return node;
+  }
+  _insert(item, level, isNode) {
+    const bbox = isNode ? item : this.toBBox(item);
+    const insertPath = [];
+    const node = this._chooseSubtree(bbox, this.data, level, insertPath);
+    node.children.push(item);
+    extend(node, bbox);
+    while (level >= 0) {
+      if (insertPath[level].children.length > this._maxEntries) {
+        this._split(insertPath, level);
+        level--;
+      } else break;
+    }
+    this._adjustParentBBoxes(bbox, insertPath, level);
+  }
+  // split overflowed node into two
+  _split(insertPath, level) {
+    const node = insertPath[level];
+    const M = node.children.length;
+    const m = this._minEntries;
+    this._chooseSplitAxis(node, m, M);
+    const splitIndex = this._chooseSplitIndex(node, m, M);
+    const newNode = createNode(node.children.splice(splitIndex, node.children.length - splitIndex));
+    newNode.height = node.height;
+    newNode.leaf = node.leaf;
+    calcBBox(node, this.toBBox);
+    calcBBox(newNode, this.toBBox);
+    if (level) insertPath[level - 1].children.push(newNode);
+    else this._splitRoot(node, newNode);
+  }
+  _splitRoot(node, newNode) {
+    this.data = createNode([node, newNode]);
+    this.data.height = node.height + 1;
+    this.data.leaf = false;
+    calcBBox(this.data, this.toBBox);
+  }
+  _chooseSplitIndex(node, m, M) {
+    let index;
+    let minOverlap = Infinity;
+    let minArea = Infinity;
+    for (let i = m; i <= M - m; i++) {
+      const bbox1 = distBBox(node, 0, i, this.toBBox);
+      const bbox2 = distBBox(node, i, M, this.toBBox);
+      const overlap = intersectionArea(bbox1, bbox2);
+      const area = bboxArea(bbox1) + bboxArea(bbox2);
+      if (overlap < minOverlap) {
+        minOverlap = overlap;
+        index = i;
+        minArea = area < minArea ? area : minArea;
+      } else if (overlap === minOverlap) {
+        if (area < minArea) {
+          minArea = area;
+          index = i;
+        }
+      }
+    }
+    return index || M - m;
+  }
+  // sorts node children by the best axis for split
+  _chooseSplitAxis(node, m, M) {
+    const compareMinX = node.leaf ? this.compareMinX : compareNodeMinX;
+    const compareMinY = node.leaf ? this.compareMinY : compareNodeMinY;
+    const xMargin = this._allDistMargin(node, m, M, compareMinX);
+    const yMargin = this._allDistMargin(node, m, M, compareMinY);
+    if (xMargin < yMargin) node.children.sort(compareMinX);
+  }
+  // total margin of all possible split distributions where each node is at least m full
+  _allDistMargin(node, m, M, compare) {
+    node.children.sort(compare);
+    const toBBox = this.toBBox;
+    const leftBBox = distBBox(node, 0, m, toBBox);
+    const rightBBox = distBBox(node, M - m, M, toBBox);
+    let margin = bboxMargin(leftBBox) + bboxMargin(rightBBox);
+    for (let i = m; i < M - m; i++) {
+      const child = node.children[i];
+      extend(leftBBox, node.leaf ? toBBox(child) : child);
+      margin += bboxMargin(leftBBox);
+    }
+    for (let i = M - m - 1; i >= m; i--) {
+      const child = node.children[i];
+      extend(rightBBox, node.leaf ? toBBox(child) : child);
+      margin += bboxMargin(rightBBox);
+    }
+    return margin;
+  }
+  _adjustParentBBoxes(bbox, path, level) {
+    for (let i = level; i >= 0; i--) {
+      extend(path[i], bbox);
+    }
+  }
+  _condense(path) {
+    for (let i = path.length - 1, siblings; i >= 0; i--) {
+      if (path[i].children.length === 0) {
+        if (i > 0) {
+          siblings = path[i - 1].children;
+          siblings.splice(siblings.indexOf(path[i]), 1);
+        } else this.clear();
+      } else calcBBox(path[i], this.toBBox);
+    }
+  }
+}
+function findItem(item, items, equalsFn) {
+  if (!equalsFn) return items.indexOf(item);
+  for (let i = 0; i < items.length; i++) {
+    if (equalsFn(item, items[i])) return i;
+  }
+  return -1;
+}
+function calcBBox(node, toBBox) {
+  distBBox(node, 0, node.children.length, toBBox, node);
+}
+function distBBox(node, k, p, toBBox, destNode) {
+  if (!destNode) destNode = createNode(null);
+  destNode.minX = Infinity;
+  destNode.minY = Infinity;
+  destNode.maxX = -Infinity;
+  destNode.maxY = -Infinity;
+  for (let i = k; i < p; i++) {
+    const child = node.children[i];
+    extend(destNode, node.leaf ? toBBox(child) : child);
+  }
+  return destNode;
+}
+function extend(a, b) {
+  a.minX = Math.min(a.minX, b.minX);
+  a.minY = Math.min(a.minY, b.minY);
+  a.maxX = Math.max(a.maxX, b.maxX);
+  a.maxY = Math.max(a.maxY, b.maxY);
+  return a;
+}
+function compareNodeMinX(a, b) {
+  return a.minX - b.minX;
+}
+function compareNodeMinY(a, b) {
+  return a.minY - b.minY;
+}
+function bboxArea(a) {
+  return (a.maxX - a.minX) * (a.maxY - a.minY);
+}
+function bboxMargin(a) {
+  return a.maxX - a.minX + (a.maxY - a.minY);
+}
+function enlargedArea(a, b) {
+  return (Math.max(b.maxX, a.maxX) - Math.min(b.minX, a.minX)) * (Math.max(b.maxY, a.maxY) - Math.min(b.minY, a.minY));
+}
+function intersectionArea(a, b) {
+  const minX = Math.max(a.minX, b.minX);
+  const minY = Math.max(a.minY, b.minY);
+  const maxX = Math.min(a.maxX, b.maxX);
+  const maxY = Math.min(a.maxY, b.maxY);
+  return Math.max(0, maxX - minX) * Math.max(0, maxY - minY);
+}
+function contains(a, b) {
+  return a.minX <= b.minX && a.minY <= b.minY && b.maxX <= a.maxX && b.maxY <= a.maxY;
+}
+function intersects(a, b) {
+  return b.minX <= a.maxX && b.minY <= a.maxY && b.maxX >= a.minX && b.maxY >= a.minY;
+}
+function createNode(children) {
+  return {
+    children,
+    height: 1,
+    leaf: true,
+    minX: Infinity,
+    minY: Infinity,
+    maxX: -Infinity,
+    maxY: -Infinity
+  };
+}
+function multiSelect(arr, left, right, n, compare) {
+  const stack = [left, right];
+  while (stack.length) {
+    right = stack.pop();
+    left = stack.pop();
+    if (right - left <= n) continue;
+    const mid = left + Math.ceil((right - left) / n / 2) * n;
+    quickselect(arr, mid, left, right, compare);
+    stack.push(left, mid, mid, right);
+  }
+}
+const logger = createLogger("Canvas2DRenderer");
+class Canvas2DRenderer {
+  constructor(viewer, options = {}) {
+    this.viewer = viewer;
+    this.options = options;
+    this.isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || "ontouchstart" in window;
+    this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+    this.canvas = null;
+    this.context = null;
+    this.overlayCanvas = null;
+    this.spatialIndex = RBush();
+    this.hotspots = /* @__PURE__ */ new Map();
+    this.visibleHotspots = /* @__PURE__ */ new Set();
+    this.path2DCache = /* @__PURE__ */ new WeakMap();
+    this.batchesByStyle = /* @__PURE__ */ new Map();
+    this.state = {
+      hoveredHotspot: null,
+      selectedHotspots: /* @__PURE__ */ new Set(),
+      animatingHotspots: /* @__PURE__ */ new Map(),
+      currentMode: "default",
+      zoom: 1,
+      bounds: null
+    };
+    this.config = {
+      maxVerticesMobile: 50,
+      simplificationTolerance: {
+        low: 5,
+        // < 0.1x zoom
+        medium: 2,
+        // < 0.5x zoom
+        high: 1,
+        // < 1.0x zoom
+        ultra: 0.1
+        // >= 1.0x zoom
+      },
+      maxConcurrentAnimations: this.isMobile ? 8 : 15,
+      updateThrottle: 16,
+      // 60 FPS
+      enableBatching: true,
+      enableSimplification: true,
+      enablePath2DCache: true,
+      debugMode: options.debugMode || false
+    };
+    this.canvasLimit = this.detectCanvasLimit();
+    this.animationFrame = null;
+    this.lastUpdateTime = 0;
+    this.handleRedraw = this.handleRedraw.bind(this);
+    this.handleViewportChange = this.handleViewportChange.bind(this);
+    this.handleClick = this.handleClick.bind(this);
+    this.handleMouseMove = this.handleMouseMove.bind(this);
+    this.initialize();
+  }
+  /**
+   * Initialize the Canvas2D renderer
+   */
+  initialize() {
+    logger.info("Initializing Canvas2DRenderer");
+    this.createCanvas();
+    this.setupOverlay();
+    this.setupEventHandlers();
+    logger.info("Canvas2DRenderer initialized");
+  }
+  /**
+   * Create the main canvas element
+   */
+  createCanvas() {
+    const container = this.viewer.container;
+    const size = this.viewer.viewport.getContainerSize();
+    const { canvas, ctx } = this.createIOSSafeCanvas(size.x, size.y);
+    this.canvas = canvas;
+    this.context = ctx;
+    Object.assign(this.canvas.style, {
+      position: "absolute",
+      top: "0",
+      left: "0",
+      width: "100%",
+      height: "100%",
+      pointerEvents: "auto",
+      // Enable interaction
+      zIndex: "1000",
+      transform: "translateZ(0)",
+      // Force GPU acceleration
+      willChange: "transform"
+    });
+    container.appendChild(this.canvas);
+    logger.info("Canvas created and added to container");
+  }
+  /**
+   * Create iOS-safe canvas with size limits
+   */
+  createIOSSafeCanvas(width, height) {
+    const canvas = document.createElement("canvas");
+    const dpr = Math.min(window.devicePixelRatio || 1, this.config.maxDevicePixelRatio || 2);
+    const totalPixels = width * dpr * height * dpr;
+    if (totalPixels > this.canvasLimit) {
+      const scale = Math.sqrt(this.canvasLimit / totalPixels);
+      width = Math.floor(width * scale);
+      height = Math.floor(height * scale);
+      logger.warn(`Canvas size limited for iOS: ${width}x${height}`);
+    }
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
+    const ctx = canvas.getContext("2d", {
+      alpha: true,
+      desynchronized: true,
+      // Reduce latency
+      willReadFrequently: false
+    });
+    ctx.scale(dpr, dpr);
+    return { canvas, ctx };
+  }
+  /**
+   * Detect iOS canvas size limit
+   */
+  detectCanvasLimit() {
+    if (this.isIOS) {
+      return 16777216;
+    }
+    return 268435456;
+  }
+  /**
+   * Setup OpenSeadragon overlay for viewport synchronization
+   */
+  setupOverlay() {
+    this.viewer.addHandler("update-viewport", this.handleViewportChange);
+    this.viewer.addHandler("canvas-click", this.handleClick);
+    this.viewer.addHandler("canvas-drag", this.handleMouseMove);
+    logger.info("OpenSeadragon overlay handlers setup");
+  }
+  /**
+   * Setup event handlers
+   */
+  setupEventHandlers() {
+    window.addEventListener("resize", this.handleResize.bind(this));
+    if (this.isMobile) {
+      this.canvas.addEventListener("touchstart", this.handleTouchStart.bind(this), { passive: false });
+      this.canvas.addEventListener("touchmove", this.handleTouchMove.bind(this), { passive: false });
+      this.canvas.addEventListener("touchend", this.handleTouchEnd.bind(this), { passive: false });
+    }
+    this.canvas.addEventListener("mousemove", this.handleMouseMove.bind(this));
+    this.canvas.addEventListener("click", this.handleClick.bind(this));
+    logger.info("Event handlers setup");
+  }
+  /**
+   * Handle viewport change for redrawing
+   */
+  handleViewportChange() {
+    const zoom = this.viewer.viewport.getZoom();
+    const bounds = this.viewer.viewport.getBounds();
+    this.state.zoom = zoom;
+    this.state.bounds = bounds;
+    const now = performance.now();
+    if (now - this.lastUpdateTime < this.config.updateThrottle) {
+      if (!this.animationFrame) {
+        this.animationFrame = requestAnimationFrame(() => {
+          this.redraw();
+          this.animationFrame = null;
+        });
+      }
+      return;
+    }
+    this.lastUpdateTime = now;
+    this.redraw();
+  }
+  /**
+   * Main redraw function
+   */
+  redraw() {
+    if (!this.context || !this.state.bounds) return;
+    const startTime = performance.now();
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    const visibleHotspots = this.getVisibleHotspots(this.state.bounds);
+    this.visibleHotspots.clear();
+    visibleHotspots.forEach((h) => this.visibleHotspots.add(h.id));
+    this.renderHotspots(visibleHotspots, this.state.zoom);
+    if (this.config.debugMode) {
+      const renderTime = performance.now() - startTime;
+      this.renderDebugInfo(visibleHotspots.length, renderTime);
+    }
+  }
+  /**
+   * Get visible hotspots using spatial index
+   */
+  getVisibleHotspots(bounds) {
+    if (!bounds) return [];
+    const results = this.spatialIndex.search({
+      minX: bounds.x,
+      minY: bounds.y,
+      maxX: bounds.x + bounds.width,
+      maxY: bounds.y + bounds.height
+    });
+    return results.map((r) => this.hotspots.get(r.id)).filter(Boolean);
+  }
+  /**
+   * Render hotspots with batching and optimization
+   */
+  renderHotspots(hotspots, zoom) {
+    if (hotspots.length === 0) return;
+    this.batchesByStyle.clear();
+    const tolerance = this.getSimplificationTolerance(zoom);
+    hotspots.forEach((hotspot) => {
+      const styleKey = this.getStyleKey(hotspot);
+      if (!this.batchesByStyle.has(styleKey)) {
+        this.batchesByStyle.set(styleKey, []);
+      }
+      this.batchesByStyle.get(styleKey).push(hotspot);
+    });
+    this.batchesByStyle.forEach((batch, styleKey) => {
+      this.renderBatch(batch, styleKey, tolerance);
+    });
+  }
+  /**
+   * Get style key for batching
+   */
+  getStyleKey(hotspot) {
+    const state = this.getHotspotState(hotspot);
+    const opacity = state.opacity || 1;
+    const strokeWidth = state.strokeWidth || 2;
+    const strokeColor = state.strokeColor || "white";
+    const fillColor = state.fillColor || "transparent";
+    return `${fillColor}_${strokeColor}_${strokeWidth}_${opacity}`;
+  }
+  /**
+   * Get hotspot rendering state
+   */
+  getHotspotState(hotspot) {
+    const isHovered = this.state.hoveredHotspot === hotspot.id;
+    const isSelected = this.state.selectedHotspots.has(hotspot.id);
+    const isAnimating = this.state.animatingHotspots.has(hotspot.id);
+    let state = {
+      opacity: 1,
+      strokeWidth: 2,
+      strokeColor: "white",
+      fillColor: "transparent"
+    };
+    if (isSelected) {
+      state.strokeWidth = 3;
+      state.strokeColor = "#00ff00";
+      state.opacity = 1;
+    } else if (isHovered) {
+      state.strokeWidth = 2.5;
+      state.opacity = 0.9;
+    } else if (isAnimating) {
+      const animation = this.state.animatingHotspots.get(hotspot.id);
+      state.opacity = animation.opacity || 1;
+      state.strokeWidth = animation.strokeWidth || 2;
+    }
+    if (this.state.currentMode === "reveal") {
+      state.opacity = Math.min(state.opacity, 0.7);
+    } else if (this.state.currentMode === "static" && this.state.zoom > 8) {
+      state.opacity = 1;
+      state.strokeWidth = 1;
+    }
+    return state;
+  }
+  /**
+   * Render a batch of hotspots with the same style
+   */
+  renderBatch(hotspots, styleKey, tolerance) {
+    const [fill, stroke, width, opacity] = styleKey.split("_");
+    this.context.save();
+    this.context.fillStyle = fill;
+    this.context.strokeStyle = stroke;
+    this.context.lineWidth = parseFloat(width);
+    this.context.globalAlpha = parseFloat(opacity);
+    this.context.beginPath();
+    hotspots.forEach((hotspot) => {
+      const path = this.getOrCreatePath2D(hotspot, tolerance);
+      if (path) {
+        this.addPathToContext(path, hotspot);
+      }
+    });
+    if (fill !== "transparent") {
+      this.context.fill();
+    }
+    this.context.stroke();
+    this.context.restore();
+  }
+  /**
+   * Get or create Path2D for hotspot with caching
+   */
+  getOrCreatePath2D(hotspot, tolerance) {
+    let cachedPath = this.path2DCache.get(hotspot);
+    if (cachedPath && cachedPath.tolerance === tolerance) {
+      return cachedPath.path;
+    }
+    const path = new Path2D();
+    const vertices = this.simplifyPolygon(hotspot.vertices, tolerance);
+    if (vertices.length < 3) return null;
+    path.moveTo(vertices[0].x, vertices[0].y);
+    for (let i = 1; i < vertices.length; i++) {
+      path.lineTo(vertices[i].x, vertices[i].y);
+    }
+    path.closePath();
+    this.path2DCache.set(hotspot, { path, tolerance });
+    return path;
+  }
+  /**
+   * Add Path2D to current context with proper transformation
+   */
+  addPathToContext(path, hotspot) {
+    const viewport = this.viewer.viewport;
+    const containerSize = viewport.getContainerSize();
+    const bounds = viewport.getBounds();
+    const scale = containerSize.x / bounds.width;
+    const offsetX = -bounds.x * scale;
+    const offsetY = -bounds.y * scale;
+    this.context.save();
+    this.context.translate(offsetX, offsetY);
+    this.context.scale(scale, scale);
+    this.context.addPath ? this.context.addPath(path) : this.drawPath(path, hotspot.vertices);
+    this.context.restore();
+  }
+  /**
+   * Fallback path drawing if addPath not supported
+   */
+  drawPath(path, vertices) {
+    if (vertices.length < 3) return;
+    this.context.moveTo(vertices[0].x, vertices[0].y);
+    for (let i = 1; i < vertices.length; i++) {
+      this.context.lineTo(vertices[i].x, vertices[i].y);
+    }
+    this.context.closePath();
+  }
+  /**
+   * Simplify polygon based on zoom level
+   */
+  simplifyPolygon(vertices, tolerance) {
+    if (!this.config.enableSimplification) return vertices;
+    if (vertices.length <= 3 || tolerance === 0) return vertices;
+    if (this.isMobile && vertices.length > this.config.maxVerticesMobile) {
+      const step = Math.ceil(vertices.length / this.config.maxVerticesMobile);
+      return vertices.filter((_, i) => i % step === 0);
+    }
+    return vertices;
+  }
+  /**
+   * Get simplification tolerance based on zoom
+   */
+  getSimplificationTolerance(zoom) {
+    if (zoom < 0.1) return this.config.simplificationTolerance.low;
+    if (zoom < 0.5) return this.config.simplificationTolerance.medium;
+    if (zoom < 1) return this.config.simplificationTolerance.high;
+    return this.config.simplificationTolerance.ultra;
+  }
+  /**
+   * Add hotspot to renderer
+   */
+  addHotspot(hotspotData) {
+    const { id, vertices, bounds } = hotspotData;
+    this.hotspots.set(id, hotspotData);
+    this.spatialIndex.insert({
+      minX: bounds.minX,
+      minY: bounds.minY,
+      maxX: bounds.maxX,
+      maxY: bounds.maxY,
+      id
+    });
+    logger.debug(`Added hotspot ${id}`);
+  }
+  /**
+   * Remove hotspot from renderer
+   */
+  removeHotspot(id) {
+    const hotspot = this.hotspots.get(id);
+    if (!hotspot) return;
+    this.hotspots.delete(id);
+    const bounds = hotspot.bounds;
+    this.spatialIndex.remove({
+      minX: bounds.minX,
+      minY: bounds.minY,
+      maxX: bounds.maxX,
+      maxY: bounds.maxY,
+      id
+    }, (a, b) => a.id === b.id);
+    logger.debug(`Removed hotspot ${id}`);
+  }
+  /**
+   * Batch add hotspots for performance
+   */
+  addHotspotsBatch(hotspotsData) {
+    const items = [];
+    hotspotsData.forEach((data) => {
+      const { id, vertices, bounds } = data;
+      this.hotspots.set(id, data);
+      items.push({
+        minX: bounds.minX,
+        minY: bounds.minY,
+        maxX: bounds.maxX,
+        maxY: bounds.maxY,
+        id
+      });
+    });
+    this.spatialIndex.load(items);
+    logger.info(`Added ${hotspotsData.length} hotspots in batch`);
+  }
+  /**
+   * Handle mouse move for hover detection
+   */
+  handleMouseMove(event) {
+    const point = this.getEventPoint(event);
+    const hitHotspot = this.hitTest(point);
+    if (hitHotspot !== this.state.hoveredHotspot) {
+      this.state.hoveredHotspot = hitHotspot;
+      this.redraw();
+      if (this.options.onHotspotHover) {
+        this.options.onHotspotHover(hitHotspot);
+      }
+    }
+  }
+  /**
+   * Handle click for selection
+   */
+  handleClick(event) {
+    const point = this.getEventPoint(event);
+    const hitHotspot = this.hitTest(point);
+    if (hitHotspot) {
+      if (this.state.selectedHotspots.has(hitHotspot)) {
+        this.state.selectedHotspots.delete(hitHotspot);
+      } else {
+        this.state.selectedHotspots.add(hitHotspot);
+      }
+      this.redraw();
+      if (this.options.onHotspotClick) {
+        this.options.onHotspotClick(hitHotspot);
+      }
+    }
+  }
+  /**
+   * Hit test at point
+   */
+  hitTest(point) {
+    const imagePoint = this.viewer.viewport.viewerElementToImageCoordinates(point);
+    const candidates = this.spatialIndex.search({
+      minX: imagePoint.x - 1,
+      minY: imagePoint.y - 1,
+      maxX: imagePoint.x + 1,
+      maxY: imagePoint.y + 1
+    });
+    for (const candidate of candidates) {
+      const hotspot = this.hotspots.get(candidate.id);
+      if (hotspot && this.pointInPolygon(imagePoint, hotspot.vertices)) {
+        return candidate.id;
+      }
+    }
+    return null;
+  }
+  /**
+   * Point in polygon test
+   */
+  pointInPolygon(point, vertices) {
+    let inside = false;
+    for (let i = 0, j = vertices.length - 1; i < vertices.length; j = i++) {
+      const xi = vertices[i].x, yi = vertices[i].y;
+      const xj = vertices[j].x, yj = vertices[j].y;
+      const intersect = yi > point.y !== yj > point.y && point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi;
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+  /**
+   * Get event point in viewer coordinates
+   */
+  getEventPoint(event) {
+    const rect = this.canvas.getBoundingClientRect();
+    let x, y;
+    if (event.touches && event.touches.length > 0) {
+      x = event.touches[0].clientX - rect.left;
+      y = event.touches[0].clientY - rect.top;
+    } else {
+      x = event.clientX - rect.left;
+      y = event.clientY - rect.top;
+    }
+    return new OpenSeadragon.Point(x, y);
+  }
+  /**
+   * Handle touch start
+   */
+  handleTouchStart(event) {
+    this.handleMouseMove(event);
+  }
+  /**
+   * Handle touch move
+   */
+  handleTouchMove(event) {
+    this.handleMouseMove(event);
+  }
+  /**
+   * Handle touch end
+   */
+  handleTouchEnd(event) {
+    if (event.changedTouches.length === 1) {
+      this.handleClick(event);
+    }
+  }
+  /**
+   * Handle window resize
+   */
+  handleResize() {
+    const size = this.viewer.viewport.getContainerSize();
+    const { canvas, ctx } = this.createIOSSafeCanvas(size.x, size.y);
+    canvas.style.cssText = this.canvas.style.cssText;
+    this.canvas.parentNode.replaceChild(canvas, this.canvas);
+    this.canvas = canvas;
+    this.context = ctx;
+    this.redraw();
+  }
+  /**
+   * Render debug information
+   */
+  renderDebugInfo(visibleCount, renderTime) {
+    this.context.save();
+    this.context.fillStyle = "white";
+    this.context.font = "12px monospace";
+    this.context.fillText(`Visible: ${visibleCount}`, 10, 20);
+    this.context.fillText(`Render: ${renderTime.toFixed(1)}ms`, 10, 35);
+    this.context.fillText(`FPS: ${(1e3 / renderTime).toFixed(0)}`, 10, 50);
+    this.context.fillText(`Zoom: ${this.state.zoom.toFixed(2)}`, 10, 65);
+    this.context.restore();
+  }
+  /**
+   * Set rendering mode
+   */
+  setMode(mode) {
+    this.state.currentMode = mode;
+    this.redraw();
+  }
+  /**
+   * Start animation for hotspot
+   */
+  animateHotspot(id, animation) {
+    this.state.animatingHotspots.set(id, animation);
+    if (!this.animationFrame) {
+      this.animate();
+    }
+  }
+  /**
+   * Animation loop
+   */
+  animate() {
+    const now = performance.now();
+    let hasActiveAnimations = false;
+    this.state.animatingHotspots.forEach((animation, id) => {
+      if (animation.update) {
+        animation.update(now);
+      }
+      if (!animation.completed) {
+        hasActiveAnimations = true;
+      } else {
+        this.state.animatingHotspots.delete(id);
+      }
+    });
+    if (hasActiveAnimations) {
+      this.redraw();
+      this.animationFrame = requestAnimationFrame(() => this.animate());
+    } else {
+      this.animationFrame = null;
+    }
+  }
+  /**
+   * Destroy renderer and cleanup
+   */
+  destroy() {
+    logger.info("Destroying Canvas2DRenderer");
+    if (this.animationFrame) {
+      cancelAnimationFrame(this.animationFrame);
+    }
+    this.viewer.removeHandler("update-viewport", this.handleViewportChange);
+    this.viewer.removeHandler("canvas-click", this.handleClick);
+    this.viewer.removeHandler("canvas-drag", this.handleMouseMove);
+    window.removeEventListener("resize", this.handleResize.bind(this));
+    if (this.canvas && this.canvas.parentNode) {
+      this.canvas.parentNode.removeChild(this.canvas);
+    }
+    this.hotspots.clear();
+    this.spatialIndex.clear();
+    this.batchesByStyle.clear();
+    this.path2DCache = /* @__PURE__ */ new WeakMap();
+    logger.info("Canvas2DRenderer destroyed");
+  }
+}
 function setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspotData) {
   const isWebGL = viewer.drawer && (viewer.drawer.constructor.name === "WebGLDrawer" || viewer.drawer.webgl || viewer.drawer.gl);
   if (viewer.drawer && !isWebGL) {
@@ -7532,7 +8530,7 @@ function setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotCli
         }
       }, 100);
     }
-    setTimeout(() => initializeHotspotSystem(viewer, state, componentsObj, handleHotspotClick), 100);
+    setTimeout(() => initializeHotspotSystem(viewer, state, componentsObj, handleHotspotClick, hotspotData), 100);
   });
   viewer.addHandler("zoom", () => {
     if (componentsObj.tileCleanupManager) {
@@ -7945,6 +8943,7 @@ function optimizeZoomPerformance(viewer, performanceConfig2, componentsObj) {
 }
 async function initializeHotspotSystem(viewer, state, componentsObj, handleHotspotClick, hotspotData) {
   if (!viewer) return;
+  const useCanvas2DRenderer = localStorage.getItem("useCanvas2DRenderer") === "true" || new URLSearchParams(window.location.search).get("canvas2d") === "true";
   const rendererOptions = {
     viewer,
     OpenSeadragon,
@@ -7958,12 +8957,43 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
     minZoomForHotspots: performanceConfig.hotspots.minZoomForHotspots,
     debugMode: state.debugLevel() === 2
   };
-  const renderer = new NativeHotspotRenderer(rendererOptions);
-  window.nativeHotspotRenderer = renderer;
-  state.setModeStateManager(renderer.modeStateManager);
+  let renderer;
+  if (useCanvas2DRenderer) {
+    console.log("Using Canvas2DRenderer for hotspot rendering (60 FPS target)");
+    renderer = new Canvas2DRenderer(viewer, rendererOptions);
+    if (hotspotData && hotspotData.length > 0) {
+      const processedHotspots = hotspotData.map((h) => ({
+        id: h.id,
+        vertices: h.coordinates.map((coord) => ({ x: coord[0], y: coord[1] })),
+        bounds: calculateBounds2(h.coordinates),
+        metadata: h
+      }));
+      renderer.addHotspotsBatch(processedHotspots);
+      console.log(`Added ${processedHotspots.length} hotspots to Canvas2DRenderer`);
+    }
+    window.canvas2DRenderer = renderer;
+  } else {
+    console.log("Using NativeHotspotRenderer (SVG) for hotspot rendering");
+    renderer = new NativeHotspotRenderer(rendererOptions);
+    window.nativeHotspotRenderer = renderer;
+  }
+  function calculateBounds2(coordinates) {
+    if (!coordinates || coordinates.length === 0) return { minX: 0, minY: 0, maxX: 0, maxY: 0 };
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    coordinates.forEach((coord) => {
+      minX = Math.min(minX, coord[0]);
+      minY = Math.min(minY, coord[1]);
+      maxX = Math.max(maxX, coord[0]);
+      maxY = Math.max(maxY, coord[1]);
+    });
+    return { minX, minY, maxX, maxY };
+  }
+  if (renderer.modeStateManager) {
+    state.setModeStateManager(renderer.modeStateManager);
+  }
   if (renderer.eventCoordinator) {
     const TemporalEchoController = (await __vitePreload(async () => {
-      const { default: __vite_default__ } = await import("./TemporalEchoController-C5eYQe8X.js");
+      const { default: __vite_default__ } = await import("./TemporalEchoController-Cs6kS4GP.js");
       return { default: __vite_default__ };
     }, true ? __vite__mapDeps([0,1,2]) : void 0)).default;
     const echoController = new TemporalEchoController({
@@ -7981,7 +9011,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
     window.temporalEchoController = echoController;
     if (isMobile()) {
       const MinimalistAudioEngine = (await __vitePreload(async () => {
-        const { default: __vite_default__ } = await import("./MinimalistAudioEngine-CG6q-vDi.js");
+        const { default: __vite_default__ } = await import("./MinimalistAudioEngine-Dp754Jlo.js");
         return { default: __vite_default__ };
       }, true ? __vite__mapDeps([3,4,1,2]) : void 0)).default;
       const audioEngine = new MinimalistAudioEngine();
@@ -7991,7 +9021,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
           await audioEngine.init();
           console.log("[ViewerEventHandlers] Minimalist audio engine initialized");
           const { getMultimodalSyncEngine } = await __vitePreload(async () => {
-            const { getMultimodalSyncEngine: getMultimodalSyncEngine2 } = await import("./MultimodalSyncEngine-Dkeo43qq.js");
+            const { getMultimodalSyncEngine: getMultimodalSyncEngine2 } = await import("./MultimodalSyncEngine-CpUIFfjz.js");
             return { getMultimodalSyncEngine: getMultimodalSyncEngine2 };
           }, true ? __vite__mapDeps([5,4,1,2]) : void 0);
           const borderRadialAnimator = window.borderRadialAnimator || (echoController == null ? void 0 : echoController.borderRadialAnimator);
@@ -8027,13 +9057,13 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
       }
     };
   }
-  const originalClickHandler = renderer.onHotspotClick;
-  renderer.onHotspotClick = (hotspot) => {
-    originalClickHandler(hotspot);
-  };
-  window.nativeHotspotRenderer = renderer;
+  if (renderer.onHotspotClick) {
+    const originalClickHandler = renderer.onHotspotClick;
+    renderer.onHotspotClick = (hotspot) => {
+      originalClickHandler(hotspot);
+    };
+  }
   state.setComponents((prev) => ({ ...prev, renderer, overlayManager }));
-  console.log("Using NativeHotspotRenderer for hotspot rendering");
   console.log(`Using ${overlayManager.constructor.name} for overlay effects`);
 }
 export {

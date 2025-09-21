@@ -1,5 +1,5 @@
-import { g as getHapticManager } from "./HapticManager-BTdq66LB.js";
-import "./main-CZUR3iQ4.js";
+import { g as getHapticManager } from "./HapticManager-Cd3zKjkO.js";
+import "./main-gne2WHxm.js";
 class DopamineAudioEngine {
   constructor() {
     this.audioContext = null;
