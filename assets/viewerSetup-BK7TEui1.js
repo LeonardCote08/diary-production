@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-D93LwRQj.js","assets/main-C6L26m2B.js","assets/main-DTOzWaBI.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-Bauw5Ae2.js","assets/main-DQfr1VhZ.js","assets/main-DTOzWaBI.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-C6L26m2B.js";
+import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-DQfr1VhZ.js";
 var howler = {};
 /*!
  *  howler.js v2.2.4
@@ -7168,17 +7168,6 @@ function applyMobileSafariFix(viewer) {
   viewer.smoothTileEdgesMinZoom = Infinity;
   viewer.minPixelRatio = 0.7;
   viewer.minZoomImageRatio = 0.7;
-  viewer.addHandler("animation-finish", function(event) {
-    const isBrowserStack = window.location.hostname.includes("browserstack") || navigator.userAgent.includes("BrowserStack");
-    if (!isBrowserStack) {
-      if (viewer.immediateRender) {
-        viewer.immediateRender = false;
-        setTimeout(() => {
-          viewer.immediateRender = true;
-        }, 100);
-      }
-    }
-  });
   let isInteracting = false;
   let interactionTimeout = null;
   viewer.addHandler("pan", () => {
@@ -7250,13 +7239,13 @@ function applyIOSTileDisappearFix(viewer) {
       } else {
         requestAnimationFrame(() => {
           forceRedraw();
+          panEndTimer = setTimeout(() => {
+            const tiledImage = viewer.world.getItemAt(0);
+            if (tiledImage && tiledImage.coverage < 0.9) {
+              forceRedraw();
+            }
+          }, 150);
         });
-        panEndTimer = setTimeout(() => {
-          forceRedraw();
-        }, 100);
-        forceRedrawTimer = setTimeout(() => {
-          forceRedraw();
-        }, 250);
       }
     }
   });
@@ -7269,9 +7258,6 @@ function applyIOSTileDisappearFix(viewer) {
     } else {
       tiledImage.update();
       viewer.forceRedraw();
-      const currentZoom = viewer.viewport.getZoom();
-      viewer.viewport.zoomTo(currentZoom * 1.0001, null, true);
-      viewer.viewport.zoomTo(currentZoom, null, true);
     }
   }
   viewer.addHandler("canvas-drag", (event) => {
@@ -12582,7 +12568,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-D93LwRQj.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-Bauw5Ae2.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspots);
   eventHandlers.setupAdaptiveSprings(viewer, performanceConfig);
   const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);
