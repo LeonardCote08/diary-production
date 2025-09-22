@@ -1721,7 +1721,8 @@ button.debug-toggle-option {
     z-index: 10001;
 }
 /* QUICK WIN #3: iOS/Safari Performance Fixes */
-/* Critical fix for iOS/Safari performance regression in OpenSeadragon 5.0.1 */
+/* Critical fix for iOS/Safari performance regression in OpenSeadragon 4.1.0 */
+/* Issue #2434: Focus outline is the #1 performance killer on iOS */
 .openseadragon-canvas:focus {
     outline: 0 !important;
     /* This single line fixes major Safari/iOS performance drops */
@@ -1748,6 +1749,10 @@ button.debug-toggle-option {
         /* MOBILE OPTIMIZATION: Crisp edges for line art on WebKit */
         image-rendering: -webkit-optimize-contrast;
         image-rendering: crisp-edges;
+        /* iOS Canvas Preservation: Force layer creation */
+        will-change: transform;
+        -webkit-transform-style: preserve-3d;
+        transform-style: preserve-3d;
     }
 }
 /* Touch optimization for all mobile devices */

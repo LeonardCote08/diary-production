@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/MinimalistAudioEngine-BHZpd0nw.js","assets/HapticManager-ISgBS4fQ.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/MinimalistAudioEngine-Dm1jSW51.js","assets/HapticManager-Bk23oVZ2.js"])))=>i.map(i=>d[i]);
 (function polyfill() {
   const relList = document.createElement("link").relList;
   if (relList && relList.supports && relList.supports("modulepreload")) {
@@ -18521,6 +18521,11 @@ class SafariOverlayManager {
       console.log("Already initialized, skipping");
       return;
     }
+    if (this.isIPhone) {
+      console.log("SafariOverlayManager: SKIPPING on iPhone (debugging disappearance issue)");
+      this.isInitialized = true;
+      return;
+    }
     this.createOverlayElement();
     this.setupEventListeners();
     console.log("Event listeners set up");
@@ -19373,6 +19378,9 @@ class SafariOverlayManager {
       this.ellipseData
     );
     if (this.isIPhone) {
+      if (adjustedOpacity >= 0.99) {
+        console.warn("[iPhone SafariOverlay] High opacity detected:", adjustedOpacity, "- this could hide canvas!");
+      }
       this.overlayElement.style.opacity = adjustedOpacity;
       this.overlayElement.style["-webkit-mask-image"] = gradientMask;
       this.overlayElement.style["mask-image"] = gradientMask;
@@ -19398,6 +19406,13 @@ class SafariOverlayManager {
           this.overlayElement.style.display = "none";
         }
       });
+    }
+    if (this.isIPhone && !this.state.selectedHotspot) {
+      if (adjustedOpacity > 0.5) {
+        console.warn("[iPhone] Forcing overlay transparency to prevent canvas hiding");
+        this.overlayElement.style.opacity = "0";
+        this.overlayElement.style.pointerEvents = "none";
+      }
     }
   }
   getHotspotBounds(hotspot) {
@@ -22996,7 +23011,7 @@ function DebugPanel(props) {
             console.log("[Minimalist Audio] Using global engine");
           } else {
             const MinimalistAudioEngine = (await __vitePreload(async () => {
-              const { default: __vite_default__ } = await import("./MinimalistAudioEngine-BHZpd0nw.js");
+              const { default: __vite_default__ } = await import("./MinimalistAudioEngine-Dm1jSW51.js");
               return { default: __vite_default__ };
             }, true ? __vite__mapDeps([0,1]) : void 0)).default;
             const engine = new MinimalistAudioEngine();
@@ -24418,7 +24433,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-xSkBzaWd.js").then((n) => n.v);
+      } = await import("./viewerSetup-QPPD-r1j.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
