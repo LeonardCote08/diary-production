@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-CiPAHRXP.js","assets/main-LmV8Bl4k.js","assets/main-CXv7Btoh.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-C0l4r2Cx.js","assets/main-C88r-A9V.js","assets/main-CXv7Btoh.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-LmV8Bl4k.js";
+import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-C88r-A9V.js";
 var howler = {};
 /*!
  *  howler.js v2.2.4
@@ -7325,123 +7325,225 @@ function applyIOSTileDisappearFix(viewer) {
   };
   console.log("iOS Tile Disappear Fix applied successfully");
 }
-class iPhoneCanvasFix {
+class iPhoneCanvasUltimateFix {
   constructor(viewer) {
+    var _a;
     this.viewer = viewer;
-    this.touchActive = false;
-    this.initialized = false;
-    this.isIPhone = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
+    this.isIPhone = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
     if (!this.isIPhone) {
-      console.log("iPhoneCanvasFix: Not iPhone, skipping initialization");
+      console.log("iPhoneCanvasUltimateFix: Not iPhone, skipping initialization");
       return;
     }
+    this.initialized = false;
+    this.healthCheckInterval = null;
+    this.originalUseCanvas = (_a = viewer.drawer) == null ? void 0 : _a.useCanvas;
     this.initialize();
   }
   initialize() {
     if (this.initialized) return;
-    console.log("iPhoneCanvasFix: Initializing canvas preservation system");
+    console.log("iPhoneCanvasUltimateFix: Initializing ULTIMATE fix for iPhone canvas issues");
+    this.checkAndHandleImageSize();
+    this.applyiPhoneConfiguration();
     this.setupTouchEventDelegation();
     this.setupCanvasPreservation();
-    this.setupMemoryManagement();
+    this.setupContextLossRecovery();
+    this.startHealthMonitoring();
     this.initialized = true;
-    console.log("iPhoneCanvasFix: Initialization complete");
+    console.log("iPhoneCanvasUltimateFix: All systems initialized successfully");
+  }
+  checkAndHandleImageSize() {
+    const world = this.viewer.world;
+    if (world && world.getItemCount() > 0) {
+      const item = world.getItemAt(0);
+      if (item && item.source) {
+        const totalPixels = item.source.width * item.source.height;
+        const iOS_LIMIT = 5242880;
+        if (totalPixels > iOS_LIMIT) {
+          console.warn(`Image size (${totalPixels} pixels) exceeds iPhone limit (${iOS_LIMIT} pixels)`);
+          console.log("CRITICAL: Disabling canvas mode to avoid iPhone resource limits");
+          if (this.viewer.drawer) {
+            this.viewer.drawer.useCanvas = false;
+            console.log("Switched to non-canvas (DOM) rendering mode");
+          }
+          if (this.viewer.source) {
+            this.viewer.source.tileSize = 256;
+            this.viewer.source.tileOverlap = 1;
+          }
+          if (this.viewer.tileCache) {
+            this.viewer.tileCache.maxImageCacheCount = 30;
+          }
+          this.viewer.imageLoaderLimit = 1;
+        } else {
+          console.log("Image size within iPhone limits, canvas mode can be used");
+        }
+      }
+    }
+  }
+  applyiPhoneConfiguration() {
+    console.log("iPhoneCanvasUltimateFix: Applying critical iPhone configuration");
+    if (this.viewer.gestureSettingsTouch) {
+      this.viewer.gestureSettingsTouch.flickEnabled = false;
+      this.viewer.gestureSettingsTouch.flickMomentum = 0;
+      this.viewer.gestureSettingsTouch.scrollToZoom = false;
+      this.viewer.gestureSettingsTouch.pinchRotate = false;
+      console.log("Disabled flick and momentum to prevent touch event blocking");
+    }
+    this.viewer.immediateRender = true;
+    this.viewer.preserveViewport = true;
+    this.viewer.imageSmoothingEnabled = false;
+    this.viewer.maxZoomPixelRatio = 2;
+    console.log("iPhone configuration applied");
   }
   setupTouchEventDelegation() {
-    const container = this.viewer.container;
-    const handlers = this.viewer.innerTracker ? this.viewer.innerTracker.handlers : {};
-    console.log("iPhoneCanvasFix: Setting up touch event delegation");
-    document.body.addEventListener("touchstart", (e) => {
-      if (container.contains(e.target)) {
-        this.touchActive = true;
-        e.preventDefault();
-        if (handlers.touchstart) {
-          handlers.touchstart(e);
-        }
+    console.log("iPhoneCanvasUltimateFix: Setting up touch event delegation to document.body");
+    const canvas = this.viewer.canvas;
+    if (!canvas) return;
+    ["touchstart", "touchmove", "touchend", "touchcancel"].forEach((eventType) => {
+      canvas.removeEventListener(eventType, null, false);
+      canvas.removeEventListener(eventType, null, true);
+    });
+    document.body.addEventListener("touchstart", (e) => this.handleTouchEvent(e), { passive: false });
+    document.body.addEventListener("touchmove", (e) => this.handleTouchEvent(e), { passive: false });
+    document.body.addEventListener("touchend", (e) => this.handleTouchEndFix(e), { passive: false });
+    document.body.addEventListener("touchcancel", (e) => this.handleTouchEndFix(e), { passive: false });
+    console.log("Touch events delegated to document.body");
+  }
+  handleTouchEvent(event) {
+    const canvas = this.viewer.canvas;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const touch = event.touches[0] || event.changedTouches[0];
+    if (touch && touch.clientX >= rect.left && touch.clientX <= rect.right && touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+      event.preventDefault();
+      if (this.viewer.innerTracker && this.viewer.innerTracker.captureHandler) {
+        this.viewer.innerTracker.captureHandler(event);
       }
-    }, { passive: false });
-    document.body.addEventListener("touchend", (e) => {
-      if (container.contains(e.target)) {
-        this.touchActive = false;
-        this.preserveCanvas();
-        if (handlers.touchend) {
-          handlers.touchend(e);
-        }
-      }
-    }, false);
-    document.body.addEventListener("touchmove", (e) => {
-      if (container.contains(e.target)) {
-        e.preventDefault();
-        if (handlers.touchmove) {
-          handlers.touchmove(e);
-        }
-      }
-    }, { passive: false });
+    }
+  }
+  handleTouchEndFix(event) {
+    this.handleTouchEvent(event);
+    console.log("TouchEnd detected - applying preservation");
+    this.forceCanvasPreservation();
+    setTimeout(() => {
+      this.forceCanvasPreservation();
+    }, 16);
+    setTimeout(() => this.forceCanvasPreservation(), 33);
+    setTimeout(() => this.forceCanvasPreservation(), 50);
   }
   setupCanvasPreservation() {
-    console.log("iPhoneCanvasFix: Setting up canvas preservation");
-    this.viewer.addHandler("canvas-press", () => {
-      this.touchActive = true;
-      console.log("iPhoneCanvasFix: Touch started");
-    });
-    this.viewer.addHandler("canvas-release", () => {
-      this.touchActive = false;
-      console.log("iPhoneCanvasFix: Touch ended - preserving canvas");
-      this.preserveCanvas();
-    });
+    console.log("iPhoneCanvasUltimateFix: Setting up canvas preservation system");
     this.viewer.addHandler("animation-finish", () => {
-      if (!this.touchActive) {
-        console.log("iPhoneCanvasFix: Animation finished - ensuring canvas visibility");
-        this.preserveCanvas();
-      }
+      console.log("Animation finished - preserving canvas");
+      this.forceCanvasPreservation();
+    });
+    this.viewer.addHandler("canvas-drag-end", () => {
+      console.log("Drag ended - preserving canvas");
+      setTimeout(() => this.forceCanvasPreservation(), 10);
+    });
+    this.viewer.addHandler("zoom", () => {
+      this.forceCanvasPreservation();
     });
   }
-  preserveCanvas() {
-    var _a, _b;
-    const canvas = (_a = this.viewer.drawer) == null ? void 0 : _a.canvas;
-    const ctx = (_b = this.viewer.drawer) == null ? void 0 : _b.context;
-    if (!canvas || !ctx) {
-      console.error("iPhoneCanvasFix: Canvas or context missing");
-      return;
-    }
-    requestAnimationFrame(() => {
-      ctx.globalAlpha = 0.999;
-      ctx.globalAlpha = 1;
-      canvas.style.transform = "translateZ(0.1px)";
+  forceCanvasPreservation() {
+    if (!this.viewer.drawer) return;
+    const canvas = this.viewer.drawer.canvas;
+    const context = this.viewer.drawer.context;
+    if (!canvas) return;
+    try {
+      const originalDisplay = canvas.style.display;
+      canvas.style.display = "none";
+      canvas.offsetHeight;
+      canvas.style.display = originalDisplay || "block";
+      canvas.style.transform = "translateZ(0)";
+      canvas.style.webkitTransform = "translateZ(0)";
       canvas.style.willChange = "transform";
-      requestAnimationFrame(() => {
-        canvas.style.transform = "translateZ(0)";
-        canvas.style.willChange = "transform";
-      });
-    });
-  }
-  setupMemoryManagement() {
-    console.log("iPhoneCanvasFix: Setting up memory management");
-    let idleTimer;
-    this.viewer.addHandler("animation", () => {
-      clearTimeout(idleTimer);
-      idleTimer = setTimeout(() => {
-        var _a, _b;
-        if (!this.touchActive && ((_a = this.viewer.drawer) == null ? void 0 : _a.context)) {
-          const tiledImage = (_b = this.viewer.world) == null ? void 0 : _b.getItemAt(0);
-          if (tiledImage && tiledImage._tileCache) {
-            this.viewer.viewport.getZoom();
-            const canvas = this.viewer.drawer.canvas;
-            const memoryMB = canvas.width * canvas.height * 4 / (1024 * 1024);
-            if (memoryMB > 150) {
-              console.log(`iPhoneCanvasFix: Memory at ${memoryMB.toFixed(1)}MB - clearing old tiles`);
-              if (tiledImage._tileCache.numTilesLoaded > 20) {
-                tiledImage.reset();
-                this.viewer.forceRedraw();
-              }
-            }
-          }
+      if (context) {
+        try {
+          context.save();
+          context.restore();
+        } catch (e) {
+          console.warn("Context needs recovery");
+          this.recoverContext();
         }
-      }, 3e3);
-    });
+      }
+      if (this.viewer.forceRedraw) {
+        this.viewer.forceRedraw();
+      }
+      canvas.style.visibility = "visible";
+      canvas.style.opacity = "1";
+    } catch (error) {
+      console.error("Error during canvas preservation:", error);
+    }
+  }
+  setupContextLossRecovery() {
+    var _a;
+    const canvas = (_a = this.viewer.drawer) == null ? void 0 : _a.canvas;
+    if (!canvas) return;
+    console.log("iPhoneCanvasUltimateFix: Setting up context loss recovery");
+    canvas.addEventListener("webglcontextlost", (event) => {
+      event.preventDefault();
+      console.warn("WebGL context lost - recovering...");
+      this.recoverContext();
+    }, false);
+    canvas.addEventListener("contextlost", (event) => {
+      event.preventDefault();
+      console.warn("Canvas context lost - recovering...");
+      this.recoverContext();
+    }, false);
+  }
+  recoverContext() {
+    console.log("Attempting context recovery...");
+    if (!this.viewer.drawer) return;
+    const wasUsingCanvas = this.viewer.drawer.useCanvas;
+    this.viewer.drawer.useCanvas = false;
+    this.viewer.forceRedraw();
+    setTimeout(() => {
+      if (wasUsingCanvas) {
+        this.viewer.drawer.useCanvas = true;
+        this.viewer.forceRedraw();
+        console.log("Context recovery completed");
+      }
+    }, 500);
+  }
+  startHealthMonitoring() {
+    console.log("iPhoneCanvasUltimateFix: Starting health monitoring");
+    this.healthCheckInterval = setInterval(() => {
+      if (!this.viewer.drawer || !this.viewer.drawer.canvas) {
+        this.stopHealthMonitoring();
+        return;
+      }
+      const canvas = this.viewer.drawer.canvas;
+      const context = this.viewer.drawer.context;
+      try {
+        if (context) {
+          context.save();
+          context.restore();
+        }
+      } catch (e) {
+        console.warn("Canvas unhealthy - triggering preservation");
+        this.forceCanvasPreservation();
+      }
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) {
+        console.warn("Canvas invisible - forcing preservation");
+        this.forceCanvasPreservation();
+      }
+    }, 1e3);
+  }
+  stopHealthMonitoring() {
+    if (this.healthCheckInterval) {
+      clearInterval(this.healthCheckInterval);
+      this.healthCheckInterval = null;
+    }
   }
   destroy() {
+    console.log("iPhoneCanvasUltimateFix: Cleaning up");
+    this.stopHealthMonitoring();
+    if (this.viewer.drawer && this.originalUseCanvas !== void 0) {
+      this.viewer.drawer.useCanvas = this.originalUseCanvas;
+    }
     this.viewer = null;
-    console.log("iPhoneCanvasFix: Destroyed");
+    this.initialized = false;
   }
 }
 class FrameBudgetManager {
@@ -12607,7 +12709,9 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   if (isIPhone) {
     try {
       console.log("Initializing iPhoneCanvasFixComplete for iPhone...");
-      componentsObj.iPhoneCanvasFix = new iPhoneCanvasFix(viewer);
+      componentsObj.iPhoneCanvasFix = new iPhoneCanvasUltimateFix(viewer);
+      console.log("Using iPhoneCanvasUltimateFix - Definitive solution for iPhone canvas issues");
+      console.log("Key features: Auto-detects 5MB limit, disables canvas mode if needed, delegates touch events");
       if (componentsObj.iPhoneCanvasFix && componentsObj.overlayManager) {
         componentsObj.iPhoneCanvasFix.viewer.overlayManager = componentsObj.overlayManager;
       }
@@ -12748,7 +12852,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-CiPAHRXP.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-C0l4r2Cx.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspots);
   eventHandlers.setupAdaptiveSprings(viewer, performanceConfig);
   const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);
