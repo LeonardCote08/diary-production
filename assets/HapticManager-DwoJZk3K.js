@@ -1,4 +1,4 @@
-import { _ as __vitePreload } from "./main-BX0iIMqa.js";
+import { _ as __vitePreload } from "./main-LmV8Bl4k.js";
 class HapticManager {
   constructor(options = {}) {
     this.hasVibrationAPI = "vibrate" in navigator;

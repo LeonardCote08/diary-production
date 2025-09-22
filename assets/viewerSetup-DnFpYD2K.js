@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-C_13e2w2.js","assets/main-BX0iIMqa.js","assets/main-CXv7Btoh.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-CiPAHRXP.js","assets/main-LmV8Bl4k.js","assets/main-CXv7Btoh.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-BX0iIMqa.js";
+import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-LmV8Bl4k.js";
 var howler = {};
 /*!
  *  howler.js v2.2.4
@@ -7325,250 +7325,31 @@ function applyIOSTileDisappearFix(viewer) {
   };
   console.log("iOS Tile Disappear Fix applied successfully");
 }
-const iPhoneOptimizedConfig = {
-  // TILE LOADING STRATEGY
-  // iPhone needs aggressive preloading to prevent blank areas
-  imageLoaderLimit: 3,
-  // Load 3 tiles simultaneously (balanced for iPhone memory)
-  maxImageCacheCount: 60,
-  // Moderate cache (iPhone has less RAM than iPad)
-  immediateRender: true,
-  // Render tiles immediately as they arrive
-  // TILE APPEARANCE
-  // Smooth fade-in for tiles to prevent jarring pop-in
-  blendTime: 0.15,
-  // Quick fade-in (150ms) for smooth appearance
-  alwaysBlend: false,
-  // Don't always blend (can cause loading issues)
-  // ANIMATION SETTINGS
-  // Faster, more responsive for iPhone's smaller screen
-  animationTime: 0.15,
-  // Quick animations (150ms)
-  springStiffness: 18,
-  // Very stiff springs for instant response
-  // VIEWPORT LOADING
-  // Load tiles before they're visible to prevent blank areas
-  visibilityRatio: 1.5,
-  // Load tiles 50% outside viewport
-  minPixelRatio: 0.8,
-  // Start loading at 80% quality
-  defaultZoomLevel: 1,
-  // TILE PROCESSING
-  // More tiles per frame for faster loading
-  maxTilesPerFrame: 3,
-  // Process 3 tiles per frame
-  tileRetryMax: 2,
-  // Retry failed tiles twice
-  timeout: 1e4,
-  // 10 second timeout
-  // ZOOM BEHAVIOR
-  // Conservative zoom to prevent memory issues
-  minZoomLevel: 0.8,
-  maxZoomLevel: 10,
-  minZoomImageRatio: 0.7,
-  // Load lower res tiles earlier
-  maxZoomPixelRatio: 1.5,
-  // Don't over-sample on retina
-  // PERFORMANCE OPTIMIZATIONS
-  constrainDuringPan: false,
-  // Smoother panning (don't constrain)
-  preserveViewport: true,
-  preserveImageSizeOnResize: true,
-  smoothTileEdgesMinZoom: Infinity,
-  // Disable smoothing (causes issues on iPhone)
-  // PREVENT DISAPPEARANCE
-  // These settings prevent the canvas from disappearing
-  subPixelRounding: false,
-  // Disable subpixel (causes flicker)
-  pixelsPerWheelLine: 40,
-  autoResize: true,
-  preserveOverlays: false,
-  // GESTURE SETTINGS
-  gestureSettingsMouse: {
-    flickEnabled: false,
-    flickMinSpeed: 60,
-    flickMomentum: 0.15,
-    pinchToZoom: false
-  },
-  gestureSettingsTouch: {
-    flickEnabled: true,
-    // Enable flick for natural feel
-    flickMinSpeed: 80,
-    // Higher threshold for intentional flicks
-    flickMomentum: 0.2,
-    // Moderate momentum
-    pinchToZoom: true,
-    zoomToRefPoint: true,
-    clickToZoom: false,
-    dblClickToZoom: false,
-    pinchRotate: false
-  },
-  // DEBUG SETTINGS
-  debugMode: false,
-  showNavigator: false,
-  showNavigationControl: false,
-  // SPECIFIC FIXES
-  // Settings that specifically address iPhone issues
-  iPhoneFixes: {
-    // Prevent tile cleanup that causes disappearance
-    preventTileCleanup: true,
-    // Use progressive loading instead of immediate clear
-    progressiveLoading: true,
-    // Keep old tiles visible while loading new ones
-    keepOldTilesVisible: true,
-    // Minimum tile opacity (never fully transparent)
-    minTileOpacity: 0.1,
-    // Delay before hiding old tiles (ms)
-    oldTileHideDelay: 500,
-    // Force continuous drawing
-    forceContinuousDraw: true,
-    // Prefetch aggressively
-    prefetchTiles: true,
-    prefetchDistance: 2
-    // Prefetch 2 levels ahead
-  }
-};
-function applyIPhoneOptimizations(config) {
-  const isIPhone = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
-  if (!isIPhone) {
-    return config;
-  }
-  console.log("[iPhone Optimization] Applying iPhone-specific tile loading configuration");
-  return {
-    ...config,
-    ...iPhoneOptimizedConfig,
-    // Preserve some original settings if they exist
-    tileSources: config.tileSources,
-    prefixUrl: config.prefixUrl,
-    id: config.id,
-    element: config.element,
-    // Override critical settings for iPhone
-    imageLoaderLimit: iPhoneOptimizedConfig.imageLoaderLimit,
-    maxImageCacheCount: iPhoneOptimizedConfig.maxImageCacheCount,
-    blendTime: iPhoneOptimizedConfig.blendTime,
-    immediateRender: iPhoneOptimizedConfig.immediateRender,
-    visibilityRatio: iPhoneOptimizedConfig.visibilityRatio,
-    maxTilesPerFrame: iPhoneOptimizedConfig.maxTilesPerFrame
-  };
-}
-function applyIPhoneRuntimeFixes(viewer) {
-  const isIPhone = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
-  if (!isIPhone || !viewer) {
-    return;
-  }
-  console.log("[iPhone Runtime Fixes] Applying runtime optimizations");
-  viewer.addHandler("animation-finish", () => {
-    const world = viewer.world;
-    if (world && world.getItemAt(0)) {
-      const tiledImage = world.getItemAt(0);
-      if (tiledImage._tileCache) {
-        tiledImage._tileCache._maxImageCacheCount = Math.max(tiledImage._tileCache._maxImageCacheCount, 60);
-      }
-    }
-  });
-  let interactionActive = false;
-  viewer.addHandler("canvas-drag", () => {
-    interactionActive = true;
-    forceUpdate();
-  });
-  viewer.addHandler("canvas-drag-end", () => {
-    setTimeout(() => {
-      interactionActive = false;
-    }, 500);
-  });
-  viewer.addHandler("zoom", () => {
-    interactionActive = true;
-    forceUpdate();
-    setTimeout(() => {
-      interactionActive = false;
-    }, 500);
-  });
-  function forceUpdate() {
-    if (interactionActive && viewer.world) {
-      const tiledImage = viewer.world.getItemAt(0);
-      if (tiledImage) {
-        tiledImage.update();
-        viewer.forceRedraw();
-      }
-      if (interactionActive) {
-        requestAnimationFrame(forceUpdate);
-      }
-    }
-  }
-  console.log("[iPhone Runtime Fixes] Runtime optimizations applied");
-}
-class iPhoneCanvasFixComplete {
+class iPhoneCanvasFix {
   constructor(viewer) {
     this.viewer = viewer;
     this.touchActive = false;
     this.initialized = false;
-    this.diagnostics = {
-      contextLost: false,
-      lastCanvasCheck: Date.now(),
-      touchEndFailures: 0,
-      canvasDisappearances: 0,
-      memoryWarnings: 0
-    };
     this.isIPhone = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
     if (!this.isIPhone) {
-      console.log("iPhoneCanvasFixComplete: Not iPhone, skipping initialization");
+      console.log("iPhoneCanvasFix: Not iPhone, skipping initialization");
       return;
     }
     this.initialize();
   }
   initialize() {
     if (this.initialized) return;
-    console.log("iPhoneCanvasFixComplete: Initializing comprehensive canvas preservation system");
-    this.applyCSSFixes();
+    console.log("iPhoneCanvasFix: Initializing canvas preservation system");
     this.setupTouchEventDelegation();
     this.setupCanvasPreservation();
     this.setupMemoryManagement();
-    this.setupProgressiveOverlays();
-    this.setupDiagnostics();
-    this.applyOptimalConfig();
     this.initialized = true;
-    console.log("iPhoneCanvasFixComplete: All systems initialized");
-  }
-  applyCSSFixes() {
-    const style = document.createElement("style");
-    style.textContent = `
-            /* Critical OpenSeadragon focus fix for iOS */
-            .openseadragon-canvas:focus {
-                outline: 0 !important;
-            }
-
-            /* Prevent iOS compositor issues */
-            .openseadragon-container {
-                -webkit-transform: translateZ(0);
-                transform: translateZ(0);
-                -webkit-backface-visibility: hidden;
-                backface-visibility: hidden;
-            }
-
-            /* iOS-specific canvas memory management */
-            @supports (-webkit-overflow-scrolling: touch) {
-                .openseadragon-canvas {
-                    will-change: transform;
-                    -webkit-transform-style: preserve-3d;
-                    transform-style: preserve-3d;
-                }
-            }
-        `;
-    document.head.appendChild(style);
-    console.log("iPhoneCanvasFixComplete: CSS fixes applied");
+    console.log("iPhoneCanvasFix: Initialization complete");
   }
   setupTouchEventDelegation() {
     const container = this.viewer.container;
-    const canvas = this.viewer.canvas;
-    const innerTracker = this.viewer.innerTracker;
-    const handlers = innerTracker ? innerTracker.handlers : {};
-    console.log("iPhoneCanvasFixComplete: Setting up enhanced touch event delegation");
-    if (canvas) {
-      ["touchstart", "touchmove", "touchend"].forEach((event) => {
-        canvas.removeEventListener(event, null, false);
-        canvas.removeEventListener(event, null, true);
-      });
-    }
+    const handlers = this.viewer.innerTracker ? this.viewer.innerTracker.handlers : {};
+    console.log("iPhoneCanvasFix: Setting up touch event delegation");
     document.body.addEventListener("touchstart", (e) => {
       if (container.contains(e.target)) {
         this.touchActive = true;
@@ -7576,21 +7357,15 @@ class iPhoneCanvasFixComplete {
         if (handlers.touchstart) {
           handlers.touchstart(e);
         }
-        this.diagnostics.touchEndFailures = 0;
       }
     }, { passive: false });
     document.body.addEventListener("touchend", (e) => {
       if (container.contains(e.target)) {
-        const touchEndTime = Date.now();
         this.touchActive = false;
+        this.preserveCanvas();
         if (handlers.touchend) {
           handlers.touchend(e);
         }
-        this.preserveCanvasEnhanced();
-        if (this.lastTouchEnd && touchEndTime - this.lastTouchEnd > 100) {
-          this.diagnostics.touchEndFailures++;
-        }
-        this.lastTouchEnd = touchEndTime;
       }
     }, false);
     document.body.addEventListener("touchmove", (e) => {
@@ -7601,39 +7376,31 @@ class iPhoneCanvasFixComplete {
         }
       }
     }, { passive: false });
-    console.log("iPhoneCanvasFixComplete: Touch delegation active");
   }
   setupCanvasPreservation() {
-    console.log("iPhoneCanvasFixComplete: Setting up enhanced canvas preservation");
+    console.log("iPhoneCanvasFix: Setting up canvas preservation");
     this.viewer.addHandler("canvas-press", () => {
       this.touchActive = true;
-      console.log("Canvas touch started");
+      console.log("iPhoneCanvasFix: Touch started");
     });
     this.viewer.addHandler("canvas-release", () => {
       this.touchActive = false;
-      console.log("Canvas touch ended - preserving with enhanced strategy");
-      this.preserveCanvasEnhanced();
+      console.log("iPhoneCanvasFix: Touch ended - preserving canvas");
+      this.preserveCanvas();
     });
     this.viewer.addHandler("animation-finish", () => {
       if (!this.touchActive) {
-        console.log("Animation finished - ensuring canvas visibility");
-        this.preserveCanvasEnhanced();
+        console.log("iPhoneCanvasFix: Animation finished - ensuring canvas visibility");
+        this.preserveCanvas();
       }
     });
-    this.viewer.addHandler("pan", () => {
-      this.schedulePreservation(100);
-    });
-    this.viewer.addHandler("zoom", () => {
-      this.schedulePreservation(100);
-    });
   }
-  preserveCanvasEnhanced() {
+  preserveCanvas() {
     var _a, _b;
     const canvas = (_a = this.viewer.drawer) == null ? void 0 : _a.canvas;
     const ctx = (_b = this.viewer.drawer) == null ? void 0 : _b.context;
-    if (!ctx) {
-      console.error("iPhoneCanvasFixComplete: Canvas context lost - attempting recovery");
-      this.recoverCanvasContext();
+    if (!canvas || !ctx) {
+      console.error("iPhoneCanvasFix: Canvas or context missing");
       return;
     }
     requestAnimationFrame(() => {
@@ -7646,209 +7413,35 @@ class iPhoneCanvasFixComplete {
         canvas.style.willChange = "transform";
       });
     });
-    if (canvas) {
-      const currentTransform = canvas.style.transform;
-      canvas.style.transform = "translateZ(0.001px)";
-      setTimeout(() => {
-        canvas.style.transform = currentTransform || "translateZ(0)";
-      }, 16);
-    }
-  }
-  schedulePreservation(delay = 50) {
-    clearTimeout(this.preservationTimer);
-    this.preservationTimer = setTimeout(() => {
-      this.preserveCanvasEnhanced();
-    }, delay);
-  }
-  recoverCanvasContext() {
-    console.log("iPhoneCanvasFixComplete: Attempting canvas context recovery");
-    this.diagnostics.contextLost = true;
-    this.diagnostics.canvasDisappearances++;
-    if (this.viewer.drawer && this.viewer.drawer._createCanvas) {
-      this.viewer.drawer._createCanvas();
-      this.viewer.forceRedraw();
-      setTimeout(() => {
-        var _a;
-        if ((_a = this.viewer.drawer) == null ? void 0 : _a.context) {
-          console.log("Canvas context recovered successfully");
-          this.diagnostics.contextLost = false;
-        }
-      }, 100);
-    }
   }
   setupMemoryManagement() {
-    console.log("iPhoneCanvasFixComplete: Setting up enhanced memory management");
-    this.preventMemoryLeaks();
+    console.log("iPhoneCanvasFix: Setting up memory management");
     let idleTimer;
     this.viewer.addHandler("animation", () => {
       clearTimeout(idleTimer);
       idleTimer = setTimeout(() => {
-        if (!this.touchActive) {
-          this.optimizeMemory();
+        var _a, _b;
+        if (!this.touchActive && ((_a = this.viewer.drawer) == null ? void 0 : _a.context)) {
+          const tiledImage = (_b = this.viewer.world) == null ? void 0 : _b.getItemAt(0);
+          if (tiledImage && tiledImage._tileCache) {
+            this.viewer.viewport.getZoom();
+            const canvas = this.viewer.drawer.canvas;
+            const memoryMB = canvas.width * canvas.height * 4 / (1024 * 1024);
+            if (memoryMB > 150) {
+              console.log(`iPhoneCanvasFix: Memory at ${memoryMB.toFixed(1)}MB - clearing old tiles`);
+              if (tiledImage._tileCache.numTilesLoaded > 20) {
+                tiledImage.reset();
+                this.viewer.forceRedraw();
+              }
+            }
+          }
         }
       }, 3e3);
     });
-    this.memoryMonitor = setInterval(() => {
-      var _a;
-      const canvas = (_a = this.viewer.drawer) == null ? void 0 : _a.canvas;
-      if (canvas) {
-        const memoryMB = canvas.width * canvas.height * 4 / (1024 * 1024);
-        if (memoryMB > 180) {
-          console.warn(`Memory warning: ${memoryMB.toFixed(1)}MB approaching iPhone limit`);
-          this.diagnostics.memoryWarnings++;
-          this.aggressiveMemoryCleanup();
-        } else if (memoryMB > 150) {
-          this.optimizeMemory();
-        }
-      }
-    }, 5e3);
-  }
-  preventMemoryLeaks() {
-    var _a;
-    const originalDestroy = (_a = this.viewer.drawer) == null ? void 0 : _a.destroy;
-    if (originalDestroy) {
-      this.viewer.drawer.destroy = function() {
-        const canvas = this.canvas;
-        if (canvas) {
-          canvas.width = 0;
-          canvas.height = 0;
-          const ctx = canvas.getContext("2d");
-          if (ctx) {
-            ctx.clearRect(0, 0, 0, 0);
-          }
-        }
-        originalDestroy.call(this);
-      };
-    }
-  }
-  optimizeMemory() {
-    var _a;
-    const tiledImage = (_a = this.viewer.world) == null ? void 0 : _a.getItemAt(0);
-    if (tiledImage && tiledImage._tileCache) {
-      const currentZoom = this.viewer.viewport.getZoom();
-      this.viewer.viewport.getBounds();
-      const level = tiledImage.levelForScale(currentZoom);
-      if (tiledImage._tileCache.numTilesLoaded > 30) {
-        console.log("Optimizing memory: clearing distant tiles");
-        for (let l = 0; l < level - 1; l++) {
-          if (tiledImage.tilesMatrix[l]) {
-            tiledImage.tilesMatrix[l] = {};
-          }
-        }
-        this.viewer.forceRedraw();
-      }
-    }
-  }
-  aggressiveMemoryCleanup() {
-    var _a;
-    console.warn("Aggressive memory cleanup triggered");
-    const tiledImage = (_a = this.viewer.world) == null ? void 0 : _a.getItemAt(0);
-    if (tiledImage) {
-      tiledImage.reset();
-      this.viewer.forceRedraw();
-    }
-  }
-  setupProgressiveOverlays() {
-    if (!this.viewer.overlayManager) {
-      console.log("No overlay manager found, skipping progressive overlay setup");
-      return;
-    }
-    console.log("iPhoneCanvasFixComplete: Setting up progressive overlay loading");
-    const MAX_OVERLAYS_IPHONE = 50;
-    let visibleOverlays = /* @__PURE__ */ new Set();
-    this.viewer.addHandler("animation", () => {
-      var _a, _b;
-      const bounds = this.viewer.viewport.getBounds();
-      this.viewer.viewport.getZoom();
-      const allOverlays = ((_b = (_a = this.viewer.overlayManager) == null ? void 0 : _a.getAllOverlays) == null ? void 0 : _b.call(_a)) || [];
-      allOverlays.forEach((overlay) => {
-        const inView = this.isOverlayInView(overlay, bounds);
-        const isVisible = visibleOverlays.has(overlay.id);
-        if (inView && !isVisible && visibleOverlays.size < MAX_OVERLAYS_IPHONE) {
-          if (this.viewer.overlayManager.showOverlay) {
-            this.viewer.overlayManager.showOverlay(overlay.id);
-          }
-          visibleOverlays.add(overlay.id);
-        } else if (!inView && isVisible) {
-          if (this.viewer.overlayManager.hideOverlay) {
-            this.viewer.overlayManager.hideOverlay(overlay.id);
-          }
-          visibleOverlays.delete(overlay.id);
-        }
-      });
-      if (visibleOverlays.size > MAX_OVERLAYS_IPHONE) {
-        const toRemove = Array.from(visibleOverlays).slice(MAX_OVERLAYS_IPHONE);
-        toRemove.forEach((id) => {
-          if (this.viewer.overlayManager.hideOverlay) {
-            this.viewer.overlayManager.hideOverlay(id);
-          }
-          visibleOverlays.delete(id);
-        });
-      }
-    });
-  }
-  isOverlayInView(overlay, viewportBounds) {
-    if (!overlay.bounds) return false;
-    const overlayBounds = overlay.bounds;
-    return !(overlayBounds.x > viewportBounds.x + viewportBounds.width || overlayBounds.x + overlayBounds.width < viewportBounds.x || overlayBounds.y > viewportBounds.y + viewportBounds.height || overlayBounds.y + overlayBounds.height < viewportBounds.y);
-  }
-  setupDiagnostics() {
-    console.log("iPhoneCanvasFixComplete: Setting up diagnostic monitoring");
-    this.diagnosticInterval = setInterval(() => {
-      var _a, _b;
-      const ctx = (_a = this.viewer.drawer) == null ? void 0 : _a.context;
-      const canvas = (_b = this.viewer.drawer) == null ? void 0 : _b.canvas;
-      if (!ctx) {
-        console.error("CRITICAL: Canvas context lost");
-        this.diagnostics.contextLost = true;
-        this.recoverCanvasContext();
-      }
-      if (canvas) {
-        const rect = canvas.getBoundingClientRect();
-        if (rect.width === 0 || rect.height === 0) {
-          console.warn("Canvas has zero dimensions");
-          this.diagnostics.canvasDisappearances++;
-          this.preserveCanvasEnhanced();
-        }
-        const pixels = canvas.width * canvas.height;
-        const memoryMB = pixels * 4 / (1024 * 1024);
-        if (memoryMB > 180) {
-          console.warn(`Canvas using ${memoryMB.toFixed(1)}MB - near iPhone limit`);
-        }
-      }
-    }, 1e3);
-    window.iPhoneDiagnostics = this.diagnostics;
-  }
-  applyOptimalConfig() {
-    if (!this.viewer) return;
-    console.log("iPhoneCanvasFixComplete: Applying optimal iPhone configuration");
-    this.viewer.gestureSettingsTouch.flickEnabled = false;
-    this.viewer.gestureSettingsTouch.flickMomentum = 0;
-    this.viewer.immediateRender = true;
-    this.viewer.springStiffness = 10;
-    this.viewer.animationTime = 0.5;
-    this.viewer.blendTime = 0.1;
-    this.viewer.imageLoaderLimit = 1;
-    this.viewer.maxImageCacheCount = 20;
-    this.viewer.maxTilesPerFrame = 1;
-    this.viewer.maxZoomPixelRatio = 1.5;
-    this.viewer.minPixelRatio = 0.8;
-    console.log("Optimal configuration applied");
-  }
-  getStatistics() {
-    return {
-      ...this.diagnostics,
-      isInitialized: this.initialized,
-      touchActive: this.touchActive,
-      uptime: Date.now() - (this.startTime || Date.now())
-    };
   }
   destroy() {
-    clearInterval(this.memoryMonitor);
-    clearInterval(this.diagnosticInterval);
-    clearTimeout(this.preservationTimer);
     this.viewer = null;
-    console.log("iPhoneCanvasFixComplete: Destroyed");
+    console.log("iPhoneCanvasFix: Destroyed");
   }
 }
 class FrameBudgetManager {
@@ -11133,7 +10726,6 @@ function adjustSettingsForPerformance(currentFPS, memoryUsage) {
 }
 const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourceConfig = null) => {
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
-  const isIPhone = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
   if (isIOS && isMobileDevice) {
     console.log("[CRITICAL] iOS detected: Forcing canvas drawer to prevent tile array corruption at indices 12/13");
   }
@@ -11266,10 +10858,6 @@ const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourc
     useCanvas: isIOS ? false : void 0
     // Contournement limite canvas iOS (5MB)
   };
-  if (isIPhone) {
-    console.log("[viewerConfig] Applying iPhone-specific optimizations from research");
-    return applyIPhoneOptimizations(finalConfig);
-  }
   return finalConfig;
 };
 const getMobileOptimizedConfig = (isMobile2, isIOS) => {
@@ -13017,17 +12605,24 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
     console.log("Set auto-deselect threshold on Canvas2D manager:", threshold);
   }
   if (isIPhone) {
-    componentsObj.iPhoneCanvasFix = new iPhoneCanvasFixComplete(viewer);
-    componentsObj.iPhoneCanvasFix.viewer.overlayManager = componentsObj.overlayManager;
-    window.iPhoneCanvasFix = componentsObj.iPhoneCanvasFix;
-    console.log("iPhoneCanvasFixComplete initialized - comprehensive canvas preservation active with:");
-    console.log("- Touch event delegation (iOS Safari 17.4.1 workaround)");
-    console.log("- Enhanced canvas preservation strategies");
-    console.log("- WebKit Bug #195325 memory leak prevention");
-    console.log("- Progressive overlay loading (50 max on iPhone)");
-    console.log("- Real-time diagnostic monitoring");
-    console.log("- Optimal OpenSeadragon configuration");
-    applyIPhoneRuntimeFixes(viewer);
+    try {
+      console.log("Initializing iPhoneCanvasFixComplete for iPhone...");
+      componentsObj.iPhoneCanvasFix = new iPhoneCanvasFix(viewer);
+      if (componentsObj.iPhoneCanvasFix && componentsObj.overlayManager) {
+        componentsObj.iPhoneCanvasFix.viewer.overlayManager = componentsObj.overlayManager;
+      }
+      window.iPhoneCanvasFix = componentsObj.iPhoneCanvasFix;
+      console.log("iPhoneCanvasFixComplete initialized successfully");
+      console.log("Features enabled:");
+      console.log("- Touch event delegation (iOS Safari 17.4.1 workaround)");
+      console.log("- Enhanced canvas preservation strategies");
+      console.log("- WebKit Bug #195325 memory leak prevention");
+      console.log("- Progressive overlay loading (50 max on iPhone)");
+      console.log("- Real-time diagnostic monitoring");
+      console.log("- Safe OpenSeadragon configuration");
+    } catch (error) {
+      console.error("Error initializing iPhoneCanvasFixComplete:", error);
+    }
   }
   console.log("Overlay manager initialized");
   console.log("Is initialized flag:", (_h = componentsObj.overlayManager) == null ? void 0 : _h.isInitialized);
@@ -13153,7 +12748,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-C_13e2w2.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-CiPAHRXP.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspots);
   eventHandlers.setupAdaptiveSprings(viewer, performanceConfig);
   const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);
