@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-BjUHsXcB.js","assets/main-DsITKk88.js","assets/main-v701mYTx.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-a9Ovf3pl.js","assets/main-PURk3aep.js","assets/main-v701mYTx.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-DsITKk88.js";
+import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-PURk3aep.js";
 var howler = {};
 /*!
  *  howler.js v2.2.4
@@ -12487,22 +12487,22 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   }
   if (isIPhone) {
     try {
-      console.log("Initializing iPhonePanZoomFix for iPhone...");
-      const { iPhonePanZoomFix } = await __vitePreload(async () => {
-        const { iPhonePanZoomFix: iPhonePanZoomFix2 } = await import("./iPhonePanZoomFix-5dvIyjKQ.js");
-        return { iPhonePanZoomFix: iPhonePanZoomFix2 };
+      console.log("Initializing iPhoneCanvasRestoreFix for iPhone...");
+      const { iPhoneCanvasRestoreFix } = await __vitePreload(async () => {
+        const { iPhoneCanvasRestoreFix: iPhoneCanvasRestoreFix2 } = await import("./iPhoneCanvasRestoreFix-CjoTeaJR.js");
+        return { iPhoneCanvasRestoreFix: iPhoneCanvasRestoreFix2 };
       }, true ? [] : void 0);
-      componentsObj.iPhonePanZoomFix = new iPhonePanZoomFix(viewer);
-      console.log("Using iPhonePanZoomFix - differential handling for pan vs zoom");
-      if (componentsObj.iPhonePanZoomFix && componentsObj.overlayManager) {
-        componentsObj.iPhonePanZoomFix.viewer.overlayManager = componentsObj.overlayManager;
+      componentsObj.iPhoneCanvasRestoreFix = new iPhoneCanvasRestoreFix(viewer);
+      console.log("Using iPhoneCanvasRestoreFix - complete canvas restoration after pan");
+      if (componentsObj.iPhoneCanvasRestoreFix && componentsObj.overlayManager) {
+        componentsObj.iPhoneCanvasRestoreFix.viewer.overlayManager = componentsObj.overlayManager;
       }
-      window.iPhonePanZoomFix = componentsObj.iPhonePanZoomFix;
-      console.log("iPhonePanZoomFix initialized successfully");
+      window.iPhoneCanvasRestoreFix = componentsObj.iPhoneCanvasRestoreFix;
+      console.log("iPhoneCanvasRestoreFix initialized successfully");
       console.log("Features enabled:");
-      console.log("- Differential pan vs zoom handling");
-      console.log("- Pan: Gentle canvas preservation without forced redraw");
-      console.log("- Zoom: Normal handling with redraw allowed");
+      console.log("- Complete canvas context restoration after pan");
+      console.log("- Backing store recreation to fix iOS corruption");
+      console.log("- Selective tile updates without full redraw");
       console.log("- Progressive overlay loading (50 max on iPhone)");
       console.log("- Real-time diagnostic monitoring");
       console.log("- Safe OpenSeadragon configuration");
@@ -12634,7 +12634,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-BjUHsXcB.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-a9Ovf3pl.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspots);
   eventHandlers.setupAdaptiveSprings(viewer, performanceConfig);
   const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);
