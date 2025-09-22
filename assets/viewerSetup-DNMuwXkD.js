@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-a9Ovf3pl.js","assets/main-PURk3aep.js","assets/main-v701mYTx.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-CpUOLBiS.js","assets/main-MNF2ZwuS.js","assets/main-v701mYTx.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-PURk3aep.js";
+import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-MNF2ZwuS.js";
 var howler = {};
 /*!
  *  howler.js v2.2.4
@@ -1545,14 +1545,14 @@ var howler = {};
        */
       _cleanBuffer: function(node) {
         var self = this;
-        var isIOS = Howler2._navigator && Howler2._navigator.vendor.indexOf("Apple") >= 0;
+        var isIOS2 = Howler2._navigator && Howler2._navigator.vendor.indexOf("Apple") >= 0;
         if (!node.bufferSource) {
           return self;
         }
         if (Howler2._scratchBuffer && node.bufferSource) {
           node.bufferSource.onended = null;
           node.bufferSource.disconnect(0);
-          if (isIOS) {
+          if (isIOS2) {
             try {
               node.bufferSource.buffer = Howler2._scratchBuffer;
             } catch (e) {
@@ -7170,8 +7170,8 @@ function applyMobileSafariFix(viewer) {
   viewer.minZoomImageRatio = 0.7;
   viewer.addHandler("animation-finish", function(event) {
     const isBrowserStack = window.location.hostname.includes("browserstack") || navigator.userAgent.includes("BrowserStack");
-    const isIPhone = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
-    if (isIPhone) {
+    const isIPhone2 = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
+    if (isIPhone2) {
       console.log("[iPhone] Skipping immediateRender toggle - using smooth tile loading");
       return;
     }
@@ -7230,13 +7230,13 @@ function applyMobileSafariFix(viewer) {
   console.log("- Image loader clearing prevented during interactions");
 }
 function applyIOSTileDisappearFix(viewer) {
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
-  const isIPhone = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
-  if (!isIOS) {
+  const isIOS2 = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+  const isIPhone2 = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
+  if (!isIOS2) {
     console.log("IOSTileDisappearFix: Not iOS, skipping fix");
     return;
   }
-  if (isIPhone) {
+  if (isIPhone2) {
     console.log("IOSTileDisappearFix: iPhone detected - SKIPPING ALL FIXES (causes disappearance)");
     return;
   }
@@ -7258,8 +7258,8 @@ function applyIOSTileDisappearFix(viewer) {
           forceRedraw();
         }, 50);
       } else {
-        const isIPhone2 = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
-        if (isIPhone2) {
+        const isIPhone3 = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
+        if (isIPhone3) {
           console.log("[iPhone] Skipping forced redraw to prevent flash");
           isPanning = false;
           return;
@@ -7281,10 +7281,10 @@ function applyIOSTileDisappearFix(viewer) {
     const tiledImage = viewer.world.getItemAt(0);
     if (!tiledImage) return;
     const isBrowserStack = window.location.hostname.includes("browserstack") || navigator.userAgent.includes("BrowserStack");
-    const isIPhone2 = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
+    const isIPhone3 = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
     if (isBrowserStack) {
       viewer.forceRedraw();
-    } else if (isIPhone2) {
+    } else if (isIPhone3) {
       console.log("[iPhone] Using gentle redraw strategy");
       tiledImage.update();
       viewer.forceRedraw();
@@ -7324,6 +7324,170 @@ function applyIOSTileDisappearFix(viewer) {
     return result;
   };
   console.log("iOS Tile Disappear Fix applied successfully");
+}
+const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isIPhone = () => /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
+function createIOSHTMLConfig(baseConfig) {
+  if (!isIOS()) {
+    return baseConfig;
+  }
+  console.log("[iOS HTML Config] Configuring HTML drawer for iOS - bypassing canvas limitations");
+  return {
+    ...baseConfig,
+    // CRITICAL: Bypass canvas entirely on iOS
+    useCanvas: false,
+    drawer: "html",
+    // Force HTML drawer explicitly
+    // Performance optimizations for HTML rendering
+    immediateRender: false,
+    // Prevent render storms
+    alwaysBlend: false,
+    // Better performance
+    imageSmoothingEnabled: false,
+    // Sharper tiles
+    // Memory management
+    maxImageCacheCount: isIPhone() ? 30 : 50,
+    imageLoaderLimit: 2,
+    maxTilesPerFrame: 2,
+    // Disable problematic features
+    flickEnabled: false,
+    gestureSettingsTouch: {
+      scrollToZoom: false,
+      clickToZoom: false,
+      dblClickToZoom: true,
+      pinchToZoom: true,
+      zoomToRefPoint: true,
+      flickEnabled: false,
+      flickMomentum: 0,
+      pinchRotate: false
+    },
+    // iOS-specific viewport settings
+    constrainDuringPan: true,
+    visibilityRatio: 1,
+    minPixelRatio: 1,
+    // Animation settings optimized for HTML rendering
+    animationTime: 0.2,
+    springStiffness: 6.5,
+    blendTime: 0,
+    // Tile settings
+    tileSize: 512,
+    tileOverlap: 1,
+    // Debug info
+    debugMode: false,
+    showNavigator: false
+  };
+}
+function applyIOSHTMLStyles() {
+  if (!isIOS()) return;
+  const styleId = "ios-html-critical-css";
+  const existingStyle = document.getElementById(styleId);
+  if (existingStyle) {
+    existingStyle.remove();
+  }
+  const style = document.createElement("style");
+  style.id = styleId;
+  style.textContent = `
+        /* Critical performance fix - prevent focus outline */
+        .openseadragon-canvas:focus,
+        .openseadragon-container:focus {
+            outline: 0 !important;
+        }
+
+        /* Prevent default iOS pan/zoom behavior */
+        #viewer,
+        .openseadragon-container {
+            touch-action: none !important;
+            -webkit-touch-callout: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+        }
+
+        /* Force hardware acceleration for tiles */
+        .openseadragon-tile {
+            transform: translateZ(0);
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        /* Optimize tile rendering */
+        .openseadragon-container {
+            -webkit-transform: translate3d(0, 0, 0);
+            transform: translate3d(0, 0, 0);
+        }
+
+        /* Prevent text selection */
+        .openseadragon-container * {
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* Fix for iOS Safari rendering issues */
+        .openseadragon-canvas {
+            -webkit-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+        }
+
+        /* Ensure tiles are crisp */
+        .openseadragon-tile img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+    `;
+  document.head.appendChild(style);
+  console.log("[iOS HTML Config] Critical CSS applied for iOS performance");
+}
+function verifyHTMLDrawer(viewer) {
+  var _a, _b;
+  if (!viewer || !isIOS()) return;
+  const drawerType = ((_b = (_a = viewer.drawer) == null ? void 0 : _a.constructor) == null ? void 0 : _b.name) || typeof viewer.drawer;
+  console.log("[iOS HTML Config] Drawer verification:", {
+    type: drawerType,
+    useCanvas: viewer.useCanvas,
+    hasCanvas: !!viewer.canvas,
+    hasContainer: !!viewer.container
+  });
+  if (drawerType === "CanvasDrawer" || viewer.useCanvas === true) {
+    console.error("[iOS HTML Config] WARNING: Canvas drawer detected on iOS! This will cause crashes.");
+    console.error("[iOS HTML Config] Attempting to force HTML drawer...");
+    if (viewer.drawer && viewer.drawer.destroy) {
+      viewer.drawer.destroy();
+    }
+    viewer.useCanvas = false;
+  }
+  return drawerType;
+}
+function setupIOSHTMLMonitoring(viewer) {
+  if (!viewer || !isIOS()) return;
+  let lastInteraction = Date.now();
+  let tileCount = 0;
+  viewer.addHandler("tile-loaded", () => {
+    tileCount++;
+    if (tileCount > 100 && isIPhone()) {
+      console.warn("[iOS HTML Config] High tile count:", tileCount, "- may impact performance");
+    }
+  });
+  viewer.addHandler("canvas-press", () => {
+    lastInteraction = Date.now();
+  });
+  const cleanupInterval = setInterval(() => {
+    if (!viewer || viewer.isDestroyed) {
+      clearInterval(cleanupInterval);
+      return;
+    }
+    const timeSinceInteraction = Date.now() - lastInteraction;
+    if (timeSinceInteraction > 3e4 && tileCount > 50) {
+      console.log("[iOS HTML Config] Cleaning tiles due to inactivity");
+      const world = viewer.world;
+      if (world && world.getItemAt(0)) {
+        const tiledImage = world.getItemAt(0);
+        if (tiledImage._tileCache) {
+          tiledImage._tileCache.numTilesLoaded = Math.min(30, tiledImage._tileCache.numTilesLoaded);
+        }
+      }
+      tileCount = 30;
+    }
+  }, 1e4);
+  return cleanupInterval;
 }
 class FrameBudgetManager {
   constructor(targetFPS = 60) {
@@ -10606,17 +10770,17 @@ function adjustSettingsForPerformance(currentFPS, memoryUsage) {
   return "normal";
 }
 const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourceConfig = null) => {
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
-  if (isIOS && isMobileDevice) {
+  const isIOS2 = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+  if (isIOS2 && isMobileDevice) {
     console.log("[CRITICAL] iOS detected: Forcing canvas drawer to prevent tile array corruption at indices 12/13");
   }
   if (isMobileDevice) {
-    const isIPadPro = isIOS && window.screen.width >= 1024;
-    const isIPadAir = isIOS && !isIPadPro && window.screen.width >= 820;
-    const isStandardIPad = isIOS && !isIPadPro && !isIPadAir;
-    config.animationTime = isIOS ? 0.2 : 0.3;
-    config.springStiffness = isIOS ? 9 : 10;
-    config.blendTime = isIOS ? 0.2 : 0.3;
+    const isIPadPro = isIOS2 && window.screen.width >= 1024;
+    const isIPadAir = isIOS2 && !isIPadPro && window.screen.width >= 820;
+    const isStandardIPad = isIOS2 && !isIPadPro && !isIPadAir;
+    config.animationTime = isIOS2 ? 0.2 : 0.3;
+    config.springStiffness = isIOS2 ? 9 : 10;
+    config.blendTime = isIOS2 ? 0.2 : 0.3;
     config.immediateRender = true;
     if (isIPadPro) {
       config.imageLoaderLimit = 4;
@@ -10650,7 +10814,7 @@ const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourc
     prefixUrl: "https://cdn.jsdelivr.net/npm/openseadragon@4.1.0/build/openseadragon/images/",
     // OpenSeadragon 4.1.0 always uses canvas drawer (no drawer property)
     imageSmoothingEnabled: config.imageSmoothingEnabled,
-    smoothTileEdgesMinZoom: isIOS ? Infinity : config.smoothTileEdgesMinZoom,
+    smoothTileEdgesMinZoom: isIOS2 ? Infinity : config.smoothTileEdgesMinZoom,
     // CRITICAL: Infinity on iOS prevents corruption
     alwaysBlend: config.alwaysBlend,
     placeholderFillStyle: config.placeholderFillStyle,
@@ -10704,10 +10868,10 @@ const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourc
       // Research: Prevent scroll conflicts
       clickToZoom: false,
       dblClickToZoom: false,
-      flickEnabled: isIOS ? false : config.flickEnabled,
+      flickEnabled: isIOS2 ? false : config.flickEnabled,
       // CRITICAL: Disable on iOS to prevent corruption triggers
       flickMinSpeed: config.flickMinSpeed,
-      flickMomentum: isIOS ? 0 : config.flickMomentum,
+      flickMomentum: isIOS2 ? 0 : config.flickMomentum,
       // CRITICAL: No momentum on iOS
       pinchToZoom: true,
       dragToPan: true,
@@ -10736,12 +10900,12 @@ const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourc
     smoothTileEdgesMinZoom: isMobileDevice ? Infinity : config.smoothTileEdgesMinZoom,
     imageSmoothingEnabled: config.imageSmoothingEnabled !== void 0 ? config.imageSmoothingEnabled : !isMobileDevice,
     // CRITICAL iOS FIX: Prevent canvas focus outline issue
-    useCanvas: isIOS ? false : void 0
+    useCanvas: isIOS2 ? false : void 0
     // Contournement limite canvas iOS (5MB)
   };
   return finalConfig;
 };
-const getMobileOptimizedConfig = (isMobile2, isIOS) => {
+const getMobileOptimizedConfig = (isMobile2, isIOS2) => {
   const baseConfig = {
     // Tiles optimization - CRITICAL
     tileSize: isMobile2 ? 512 : 256,
@@ -10763,9 +10927,9 @@ const getMobileOptimizedConfig = (isMobile2, isIOS) => {
     immediateRender: true,
     // Skip animations when possible
     // iOS-specific fixes
-    placeholderFillStyle: isIOS ? null : "#000000",
+    placeholderFillStyle: isIOS2 ? null : "#000000",
     // Fix iOS flickering
-    smoothTileEdgesMinZoom: isIOS ? Infinity : 1.1,
+    smoothTileEdgesMinZoom: isIOS2 ? Infinity : 1.1,
     // Disable edge smoothing on iOS
     // Performance settings
     minZoomImageRatio: isMobile2 ? 0.8 : 0.9,
@@ -10806,7 +10970,7 @@ const getMobileOptimizedConfig = (isMobile2, isIOS) => {
     subPixelRoundingForTransparency: false
     // Avoid subpixel issues on mobile
   };
-  if (isIOS) {
+  if (isIOS2) {
     baseConfig.useCanvas = true;
     baseConfig.preserveImageSizeOnResize = true;
   }
@@ -12176,9 +12340,9 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   const intervals = {};
   let homeViewport = null;
   const isMobileDevice = isMobile();
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const isIPhone = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
-  const baseConfig = isMobileDevice ? getMobileOptimizedConfig(isMobileDevice, isIOS) : performanceConfig.viewer;
+  const isIOS2 = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isIPhone2 = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
+  const baseConfig = isMobileDevice ? getMobileOptimizedConfig(isMobileDevice, isIOS2) : performanceConfig.viewer;
   console.log("[PERF] Using mobile-optimized config:", isMobileDevice);
   console.log("[PERF] Config details:", {
     tileSize: baseConfig.tileSize,
@@ -12219,11 +12383,17 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
     console.log("[PERFORMANCE] Using optimized tiles with aggressive compression");
   }
   const drawerType = getBrowserOptimalDrawer();
+  let finalConfig = baseConfig;
+  if (isIOS2) {
+    console.log("[CRITICAL] Applying iOS HTML configuration - bypassing canvas entirely");
+    finalConfig = createIOSHTMLConfig(baseConfig);
+    applyIOSHTMLStyles();
+  }
   const viewerConfigOptions = buildViewerConfig(
-    baseConfig,
-    // Use mobile-optimized config instead of default
+    finalConfig,
     tileSourceConfig,
-    drawerType,
+    isIOS2 ? "html" : drawerType,
+    // Force HTML drawer on iOS
     isMobileDevice,
     tileSourceConfig
   );
@@ -12233,7 +12403,12 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   }
   console.log("[viewerSetup] Creating viewer WITHOUT tileSources to ensure handlers attach first");
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  if (isIOS) {
+  if (isIOS2) {
+    viewerConfigOptions.useCanvas = false;
+    viewerConfigOptions.drawer = "html";
+    console.log("[iOS] Forcing HTML drawer - canvas disabled completely");
+  }
+  if (isIOS2) {
     console.log("[CRITICAL iOS CONFIG]", {
       drawer: viewerConfigOptions.drawer,
       smoothTileEdgesMinZoom: viewerConfigOptions.smoothTileEdgesMinZoom,
@@ -12292,11 +12467,11 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   const viewer = OpenSeadragon(viewerOptions);
   console.log("Applying TileCascadeFix for stable tile rendering...");
   applyTileCascadeFix(OpenSeadragon);
-  if (isIOS && !isIPhone) {
+  if (isIOS2 && !isIPhone2) {
     console.log("Applying MobileSafariFix for iPad...");
     applyMobileSafariFix(viewer);
     applyIOSTileDisappearFix(viewer);
-  } else if (isIPhone) {
+  } else if (isIPhone2) {
     console.log("iPhone detected - using new iPhoneCanvasFix instead of old fixes");
   }
   await new Promise((resolve) => setTimeout(resolve, 50));
@@ -12343,7 +12518,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
             }
           }, 2e3);
         }
-        if (isIOS) {
+        if (isIOS2) {
           console.log("[iOS] Tile protection will be handled by global patch");
           const canvas = viewer.canvas;
           if (canvas) {
@@ -12485,27 +12660,20 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
     componentsObj.overlayManager.setAutoDeselectThreshold(threshold);
     console.log("Set auto-deselect threshold on Canvas2D manager:", threshold);
   }
-  if (isIPhone) {
+  if (isIPhone2) {
     try {
-      console.log("Initializing iPhoneCanvasRestoreFix for iPhone...");
-      const { iPhoneCanvasRestoreFix } = await __vitePreload(async () => {
-        const { iPhoneCanvasRestoreFix: iPhoneCanvasRestoreFix2 } = await import("./iPhoneCanvasRestoreFix-CjoTeaJR.js");
-        return { iPhoneCanvasRestoreFix: iPhoneCanvasRestoreFix2 };
-      }, true ? [] : void 0);
-      componentsObj.iPhoneCanvasRestoreFix = new iPhoneCanvasRestoreFix(viewer);
-      console.log("Using iPhoneCanvasRestoreFix - complete canvas restoration after pan");
-      if (componentsObj.iPhoneCanvasRestoreFix && componentsObj.overlayManager) {
-        componentsObj.iPhoneCanvasRestoreFix.viewer.overlayManager = componentsObj.overlayManager;
-      }
-      window.iPhoneCanvasRestoreFix = componentsObj.iPhoneCanvasRestoreFix;
-      console.log("iPhoneCanvasRestoreFix initialized successfully");
+      console.log("[iOS HTML] Setting up monitoring for HTML drawer");
+      const drawerType2 = verifyHTMLDrawer(viewer);
+      console.log(`[iOS HTML] Drawer type verified: ${drawerType2}`);
+      const cleanupInterval = setupIOSHTMLMonitoring(viewer);
+      componentsObj.iosCleanupInterval = cleanupInterval;
+      window.iosDrawerType = drawerType2;
+      console.log("[iOS HTML] Initialization complete");
       console.log("Features enabled:");
-      console.log("- Complete canvas context restoration after pan");
-      console.log("- Backing store recreation to fix iOS corruption");
-      console.log("- Selective tile updates without full redraw");
-      console.log("- Progressive overlay loading (50 max on iPhone)");
-      console.log("- Real-time diagnostic monitoring");
-      console.log("- Safe OpenSeadragon configuration");
+      console.log("- HTML-based tile rendering (no canvas)");
+      console.log("- CSS transforms for hardware acceleration");
+      console.log("- Automatic memory management");
+      console.log("- No canvas memory limitations");
     } catch (error) {
       console.error("Error initializing iPhoneCanvasFixComplete:", error);
     }
@@ -12548,9 +12716,9 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   setTimeout(() => {
     const actualDrawer = getDrawerType(viewer.drawer);
     console.log("RESEARCH VERIFICATION: Actual drawer in use:", actualDrawer);
-    if ((isMobileDevice || isSafari || isIOS) && actualDrawer !== "canvas") {
+    if ((isMobileDevice || isSafari || isIOS2) && actualDrawer !== "canvas") {
       console.error("CRITICAL: Canvas drawer not applied! Performance will be poor.");
-    } else if ((isMobileDevice || isSafari || isIOS) && actualDrawer === "canvas") {
+    } else if ((isMobileDevice || isSafari || isIOS2) && actualDrawer === "canvas") {
       console.log("SUCCESS: Canvas drawer confirmed for mobile/Safari - performance should be optimal");
     }
   }, 100);
@@ -12559,7 +12727,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   componentsObj.tileOptimizer.start();
   componentsObj.tileCleanupManager.start();
   componentsObj.lowZoomOptimizer.enable();
-  if (isIOS) {
+  if (isIOS2) {
     console.log("===== iOS CRITICAL CONFIGURATION =====");
     console.log("Drawer type:", getDrawerType(viewer.drawer));
     console.log("Max image cache count:", viewer.maxImageCacheCount);
@@ -12634,7 +12802,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-a9Ovf3pl.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-CpUOLBiS.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspots);
   eventHandlers.setupAdaptiveSprings(viewer, performanceConfig);
   const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);
