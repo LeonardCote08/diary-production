@@ -1,9 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-k6hQs-XB.js","assets/main-C88r-A9V.js","assets/main-CXv7Btoh.css","assets/MinimalistAudioEngine-Cr2rXMZi.js","assets/HapticManager-IcXOjiAW.js","assets/MultimodalSyncEngine-9EzGit-1.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-C4mdVGJt.js","assets/main-Cedkoebd.js","assets/main-v701mYTx.css","assets/MinimalistAudioEngine-CH7kzbPK.js","assets/HapticManager-CfZ9HpWn.js","assets/MultimodalSyncEngine-BihegVo5.js"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, _ as __vitePreload, i as isMobile, d as OverlayManagerFactory } from "./main-C88r-A9V.js";
-import { c as createLogger, o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-iSGkwikS.js";
+import { O as OpenSeadragon, _ as __vitePreload, i as isMobile, d as OverlayManagerFactory } from "./main-Cedkoebd.js";
+import { c as createLogger, o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-mkpP2B8b.js";
 class TemporalModeHandler {
   constructor(options = {}) {
     this.audioEngine = options.audioEngine || window.audioEngine;
@@ -8993,7 +8993,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
   }
   if (renderer.eventCoordinator) {
     const TemporalEchoController = (await __vitePreload(async () => {
-      const { default: __vite_default__ } = await import("./TemporalEchoController-k6hQs-XB.js");
+      const { default: __vite_default__ } = await import("./TemporalEchoController-C4mdVGJt.js");
       return { default: __vite_default__ };
     }, true ? __vite__mapDeps([0,1,2]) : void 0)).default;
     const echoController = new TemporalEchoController({
@@ -9011,7 +9011,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
     window.temporalEchoController = echoController;
     if (isMobile()) {
       const MinimalistAudioEngine = (await __vitePreload(async () => {
-        const { default: __vite_default__ } = await import("./MinimalistAudioEngine-Cr2rXMZi.js");
+        const { default: __vite_default__ } = await import("./MinimalistAudioEngine-CH7kzbPK.js");
         return { default: __vite_default__ };
       }, true ? __vite__mapDeps([3,4,1,2]) : void 0)).default;
       const audioEngine = new MinimalistAudioEngine();
@@ -9021,7 +9021,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
           await audioEngine.init();
           console.log("[ViewerEventHandlers] Minimalist audio engine initialized");
           const { getMultimodalSyncEngine } = await __vitePreload(async () => {
-            const { getMultimodalSyncEngine: getMultimodalSyncEngine2 } = await import("./MultimodalSyncEngine-9EzGit-1.js");
+            const { getMultimodalSyncEngine: getMultimodalSyncEngine2 } = await import("./MultimodalSyncEngine-BihegVo5.js");
             return { getMultimodalSyncEngine: getMultimodalSyncEngine2 };
           }, true ? __vite__mapDeps([5,4,1,2]) : void 0);
           const borderRadialAnimator = window.borderRadialAnimator || (echoController == null ? void 0 : echoController.borderRadialAnimator);
