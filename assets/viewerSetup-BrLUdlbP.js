@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-Bi8IjhPT.js","assets/main-BIh9YfNQ.js","assets/main-v701mYTx.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-DF0rqIBQ.js","assets/main-BN_WUywV.js","assets/main-v701mYTx.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon$1, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-BIh9YfNQ.js";
+import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-BN_WUywV.js";
 var howler = {};
 /*!
  *  howler.js v2.2.4
@@ -7341,19 +7341,16 @@ function createIOSHTMLConfig(baseConfig) {
     drawer: "html",
     // Force HTML drawer explicitly
     // Performance optimizations for HTML rendering
-    immediateRender: true,
-    // Render tiles immediately as they arrive
+    immediateRender: false,
+    // Prevent render storms
     alwaysBlend: false,
     // Better performance
     imageSmoothingEnabled: false,
     // Sharper tiles
     // Memory management (iPad can handle more tiles than iPhone)
-    maxImageCacheCount: isIPhone() ? 60 : isIPad$1() ? 150 : 100,
-    // Increased cache
-    imageLoaderLimit: isIPhone() ? 3 : isIPad$1() ? 4 : 3,
-    // More concurrent loads
-    maxTilesPerFrame: isIPhone() ? 3 : isIPad$1() ? 4 : 3,
-    // Process more tiles per frame
+    maxImageCacheCount: isIPhone() ? 30 : isIPad$1() ? 75 : 50,
+    imageLoaderLimit: 2,
+    maxTilesPerFrame: 2,
     // Disable problematic features
     flickEnabled: false,
     gestureSettingsTouch: {
@@ -7371,19 +7368,12 @@ function createIOSHTMLConfig(baseConfig) {
     visibilityRatio: 1,
     minPixelRatio: 1,
     // Animation settings optimized for HTML rendering
-    animationTime: 0.15,
-    // Faster animations
-    springStiffness: 8,
-    // Snappier response
+    animationTime: 0.2,
+    springStiffness: 6.5,
     blendTime: 0,
-    // No blend delay
-    // Tile settings with prefetch
+    // Tile settings
     tileSize: 512,
     tileOverlap: 1,
-    preload: true,
-    // Enable tile preloading
-    placeholderFillStyle: "#f0f0f0",
-    // Light gray placeholder
     // Debug info
     debugMode: false,
     showNavigator: false
@@ -7500,150 +7490,6 @@ function setupIOSHTMLMonitoring(viewer) {
     }
   }, 1e4);
   return cleanupInterval;
-}
-class iOSTilePrefetcher {
-  constructor(viewer) {
-    this.viewer = viewer;
-    this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    if (!this.isIOS) {
-      console.log("[iOSTilePrefetcher] Not iOS, skipping initialization");
-      return;
-    }
-    this.lastViewport = null;
-    this.movementVector = { x: 0, y: 0 };
-    this.prefetchRadius = 2;
-    this.predictionEnabled = true;
-    this.initialize();
-  }
-  initialize() {
-    console.log("[iOSTilePrefetcher] Initializing aggressive tile prefetching");
-    this.viewer.addHandler("viewport-change", (event) => {
-      this.onViewportChange(event);
-    });
-    this.viewer.addHandler("animation-start", () => {
-      this.prefetchVisibleArea();
-    });
-    this.viewer.addHandler("open", () => {
-      setTimeout(() => {
-        this.prefetchVisibleArea();
-      }, 100);
-    });
-    this.applyImmediateRenderingHacks();
-  }
-  onViewportChange(event) {
-    const currentViewport = this.viewer.viewport;
-    const bounds = currentViewport.getBounds();
-    if (this.lastViewport) {
-      this.movementVector = {
-        x: bounds.x - this.lastViewport.x,
-        y: bounds.y - this.lastViewport.y
-      };
-    }
-    this.lastViewport = { x: bounds.x, y: bounds.y };
-    if (this.predictionEnabled && (Math.abs(this.movementVector.x) > 0.01 || Math.abs(this.movementVector.y) > 0.01)) {
-      this.prefetchPredictedArea();
-    }
-  }
-  prefetchVisibleArea() {
-    const world = this.viewer.world;
-    if (!world || world.getItemCount() === 0) return;
-    const tiledImage = world.getItemAt(0);
-    if (!tiledImage) return;
-    const viewport = this.viewer.viewport;
-    const zoom = viewport.getZoom();
-    const bounds = viewport.getBounds();
-    const expandedBounds = new OpenSeadragon.Rect(
-      bounds.x - bounds.width * this.prefetchRadius,
-      bounds.y - bounds.height * this.prefetchRadius,
-      bounds.width * (1 + this.prefetchRadius * 2),
-      bounds.height * (1 + this.prefetchRadius * 2)
-    );
-    const level = tiledImage.source.getLevelForScale(zoom);
-    console.log(`[iOSTilePrefetcher] Prefetching tiles at level ${level} for expanded bounds`);
-    this.loadTilesInBounds(tiledImage, expandedBounds, level);
-  }
-  prefetchPredictedArea() {
-    if (Math.abs(this.movementVector.x) < 1e-3 && Math.abs(this.movementVector.y) < 1e-3) {
-      return;
-    }
-    const world = this.viewer.world;
-    if (!world || world.getItemCount() === 0) return;
-    const tiledImage = world.getItemAt(0);
-    if (!tiledImage) return;
-    const viewport = this.viewer.viewport;
-    const zoom = viewport.getZoom();
-    const bounds = viewport.getBounds();
-    const predictedBounds = new OpenSeadragon.Rect(
-      bounds.x + this.movementVector.x * 5,
-      // Predict 5 frames ahead
-      bounds.y + this.movementVector.y * 5,
-      bounds.width * 1.5,
-      // Slightly larger area
-      bounds.height * 1.5
-    );
-    const level = tiledImage.source.getLevelForScale(zoom);
-    this.loadTilesInBounds(tiledImage, predictedBounds, level);
-  }
-  loadTilesInBounds(tiledImage, bounds, level) {
-    const tileSource = tiledImage.source;
-    if (!tileSource.getTileAtPoint) {
-      return;
-    }
-    const topLeft = tileSource.getTileAtPoint(level, { x: bounds.x, y: bounds.y });
-    const bottomRight = tileSource.getTileAtPoint(level, {
-      x: bounds.x + bounds.width,
-      y: bounds.y + bounds.height
-    });
-    if (!topLeft || !bottomRight) return;
-    for (let x = topLeft.x; x <= bottomRight.x; x++) {
-      for (let y = topLeft.y; y <= bottomRight.y; y++) {
-        this.loadTile(tiledImage, level, x, y);
-      }
-    }
-  }
-  loadTile(tiledImage, level, x, y) {
-    const numTiles = tiledImage.source.getNumTiles(level);
-    if (x < 0 || y < 0 || x >= numTiles.x || y >= numTiles.y) {
-      return;
-    }
-    const tile = tiledImage._getTile(level, x, y, true);
-    if (tile && !tile.loaded && !tile.loading) {
-      tiledImage._loadTile(tile);
-    }
-  }
-  applyImmediateRenderingHacks() {
-    const world = this.viewer.world;
-    if (!world) return;
-    this.viewer.addHandler("tile-loaded", (event) => {
-      if (this.viewer.drawer) {
-        requestAnimationFrame(() => {
-          if (this.viewer.drawer.clear) {
-            this.viewer.drawer.clear();
-          }
-          if (this.viewer.world.draw) {
-            this.viewer.world.draw();
-          }
-        });
-      }
-    });
-    let interactionTimer;
-    ["pan", "zoom"].forEach((eventType) => {
-      this.viewer.addHandler(eventType, () => {
-        clearTimeout(interactionTimer);
-        interactionTimer = setTimeout(() => {
-          if (this.viewer.drawer && this.viewer.world) {
-            this.viewer.drawer.clear();
-            this.viewer.world.draw();
-          }
-        }, 16);
-      });
-    });
-  }
-  destroy() {
-    this.viewer = null;
-    this.lastViewport = null;
-    console.log("[iOSTilePrefetcher] Destroyed");
-  }
 }
 class FrameBudgetManager {
   constructor(targetFPS = 60) {
@@ -8153,7 +7999,7 @@ class ConsciousnessEffectsOverlay {
    * Convert viewport coordinates to canvas coordinates
    */
   viewportToCanvas(viewportPoint) {
-    const point = new OpenSeadragon$1.Point(viewportPoint.x, viewportPoint.y);
+    const point = new OpenSeadragon.Point(viewportPoint.x, viewportPoint.y);
     const pixel = this.viewer.viewport.viewportToViewerElementCoordinates(point);
     return {
       x: pixel.x,
@@ -9121,7 +8967,7 @@ class CinematicZoomManager {
           x: finalParams.center.x - currentCenter.x,
           y: finalParams.center.y - currentCenter.y
         };
-        stageCenter = new OpenSeadragon$1.Point(
+        stageCenter = new OpenSeadragon.Point(
           currentCenter.x + centerDiff.x * stage.centerProgress,
           currentCenter.y + centerDiff.y * stage.centerProgress
         );
@@ -9253,7 +9099,7 @@ class CinematicZoomManager {
     const center = targetBounds.getCenter();
     return {
       zoom: targetZoom,
-      center: new OpenSeadragon$1.Point(center.x, center.y),
+      center: new OpenSeadragon.Point(center.x, center.y),
       currentZoom,
       zoomRatio: targetZoom / currentZoom
     };
@@ -9339,7 +9185,7 @@ class CinematicZoomManager {
       const elapsed = currentTime - startTime;
       const linearProgress = Math.min(elapsed / duration, 1);
       const progress = easingFn(linearProgress);
-      const interpolatedCenter = new OpenSeadragon$1.Point(
+      const interpolatedCenter = new OpenSeadragon.Point(
         startCenter.x + (targetCenter.x - startCenter.x) * progress,
         startCenter.y + (targetCenter.y - startCenter.y) * progress
       );
@@ -9412,7 +9258,7 @@ class CinematicZoomManager {
         progress
       );
       if (center) {
-        const interpolatedCenter = new OpenSeadragon$1.Point(
+        const interpolatedCenter = new OpenSeadragon.Point(
           startCenter.x + (center.x - startCenter.x) * progress,
           startCenter.y + (center.y - startCenter.y) * progress
         );
@@ -9992,7 +9838,7 @@ class ImmediateZoomHandler {
       const currentZoom = this.viewer.viewport.getZoom();
       const rect = canvas.getBoundingClientRect();
       const viewportPoint = this.viewer.viewport.pointFromPixel(
-        new OpenSeadragon$1.Point(
+        new OpenSeadragon.Point(
           event.clientX - rect.left,
           event.clientY - rect.top
         )
@@ -10146,7 +9992,7 @@ class ViewportManager {
    */
   imageToPixel(imageX, imageY) {
     const viewportPoint = this.viewer.viewport.imageToViewportCoordinates(
-      new OpenSeadragon$1.Point(imageX, imageY)
+      new OpenSeadragon.Point(imageX, imageY)
     );
     return this.viewer.viewport.pixelFromPoint(viewportPoint);
   }
@@ -10155,7 +10001,7 @@ class ViewportManager {
    */
   pixelToImage(pixelX, pixelY) {
     const viewportPoint = this.viewer.viewport.pointFromPixel(
-      new OpenSeadragon$1.Point(pixelX, pixelY)
+      new OpenSeadragon.Point(pixelX, pixelY)
     );
     return this.viewer.viewport.viewportToImageCoordinates(viewportPoint);
   }
@@ -12620,9 +12466,9 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   };
   delete viewerOptions.drawer;
   console.log("Creating OpenSeadragon 4.1.0 viewer (canvas-only):", viewerOptions);
-  const viewer = OpenSeadragon$1(viewerOptions);
+  const viewer = OpenSeadragon(viewerOptions);
   console.log("Applying TileCascadeFix for stable tile rendering...");
-  applyTileCascadeFix(OpenSeadragon$1);
+  applyTileCascadeFix(OpenSeadragon);
   if (isIOS2 && !isIPhone2) {
     console.log("Applying MobileSafariFix for iPad...");
     applyMobileSafariFix(viewer);
@@ -12824,10 +12670,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
       console.log(`[iOS HTML] Drawer type verified: ${drawerType2}`);
       const cleanupInterval = setupIOSHTMLMonitoring(viewer);
       componentsObj.iosCleanupInterval = cleanupInterval;
-      componentsObj.iosPrefetcher = new iOSTilePrefetcher(viewer);
-      console.log("[iOS HTML] Tile prefetcher initialized");
       window.iosDrawerType = drawerType2;
-      window.iosPrefetcher = componentsObj.iosPrefetcher;
       console.log("[iOS HTML] Initialization complete");
       console.log("Features enabled:");
       console.log("- HTML-based tile rendering (no canvas)");
@@ -12962,7 +12805,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-Bi8IjhPT.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-DF0rqIBQ.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspots);
   eventHandlers.setupAdaptiveSprings(viewer, performanceConfig);
   const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);
@@ -13042,11 +12885,11 @@ function setupSmoothingUtilities(viewer) {
   window.toggleTileCascadeFix = function(enable) {
     if (enable) {
       console.log("🔐 Enabling TileCascadeFix...");
-      applyTileCascadeFix(OpenSeadragon$1);
+      applyTileCascadeFix(OpenSeadragon);
       console.log("✅ TileCascadeFix enabled - single tile level (may cause zoom artifacts)");
     } else {
       console.log("🔓 Disabling TileCascadeFix...");
-      removeTileCascadeFix(OpenSeadragon$1);
+      removeTileCascadeFix(OpenSeadragon);
       console.log("✅ TileCascadeFix disabled - smooth blending enabled");
     }
     viewer.forceRedraw();
@@ -13079,9 +12922,9 @@ function setupSmoothingUtilities(viewer) {
   window.fixFlickering = function() {
     console.log("Applying manual flickering fix...");
     forceResetViewerState(viewer);
-    removeTileCascadeFix(OpenSeadragon$1);
+    removeTileCascadeFix(OpenSeadragon);
     setTimeout(() => {
-      applyTileCascadeFix(OpenSeadragon$1);
+      applyTileCascadeFix(OpenSeadragon);
       viewer.forceRedraw();
       console.log("Flickering fix applied");
     }, 100);
