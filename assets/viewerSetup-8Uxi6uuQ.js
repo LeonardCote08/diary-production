@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-DZRztfwQ.js","assets/main-BCfxyCAn.js","assets/main-CXv7Btoh.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-C_13e2w2.js","assets/main-BX0iIMqa.js","assets/main-CXv7Btoh.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-BCfxyCAn.js";
+import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-BX0iIMqa.js";
 var howler = {};
 /*!
  *  howler.js v2.2.4
@@ -12708,6 +12708,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   let homeViewport = null;
   const isMobileDevice = isMobile();
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isIPhone = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
   const baseConfig = isMobileDevice ? getMobileOptimizedConfig(isMobileDevice, isIOS) : performanceConfig.viewer;
   console.log("[PERF] Using mobile-optimized config:", isMobileDevice);
   console.log("[PERF] Config details:", {
@@ -13015,7 +13016,6 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
     componentsObj.overlayManager.setAutoDeselectThreshold(threshold);
     console.log("Set auto-deselect threshold on Canvas2D manager:", threshold);
   }
-  const isIPhone = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
   if (isIPhone) {
     componentsObj.iPhoneCanvasFix = new iPhoneCanvasFixComplete(viewer);
     componentsObj.iPhoneCanvasFix.viewer.overlayManager = componentsObj.overlayManager;
@@ -13153,7 +13153,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-DZRztfwQ.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-C_13e2w2.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspots);
   eventHandlers.setupAdaptiveSprings(viewer, performanceConfig);
   const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);

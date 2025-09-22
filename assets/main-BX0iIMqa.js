@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/MinimalistAudioEngine-Dm1jSW51.js","assets/HapticManager-Bk23oVZ2.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/MinimalistAudioEngine-CshcoIvm.js","assets/HapticManager-CGp-_Nrl.js"])))=>i.map(i=>d[i]);
 (function polyfill() {
   const relList = document.createElement("link").relList;
   if (relList && relList.supports && relList.supports("modulepreload")) {
@@ -23011,7 +23011,7 @@ function DebugPanel(props) {
             console.log("[Minimalist Audio] Using global engine");
           } else {
             const MinimalistAudioEngine = (await __vitePreload(async () => {
-              const { default: __vite_default__ } = await import("./MinimalistAudioEngine-Dm1jSW51.js");
+              const { default: __vite_default__ } = await import("./MinimalistAudioEngine-CshcoIvm.js");
               return { default: __vite_default__ };
             }, true ? __vite__mapDeps([0,1]) : void 0)).default;
             const engine = new MinimalistAudioEngine();
@@ -24433,7 +24433,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-QPPD-r1j.js").then((n) => n.v);
+      } = await import("./viewerSetup-8Uxi6uuQ.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
