@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/MinimalistAudioEngine-DS3xXGhN.js","assets/HapticManager-DzHl8JeT.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/MinimalistAudioEngine-otUc1mli.js","assets/HapticManager-BK1SHeju.js"])))=>i.map(i=>d[i]);
 (function polyfill() {
   const relList = document.createElement("link").relList;
   if (relList && relList.supports && relList.supports("modulepreload")) {
@@ -18155,8 +18155,16 @@ class SafariOverlayManager {
     this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     this.isWebKit = "WebkitAppearance" in document.documentElement.style && !window.chrome;
     this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+    this.isIPhone = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
+    this.isIPad = /iPad/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
     this.isMobile = this.isIOS || /Android/i.test(navigator.userAgent);
     this.isSafariOrWebKit = this.isSafari || this.isWebKit;
+    console.log("[SafariOverlayManager] Device detection:", {
+      isIPhone: this.isIPhone,
+      isIPad: this.isIPad,
+      isIOS: this.isIOS,
+      userAgent: navigator.userAgent.substring(0, 100)
+    });
     this.supportsMaskImage = CSS.supports("-webkit-mask-image", "radial-gradient(circle, black, transparent)");
     this.state = {
       selectedHotspot: null,
@@ -19364,7 +19372,11 @@ class SafariOverlayManager {
       this.useEllipse,
       this.ellipseData
     );
-    if (this.isIOS) {
+    if (this.isIPhone) {
+      this.overlayElement.style.opacity = adjustedOpacity;
+      this.overlayElement.style["-webkit-mask-image"] = gradientMask;
+      this.overlayElement.style["mask-image"] = gradientMask;
+    } else if (this.isIOS) {
       this.overlayElement.style["-webkit-mask-image"] = gradientMask;
       this.overlayElement.style["mask-image"] = gradientMask;
       requestAnimationFrame(() => {
@@ -22984,7 +22996,7 @@ function DebugPanel(props) {
             console.log("[Minimalist Audio] Using global engine");
           } else {
             const MinimalistAudioEngine = (await __vitePreload(async () => {
-              const { default: __vite_default__ } = await import("./MinimalistAudioEngine-DS3xXGhN.js");
+              const { default: __vite_default__ } = await import("./MinimalistAudioEngine-otUc1mli.js");
               return { default: __vite_default__ };
             }, true ? __vite__mapDeps([0,1]) : void 0)).default;
             const engine = new MinimalistAudioEngine();
@@ -24406,7 +24418,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-BizNOEcb.js").then((n) => n.v);
+      } = await import("./viewerSetup-CSBhO-tD.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };

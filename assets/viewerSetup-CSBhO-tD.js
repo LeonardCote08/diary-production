@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-DaWqEOUY.js","assets/main-CoH7BaCS.js","assets/main-DqCiCIqm.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-C0zBQRfV.js","assets/main-Bachfx_3.js","assets/main-DqCiCIqm.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-CoH7BaCS.js";
+import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-Bachfx_3.js";
 var howler = {};
 /*!
  *  howler.js v2.2.4
@@ -7226,11 +7226,13 @@ function applyMobileSafariFix(viewer) {
 }
 function applyIOSTileDisappearFix(viewer) {
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+  const isIPhone = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
   if (!isIOS) {
     console.log("IOSTileDisappearFix: Not iOS, skipping fix");
     return;
   }
   console.log("=== APPLYING iOS TILE DISAPPEAR FIX ===");
+  console.log("Device:", isIPhone ? "iPhone" : "iPad/Other iOS");
   let isPanning = false;
   let panEndTimer = null;
   let forceRedrawTimer = null;
@@ -7248,15 +7250,23 @@ function applyIOSTileDisappearFix(viewer) {
           forceRedraw();
         }, 50);
       } else {
-        requestAnimationFrame(() => {
-          forceRedraw();
-        });
-        panEndTimer = setTimeout(() => {
-          forceRedraw();
-        }, 100);
-        forceRedrawTimer = setTimeout(() => {
-          forceRedraw();
-        }, 250);
+        const isIPhone2 = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
+        if (isIPhone2) {
+          console.log("[iPhone] Using single delayed redraw");
+          panEndTimer = setTimeout(() => {
+            forceRedraw();
+          }, 50);
+        } else {
+          requestAnimationFrame(() => {
+            forceRedraw();
+          });
+          panEndTimer = setTimeout(() => {
+            forceRedraw();
+          }, 100);
+          forceRedrawTimer = setTimeout(() => {
+            forceRedraw();
+          }, 250);
+        }
       }
     }
   });
@@ -7264,8 +7274,14 @@ function applyIOSTileDisappearFix(viewer) {
     const tiledImage = viewer.world.getItemAt(0);
     if (!tiledImage) return;
     const isBrowserStack = window.location.hostname.includes("browserstack") || navigator.userAgent.includes("BrowserStack");
+    const isIPhone2 = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
     if (isBrowserStack) {
       viewer.forceRedraw();
+    } else if (isIPhone2) {
+      console.log("[iPhone] Using gentle redraw strategy");
+      tiledImage.update();
+      viewer.forceRedraw();
+      viewer.viewport.applyConstraints();
     } else {
       tiledImage.update();
       viewer.forceRedraw();
@@ -7306,6 +7322,8 @@ class IOSCanvasRecoveryMonitor {
   constructor(viewer) {
     this.viewer = viewer;
     this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+    this.isIPhone = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
+    this.isIPad = /iPad/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
     this.disappearanceCount = 0;
     this.lastCheckTime = 0;
     this.isMonitoring = false;
@@ -7313,9 +7331,15 @@ class IOSCanvasRecoveryMonitor {
     this.recoveryAttempts = 0;
     this.lastRecoveryTime = 0;
     this.consecutiveBlankFrames = 0;
-    this.maxConsecutiveBlankFrames = 3;
+    this.maxConsecutiveBlankFrames = this.isIPhone ? 1 : 3;
     if (this.isIOS) {
       this.initialize();
+      console.log(
+        "IOSCanvasRecoveryMonitor: Device type:",
+        this.isIPhone ? "iPhone" : "iPad",
+        "Threshold:",
+        this.maxConsecutiveBlankFrames
+      );
     }
   }
   initialize() {
@@ -7438,7 +7462,21 @@ class IOSCanvasRecoveryMonitor {
   applyRecoveryStrategies() {
     const canvas = this.viewer.canvas;
     const container = this.viewer.container;
-    console.log("IOSCanvasRecoveryMonitor: Applying recovery strategies...");
+    console.log(`IOSCanvasRecoveryMonitor: Applying recovery strategies for ${this.isIPhone ? "iPhone" : "iPad"}...`);
+    if (this.isIPhone) {
+      this.viewer.forceRedraw();
+      if (this.recoveryAttempts > 1) {
+        this.viewer.viewport.applyConstraints();
+        this.viewer.viewport.update();
+      }
+      if (this.recoveryAttempts > 2) {
+        const tiledImage = this.viewer.world.getItemAt(0);
+        if (tiledImage) {
+          tiledImage.update();
+        }
+      }
+      return;
+    }
     if (canvas) {
       const currentTransform = canvas.style.transform;
       canvas.style.transform = "translateZ(0.001px)";
@@ -7453,7 +7491,7 @@ class IOSCanvasRecoveryMonitor {
       void container.offsetHeight;
       container.style.display = originalDisplay || "block";
     }
-    if (this.recoveryAttempts > 3) {
+    if (this.recoveryAttempts > 3 && !this.isIPhone) {
       const currentZoom = this.viewer.viewport.getZoom();
       this.viewer.viewport.zoomTo(currentZoom * 1.0001, null, true);
       requestAnimationFrame(() => {
@@ -12778,7 +12816,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-DaWqEOUY.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-C0zBQRfV.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspots);
   eventHandlers.setupAdaptiveSprings(viewer, performanceConfig);
   const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);
