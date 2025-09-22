@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-CkbZ_DWG.js","assets/main-R6ga_M3j.js","assets/main-v701mYTx.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-BjUHsXcB.js","assets/main-DsITKk88.js","assets/main-v701mYTx.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-R6ga_M3j.js";
+import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-DsITKk88.js";
 var howler = {};
 /*!
  *  howler.js v2.2.4
@@ -7325,125 +7325,6 @@ function applyIOSTileDisappearFix(viewer) {
   };
   console.log("iOS Tile Disappear Fix applied successfully");
 }
-class iPhoneCanvasFix {
-  constructor(viewer) {
-    this.viewer = viewer;
-    this.touchActive = false;
-    this.initialized = false;
-    this.isIPhone = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
-    if (!this.isIPhone) {
-      console.log("iPhoneCanvasFix: Not iPhone, skipping initialization");
-      return;
-    }
-    this.initialize();
-  }
-  initialize() {
-    if (this.initialized) return;
-    console.log("iPhoneCanvasFix: Initializing canvas preservation system");
-    this.setupTouchEventDelegation();
-    this.setupCanvasPreservation();
-    this.setupMemoryManagement();
-    this.initialized = true;
-    console.log("iPhoneCanvasFix: Initialization complete");
-  }
-  setupTouchEventDelegation() {
-    const container = this.viewer.container;
-    const handlers = this.viewer.innerTracker ? this.viewer.innerTracker.handlers : {};
-    console.log("iPhoneCanvasFix: Setting up touch event delegation");
-    document.body.addEventListener("touchstart", (e) => {
-      if (container.contains(e.target)) {
-        this.touchActive = true;
-        e.preventDefault();
-        if (handlers.touchstart) {
-          handlers.touchstart(e);
-        }
-      }
-    }, { passive: false });
-    document.body.addEventListener("touchend", (e) => {
-      if (container.contains(e.target)) {
-        this.touchActive = false;
-        this.preserveCanvas();
-        if (handlers.touchend) {
-          handlers.touchend(e);
-        }
-      }
-    }, false);
-    document.body.addEventListener("touchmove", (e) => {
-      if (container.contains(e.target)) {
-        e.preventDefault();
-        if (handlers.touchmove) {
-          handlers.touchmove(e);
-        }
-      }
-    }, { passive: false });
-  }
-  setupCanvasPreservation() {
-    console.log("iPhoneCanvasFix: Setting up canvas preservation");
-    this.viewer.addHandler("canvas-press", () => {
-      this.touchActive = true;
-      console.log("iPhoneCanvasFix: Touch started");
-    });
-    this.viewer.addHandler("canvas-release", () => {
-      this.touchActive = false;
-      console.log("iPhoneCanvasFix: Touch ended - preserving canvas");
-      this.preserveCanvas();
-    });
-    this.viewer.addHandler("animation-finish", () => {
-      if (!this.touchActive) {
-        console.log("iPhoneCanvasFix: Animation finished - ensuring canvas visibility");
-        this.preserveCanvas();
-      }
-    });
-  }
-  preserveCanvas() {
-    var _a, _b;
-    const canvas = (_a = this.viewer.drawer) == null ? void 0 : _a.canvas;
-    const ctx = (_b = this.viewer.drawer) == null ? void 0 : _b.context;
-    if (!canvas || !ctx) {
-      console.error("iPhoneCanvasFix: Canvas or context missing");
-      return;
-    }
-    requestAnimationFrame(() => {
-      ctx.globalAlpha = 0.999;
-      ctx.globalAlpha = 1;
-      canvas.style.transform = "translateZ(0.1px)";
-      canvas.style.willChange = "transform";
-      requestAnimationFrame(() => {
-        canvas.style.transform = "translateZ(0)";
-        canvas.style.willChange = "transform";
-      });
-    });
-  }
-  setupMemoryManagement() {
-    console.log("iPhoneCanvasFix: Setting up memory management");
-    let idleTimer;
-    this.viewer.addHandler("animation", () => {
-      clearTimeout(idleTimer);
-      idleTimer = setTimeout(() => {
-        var _a, _b;
-        if (!this.touchActive && ((_a = this.viewer.drawer) == null ? void 0 : _a.context)) {
-          const tiledImage = (_b = this.viewer.world) == null ? void 0 : _b.getItemAt(0);
-          if (tiledImage && tiledImage._tileCache) {
-            this.viewer.viewport.getZoom();
-            const canvas = this.viewer.drawer.canvas;
-            const memoryMB = canvas.width * canvas.height * 4 / (1024 * 1024);
-            if (memoryMB > 150) {
-              console.log(`iPhoneCanvasFix: Memory at ${memoryMB.toFixed(1)}MB - clearing old tiles`);
-              if (tiledImage._tileCache.numTilesLoaded > 20) {
-                tiledImage.reset();
-                this.viewer.forceRedraw();
-              }
-            }
-          }
-        }
-      }, 3e3);
-    });
-  }
-  destroy() {
-    this.viewer = null;
-    console.log("iPhoneCanvasFix: Destroyed");
-  }
-}
 class FrameBudgetManager {
   constructor(targetFPS = 60) {
     this.targetFPS = targetFPS;
@@ -12606,18 +12487,22 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   }
   if (isIPhone) {
     try {
-      console.log("Initializing iPhoneCanvasFixComplete for iPhone...");
-      componentsObj.iPhoneCanvasFix = new iPhoneCanvasFix(viewer);
-      console.log("Using simple iPhoneCanvasFix - preserves canvas without disabling it");
-      if (componentsObj.iPhoneCanvasFix && componentsObj.overlayManager) {
-        componentsObj.iPhoneCanvasFix.viewer.overlayManager = componentsObj.overlayManager;
+      console.log("Initializing iPhonePanZoomFix for iPhone...");
+      const { iPhonePanZoomFix } = await __vitePreload(async () => {
+        const { iPhonePanZoomFix: iPhonePanZoomFix2 } = await import("./iPhonePanZoomFix-5dvIyjKQ.js");
+        return { iPhonePanZoomFix: iPhonePanZoomFix2 };
+      }, true ? [] : void 0);
+      componentsObj.iPhonePanZoomFix = new iPhonePanZoomFix(viewer);
+      console.log("Using iPhonePanZoomFix - differential handling for pan vs zoom");
+      if (componentsObj.iPhonePanZoomFix && componentsObj.overlayManager) {
+        componentsObj.iPhonePanZoomFix.viewer.overlayManager = componentsObj.overlayManager;
       }
-      window.iPhoneCanvasFix = componentsObj.iPhoneCanvasFix;
-      console.log("iPhoneCanvasFixComplete initialized successfully");
+      window.iPhonePanZoomFix = componentsObj.iPhonePanZoomFix;
+      console.log("iPhonePanZoomFix initialized successfully");
       console.log("Features enabled:");
-      console.log("- Touch event delegation (iOS Safari 17.4.1 workaround)");
-      console.log("- Enhanced canvas preservation strategies");
-      console.log("- WebKit Bug #195325 memory leak prevention");
+      console.log("- Differential pan vs zoom handling");
+      console.log("- Pan: Gentle canvas preservation without forced redraw");
+      console.log("- Zoom: Normal handling with redraw allowed");
       console.log("- Progressive overlay loading (50 max on iPhone)");
       console.log("- Real-time diagnostic monitoring");
       console.log("- Safe OpenSeadragon configuration");
@@ -12749,7 +12634,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-CkbZ_DWG.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-BjUHsXcB.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspots);
   eventHandlers.setupAdaptiveSprings(viewer, performanceConfig);
   const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);
