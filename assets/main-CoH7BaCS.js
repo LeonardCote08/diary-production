@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/MinimalistAudioEngine-CAUpKVUu.js","assets/HapticManager-DNVJ-Kb5.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/MinimalistAudioEngine-DS3xXGhN.js","assets/HapticManager-DzHl8JeT.js"])))=>i.map(i=>d[i]);
 (function polyfill() {
   const relList = document.createElement("link").relList;
   if (relList && relList.supports && relList.supports("modulepreload")) {
@@ -18198,7 +18198,8 @@ class SafariOverlayManager {
       // Same as standard
       baseRadius: 150,
       // Increased from 30 for better base coverage
-      updateThrottle: 16,
+      updateThrottle: this.isIOS ? 33 : 16,
+      // iOS: 30 FPS, Desktop: 60 FPS
       enableTransitions: true,
       transitionDuration: 200,
       // Reduced for faster response
@@ -18638,8 +18639,8 @@ class SafariOverlayManager {
       const scaledRadiusY = ellipseData.radiusY * scale * this.tuningParams.ellipseMultiplierY;
       const stops2 = [
         { position: 0, opacity: 0 },
-        { position: 0.5, opacity: 0.15 },
-        { position: 0.8, opacity: 0.5 },
+        { position: 0.33, opacity: 0.15 },
+        { position: 0.66, opacity: 0.5 },
         { position: 1, opacity: 1 }
       ];
       const ellipseStops = stops2.map((stop) => {
@@ -18656,16 +18657,10 @@ class SafariOverlayManager {
     const adjustedRadius = scaledRadius * this.tuningParams.circleMultiplier;
     const stops = [
       { position: 0, opacity: 0 },
-      { position: 0.19, opacity: 0.042 },
-      { position: 0.34, opacity: 0.126 },
-      { position: 0.47, opacity: 0.278 },
-      { position: 0.565, opacity: 0.382 },
-      { position: 0.65, opacity: 0.541 },
-      { position: 0.73, opacity: 0.738 },
-      { position: 0.802, opacity: 0.875 },
-      { position: 0.861, opacity: 0.942 },
-      { position: 0.91, opacity: 0.979 },
-      { position: 0.952, opacity: 0.992 },
+      { position: 0.2, opacity: 0.05 },
+      { position: 0.4, opacity: 0.2 },
+      { position: 0.6, opacity: 0.4 },
+      { position: 0.8, opacity: 0.8 },
       { position: 1, opacity: 1 }
     ];
     const gradientStops = stops.map((stop) => {
@@ -19345,12 +19340,19 @@ class SafariOverlayManager {
       console.warn("SafariOverlayManager: overlayElement is null in applySpotlightStyles");
       return;
     }
-    if (this.state.opacity > 0) {
-      this.overlayElement.style.visibility = "visible";
-    }
-    if (this.state.opacity > 0 && this.overlayElement.style.display === "none") {
-      console.log("Making overlay visible");
-      this.overlayElement.style.display = "block";
+    const shouldShow = this.state.opacity > 0;
+    const shouldHide = this.state.opacity === 0 && !this.state.selectedHotspot;
+    if (shouldShow) {
+      if (this.overlayElement.style.display === "none") {
+        this.overlayElement.style.display = "block";
+        requestAnimationFrame(() => {
+          if (this.overlayElement) {
+            this.overlayElement.style.visibility = "visible";
+          }
+        });
+      } else {
+        this.overlayElement.style.visibility = "visible";
+      }
     }
     const focusScore = this.state.selectedHotspot ? this.calculateFocusScore() : 1;
     const adjustedOpacity = this.state.opacity * focusScore;
@@ -19362,17 +19364,28 @@ class SafariOverlayManager {
       this.useEllipse,
       this.ellipseData
     );
-    this.overlayElement.style.opacity = adjustedOpacity;
-    this.overlayElement.style["-webkit-mask-image"] = gradientMask;
-    this.overlayElement.style["mask-image"] = gradientMask;
+    if (this.isIOS) {
+      this.overlayElement.style["-webkit-mask-image"] = gradientMask;
+      this.overlayElement.style["mask-image"] = gradientMask;
+      requestAnimationFrame(() => {
+        if (this.overlayElement) {
+          this.overlayElement.style.opacity = adjustedOpacity;
+        }
+      });
+    } else {
+      this.overlayElement.style.opacity = adjustedOpacity;
+      this.overlayElement.style["-webkit-mask-image"] = gradientMask;
+      this.overlayElement.style["mask-image"] = gradientMask;
+    }
     this.overlayElement.style["-webkit-transform"] = "translateZ(0)";
     this.overlayElement.style["transform"] = "translateZ(0)";
-    if (adjustedOpacity === 0 && !this.state.selectedHotspot) {
-      this.overlayElement.style.display = "none";
-    }
-    if (adjustedOpacity === 0 && !this.state.selectedHotspot) {
-      this.overlayElement.style.display = "none";
+    if (shouldHide) {
       this.overlayElement.style.visibility = "hidden";
+      requestAnimationFrame(() => {
+        if (this.overlayElement && this.state.opacity === 0) {
+          this.overlayElement.style.display = "none";
+        }
+      });
     }
   }
   getHotspotBounds(hotspot) {
@@ -22971,7 +22984,7 @@ function DebugPanel(props) {
             console.log("[Minimalist Audio] Using global engine");
           } else {
             const MinimalistAudioEngine = (await __vitePreload(async () => {
-              const { default: __vite_default__ } = await import("./MinimalistAudioEngine-CAUpKVUu.js");
+              const { default: __vite_default__ } = await import("./MinimalistAudioEngine-DS3xXGhN.js");
               return { default: __vite_default__ };
             }, true ? __vite__mapDeps([0,1]) : void 0)).default;
             const engine = new MinimalistAudioEngine();
@@ -24393,7 +24406,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-BK7TEui1.js").then((n) => n.v);
+      } = await import("./viewerSetup-BizNOEcb.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };

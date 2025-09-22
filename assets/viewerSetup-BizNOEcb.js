@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-Bauw5Ae2.js","assets/main-DQfr1VhZ.js","assets/main-DTOzWaBI.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-DaWqEOUY.js","assets/main-CoH7BaCS.js","assets/main-DqCiCIqm.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-DQfr1VhZ.js";
+import { c as commonjsGlobal, i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, d as OverlayManagerFactory, e as applyTuningToViewer, r as removeTileCascadeFix } from "./main-CoH7BaCS.js";
 var howler = {};
 /*!
  *  howler.js v2.2.4
@@ -7168,6 +7168,17 @@ function applyMobileSafariFix(viewer) {
   viewer.smoothTileEdgesMinZoom = Infinity;
   viewer.minPixelRatio = 0.7;
   viewer.minZoomImageRatio = 0.7;
+  viewer.addHandler("animation-finish", function(event) {
+    const isBrowserStack = window.location.hostname.includes("browserstack") || navigator.userAgent.includes("BrowserStack");
+    if (!isBrowserStack) {
+      if (viewer.immediateRender) {
+        viewer.immediateRender = false;
+        setTimeout(() => {
+          viewer.immediateRender = true;
+        }, 100);
+      }
+    }
+  });
   let isInteracting = false;
   let interactionTimeout = null;
   viewer.addHandler("pan", () => {
@@ -7239,13 +7250,13 @@ function applyIOSTileDisappearFix(viewer) {
       } else {
         requestAnimationFrame(() => {
           forceRedraw();
-          panEndTimer = setTimeout(() => {
-            const tiledImage = viewer.world.getItemAt(0);
-            if (tiledImage && tiledImage.coverage < 0.9) {
-              forceRedraw();
-            }
-          }, 150);
         });
+        panEndTimer = setTimeout(() => {
+          forceRedraw();
+        }, 100);
+        forceRedrawTimer = setTimeout(() => {
+          forceRedraw();
+        }, 250);
       }
     }
   });
@@ -7258,6 +7269,9 @@ function applyIOSTileDisappearFix(viewer) {
     } else {
       tiledImage.update();
       viewer.forceRedraw();
+      const currentZoom = viewer.viewport.getZoom();
+      viewer.viewport.zoomTo(currentZoom * 1.0001, null, true);
+      viewer.viewport.zoomTo(currentZoom, null, true);
     }
   }
   viewer.addHandler("canvas-drag", (event) => {
@@ -7287,6 +7301,197 @@ function applyIOSTileDisappearFix(viewer) {
     return result;
   };
   console.log("iOS Tile Disappear Fix applied successfully");
+}
+class IOSCanvasRecoveryMonitor {
+  constructor(viewer) {
+    this.viewer = viewer;
+    this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+    this.disappearanceCount = 0;
+    this.lastCheckTime = 0;
+    this.isMonitoring = false;
+    this.checkInterval = null;
+    this.recoveryAttempts = 0;
+    this.lastRecoveryTime = 0;
+    this.consecutiveBlankFrames = 0;
+    this.maxConsecutiveBlankFrames = 3;
+    if (this.isIOS) {
+      this.initialize();
+    }
+  }
+  initialize() {
+    console.log("IOSCanvasRecoveryMonitor: Initializing for iOS Safari");
+    this.viewer.addHandler("animation", () => this.checkCanvas());
+    this.viewer.addHandler("animation-finish", () => {
+      console.log("IOSCanvasRecoveryMonitor: Animation finished - monitoring for canvas disappearance");
+      this.checkCanvas();
+      setTimeout(() => this.checkCanvas(), 16);
+      setTimeout(() => this.checkCanvas(), 50);
+      setTimeout(() => this.checkCanvas(), 100);
+      setTimeout(() => this.checkCanvas(), 250);
+      this.startContinuousMonitoring(1e3);
+    });
+    this.viewer.addHandler("pan", () => {
+      this.startContinuousMonitoring(500);
+    });
+    this.viewer.addHandler("zoom", () => {
+      this.startContinuousMonitoring(500);
+    });
+  }
+  startContinuousMonitoring(duration) {
+    if (this.checkInterval) {
+      clearInterval(this.checkInterval);
+    }
+    this.isMonitoring = true;
+    this.checkInterval = setInterval(() => {
+      this.checkCanvas();
+    }, 50);
+    setTimeout(() => {
+      this.stopContinuousMonitoring();
+    }, duration);
+  }
+  stopContinuousMonitoring() {
+    if (this.checkInterval) {
+      clearInterval(this.checkInterval);
+      this.checkInterval = null;
+    }
+    this.isMonitoring = false;
+    this.consecutiveBlankFrames = 0;
+  }
+  checkCanvas() {
+    const now = performance.now();
+    if (now - this.lastCheckTime < 16) return;
+    this.lastCheckTime = now;
+    try {
+      const canvas = this.viewer.canvas;
+      if (!canvas) {
+        console.error("IOSCanvasRecoveryMonitor: Canvas element not found");
+        return;
+      }
+      if (canvas.width === 0 || canvas.height === 0) {
+        console.warn("IOSCanvasRecoveryMonitor: Canvas has zero dimensions");
+        this.handleCanvasDisappearance();
+        return;
+      }
+      const computedStyle = window.getComputedStyle(canvas);
+      if (computedStyle.display === "none" || computedStyle.visibility === "hidden" || computedStyle.opacity === "0") {
+        console.warn("IOSCanvasRecoveryMonitor: Canvas is hidden via CSS", {
+          display: computedStyle.display,
+          visibility: computedStyle.visibility,
+          opacity: computedStyle.opacity
+        });
+        this.handleCanvasDisappearance();
+        return;
+      }
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        const samples = [
+          { x: canvas.width / 2, y: canvas.height / 2 },
+          // Center
+          { x: 10, y: 10 },
+          // Top-left
+          { x: canvas.width - 10, y: canvas.height - 10 }
+          // Bottom-right
+        ];
+        let allBlank = true;
+        for (const sample of samples) {
+          try {
+            const imageData = ctx.getImageData(sample.x, sample.y, 1, 1);
+            if (imageData.data.some((val) => val !== 0)) {
+              allBlank = false;
+              break;
+            }
+          } catch (e) {
+            console.debug("IOSCanvasRecoveryMonitor: Cannot sample pixel", e);
+            allBlank = false;
+            break;
+          }
+        }
+        if (allBlank) {
+          this.consecutiveBlankFrames++;
+          if (this.consecutiveBlankFrames >= this.maxConsecutiveBlankFrames) {
+            console.warn(`IOSCanvasRecoveryMonitor: Canvas is blank for ${this.consecutiveBlankFrames} frames`);
+            this.handleCanvasDisappearance();
+          }
+        } else {
+          if (this.consecutiveBlankFrames > 0) {
+            console.log("IOSCanvasRecoveryMonitor: Canvas recovered naturally");
+          }
+          this.consecutiveBlankFrames = 0;
+        }
+      }
+    } catch (error) {
+      console.error("IOSCanvasRecoveryMonitor: Error checking canvas", error);
+    }
+  }
+  handleCanvasDisappearance() {
+    this.disappearanceCount++;
+    const now = performance.now();
+    console.warn(`IOSCanvasRecoveryMonitor: Canvas disappeared (count: ${this.disappearanceCount})`);
+    if (now - this.lastRecoveryTime < 500) {
+      console.log("IOSCanvasRecoveryMonitor: Skipping recovery (too soon after last attempt)");
+      return;
+    }
+    this.lastRecoveryTime = now;
+    this.recoveryAttempts++;
+    this.applyRecoveryStrategies();
+  }
+  applyRecoveryStrategies() {
+    const canvas = this.viewer.canvas;
+    const container = this.viewer.container;
+    console.log("IOSCanvasRecoveryMonitor: Applying recovery strategies...");
+    if (canvas) {
+      const currentTransform = canvas.style.transform;
+      canvas.style.transform = "translateZ(0.001px)";
+      requestAnimationFrame(() => {
+        canvas.style.transform = currentTransform || "translateZ(0)";
+      });
+    }
+    this.viewer.forceRedraw();
+    if (this.recoveryAttempts > 2 && container) {
+      const originalDisplay = container.style.display;
+      container.style.display = "none";
+      void container.offsetHeight;
+      container.style.display = originalDisplay || "block";
+    }
+    if (this.recoveryAttempts > 3) {
+      const currentZoom = this.viewer.viewport.getZoom();
+      this.viewer.viewport.zoomTo(currentZoom * 1.0001, null, true);
+      requestAnimationFrame(() => {
+        this.viewer.viewport.zoomTo(currentZoom, null, true);
+      });
+    }
+    if (this.recoveryAttempts > 4) {
+      this.viewer.viewport.applyConstraints();
+      this.viewer.viewport.update();
+    }
+    console.log(`IOSCanvasRecoveryMonitor: Recovery attempt ${this.recoveryAttempts} completed`);
+    setTimeout(() => {
+      this.checkCanvas();
+      if (this.consecutiveBlankFrames === 0) {
+        console.log("IOSCanvasRecoveryMonitor: Recovery successful!");
+        this.recoveryAttempts = 0;
+      }
+    }, 100);
+  }
+  getStatistics() {
+    return {
+      isIOS: this.isIOS,
+      disappearanceCount: this.disappearanceCount,
+      recoveryAttempts: this.recoveryAttempts,
+      isMonitoring: this.isMonitoring,
+      consecutiveBlankFrames: this.consecutiveBlankFrames
+    };
+  }
+  destroy() {
+    this.stopContinuousMonitoring();
+    if (this.viewer) {
+      this.viewer.removeAllHandlers("animation");
+      this.viewer.removeAllHandlers("animation-finish");
+      this.viewer.removeAllHandlers("pan");
+      this.viewer.removeAllHandlers("zoom");
+    }
+    console.log("IOSCanvasRecoveryMonitor: Destroyed");
+  }
 }
 class FrameBudgetManager {
   constructor(targetFPS = 60) {
@@ -12444,6 +12649,11 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
     componentsObj.overlayManager.setAutoDeselectThreshold(threshold);
     console.log("Set auto-deselect threshold on Canvas2D manager:", threshold);
   }
+  if (isIOS) {
+    componentsObj.canvasRecoveryMonitor = new IOSCanvasRecoveryMonitor(viewer);
+    window.canvasRecoveryMonitor = componentsObj.canvasRecoveryMonitor;
+    console.log("IOSCanvasRecoveryMonitor initialized for iOS Safari");
+  }
   console.log("Overlay manager initialized");
   console.log("Is initialized flag:", (_h = componentsObj.overlayManager) == null ? void 0 : _h.isInitialized);
   console.log("Overlay element created?", !!((_i = componentsObj.overlayManager) == null ? void 0 : _i.overlayElement));
@@ -12568,7 +12778,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-Bauw5Ae2.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-DaWqEOUY.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspots);
   eventHandlers.setupAdaptiveSprings(viewer, performanceConfig);
   const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);

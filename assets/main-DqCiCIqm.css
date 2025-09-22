@@ -1729,9 +1729,12 @@ button.debug-toggle-option {
 /* Additional WebKit performance optimizations */
 @supports (-webkit-appearance: none) {
     .openseadragon-container {
-        -webkit-transform: translateZ(0);
+        /* iOS Safari Canvas Fix: Force proper layer promotion */
+        transform: translateZ(0);
+        -webkit-transform: translate3d(0, 0, 0);
         -webkit-backface-visibility: hidden;
         -webkit-perspective: 1000px;
+        will-change: transform;
         /* Force hardware acceleration */
     }
     
