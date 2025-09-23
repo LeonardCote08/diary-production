@@ -1,4 +1,3 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/MinimalistAudioEngine-7fAJNllJ.js","assets/HapticManager-D7vOkNt6.js"])))=>i.map(i=>d[i]);
 (function polyfill() {
   const relList = document.createElement("link").relList;
   if (relList && relList.supports && relList.supports("modulepreload")) {
@@ -21578,7 +21577,6 @@ function useViewerState() {
   });
   const [hoveredHotspot, setHoveredHotspot] = createSignal(null);
   const [selectedHotspot, setSelectedHotspot] = createSignal(null);
-  const [currentPlayingHotspot, setCurrentPlayingHotspot] = createSignal(null);
   const [currentMediaHotspot, setCurrentMediaHotspot] = createSignal(null);
   const [showExpandButton, setShowExpandButton] = createSignal(false);
   const [expandButtonFading, setExpandButtonFading] = createSignal(false);
@@ -21735,8 +21733,6 @@ function useViewerState() {
     setHoveredHotspot,
     selectedHotspot,
     setSelectedHotspot,
-    currentPlayingHotspot,
-    setCurrentPlayingHotspot,
     currentMediaHotspot,
     setCurrentMediaHotspot,
     // UI states
@@ -22192,318 +22188,6 @@ function useViewerAnimations(viewer, state, components) {
     expandToFullView
   };
 }
-var _tmpl$$6 = /* @__PURE__ */ template(`<svg width=16 height=16 viewBox="0 0 16 16"fill=none stroke=currentColor strokeWidth=1><path d="M5 3l8 5-8 5V3z"strokeLinejoin=round fill=rgba(255,255,255,0.9) stroke=none>`), _tmpl$2$6 = /* @__PURE__ */ template(`<svg width=16 height=16 viewBox="0 0 16 16"fill=none stroke=currentColor strokeWidth=1><path d="M5 3v10M11 3v10"strokeLinecap=round>`), _tmpl$3$5 = /* @__PURE__ */ template(`<svg width=18 height=18 viewBox="0 0 18 18"fill=none stroke=currentColor strokeWidth=1><path d="M9 16A7 7 0 109 2a7 7 0 000 14z"opacity=0.3></path><path d="M9 7V5L6 8l3 3V9c2 0 3.5 1.5 3.5 3.5"strokeLinecap=round strokeLinejoin=round>`), _tmpl$4$5 = /* @__PURE__ */ template(`<svg width=18 height=18 viewBox="0 0 18 18"fill=none stroke=currentColor strokeWidth=1><path d="M9 16A7 7 0 109 2a7 7 0 000 14z"opacity=0.3></path><path d="M9 9V5l3 3-3 3v-2c-2 0-3.5 1.5-3.5 3.5"strokeLinecap=round strokeLinejoin=round>`), _tmpl$5$4 = /* @__PURE__ */ template(`<svg width=16 height=16 viewBox="0 0 16 16"fill=none stroke=currentColor strokeWidth=1><path d="M3 6v4h2.5L9 13V3L5.5 6H3z"strokeLinejoin=round></path><path d="M11.5 5.5c.8.7.8 2.3 0 3"strokeLinecap=round opacity=0.7>`), _tmpl$6$4 = /* @__PURE__ */ template(`<svg width=16 height=16 viewBox="0 0 16 16"fill=none stroke=currentColor strokeWidth=1><path d="M3 6v4h2.5L9 13V3L5.5 6H3z"strokeLinejoin=round></path><path d="M11 6l3 3m0-3l-3 3"strokeLinecap=round opacity=0.7>`), _tmpl$7$4 = /* @__PURE__ */ template(`<svg width=12 height=12 viewBox="0 0 12 12"fill=none stroke=currentColor strokeWidth=1><path d="M2 4.5h8M4.5 7.5l2 2 2-2"strokeLinecap=round strokeLinejoin=round>`), _tmpl$8$4 = /* @__PURE__ */ template(`<div class=audio-player-minimized><button></button><div class=track-name-mini-container><span class=track-name-mini>`), _tmpl$9$4 = /* @__PURE__ */ template(`<button class="btn-skip btn-skip-back"title="Back 15s (Shift+←)">`), _tmpl$0$4 = /* @__PURE__ */ template(`<button class="btn-skip btn-skip-forward"title="Forward 15s (Shift+→)">`), _tmpl$1$3 = /* @__PURE__ */ template(`<input type=range class=volume-slider min=0 max=100>`), _tmpl$10$3 = /* @__PURE__ */ template(`<div class=keyboard-hints><span>Space: Play/Pause</span><span>Shift+←→: Skip</span><span>M: Mute</span><span>Esc: Minimize`), _tmpl$11$2 = /* @__PURE__ */ template(`<div class=audio-player-expanded><div class=player-header><h4 class=track-name></h4><button class=btn-minimize title="Minimize (Esc)"></button></div><div class=progress-section><span class=time-current></span><div class=progress-bar><div class=progress-track><div class=progress-fill></div><div class=progress-thumb></div></div></div><span class=time-duration></span></div><div class=controls-section><div class=controls-left><button></button></div><div class=controls-right><button class=btn-mute>`), _tmpl$12$2 = /* @__PURE__ */ template(`<div>`);
-const PlayIcon = () => _tmpl$$6();
-const PauseIcon = () => _tmpl$2$6();
-const SkipBackIcon = () => _tmpl$3$5();
-const SkipForwardIcon = () => _tmpl$4$5();
-const VolumeIcon = () => _tmpl$5$4();
-const MuteIcon = () => _tmpl$6$4();
-const MinimizeIcon = () => _tmpl$7$4();
-function AudioPlayer(props) {
-  const {
-    audioEngine,
-    currentHotspot
-  } = props;
-  const [isMinimized, setIsMinimized] = createSignal(true);
-  const [isPlaying, setIsPlaying] = createSignal(false);
-  const [progress, setProgress] = createSignal(0);
-  const [currentTime, setCurrentTime] = createSignal(0);
-  const [duration, setDuration] = createSignal(0);
-  const [volume, setVolume] = createSignal(80);
-  const [isMuted, setIsMuted] = createSignal(false);
-  const [isDraggingProgress, setIsDraggingProgress] = createSignal(false);
-  const [isFirstPlayback, setIsFirstPlayback] = createSignal(true);
-  const [isChangingTrack, setIsChangingTrack] = createSignal(false);
-  createEffect(() => {
-    const hotspot = currentHotspot();
-    if (hotspot && isPlaying() && isMinimized()) {
-      setIsChangingTrack(true);
-      setTimeout(() => setIsChangingTrack(false), 500);
-    }
-  });
-  const isMobile2 = () => window.innerWidth <= 768;
-  createEffect(() => {
-    if (!audioEngine) return;
-    audioEngine.onProgress = (progressData) => {
-      if (!isDraggingProgress()) {
-        setProgress(progressData.percent);
-        setCurrentTime(progressData.current);
-        setDuration(progressData.duration);
-      }
-    };
-    audioEngine.onPlaybackStart = () => {
-      setIsPlaying(true);
-      if (isMinimized() && isFirstPlayback()) {
-        setIsMinimized(false);
-        setIsFirstPlayback(false);
-      } else if (!isMinimized()) {
-        setIsFirstPlayback(false);
-      }
-    };
-    audioEngine.onPlaybackEnd = () => {
-      setIsPlaying(false);
-      setProgress(0);
-      setCurrentTime(0);
-    };
-    audioEngine.setVolume(volume() / 100);
-  });
-  createEffect(() => {
-    const handleKeyPress = (e) => {
-      if (!currentHotspot()) return;
-      if (e.target.tagName === "INPUT") return;
-      switch (e.key) {
-        case " ":
-          if (!isMinimized()) {
-            e.preventDefault();
-            togglePlayPause();
-          }
-          break;
-        case "ArrowLeft":
-          if (e.shiftKey && !isMinimized()) {
-            e.preventDefault();
-            skipBackward();
-          }
-          break;
-        case "ArrowRight":
-          if (e.shiftKey && !isMinimized()) {
-            e.preventDefault();
-            skipForward();
-          }
-          break;
-        case "m":
-        case "M":
-          if (!isMinimized()) {
-            toggleMute();
-          }
-          break;
-        case "Escape":
-          if (!isMinimized()) {
-            setIsMinimized(true);
-          }
-          break;
-      }
-    };
-    window.addEventListener("keydown", handleKeyPress);
-    onCleanup(() => window.removeEventListener("keydown", handleKeyPress));
-  });
-  createEffect(() => {
-    if (audioEngine) {
-      const state = audioEngine.getState();
-      setIsPlaying(state.isPlaying);
-      setIsMuted(state.isMuted);
-    }
-  });
-  const togglePlayPause = () => {
-    if (!audioEngine || !currentHotspot()) return;
-    if (isPlaying()) {
-      audioEngine.pause();
-    } else {
-      audioEngine.resume();
-    }
-  };
-  const skipForward = () => {
-    if (audioEngine) audioEngine.skip(15);
-  };
-  const skipBackward = () => {
-    if (audioEngine) audioEngine.skip(-15);
-  };
-  const toggleMute = () => {
-    if (!audioEngine) return;
-    const muted = audioEngine.toggleMute();
-    setIsMuted(muted);
-  };
-  const handleProgressClick = (e) => {
-    if (!audioEngine) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const percent = (e.clientX - rect.left) / rect.width * 100;
-    audioEngine.seekToPercent(percent);
-    setProgress(percent);
-  };
-  const handleProgressDrag = (e) => {
-    if (!isDraggingProgress()) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const percent = Math.max(0, Math.min(100, (e.clientX - rect.left) / rect.width * 100));
-    setProgress(percent);
-  };
-  const handleProgressMouseUp = () => {
-    if (isDraggingProgress() && audioEngine) {
-      audioEngine.seekToPercent(progress());
-      setIsDraggingProgress(false);
-    }
-  };
-  const handleVolumeChange = (e) => {
-    const newVolume = parseInt(e.target.value);
-    setVolume(newVolume);
-    if (audioEngine) {
-      audioEngine.setVolume(newVolume / 100);
-      if (newVolume > 0 && isMuted()) {
-        audioEngine.toggleMute();
-        setIsMuted(false);
-      }
-    }
-  };
-  const formatTime = (seconds) => {
-    if (!seconds || isNaN(seconds)) return "0:00";
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-  const getHotspotName = () => {
-    const hotspot = currentHotspot();
-    if (!hotspot) return "";
-    return hotspot.narrationTitle || `Hotspot ${hotspot.id}`;
-  };
-  return createComponent(Show, {
-    get when() {
-      return currentHotspot();
-    },
-    get children() {
-      var _el$8 = _tmpl$12$2();
-      _el$8.addEventListener("mouseleave", handleProgressMouseUp);
-      _el$8.$$mouseup = handleProgressMouseUp;
-      insert(_el$8, createComponent(Show, {
-        get when() {
-          return isMinimized();
-        },
-        get children() {
-          var _el$9 = _tmpl$8$4(), _el$0 = _el$9.firstChild, _el$1 = _el$0.nextSibling, _el$10 = _el$1.firstChild;
-          _el$0.$$click = () => {
-            if (!isPlaying()) {
-              setIsMinimized(false);
-            } else {
-              togglePlayPause();
-            }
-          };
-          insert(_el$0, (() => {
-            var _c$ = memo(() => !!isPlaying());
-            return () => _c$() ? createComponent(PauseIcon, {}) : createComponent(PlayIcon, {});
-          })());
-          insert(_el$10, getHotspotName);
-          createRenderEffect((_p$) => {
-            var _v$ = `btn-play-mini ${isPlaying() ? "playing" : ""} ${isChangingTrack() ? "changing" : ""}`, _v$2 = isPlaying() ? "Pause" : "Play";
-            _v$ !== _p$.e && className(_el$0, _p$.e = _v$);
-            _v$2 !== _p$.t && setAttribute(_el$0, "title", _p$.t = _v$2);
-            return _p$;
-          }, {
-            e: void 0,
-            t: void 0
-          });
-          return _el$9;
-        }
-      }), null);
-      insert(_el$8, createComponent(Show, {
-        get when() {
-          return !isMinimized();
-        },
-        get children() {
-          var _el$11 = _tmpl$11$2(), _el$12 = _el$11.firstChild, _el$13 = _el$12.firstChild, _el$14 = _el$13.nextSibling, _el$15 = _el$12.nextSibling, _el$16 = _el$15.firstChild, _el$17 = _el$16.nextSibling, _el$18 = _el$17.firstChild, _el$19 = _el$18.firstChild, _el$20 = _el$19.nextSibling, _el$21 = _el$17.nextSibling, _el$22 = _el$15.nextSibling, _el$23 = _el$22.firstChild, _el$25 = _el$23.firstChild, _el$27 = _el$23.nextSibling, _el$28 = _el$27.firstChild;
-          insert(_el$13, getHotspotName);
-          _el$14.$$click = () => setIsMinimized(true);
-          insert(_el$14, createComponent(MinimizeIcon, {}));
-          insert(_el$16, () => formatTime(currentTime()));
-          _el$17.$$mousemove = handleProgressDrag;
-          _el$17.$$mousedown = () => setIsDraggingProgress(true);
-          _el$17.$$click = handleProgressClick;
-          insert(_el$21, () => formatTime(duration()));
-          insert(_el$23, createComponent(Show, {
-            get when() {
-              return !isMobile2();
-            },
-            get children() {
-              var _el$24 = _tmpl$9$4();
-              _el$24.$$click = skipBackward;
-              insert(_el$24, createComponent(SkipBackIcon, {}));
-              return _el$24;
-            }
-          }), _el$25);
-          _el$25.$$click = togglePlayPause;
-          insert(_el$25, createComponent(Show, {
-            get when() {
-              return !isPlaying();
-            },
-            get children() {
-              return createComponent(PlayIcon, {});
-            }
-          }), null);
-          insert(_el$25, createComponent(Show, {
-            get when() {
-              return isPlaying();
-            },
-            get children() {
-              return createComponent(PauseIcon, {});
-            }
-          }), null);
-          insert(_el$23, createComponent(Show, {
-            get when() {
-              return !isMobile2();
-            },
-            get children() {
-              var _el$26 = _tmpl$0$4();
-              _el$26.$$click = skipForward;
-              insert(_el$26, createComponent(SkipForwardIcon, {}));
-              return _el$26;
-            }
-          }), null);
-          _el$28.$$click = toggleMute;
-          insert(_el$28, createComponent(Show, {
-            get when() {
-              return memo(() => !!!isMuted())() && volume() > 0;
-            },
-            get children() {
-              return createComponent(VolumeIcon, {});
-            }
-          }), null);
-          insert(_el$28, createComponent(Show, {
-            get when() {
-              return isMuted() || volume() === 0;
-            },
-            get children() {
-              return createComponent(MuteIcon, {});
-            }
-          }), null);
-          insert(_el$27, createComponent(Show, {
-            get when() {
-              return !isMobile2();
-            },
-            get children() {
-              var _el$29 = _tmpl$1$3();
-              _el$29.$$input = handleVolumeChange;
-              createRenderEffect(() => setAttribute(_el$29, "title", `Volume: ${volume()}%`));
-              createRenderEffect(() => _el$29.value = volume());
-              return _el$29;
-            }
-          }), null);
-          insert(_el$11, createComponent(Show, {
-            when: false,
-            get children() {
-              return _tmpl$10$3();
-            }
-          }), null);
-          createRenderEffect((_p$) => {
-            var _v$3 = `${progress()}%`, _v$4 = `${progress()}%`, _v$5 = `btn-play ${isPlaying() ? "playing" : ""}`, _v$6 = isPlaying() ? "Pause (Space)" : "Play (Space)", _v$7 = isMuted() ? "Unmute (M)" : "Mute (M)";
-            _v$3 !== _p$.e && ((_p$.e = _v$3) != null ? _el$19.style.setProperty("width", _v$3) : _el$19.style.removeProperty("width"));
-            _v$4 !== _p$.t && ((_p$.t = _v$4) != null ? _el$20.style.setProperty("left", _v$4) : _el$20.style.removeProperty("left"));
-            _v$5 !== _p$.a && className(_el$25, _p$.a = _v$5);
-            _v$6 !== _p$.o && setAttribute(_el$25, "title", _p$.o = _v$6);
-            _v$7 !== _p$.i && setAttribute(_el$28, "title", _p$.i = _v$7);
-            return _p$;
-          }, {
-            e: void 0,
-            t: void 0,
-            a: void 0,
-            o: void 0,
-            i: void 0
-          });
-          return _el$11;
-        }
-      }), null);
-      createRenderEffect(() => className(_el$8, `audio-player ${isMinimized() ? "minimized" : ""} ${isMobile2() ? "mobile" : "desktop"}`));
-      return _el$8;
-    }
-  });
-}
-delegateEvents(["mouseup", "click", "mousedown", "mousemove", "input"]);
 delegateEvents(["click"]);
 function addGlassButtonEffects(event, button) {
   if (navigator.vibrate) {
@@ -22635,7 +22319,7 @@ class CacheManager {
 }
 const cacheManager = new CacheManager();
 cacheManager.initDevelopmentMode();
-var _tmpl$$5 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Hovered</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Selected</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Type</span><span class=debug-stat-value>`), _tmpl$2$5 = /* @__PURE__ */ template(`<div class=debug-stat-row style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.1);"><span class=debug-stat-label style=color:#00ffff;>Safari Hybrid</span><span class=debug-stat-value style=color:#00ffff;>Active`), _tmpl$3$4 = /* @__PURE__ */ template(`<div class=debug-stat-row><span class=debug-stat-label>Render Time</span><span class=debug-stat-value>ms`), _tmpl$4$4 = /* @__PURE__ */ template(`<div class=debug-stat-row><span class=debug-stat-label>Visible/Total</span><span class=debug-stat-value>/`), _tmpl$5$3 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>FPS</span><span class=debug-stat-value><span style=opacity:0.7;font-size:10px> (avg: <!>)</span></span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Memory</span><span class=debug-stat-value>MB</span></div><div class=debug-stat-row><span class=debug-stat-label>Frame Time</span><span class=debug-stat-value>ms</span></div><div class=debug-stat-row><span class=debug-stat-label>Zoom</span><span class=debug-stat-value>x`), _tmpl$6$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Zoom Animation Speed<span class=debug-control-value>x</span></label><input type=range class=debug-slider min=0.5 max=2.5 step=0.1><p class=debug-control-description>How fast the artwork zooms when you click on elements`), _tmpl$7$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Color Theme<span class=debug-help-icon title="Changes the highlight colors">?</span></label><div class=debug-toggle-group><button type=button>Cyan Tech</button><button type=button>Golden Magic</button><button type=button>Blue Moon</button></div><div class=debug-toggle-group style=margin-top:8px;><button type=button>Pure White</button><button type=button>Soft White</button><button type=button>Dark Mode`), _tmpl$8$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Stroke Animation Speed</label><div style=display:flex;align-items:center;gap:12px;><span style=font-size:11px;color:#888;min-width:30px;>Fast</span><input type=range min=0.3 max=4.0 step=0.1 style=flex:1;cursor:pointer;><span style=font-size:11px;color:#888;min-width:30px;text-align:right;>Slow</span></div><p class=debug-control-description style=margin-top:8px;text-align:center;><span style=color:#666;font-size:10px;>`), _tmpl$9$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Hotspot Reveal Mode</label><div class=debug-toggle-group><button type=button>Focus</button><button type=button>Ripple (experimental)</button></div><p class=debug-control-description>`), _tmpl$0$3 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>FPS Target</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Effects</span><span class=debug-stat-value style=font-size:10px;></span></div><div class=debug-stat-row><span class=debug-stat-label>GPU</span><span class=debug-stat-value>`), _tmpl$1$2 = /* @__PURE__ */ template(`<div class=debug-control style=margin-top:16px;><button class="debug-toggle-option active"style=width:100%; type=button>Test Random Zoom`), _tmpl$10$2 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Cache Version</span><span class=debug-stat-value>1.0.2</span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value>Active</span></div><div class=debug-stat-row><span class=debug-stat-label>localStorage Size</span><span class=debug-stat-value>`), _tmpl$11$1 = /* @__PURE__ */ template(`<div class=debug-control style=margin-top:16px;><button class=debug-toggle-option>🗑️ Clear Cache & Reload</button><p class=debug-control-description>Fixes stuck animations and broken hover states`), _tmpl$12$1 = /* @__PURE__ */ template(`<div style=margin-bottom:20px;><label style=color:#999;font-size:10px;display:block;margin-bottom:8px;>HAPTIC FEEDBACK</label><div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:8px;"><button class=glass-button>Reveal (100ms)</button><button class=glass-button>Activate (200ms)`), _tmpl$13$1 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div style="margin-bottom:20px;padding:12px;background:rgba(255, 200, 0, 0.05);border:1px solid rgba(255, 200, 0, 0.2);border-radius:4px;"><h4 style="margin:0 0 12px 0;color:#FFC400;font-size:11px;text-transform:uppercase;letter-spacing:1px;">★ Absorbed Impact ★</h4><div style=text-align:center;><button class=glass-button></button><div style="margin-bottom:12px;padding:12px;background:rgba(0, 0, 0, 0.3);border-radius:4px;"><div style=font-size:10px;color:#777;text-align:center;margin-bottom:8px;>🔬 Nouveaux sons en développement</div><div style=font-size:9px;color:#555;text-align:center;>Recherche en cours pour créer des sons<br>organiques et sophistiqués</div></div><div style="padding:8px;background:rgba(0, 0, 0, 0.2);border-radius:4px;"><div style=font-size:10px;color:#999;text-align:center;>Son actif: <span style=color:#FFC400;font-weight:bold;>Absorbed Impact</span><br><span style=font-size:9px;opacity:0.8;>Pour TEMPO 1 & 2`), _tmpl$14$1 = /* @__PURE__ */ template(`<div style="margin-top:12px;padding:8px;background:rgba(0, 0, 0, 0.2);border-radius:4px;"><div style=display:flex;justify-content:space-between;font-size:10px;color:#777;><span>Interactions: </span><span>Session: <!>m <!>s`), _tmpl$15$1 = /* @__PURE__ */ template(`<div><button style=background:none;border:none;color:#fff;font-size:14px;padding:8px;cursor:pointer;opacity:0.8;hover:opacity:1;>◀ Last</button><button style=background:none;border:none;color:#fff;font-size:14px;padding:8px;cursor:pointer;opacity:0.8;>⏪ 15</button><button style="background:none;border:none;color:#fff;font-size:18px;padding:8px 16px;cursor:pointer;"></button><button style=background:none;border:none;color:#fff;font-size:14px;padding:8px;cursor:pointer;opacity:0.8;>15 ⏩</button><button style=background:none;border:none;color:#fff;font-size:14px;padding:8px;cursor:pointer;opacity:0.8;>Next ▶`), _tmpl$16$1 = /* @__PURE__ */ template(`<div><button style=background:none;border:none;color:rgba(255,255,255,0.5);font-size:12px;padding:4px;cursor:pointer;>◀</button><button style=background:none;border:none;color:rgba(255,255,255,0.5);font-size:10px;padding:4px;cursor:pointer;>-15</button><button style="background:none;border:none;color:#fff;font-size:16px;padding:4px 8px;cursor:pointer;"></button><button style=background:none;border:none;color:rgba(255,255,255,0.5);font-size:10px;padding:4px;cursor:pointer;>+15</button><button style=background:none;border:none;color:rgba(255,255,255,0.5);font-size:12px;padding:4px;cursor:pointer;>▶`), _tmpl$17$1 = /* @__PURE__ */ template(`<div><div><button style=background:none;border:none;color:rgba(255,255,255,0.7);font-size:16px;padding:4px;cursor:pointer;>⏮</button><button style=background:none;border:none;color:rgba(255,255,255,0.7);font-size:14px;padding:4px;cursor:pointer;>⏪</button><button style=background:rgba(255,255,255,0.1);border:none;color:#fff;font-size:18px;padding:8px;border-radius:50%;width:40px;height:40px;cursor:pointer;></button><button style=background:none;border:none;color:rgba(255,255,255,0.7);font-size:14px;padding:4px;cursor:pointer;>⏩</button><button style=background:none;border:none;color:rgba(255,255,255,0.7);font-size:16px;padding:4px;cursor:pointer;>⏭`), _tmpl$18$1 = /* @__PURE__ */ template(`<div><div style=display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:12px;><button style="background:none;border:none;color:rgba(255,255,255,0.7);font-size:18px;cursor:pointer;transition:color 0.2s;">⏮</button><button style=background:none;border:none;color:rgba(255,255,255,0.7);font-size:16px;cursor:pointer;>⏪</button><button style=background:#1db954;border:none;color:#000;font-size:16px;padding:0;border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;></button><button style=background:none;border:none;color:rgba(255,255,255,0.7);font-size:16px;cursor:pointer;>⏩</button><button style=background:none;border:none;color:rgba(255,255,255,0.7);font-size:18px;cursor:pointer;>⏭</button></div><div style=display:flex;align-items:center;gap:8px;><span style=font-size:11px;color:rgba(255,255,255,0.5);>0:00</span><div style=flex:1;height:4px;background:rgba(255,255,255,0.1);border-radius:2px;position:relative;><div style=position:absolute;left:0;top:0;width:30%;height:100%;background:#1db954;border-radius:2px;></div></div><span style=font-size:11px;color:rgba(255,255,255,0.5);>1:30`), _tmpl$19$1 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div style=margin-bottom:20px;><h4 style="margin:0 0 12px 0;color:#666;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Select Player Style</h4><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><button class=glass-button>Deji's Vision</button><button class=glass-button>Ultra Minimal</button><button class=glass-button>Floating Bar</button><button class=glass-button>Spotify-like</button></div></div><div style=margin-bottom:20px;><h4 style="margin:0 0 12px 0;color:#666;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Player Preview (Segment <!>/<!>)</h4></div><div style="padding:10px;background:rgba(0, 0, 0, 0.2);border:1px solid rgba(255, 255, 255, 0.05);border-radius:4px;"><p style=font-size:10px;color:#666;margin:0;line-height:1.4;>Test different audio player styles for the narration system. Each style has different visual approaches while maintaining the same core functionality.`), _tmpl$20$1 = /* @__PURE__ */ template(`<span class=debug-mobile-compact-fps> FPS`), _tmpl$21$1 = /* @__PURE__ */ template(`<div class="debug-mobile-compact glass-button"><div class=debug-mobile-compact-content><span class=debug-mobile-compact-icon><svg width=16 height=16 viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round></path></svg></span><span class=debug-mobile-compact-label>Debug`), _tmpl$22$1 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Cache Version</span><span class=debug-stat-value>1.0.2</span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value style=color:#4CAF50>Active</span></div><div style=margin-top:20px;><button class=glass-button>🗑️ Clear Cache & Reload</button><p style=margin-top:10px;font-size:11px;opacity:0.6;text-align:center;>Clears localStorage, sessionStorage and reloads the app`), _tmpl$23$1 = /* @__PURE__ */ template(`<div><div><div class=debug-mobile-sheet-handle><div class=debug-mobile-sheet-handle-bar></div></div><div class=debug-mobile-sheet-header><h3 class=debug-mobile-sheet-title><svg width=18 height=18 viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round></path></svg>Artwork Controls</h3></div><div class=debug-mobile-tabs></div><div class=debug-mobile-content>`), _tmpl$24$1 = /* @__PURE__ */ template(`<button><span class=debug-mobile-tab-icon></span><span class=debug-mobile-tab-label>`), _tmpl$25$1 = /* @__PURE__ */ template(`<span style=margin-left:8px;>Artwork Controls`), _tmpl$26$1 = /* @__PURE__ */ template(`<button title="Minimize panel"><svg viewBox="0 0 20 20"><rect x=11 y=15 width=14 height=2>`), _tmpl$27$1 = /* @__PURE__ */ template(`<div><div class=debug-panel-header><h3 class=debug-panel-title style="margin:0;display:'flex';alignItems:'center';"><svg viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round>`), _tmpl$28$1 = /* @__PURE__ */ template(`<div><div class=debug-section-header><div class=debug-section-title><span class=debug-section-icon></span><span></span></div><span class=debug-section-chevron>▼</span></div><div class=debug-section-content><div class=debug-section-body>`);
+var _tmpl$$4 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Hovered</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Selected</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Type</span><span class=debug-stat-value>`), _tmpl$2$4 = /* @__PURE__ */ template(`<div class=debug-stat-row style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.1);"><span class=debug-stat-label style=color:#00ffff;>Safari Hybrid</span><span class=debug-stat-value style=color:#00ffff;>Active`), _tmpl$3$3 = /* @__PURE__ */ template(`<div class=debug-stat-row><span class=debug-stat-label>Render Time</span><span class=debug-stat-value>ms`), _tmpl$4$3 = /* @__PURE__ */ template(`<div class=debug-stat-row><span class=debug-stat-label>Visible/Total</span><span class=debug-stat-value>/`), _tmpl$5$3 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>FPS</span><span class=debug-stat-value><span style=opacity:0.7;font-size:10px> (avg: <!>)</span></span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Memory</span><span class=debug-stat-value>MB</span></div><div class=debug-stat-row><span class=debug-stat-label>Frame Time</span><span class=debug-stat-value>ms</span></div><div class=debug-stat-row><span class=debug-stat-label>Zoom</span><span class=debug-stat-value>x`), _tmpl$6$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Zoom Animation Speed<span class=debug-control-value>x</span></label><input type=range class=debug-slider min=0.5 max=2.5 step=0.1><p class=debug-control-description>How fast the artwork zooms when you click on elements`), _tmpl$7$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Color Theme<span class=debug-help-icon title="Changes the highlight colors">?</span></label><div class=debug-toggle-group><button type=button>Cyan Tech</button><button type=button>Golden Magic</button><button type=button>Blue Moon</button></div><div class=debug-toggle-group style=margin-top:8px;><button type=button>Pure White</button><button type=button>Soft White</button><button type=button>Dark Mode`), _tmpl$8$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Stroke Animation Speed</label><div style=display:flex;align-items:center;gap:12px;><span style=font-size:11px;color:#888;min-width:30px;>Fast</span><input type=range min=0.3 max=4.0 step=0.1 style=flex:1;cursor:pointer;><span style=font-size:11px;color:#888;min-width:30px;text-align:right;>Slow</span></div><p class=debug-control-description style=margin-top:8px;text-align:center;><span style=color:#666;font-size:10px;>`), _tmpl$9$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Hotspot Reveal Mode</label><div class=debug-toggle-group><button type=button>Focus</button><button type=button>Ripple (experimental)</button></div><p class=debug-control-description>`), _tmpl$0$3 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>FPS Target</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Effects</span><span class=debug-stat-value style=font-size:10px;></span></div><div class=debug-stat-row><span class=debug-stat-label>GPU</span><span class=debug-stat-value>`), _tmpl$1$2 = /* @__PURE__ */ template(`<div class=debug-control style=margin-top:16px;><button class="debug-toggle-option active"style=width:100%; type=button>Test Random Zoom`), _tmpl$10$2 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Cache Version</span><span class=debug-stat-value>1.0.2</span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value>Active</span></div><div class=debug-stat-row><span class=debug-stat-label>localStorage Size</span><span class=debug-stat-value>`), _tmpl$11$1 = /* @__PURE__ */ template(`<div class=debug-control style=margin-top:16px;><button class=debug-toggle-option>🗑️ Clear Cache & Reload</button><p class=debug-control-description>Fixes stuck animations and broken hover states`), _tmpl$12$1 = /* @__PURE__ */ template(`<span class=debug-mobile-compact-fps> FPS`), _tmpl$13$1 = /* @__PURE__ */ template(`<div class="debug-mobile-compact glass-button"><div class=debug-mobile-compact-content><span class=debug-mobile-compact-icon><svg width=16 height=16 viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round></path></svg></span><span class=debug-mobile-compact-label>Debug`), _tmpl$14$1 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Cache Version</span><span class=debug-stat-value>1.0.2</span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value style=color:#4CAF50>Active</span></div><div style=margin-top:20px;><button class=glass-button>🗑️ Clear Cache & Reload</button><p style=margin-top:10px;font-size:11px;opacity:0.6;text-align:center;>Clears localStorage, sessionStorage and reloads the app`), _tmpl$15$1 = /* @__PURE__ */ template(`<div><div><div class=debug-mobile-sheet-handle><div class=debug-mobile-sheet-handle-bar></div></div><div class=debug-mobile-sheet-header><h3 class=debug-mobile-sheet-title><svg width=18 height=18 viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round></path></svg>Artwork Controls</h3></div><div class=debug-mobile-tabs></div><div class=debug-mobile-content>`), _tmpl$16$1 = /* @__PURE__ */ template(`<button><span class=debug-mobile-tab-icon></span><span class=debug-mobile-tab-label>`), _tmpl$17$1 = /* @__PURE__ */ template(`<span style=margin-left:8px;>Artwork Controls`), _tmpl$18$1 = /* @__PURE__ */ template(`<button title="Minimize panel"><svg viewBox="0 0 20 20"><rect x=11 y=15 width=14 height=2>`), _tmpl$19$1 = /* @__PURE__ */ template(`<div><div class=debug-panel-header><h3 class=debug-panel-title style="margin:0;display:'flex';alignItems:'center';"><svg viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round>`), _tmpl$20$1 = /* @__PURE__ */ template(`<div><div class=debug-section-header><div class=debug-section-title><span class=debug-section-icon></span><span></span></div><span class=debug-section-chevron>▼</span></div><div class=debug-section-content><div class=debug-section-body>`);
 function DebugPanel(props) {
   const [isMinimized, setIsMinimized] = createSignal(true);
   const [expandedSections, setExpandedSections] = createSignal({
@@ -22706,7 +22390,7 @@ function DebugPanel(props) {
       icon: "🔍",
       title: "Active Element",
       content: () => (() => {
-        var _el$ = _tmpl$$5(), _el$2 = _el$.firstChild, _el$3 = _el$2.firstChild, _el$4 = _el$3.nextSibling, _el$5 = _el$2.nextSibling, _el$6 = _el$5.firstChild, _el$7 = _el$6.nextSibling, _el$8 = _el$5.nextSibling, _el$9 = _el$8.firstChild, _el$0 = _el$9.nextSibling;
+        var _el$ = _tmpl$$4(), _el$2 = _el$.firstChild, _el$3 = _el$2.firstChild, _el$4 = _el$3.nextSibling, _el$5 = _el$2.nextSibling, _el$6 = _el$5.firstChild, _el$7 = _el$6.nextSibling, _el$8 = _el$5.nextSibling, _el$9 = _el$8.firstChild, _el$0 = _el$9.nextSibling;
         insert(_el$4, () => {
           var _a;
           return ((_a = props.hoveredHotspot()) == null ? void 0 : _a.id) || "none";
@@ -22760,8 +22444,8 @@ function DebugPanel(props) {
               return props.safariHybridMetrics;
             },
             get children() {
-              return [_tmpl$2$5(), (() => {
-                var _el$34 = _tmpl$3$4(), _el$35 = _el$34.firstChild, _el$36 = _el$35.nextSibling, _el$37 = _el$36.firstChild;
+              return [_tmpl$2$4(), (() => {
+                var _el$34 = _tmpl$3$3(), _el$35 = _el$34.firstChild, _el$36 = _el$35.nextSibling, _el$37 = _el$36.firstChild;
                 insert(_el$36, () => {
                   var _a;
                   return ((_a = props.safariHybridMetrics.renderTime) == null ? void 0 : _a.toFixed(2)) || "0.00";
@@ -22769,7 +22453,7 @@ function DebugPanel(props) {
                 createRenderEffect((_$p) => (_$p = props.safariHybridMetrics.renderTime > 16.67 ? "#FF9800" : "#4CAF50") != null ? _el$36.style.setProperty("color", _$p) : _el$36.style.removeProperty("color"));
                 return _el$34;
               })(), (() => {
-                var _el$38 = _tmpl$4$4(), _el$39 = _el$38.firstChild, _el$40 = _el$39.nextSibling, _el$41 = _el$40.firstChild;
+                var _el$38 = _tmpl$4$3(), _el$39 = _el$38.firstChild, _el$40 = _el$39.nextSibling, _el$41 = _el$40.firstChild;
                 insert(_el$40, () => props.safariHybridMetrics.visibleHotspots || "0", _el$41);
                 insert(_el$40, () => props.safariHybridMetrics.hotspotCount || "0", null);
                 return _el$38;
@@ -22994,307 +22678,6 @@ function DebugPanel(props) {
         _el$92.style.setProperty("color", "#FF5722");
         return _el$91;
       })()]
-    },
-    // Minimalist Audio Test section (mobile only)
-    {
-      id: "minimalistAudio",
-      icon: "◐",
-      title: "Sound Test",
-      content: () => {
-        const [audioEngine, setAudioEngine] = createSignal(null);
-        onMount(async () => {
-          if (window.minimalistAudioEngine) {
-            setAudioEngine(window.minimalistAudioEngine);
-            if (!window.minimalistAudioEngine.isUnlocked) {
-              await window.minimalistAudioEngine.init();
-            }
-            console.log("[Minimalist Audio] Using global engine");
-          } else {
-            const MinimalistAudioEngine = (await __vitePreload(async () => {
-              const { default: __vite_default__ } = await import("./MinimalistAudioEngine-7fAJNllJ.js");
-              return { default: __vite_default__ };
-            }, true ? __vite__mapDeps([0,1]) : void 0)).default;
-            const engine = new MinimalistAudioEngine();
-            await engine.init();
-            setAudioEngine(engine);
-            window.minimalistAudioEngine = engine;
-            console.log("[Minimalist Audio] Created new engine");
-          }
-        });
-        return (() => {
-          var _el$93 = _tmpl$13$1(), _el$94 = _el$93.firstChild, _el$95 = _el$94.firstChild, _el$96 = _el$95.nextSibling, _el$97 = _el$96.firstChild;
-          _el$97.$$click = () => {
-            var _a, _b;
-            if (audioEngine()) {
-              (_b = (_a = audioEngine()).playActivate) == null ? void 0 : _b.call(_a);
-            }
-          };
-          _el$97.style.setProperty("padding", "16px 24px");
-          _el$97.style.setProperty("fontSize", "12px");
-          _el$97.style.setProperty("marginBottom", "12px");
-          _el$97.style.setProperty("fontWeight", "bold");
-          _el$97.style.setProperty("width", "100%");
-          insert(_el$97, () => audioEngine() ? "🔊 Tester le son" : "⏳ Initialisation...");
-          insert(_el$94, createComponent(Show, {
-            get when() {
-              return audioEngine();
-            },
-            get children() {
-              return (() => {
-                var _a, _b;
-                const info = ((_b = (_a = audioEngine()) == null ? void 0 : _a.getVariationInfo) == null ? void 0 : _b.call(_a)) || {
-                  metrics: {
-                    totalInteractions: 0,
-                    sessionDuration: 0
-                  }
-                };
-                return createComponent(Show, {
-                  get when() {
-                    return info.metrics.totalInteractions > 0;
-                  },
-                  get children() {
-                    var _el$103 = _tmpl$14$1(), _el$104 = _el$103.firstChild, _el$105 = _el$104.firstChild;
-                    _el$105.firstChild;
-                    var _el$107 = _el$105.nextSibling, _el$108 = _el$107.firstChild, _el$111 = _el$108.nextSibling, _el$109 = _el$111.nextSibling, _el$112 = _el$109.nextSibling;
-                    _el$112.nextSibling;
-                    insert(_el$105, () => info.metrics.totalInteractions, null);
-                    insert(_el$107, () => Math.floor(info.metrics.sessionDuration / 60), _el$111);
-                    insert(_el$107, () => info.metrics.sessionDuration % 60, _el$112);
-                    return _el$103;
-                  }
-                });
-              })();
-            }
-          }), null);
-          insert(_el$93, createComponent(Show, {
-            when: false,
-            get children() {
-              var _el$98 = _tmpl$12$1(), _el$99 = _el$98.firstChild, _el$100 = _el$99.nextSibling, _el$101 = _el$100.firstChild, _el$102 = _el$101.nextSibling;
-              _el$101.$$click = () => {
-                var _a, _b;
-                (_b = (_a = audioEngine()) == null ? void 0 : _a.testHaptics) == null ? void 0 : _b.call(_a, "reveal");
-              };
-              _el$101.style.setProperty("padding", "12px");
-              _el$101.style.setProperty("fontSize", "11px");
-              _el$102.$$click = () => {
-                var _a, _b;
-                (_b = (_a = audioEngine()) == null ? void 0 : _a.testHaptics) == null ? void 0 : _b.call(_a, "activate");
-              };
-              _el$102.style.setProperty("padding", "12px");
-              _el$102.style.setProperty("fontSize", "11px");
-              return _el$98;
-            }
-          }), null);
-          createRenderEffect((_p$) => {
-            var _v$11 = audioEngine() ? "rgba(255, 200, 0, 0.1)" : "rgba(100, 100, 100, 0.1)", _v$12 = audioEngine() ? "2px solid rgba(255, 200, 0, 0.3)" : "2px solid rgba(100, 100, 100, 0.3)", _v$13 = audioEngine() ? "#FFC400" : "#666", _v$14 = audioEngine() ? "pointer" : "wait", _v$15 = !audioEngine();
-            _v$11 !== _p$.e && ((_p$.e = _v$11) != null ? _el$97.style.setProperty("background", _v$11) : _el$97.style.removeProperty("background"));
-            _v$12 !== _p$.t && ((_p$.t = _v$12) != null ? _el$97.style.setProperty("border", _v$12) : _el$97.style.removeProperty("border"));
-            _v$13 !== _p$.a && ((_p$.a = _v$13) != null ? _el$97.style.setProperty("color", _v$13) : _el$97.style.removeProperty("color"));
-            _v$14 !== _p$.o && ((_p$.o = _v$14) != null ? _el$97.style.setProperty("cursor", _v$14) : _el$97.style.removeProperty("cursor"));
-            _v$15 !== _p$.i && (_el$97.disabled = _p$.i = _v$15);
-            return _p$;
-          }, {
-            e: void 0,
-            t: void 0,
-            a: void 0,
-            o: void 0,
-            i: void 0
-          });
-          return _el$93;
-        })();
-      }
-    },
-    // Audio Player Test section (desktop and mobile)
-    {
-      id: "audioPlayerTest",
-      icon: "🎵",
-      title: "Audio Player Styles",
-      content: () => {
-        const [selectedStyle, setSelectedStyle] = createSignal("deji");
-        const [isPlaying, setIsPlaying] = createSignal(false);
-        const [currentSegment, setCurrentSegment] = createSignal(1);
-        const [totalSegments] = createSignal(5);
-        const activatePlayerStyle = (style2) => {
-          console.log(`[Audio Player Test] Activating ${style2} style`);
-          if (window.setGlobalAudioPlayerStyle) {
-            window.setGlobalAudioPlayerStyle(style2);
-          }
-          if (isMobile() && props.closeDebugPanel) {
-            props.closeDebugPanel();
-          } else if (isMobile()) {
-            closeBottomSheet();
-          }
-          if (!isMobile()) {
-            setIsMinimized(true);
-          }
-        };
-        const togglePlayPause = () => {
-          setIsPlaying(!isPlaying());
-          console.log("[Audio Player Test] Play/Pause toggled:", isPlaying());
-        };
-        const previousSegment = () => {
-          if (currentSegment() > 1) {
-            setCurrentSegment(currentSegment() - 1);
-            console.log("[Audio Player Test] Previous segment:", currentSegment());
-          }
-        };
-        const nextSegment = () => {
-          if (currentSegment() < totalSegments()) {
-            setCurrentSegment(currentSegment() + 1);
-            console.log("[Audio Player Test] Next segment:", currentSegment());
-          }
-        };
-        const skip = (seconds) => {
-          console.log(`[Audio Player Test] Skip ${seconds} seconds`);
-        };
-        return (() => {
-          var _el$113 = _tmpl$19$1(), _el$114 = _el$113.firstChild, _el$115 = _el$114.firstChild, _el$116 = _el$115.nextSibling, _el$117 = _el$116.firstChild, _el$118 = _el$117.nextSibling, _el$119 = _el$118.nextSibling, _el$120 = _el$119.nextSibling, _el$121 = _el$114.nextSibling, _el$122 = _el$121.firstChild, _el$123 = _el$122.firstChild, _el$126 = _el$123.nextSibling, _el$124 = _el$126.nextSibling, _el$127 = _el$124.nextSibling;
-          _el$127.nextSibling;
-          _el$117.$$click = () => {
-            setSelectedStyle("deji");
-            activatePlayerStyle("deji");
-          };
-          _el$117.style.setProperty("padding", "10px");
-          _el$118.$$click = () => {
-            setSelectedStyle("minimal");
-            activatePlayerStyle("minimal");
-          };
-          _el$118.style.setProperty("padding", "10px");
-          _el$119.$$click = () => {
-            setSelectedStyle("floating");
-            activatePlayerStyle("floating");
-          };
-          _el$119.style.setProperty("padding", "10px");
-          _el$120.$$click = () => {
-            setSelectedStyle("spotify");
-            activatePlayerStyle("spotify");
-          };
-          _el$120.style.setProperty("padding", "10px");
-          insert(_el$122, currentSegment, _el$126);
-          insert(_el$122, totalSegments, _el$127);
-          insert(_el$121, createComponent(Show, {
-            get when() {
-              return selectedStyle() === "deji";
-            },
-            get children() {
-              var _el$128 = _tmpl$15$1(), _el$129 = _el$128.firstChild, _el$130 = _el$129.nextSibling, _el$131 = _el$130.nextSibling, _el$132 = _el$131.nextSibling, _el$133 = _el$132.nextSibling;
-              _el$128.style.setProperty("background", "rgba(0, 0, 0, 0.95)");
-              _el$128.style.setProperty("border", "1px solid rgba(255, 255, 255, 0.1)");
-              _el$128.style.setProperty("borderRadius", "4px");
-              _el$128.style.setProperty("padding", "12px");
-              _el$128.style.setProperty("display", "flex");
-              _el$128.style.setProperty("alignItems", "center");
-              _el$128.style.setProperty("justifyContent", "space-between");
-              _el$128.style.setProperty("gap", "8px");
-              _el$128.style.setProperty("minHeight", "56px");
-              _el$129.$$click = previousSegment;
-              _el$130.$$click = () => skip(-15);
-              _el$131.$$click = togglePlayPause;
-              insert(_el$131, () => isPlaying() ? "⏸" : "▶");
-              _el$132.$$click = () => skip(15);
-              _el$133.$$click = nextSegment;
-              return _el$128;
-            }
-          }), null);
-          insert(_el$121, createComponent(Show, {
-            get when() {
-              return selectedStyle() === "minimal";
-            },
-            get children() {
-              var _el$134 = _tmpl$16$1(), _el$135 = _el$134.firstChild, _el$136 = _el$135.nextSibling, _el$137 = _el$136.nextSibling, _el$138 = _el$137.nextSibling, _el$139 = _el$138.nextSibling;
-              _el$134.style.setProperty("display", "flex");
-              _el$134.style.setProperty("alignItems", "center");
-              _el$134.style.setProperty("justifyContent", "center");
-              _el$134.style.setProperty("gap", "20px");
-              _el$134.style.setProperty("padding", "20px");
-              _el$134.style.setProperty("background", "transparent");
-              _el$135.$$click = previousSegment;
-              _el$136.$$click = () => skip(-15);
-              _el$137.$$click = togglePlayPause;
-              insert(_el$137, () => isPlaying() ? "⏸" : "▶");
-              _el$138.$$click = () => skip(15);
-              _el$139.$$click = nextSegment;
-              return _el$134;
-            }
-          }), null);
-          insert(_el$121, createComponent(Show, {
-            get when() {
-              return selectedStyle() === "floating";
-            },
-            get children() {
-              var _el$140 = _tmpl$17$1(), _el$141 = _el$140.firstChild, _el$142 = _el$141.firstChild, _el$143 = _el$142.nextSibling, _el$144 = _el$143.nextSibling, _el$145 = _el$144.nextSibling, _el$146 = _el$145.nextSibling;
-              _el$140.style.setProperty("position", "relative");
-              _el$140.style.setProperty("height", "80px");
-              _el$140.style.setProperty("display", "flex");
-              _el$140.style.setProperty("alignItems", "flex-end");
-              _el$141.style.setProperty("background", "rgba(0, 0, 0, 0.8)");
-              _el$141.style.setProperty("backdropFilter", "blur(10px)");
-              _el$141.style.setProperty("borderRadius", "24px");
-              _el$141.style.setProperty("padding", "8px 16px");
-              _el$141.style.setProperty("display", "flex");
-              _el$141.style.setProperty("alignItems", "center");
-              _el$141.style.setProperty("gap", "12px");
-              _el$141.style.setProperty("boxShadow", "0 4px 12px rgba(0,0,0,0.3)");
-              _el$142.$$click = previousSegment;
-              _el$143.$$click = () => skip(-15);
-              _el$144.$$click = togglePlayPause;
-              insert(_el$144, () => isPlaying() ? "⏸" : "▶");
-              _el$145.$$click = () => skip(15);
-              _el$146.$$click = nextSegment;
-              return _el$140;
-            }
-          }), null);
-          insert(_el$121, createComponent(Show, {
-            get when() {
-              return selectedStyle() === "spotify";
-            },
-            get children() {
-              var _el$147 = _tmpl$18$1(), _el$148 = _el$147.firstChild, _el$149 = _el$148.firstChild, _el$150 = _el$149.nextSibling, _el$151 = _el$150.nextSibling, _el$152 = _el$151.nextSibling, _el$153 = _el$152.nextSibling;
-              _el$147.style.setProperty("background", "linear-gradient(to bottom, rgba(40,40,40,0.95), rgba(18,18,18,0.95))");
-              _el$147.style.setProperty("borderRadius", "8px");
-              _el$147.style.setProperty("padding", "16px");
-              _el$147.style.setProperty("boxShadow", "0 8px 24px rgba(0,0,0,0.4)");
-              _el$149.$$click = previousSegment;
-              _el$150.$$click = () => skip(-15);
-              _el$151.$$click = togglePlayPause;
-              insert(_el$151, () => isPlaying() ? "⏸" : "▶");
-              _el$152.$$click = () => skip(15);
-              _el$153.$$click = nextSegment;
-              return _el$147;
-            }
-          }), null);
-          createRenderEffect((_p$) => {
-            var _v$16 = selectedStyle() === "deji" ? "rgba(0, 0, 0, 0.3)" : "rgba(0, 0, 0, 0.1)", _v$17 = selectedStyle() === "deji" ? "1px solid rgba(255, 255, 255, 0.3)" : "1px solid rgba(255, 255, 255, 0.1)", _v$18 = selectedStyle() === "deji" ? "#fff" : "#999", _v$19 = selectedStyle() === "minimal" ? "rgba(0, 0, 0, 0.3)" : "rgba(0, 0, 0, 0.1)", _v$20 = selectedStyle() === "minimal" ? "1px solid rgba(255, 255, 255, 0.3)" : "1px solid rgba(255, 255, 255, 0.1)", _v$21 = selectedStyle() === "minimal" ? "#fff" : "#999", _v$22 = selectedStyle() === "floating" ? "rgba(0, 0, 0, 0.3)" : "rgba(0, 0, 0, 0.1)", _v$23 = selectedStyle() === "floating" ? "1px solid rgba(255, 255, 255, 0.3)" : "1px solid rgba(255, 255, 255, 0.1)", _v$24 = selectedStyle() === "floating" ? "#fff" : "#999", _v$25 = selectedStyle() === "spotify" ? "rgba(0, 0, 0, 0.3)" : "rgba(0, 0, 0, 0.1)", _v$26 = selectedStyle() === "spotify" ? "1px solid rgba(255, 255, 255, 0.3)" : "1px solid rgba(255, 255, 255, 0.1)", _v$27 = selectedStyle() === "spotify" ? "#fff" : "#999";
-            _v$16 !== _p$.e && ((_p$.e = _v$16) != null ? _el$117.style.setProperty("background", _v$16) : _el$117.style.removeProperty("background"));
-            _v$17 !== _p$.t && ((_p$.t = _v$17) != null ? _el$117.style.setProperty("border", _v$17) : _el$117.style.removeProperty("border"));
-            _v$18 !== _p$.a && ((_p$.a = _v$18) != null ? _el$117.style.setProperty("color", _v$18) : _el$117.style.removeProperty("color"));
-            _v$19 !== _p$.o && ((_p$.o = _v$19) != null ? _el$118.style.setProperty("background", _v$19) : _el$118.style.removeProperty("background"));
-            _v$20 !== _p$.i && ((_p$.i = _v$20) != null ? _el$118.style.setProperty("border", _v$20) : _el$118.style.removeProperty("border"));
-            _v$21 !== _p$.n && ((_p$.n = _v$21) != null ? _el$118.style.setProperty("color", _v$21) : _el$118.style.removeProperty("color"));
-            _v$22 !== _p$.s && ((_p$.s = _v$22) != null ? _el$119.style.setProperty("background", _v$22) : _el$119.style.removeProperty("background"));
-            _v$23 !== _p$.h && ((_p$.h = _v$23) != null ? _el$119.style.setProperty("border", _v$23) : _el$119.style.removeProperty("border"));
-            _v$24 !== _p$.r && ((_p$.r = _v$24) != null ? _el$119.style.setProperty("color", _v$24) : _el$119.style.removeProperty("color"));
-            _v$25 !== _p$.d && ((_p$.d = _v$25) != null ? _el$120.style.setProperty("background", _v$25) : _el$120.style.removeProperty("background"));
-            _v$26 !== _p$.l && ((_p$.l = _v$26) != null ? _el$120.style.setProperty("border", _v$26) : _el$120.style.removeProperty("border"));
-            _v$27 !== _p$.u && ((_p$.u = _v$27) != null ? _el$120.style.setProperty("color", _v$27) : _el$120.style.removeProperty("color"));
-            return _p$;
-          }, {
-            e: void 0,
-            t: void 0,
-            a: void 0,
-            o: void 0,
-            i: void 0,
-            n: void 0,
-            s: void 0,
-            h: void 0,
-            r: void 0,
-            d: void 0,
-            l: void 0,
-            u: void 0
-          });
-          return _el$113;
-        })();
-      }
     }
   ];
   if (isMobile()) {
@@ -23310,101 +22693,93 @@ function DebugPanel(props) {
       id: "cache",
       label: "Cache",
       icon: "🗑️"
-    }, {
-      id: "minimalistAudio",
-      label: "Sound",
-      icon: "◐"
-    }, {
-      id: "audioPlayerTest",
-      label: "Player",
-      icon: "🎵"
     }];
     return [(() => {
-      var _el$154 = _tmpl$21$1(), _el$155 = _el$154.firstChild, _el$156 = _el$155.firstChild;
-      _el$156.nextSibling;
-      _el$154.$$click = (e) => {
+      var _el$93 = _tmpl$13$1(), _el$94 = _el$93.firstChild, _el$95 = _el$94.firstChild;
+      _el$95.nextSibling;
+      _el$93.$$click = (e) => {
         addGlassButtonEffects(e, e.currentTarget);
         setMobileExpanded(true);
       };
-      _el$154.style.setProperty("position", "fixed");
-      _el$154.style.setProperty("bottom", "20px");
-      _el$154.style.setProperty("left", "20px");
-      _el$154.style.setProperty("transform", "none");
-      _el$154.style.setProperty("zIndex", "1000");
-      insert(_el$155, createComponent(Show, {
+      _el$93.style.setProperty("position", "fixed");
+      _el$93.style.setProperty("bottom", "20px");
+      _el$93.style.setProperty("left", "20px");
+      _el$93.style.setProperty("transform", "none");
+      _el$93.style.setProperty("zIndex", "1000");
+      insert(_el$94, createComponent(Show, {
         get when() {
           var _a;
           return (_a = props.performanceMetrics) == null ? void 0 : _a.currentFPS;
         },
         get children() {
-          var _el$158 = _tmpl$20$1(), _el$159 = _el$158.firstChild;
-          insert(_el$158, () => {
+          var _el$97 = _tmpl$12$1(), _el$98 = _el$97.firstChild;
+          insert(_el$97, () => {
             var _a, _b;
             return (_b = (_a = props.performanceMetrics) == null ? void 0 : _a.currentFPS) == null ? void 0 : _b.toFixed(0);
-          }, _el$159);
+          }, _el$98);
           createRenderEffect((_$p) => {
             var _a;
-            return (_$p = (((_a = props.performanceMetrics) == null ? void 0 : _a.currentFPS) || 60) < 45 ? "#FF9800" : "#4CAF50") != null ? _el$158.style.setProperty("color", _$p) : _el$158.style.removeProperty("color");
+            return (_$p = (((_a = props.performanceMetrics) == null ? void 0 : _a.currentFPS) || 60) < 45 ? "#FF9800" : "#4CAF50") != null ? _el$97.style.setProperty("color", _$p) : _el$97.style.removeProperty("color");
           });
-          return _el$158;
+          return _el$97;
         }
       }), null);
-      createRenderEffect((_$p) => (_$p = mobileExpanded() ? "none" : "flex") != null ? _el$154.style.setProperty("display", _$p) : _el$154.style.removeProperty("display"));
-      return _el$154;
+      createRenderEffect((_$p) => (_$p = mobileExpanded() ? "none" : "flex") != null ? _el$93.style.setProperty("display", _$p) : _el$93.style.removeProperty("display"));
+      return _el$93;
     })(), createComponent(Show, {
       get when() {
         return mobileExpanded();
       },
       get children() {
-        var _el$160 = _tmpl$23$1(), _el$161 = _el$160.firstChild, _el$162 = _el$161.firstChild, _el$163 = _el$162.nextSibling, _el$164 = _el$163.firstChild, _el$165 = _el$163.nextSibling, _el$166 = _el$165.nextSibling;
-        _el$160.$$click = (e) => {
+        var _el$99 = _tmpl$15$1(), _el$100 = _el$99.firstChild, _el$101 = _el$100.firstChild, _el$102 = _el$101.nextSibling, _el$103 = _el$102.firstChild, _el$104 = _el$102.nextSibling, _el$105 = _el$104.nextSibling;
+        _el$99.$$click = (e) => {
           if (e.target === e.currentTarget) {
             closeBottomSheet();
           }
         };
-        _el$161.$$pointerdown = (e) => e.stopPropagation();
-        _el$161.$$click = (e) => e.stopPropagation();
-        _el$161.$$touchend = handleTouchEnd;
-        _el$161.$$touchmove = handleTouchMove;
-        _el$161.$$touchstart = handleTouchStart;
+        _el$100.$$pointerdown = (e) => e.stopPropagation();
+        _el$100.$$click = (e) => e.stopPropagation();
+        _el$100.$$touchend = handleTouchEnd;
+        _el$100.$$touchmove = handleTouchMove;
+        _el$100.$$touchstart = handleTouchStart;
         var _ref$ = bottomSheetRef;
-        typeof _ref$ === "function" ? use(_ref$, _el$161) : bottomSheetRef = _el$161;
-        _el$161.style.setProperty("position", "fixed");
-        _el$161.style.setProperty("bottom", "0");
-        _el$161.style.setProperty("left", "50%");
-        _el$161.style.setProperty("transform", "translateX(-50%)");
-        _el$161.style.setProperty("transition", "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)");
-        _el$161.style.setProperty("willChange", "transform");
-        _el$161.style.setProperty("width", "90%");
-        _el$161.style.setProperty("maxWidth", "500px");
-        _el$161.style.setProperty("minHeight", "60vh");
-        _el$161.style.setProperty("maxHeight", "85vh");
-        _el$161.style.setProperty("display", "flex");
-        _el$161.style.setProperty("flexDirection", "column");
-        _el$162.style.setProperty("padding", "8px");
-        _el$163.style.setProperty("padding", "12px 20px");
-        _el$164.style.setProperty("fontSize", "14px");
-        _el$164.style.setProperty("margin", "0");
-        _el$164.style.setProperty("display", "flex");
-        _el$164.style.setProperty("alignItems", "center");
-        _el$164.style.setProperty("gap", "8px");
-        insert(_el$165, createComponent(For, {
+        typeof _ref$ === "function" ? use(_ref$, _el$100) : bottomSheetRef = _el$100;
+        _el$100.style.setProperty("position", "fixed");
+        _el$100.style.setProperty("bottom", "0");
+        _el$100.style.setProperty("left", "50%");
+        _el$100.style.setProperty("transform", "translateX(-50%)");
+        _el$100.style.setProperty("transition", "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)");
+        _el$100.style.setProperty("willChange", "transform");
+        _el$100.style.setProperty("width", "90%");
+        _el$100.style.setProperty("maxWidth", "500px");
+        _el$100.style.setProperty("minHeight", "60vh");
+        _el$100.style.setProperty("maxHeight", "85vh");
+        _el$100.style.setProperty("display", "flex");
+        _el$100.style.setProperty("flexDirection", "column");
+        _el$101.style.setProperty("padding", "8px");
+        _el$102.style.setProperty("padding", "12px 20px");
+        _el$103.style.setProperty("fontSize", "14px");
+        _el$103.style.setProperty("margin", "0");
+        _el$103.style.setProperty("display", "flex");
+        _el$103.style.setProperty("alignItems", "center");
+        _el$103.style.setProperty("gap", "8px");
+        insert(_el$104, createComponent(For, {
           each: tabs,
           children: (tab, index) => (() => {
-            var _el$172 = _tmpl$24$1(), _el$173 = _el$172.firstChild, _el$174 = _el$173.nextSibling;
-            _el$172.$$click = () => setActiveTab(index());
-            insert(_el$173, () => tab.icon);
-            insert(_el$174, () => tab.label);
-            createRenderEffect(() => className(_el$172, `debug-mobile-tab ${activeTab() === index() ? "active" : ""}`));
-            return _el$172;
+            var _el$111 = _tmpl$16$1(), _el$112 = _el$111.firstChild, _el$113 = _el$112.nextSibling;
+            _el$111.$$click = () => setActiveTab(index());
+            insert(_el$112, () => tab.icon);
+            insert(_el$113, () => tab.label);
+            createRenderEffect(() => className(_el$111, `debug-mobile-tab ${activeTab() === index() ? "active" : ""}`));
+            return _el$111;
           })()
         }));
-        _el$166.style.setProperty("flex", "1");
-        _el$166.style.setProperty("overflowY", "auto");
-        _el$166.style.setProperty("WebkitOverflowScrolling", "touch");
-        _el$166.style.setProperty("padding", "32px 24px 40px");
-        _el$166.style.setProperty("minHeight", "300px");
-        insert(_el$166, createComponent(Switch, {
+        _el$105.style.setProperty("flex", "1");
+        _el$105.style.setProperty("overflowY", "auto");
+        _el$105.style.setProperty("WebkitOverflowScrolling", "touch");
+        _el$105.style.setProperty("padding", "32px 24px 40px");
+        _el$105.style.setProperty("minHeight", "300px");
+        insert(_el$105, createComponent(Switch, {
           get children() {
             return [createComponent(Match, {
               get when() {
@@ -23423,17 +22798,17 @@ function DebugPanel(props) {
                   var _a;
                   const metrics = ((_a = props.consciousnessMetrics) == null ? void 0 : _a.call(props)) || {};
                   return [(() => {
-                    var _el$175 = _tmpl$0$3(), _el$176 = _el$175.firstChild, _el$177 = _el$176.firstChild, _el$178 = _el$177.nextSibling, _el$179 = _el$176.nextSibling, _el$180 = _el$179.firstChild, _el$181 = _el$180.nextSibling, _el$182 = _el$179.nextSibling, _el$183 = _el$182.firstChild, _el$184 = _el$183.nextSibling;
-                    insert(_el$178, () => metrics.targetFPS || "60");
-                    insert(_el$181, () => {
+                    var _el$114 = _tmpl$0$3(), _el$115 = _el$114.firstChild, _el$116 = _el$115.firstChild, _el$117 = _el$116.nextSibling, _el$118 = _el$115.nextSibling, _el$119 = _el$118.firstChild, _el$120 = _el$119.nextSibling, _el$121 = _el$118.nextSibling, _el$122 = _el$121.firstChild, _el$123 = _el$122.nextSibling;
+                    insert(_el$117, () => metrics.targetFPS || "60");
+                    insert(_el$120, () => {
                       var _a2;
                       return ((_a2 = metrics.effects) == null ? void 0 : _a2.join(", ")) || "none";
                     });
-                    insert(_el$184, () => metrics.gpu || "unknown");
-                    return _el$175;
+                    insert(_el$123, () => metrics.gpu || "unknown");
+                    return _el$114;
                   })(), (() => {
-                    var _el$185 = _tmpl$1$2(), _el$186 = _el$185.firstChild;
-                    _el$186.$$click = () => {
+                    var _el$124 = _tmpl$1$2(), _el$125 = _el$124.firstChild;
+                    _el$125.$$click = () => {
                       var _a2;
                       console.log("🌊 Testing consciousness zoom...");
                       const renderer = window.nativeHotspotRenderer;
@@ -23474,7 +22849,7 @@ function DebugPanel(props) {
                         console.warn("❌ No hotspots found");
                       }
                     };
-                    return _el$185;
+                    return _el$124;
                   })()];
                 })();
               }
@@ -23483,18 +22858,18 @@ function DebugPanel(props) {
                 return activeTab() === 2;
               },
               get children() {
-                var _el$167 = _tmpl$22$1(), _el$168 = _el$167.firstChild, _el$169 = _el$168.nextSibling, _el$170 = _el$169.nextSibling, _el$171 = _el$170.firstChild;
-                _el$171.$$click = () => {
+                var _el$106 = _tmpl$14$1(), _el$107 = _el$106.firstChild, _el$108 = _el$107.nextSibling, _el$109 = _el$108.nextSibling, _el$110 = _el$109.firstChild;
+                _el$110.$$click = () => {
                   if (confirm("Clear all cached data and reload?")) {
                     cacheManager.forceReset();
                   }
                 };
-                _el$171.style.setProperty("width", "100%");
-                _el$171.style.setProperty("padding", "12px");
-                _el$171.style.setProperty("background", "rgba(255, 87, 34, 0.1)");
-                _el$171.style.setProperty("border", "1px solid rgba(255, 87, 34, 0.3)");
-                _el$171.style.setProperty("color", "#FF5722");
-                return _el$167;
+                _el$110.style.setProperty("width", "100%");
+                _el$110.style.setProperty("padding", "12px");
+                _el$110.style.setProperty("background", "rgba(255, 87, 34, 0.1)");
+                _el$110.style.setProperty("border", "1px solid rgba(255, 87, 34, 0.3)");
+                _el$110.style.setProperty("color", "#FF5722");
+                return _el$106;
               }
             }), createComponent(Match, {
               get when() {
@@ -23516,15 +22891,15 @@ function DebugPanel(props) {
           }
         }));
         createRenderEffect((_p$) => {
-          var _v$28 = `debug-mobile-backdrop ${isClosing() ? "closing" : ""}`, _v$29 = `debug-mobile-sheet ${isClosing() ? "closing" : "expanded"}`;
-          _v$28 !== _p$.e && className(_el$160, _p$.e = _v$28);
-          _v$29 !== _p$.t && className(_el$161, _p$.t = _v$29);
+          var _v$11 = `debug-mobile-backdrop ${isClosing() ? "closing" : ""}`, _v$12 = `debug-mobile-sheet ${isClosing() ? "closing" : "expanded"}`;
+          _v$11 !== _p$.e && className(_el$99, _p$.e = _v$11);
+          _v$12 !== _p$.t && className(_el$100, _p$.t = _v$12);
           return _p$;
         }, {
           e: void 0,
           t: void 0
         });
-        return _el$160;
+        return _el$99;
       }
     })];
   }
@@ -23584,67 +22959,67 @@ function DebugPanel(props) {
     }));
   };
   return (() => {
-    var _el$187 = _tmpl$27$1(), _el$188 = _el$187.firstChild, _el$189 = _el$188.firstChild, _el$190 = _el$189.firstChild;
-    _el$187.$$mousedown = handleMouseDown;
-    _el$188.$$click = () => {
+    var _el$126 = _tmpl$19$1(), _el$127 = _el$126.firstChild, _el$128 = _el$127.firstChild, _el$129 = _el$128.firstChild;
+    _el$126.$$mousedown = handleMouseDown;
+    _el$127.$$click = () => {
       if (isMinimized()) {
         setIsMinimized(false);
       }
     };
-    _el$190.style.setProperty("transition", "all 0.3s");
-    _el$190.style.setProperty("color", "rgba(255, 255, 255, 0.9)");
-    insert(_el$189, createComponent(Show, {
+    _el$129.style.setProperty("transition", "all 0.3s");
+    _el$129.style.setProperty("color", "rgba(255, 255, 255, 0.9)");
+    insert(_el$128, createComponent(Show, {
       get when() {
         return !isMinimized();
       },
       get children() {
-        return _tmpl$25$1();
+        return _tmpl$17$1();
       }
     }), null);
-    insert(_el$188, createComponent(Show, {
+    insert(_el$127, createComponent(Show, {
       get when() {
         return !isMinimized();
       },
       get children() {
-        var _el$192 = _tmpl$26$1(), _el$193 = _el$192.firstChild;
-        _el$192.addEventListener("mouseleave", (e) => {
+        var _el$131 = _tmpl$18$1(), _el$132 = _el$131.firstChild;
+        _el$131.addEventListener("mouseleave", (e) => {
           e.currentTarget.style.background = "rgba(255,255,255,0.08)";
           e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
           e.currentTarget.style.color = "rgba(255,255,255,0.5)";
         });
-        _el$192.addEventListener("mouseenter", (e) => {
+        _el$131.addEventListener("mouseenter", (e) => {
           e.currentTarget.style.background = "rgba(255,255,255,0.12)";
           e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
           e.currentTarget.style.color = "rgba(255,255,255,0.8)";
         });
-        _el$192.$$click = (e) => {
+        _el$131.$$click = (e) => {
           e.stopPropagation();
           setIsMinimized(!isMinimized());
         };
-        _el$192.style.setProperty("position", "absolute");
-        _el$192.style.setProperty("top", "12px");
-        _el$192.style.setProperty("right", "12px");
-        _el$192.style.setProperty("background", "rgba(255,255,255,0.08)");
-        _el$192.style.setProperty("border", "1px solid rgba(255,255,255,0.12)");
-        _el$192.style.setProperty("color", "rgba(255,255,255,0.5)");
-        _el$192.style.setProperty("fontSize", "14px");
-        _el$192.style.setProperty("lineHeight", "1");
-        _el$192.style.setProperty("cursor", "pointer");
-        _el$192.style.setProperty("padding", "0");
-        _el$192.style.setProperty("width", "28px");
-        _el$192.style.setProperty("height", "28px");
-        _el$192.style.setProperty("display", "flex");
-        _el$192.style.setProperty("alignItems", "center");
-        _el$192.style.setProperty("justifyContent", "center");
-        _el$192.style.setProperty("borderRadius", "8px");
-        _el$192.style.setProperty("transition", "all 0.2s");
-        _el$193.style.setProperty("width", "16px");
-        _el$193.style.setProperty("height", "16px");
-        _el$193.style.setProperty("fill", "currentColor");
-        return _el$192;
+        _el$131.style.setProperty("position", "absolute");
+        _el$131.style.setProperty("top", "12px");
+        _el$131.style.setProperty("right", "12px");
+        _el$131.style.setProperty("background", "rgba(255,255,255,0.08)");
+        _el$131.style.setProperty("border", "1px solid rgba(255,255,255,0.12)");
+        _el$131.style.setProperty("color", "rgba(255,255,255,0.5)");
+        _el$131.style.setProperty("fontSize", "14px");
+        _el$131.style.setProperty("lineHeight", "1");
+        _el$131.style.setProperty("cursor", "pointer");
+        _el$131.style.setProperty("padding", "0");
+        _el$131.style.setProperty("width", "28px");
+        _el$131.style.setProperty("height", "28px");
+        _el$131.style.setProperty("display", "flex");
+        _el$131.style.setProperty("alignItems", "center");
+        _el$131.style.setProperty("justifyContent", "center");
+        _el$131.style.setProperty("borderRadius", "8px");
+        _el$131.style.setProperty("transition", "all 0.2s");
+        _el$132.style.setProperty("width", "16px");
+        _el$132.style.setProperty("height", "16px");
+        _el$132.style.setProperty("fill", "currentColor");
+        return _el$131;
       }
     }), null);
-    insert(_el$187, createComponent(Show, {
+    insert(_el$126, createComponent(Show, {
       get when() {
         return !isMinimized();
       },
@@ -23652,20 +23027,20 @@ function DebugPanel(props) {
         return createComponent(For, {
           each: sections,
           children: (section) => (() => {
-            var _el$194 = _tmpl$28$1(), _el$195 = _el$194.firstChild, _el$196 = _el$195.firstChild, _el$197 = _el$196.firstChild, _el$198 = _el$197.nextSibling, _el$199 = _el$195.nextSibling, _el$200 = _el$199.firstChild;
-            _el$195.$$click = () => toggleSection(section.id);
-            insert(_el$197, () => section.icon);
-            insert(_el$198, () => section.title);
-            insert(_el$200, () => section.content());
-            createRenderEffect(() => className(_el$194, `debug-section ${expandedSections()[section.id] ? "expanded" : ""}`));
-            return _el$194;
+            var _el$133 = _tmpl$20$1(), _el$134 = _el$133.firstChild, _el$135 = _el$134.firstChild, _el$136 = _el$135.firstChild, _el$137 = _el$136.nextSibling, _el$138 = _el$134.nextSibling, _el$139 = _el$138.firstChild;
+            _el$134.$$click = () => toggleSection(section.id);
+            insert(_el$136, () => section.icon);
+            insert(_el$137, () => section.title);
+            insert(_el$139, () => section.content());
+            createRenderEffect(() => className(_el$133, `debug-section ${expandedSections()[section.id] ? "expanded" : ""}`));
+            return _el$133;
           })()
         });
       }
     }), null);
     createRenderEffect((_p$) => {
       var _a, _b, _c;
-      var _v$30 = `debug-panel ${isMinimized() ? "glass-button" : ""}`, _v$31 = {
+      var _v$13 = `debug-panel ${isMinimized() ? "glass-button" : ""}`, _v$14 = {
         ...position().x !== null && !isMinimized() ? {
           // When dragging, use absolute positioning
           position: "fixed",
@@ -23703,7 +23078,7 @@ function DebugPanel(props) {
         cursor: isDragging() ? "grabbing" : "default",
         transition: isDragging() ? "none" : "all 0.2s"
         // Remove transition during drag
-      }, _v$32 = {
+      }, _v$15 = {
         cursor: isMinimized() ? "pointer" : "grab",
         ...isMinimized() ? {
           height: "100%",
@@ -23712,12 +23087,12 @@ function DebugPanel(props) {
           justifyContent: "center",
           padding: 0
         } : {}
-      }, _v$33 = isMinimized() ? "20" : "18", _v$34 = isMinimized() ? "20" : "18";
-      _v$30 !== _p$.e && className(_el$187, _p$.e = _v$30);
-      _p$.t = style(_el$187, _v$31, _p$.t);
-      _p$.a = style(_el$188, _v$32, _p$.a);
-      _v$33 !== _p$.o && setAttribute(_el$190, "width", _p$.o = _v$33);
-      _v$34 !== _p$.i && setAttribute(_el$190, "height", _p$.i = _v$34);
+      }, _v$16 = isMinimized() ? "20" : "18", _v$17 = isMinimized() ? "20" : "18";
+      _v$13 !== _p$.e && className(_el$126, _p$.e = _v$13);
+      _p$.t = style(_el$126, _v$14, _p$.t);
+      _p$.a = style(_el$127, _v$15, _p$.a);
+      _v$16 !== _p$.o && setAttribute(_el$129, "width", _p$.o = _v$16);
+      _v$17 !== _p$.i && setAttribute(_el$129, "height", _p$.i = _v$17);
       return _p$;
     }, {
       e: void 0,
@@ -23726,11 +23101,11 @@ function DebugPanel(props) {
       o: void 0,
       i: void 0
     });
-    return _el$187;
+    return _el$126;
   })();
 }
 delegateEvents(["input", "click", "touchstart", "touchmove", "touchend", "pointerdown", "mousedown"]);
-var _tmpl$$4 = /* @__PURE__ */ template(`<span class=thermal-icon>`), _tmpl$2$4 = /* @__PURE__ */ template(`<div class=performance-indicator><span class=fps-value> FPS</span><span class=quality-icon>`);
+var _tmpl$$3 = /* @__PURE__ */ template(`<span class=thermal-icon>`), _tmpl$2$3 = /* @__PURE__ */ template(`<div class=performance-indicator><span class=fps-value> FPS</span><span class=quality-icon>`);
 function PerformanceIndicator(props) {
   const getStatusColor = () => {
     if (!props.status) return "#666";
@@ -23773,7 +23148,7 @@ function PerformanceIndicator(props) {
       return props.visible && props.status;
     },
     get children() {
-      var _el$ = _tmpl$2$4(), _el$2 = _el$.firstChild, _el$3 = _el$2.firstChild, _el$4 = _el$2.nextSibling;
+      var _el$ = _tmpl$2$3(), _el$2 = _el$.firstChild, _el$3 = _el$2.firstChild, _el$4 = _el$2.nextSibling;
       insert(_el$2, () => props.status.fps, _el$3);
       insert(_el$4, () => getQualityIcon(props.status.quality));
       insert(_el$, createComponent(Show, {
@@ -23781,7 +23156,7 @@ function PerformanceIndicator(props) {
           return props.status.thermal !== "normal";
         },
         get children() {
-          var _el$5 = _tmpl$$4();
+          var _el$5 = _tmpl$$3();
           insert(_el$5, () => getThermalIcon(props.status.thermal));
           return _el$5;
         }
@@ -24206,7 +23581,7 @@ class FullscreenManager {
   }
 }
 const fullscreenManager = new FullscreenManager();
-var _tmpl$$3 = /* @__PURE__ */ template(`<img class=preview-image alt="Loading preview">`), _tmpl$2$3 = /* @__PURE__ */ template(`<div class=viewer-loading><p>Loading high-resolution artwork...</p><p style=font-size:12px;margin-top:10px;opacity:0.7;>Debug: isLoading=<!>, viewerReady=`), _tmpl$3$3 = /* @__PURE__ */ template(`<div style=margin-bottom:16px;><div style=display:flex;align-items:center;justify-content:space-between;><label style=font-size:11px;color:rgba(255,255,255,0.8);>Smooth Interpolation</label><button></button></div><div style=font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px;>OFF = Perfect sync, ON = Smooth movement`), _tmpl$4$3 = /* @__PURE__ */ template(`<div style=margin-bottom:12px;><label style=font-size:11px;color:rgba(255,255,255,0.8);display:block;margin-bottom:6px;>Smoothing: </label><input type=range min=0.1 max=1.0 step=0.05><div style=font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px;>Lower = smoother, Higher = more responsive`), _tmpl$5$2 = /* @__PURE__ */ template(`<div style=margin-bottom:12px;><label style=font-size:11px;color:rgba(255,255,255,0.8);display:block;margin-bottom:6px;>Zoom fade distance: <!>%</label><input type=range min=0.1 max=1.0 step=0.05><div style=font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px;>Darkness gradually fades when zooming below this level`), _tmpl$6$2 = /* @__PURE__ */ template(`<div style=margin-bottom:12px;><label style=font-size:11px;color:rgba(255,255,255,0.8);display:block;margin-bottom:6px;>Pan fade distance: <!>%</label><input type=range min=0.1 max=1.0 step=0.05><div style=font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px;>Darkness gradually fades as you pan away this distance`), _tmpl$7$2 = /* @__PURE__ */ template(`<div><div><div style=font-size:12px;color:#FFFFFF;font-weight:600;letter-spacing:0.5px;text-align:center;>SPOTLIGHT FINE-TUNING</div><button>✕</button></div><div class=floating-panel-scrollable><div style=margin-bottom:12px;><label style=font-size:11px;color:rgba(255,255,255,0.8);display:block;margin-bottom:6px;>Circle Size: </label><input type=range max=3.0 step=0.05>`), _tmpl$8$2 = /* @__PURE__ */ template(`<button aria-label="Expand to Full View"><svg width=24 height=24 viewBox="0 0 24 24"fill=none><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round>`), _tmpl$9$2 = /* @__PURE__ */ template(`<div class=fullscreen-button-container><button class="fullscreen-button glass-button">`), _tmpl$0$2 = /* @__PURE__ */ template(`<div class=viewer-container><div class=openseadragon-viewer>`), _tmpl$1$1 = /* @__PURE__ */ template(`<svg width=20 height=20 viewBox="0 0 20 20"fill=none><path d="M5 1v4H1M15 1v4h4M5 19v-4H1M15 19v-4h4"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round>`), _tmpl$10$1 = /* @__PURE__ */ template(`<svg width=20 height=20 viewBox="0 0 20 20"fill=none><path d="M1 5V1h4M19 5V1h-4M1 15v4h4M19 15v4h-4"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round>`);
+var _tmpl$$2 = /* @__PURE__ */ template(`<img class=preview-image alt="Loading preview">`), _tmpl$2$2 = /* @__PURE__ */ template(`<div class=viewer-loading><p>Loading high-resolution artwork...</p><p style=font-size:12px;margin-top:10px;opacity:0.7;>Debug: isLoading=<!>, viewerReady=`), _tmpl$3$2 = /* @__PURE__ */ template(`<div style=margin-bottom:16px;><div style=display:flex;align-items:center;justify-content:space-between;><label style=font-size:11px;color:rgba(255,255,255,0.8);>Smooth Interpolation</label><button></button></div><div style=font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px;>OFF = Perfect sync, ON = Smooth movement`), _tmpl$4$2 = /* @__PURE__ */ template(`<div style=margin-bottom:12px;><label style=font-size:11px;color:rgba(255,255,255,0.8);display:block;margin-bottom:6px;>Smoothing: </label><input type=range min=0.1 max=1.0 step=0.05><div style=font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px;>Lower = smoother, Higher = more responsive`), _tmpl$5$2 = /* @__PURE__ */ template(`<div style=margin-bottom:12px;><label style=font-size:11px;color:rgba(255,255,255,0.8);display:block;margin-bottom:6px;>Zoom fade distance: <!>%</label><input type=range min=0.1 max=1.0 step=0.05><div style=font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px;>Darkness gradually fades when zooming below this level`), _tmpl$6$2 = /* @__PURE__ */ template(`<div style=margin-bottom:12px;><label style=font-size:11px;color:rgba(255,255,255,0.8);display:block;margin-bottom:6px;>Pan fade distance: <!>%</label><input type=range min=0.1 max=1.0 step=0.05><div style=font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px;>Darkness gradually fades as you pan away this distance`), _tmpl$7$2 = /* @__PURE__ */ template(`<div><div><div style=font-size:12px;color:#FFFFFF;font-weight:600;letter-spacing:0.5px;text-align:center;>SPOTLIGHT FINE-TUNING</div><button>✕</button></div><div class=floating-panel-scrollable><div style=margin-bottom:12px;><label style=font-size:11px;color:rgba(255,255,255,0.8);display:block;margin-bottom:6px;>Circle Size: </label><input type=range max=3.0 step=0.05>`), _tmpl$8$2 = /* @__PURE__ */ template(`<button aria-label="Expand to Full View"><svg width=24 height=24 viewBox="0 0 24 24"fill=none><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round>`), _tmpl$9$2 = /* @__PURE__ */ template(`<div class=fullscreen-button-container><button class="fullscreen-button glass-button">`), _tmpl$0$2 = /* @__PURE__ */ template(`<div class=viewer-container><div class=openseadragon-viewer>`), _tmpl$1$1 = /* @__PURE__ */ template(`<svg width=20 height=20 viewBox="0 0 20 20"fill=none><path d="M5 1v4H1M15 1v4h4M5 19v-4H1M15 19v-4h4"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round>`), _tmpl$10$1 = /* @__PURE__ */ template(`<svg width=20 height=20 viewBox="0 0 20 20"fill=none><path d="M1 5V1h4M19 5V1h-4M1 15v4h4M19 15v4h-4"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round>`);
 let hotspotData = [];
 function ArtworkViewer(props) {
   let viewerRef;
@@ -24308,7 +23683,6 @@ function ArtworkViewer(props) {
     if (!hotspot) {
       state.setSelectedHotspot(null);
       state.setShowMediaButton(false);
-      state.setCurrentPlayingHotspot(null);
       state.setCurrentMediaHotspot(null);
       if (state.components().overlayManager) {
         console.log("Calling overlayManager.clearSelection()");
@@ -24340,7 +23714,6 @@ function ArtworkViewer(props) {
     }
     state.setShowMediaButton(false);
     state.setSelectedHotspot(hotspot);
-    state.setCurrentPlayingHotspot(hotspot);
     console.log("🔍 Checking renderer for setVisualSelectedState:", {
       hasRenderer: !!state.components().renderer,
       hasMethod: !!(state.components().renderer && state.components().renderer.setVisualSelectedState),
@@ -24433,7 +23806,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-bmu1YwRR.js").then((n) => n.v);
+      } = await import("./viewerSetup-B_52wcl-.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
@@ -24530,7 +23903,7 @@ function ArtworkViewer(props) {
         return memo(() => !!state.previewLoaded())() && !state.viewerReady();
       },
       get children() {
-        var _el$2 = _tmpl$$3();
+        var _el$2 = _tmpl$$2();
         createRenderEffect(() => setAttribute(_el$2, "src", `/images/tiles/${props.artworkId}_1024/preview.jpg`));
         return _el$2;
       }
@@ -24544,7 +23917,7 @@ function ArtworkViewer(props) {
         return state.isLoading();
       },
       get children() {
-        var _el$4 = _tmpl$2$3(), _el$5 = _el$4.firstChild, _el$6 = _el$5.nextSibling, _el$7 = _el$6.firstChild, _el$9 = _el$7.nextSibling;
+        var _el$4 = _tmpl$2$2(), _el$5 = _el$4.firstChild, _el$6 = _el$5.nextSibling, _el$7 = _el$6.firstChild, _el$9 = _el$7.nextSibling;
         _el$9.nextSibling;
         insert(_el$6, () => String(state.isLoading()), _el$9);
         insert(_el$6, () => String(state.viewerReady()), null);
@@ -24797,7 +24170,7 @@ function ArtworkViewer(props) {
           },
           get children() {
             return [(() => {
-              var _el$17 = _tmpl$3$3(), _el$18 = _el$17.firstChild, _el$19 = _el$18.firstChild, _el$20 = _el$19.nextSibling;
+              var _el$17 = _tmpl$3$2(), _el$18 = _el$17.firstChild, _el$19 = _el$18.firstChild, _el$20 = _el$19.nextSibling;
               _el$20.$$click = () => {
                 var _a, _b, _c;
                 const newValue = !(((_a = state.interpolationEnabled) == null ? void 0 : _a.call(state)) ?? true);
@@ -24828,7 +24201,7 @@ function ArtworkViewer(props) {
                 return ((_a = state.interpolationEnabled) == null ? void 0 : _a.call(state)) ?? true;
               },
               get children() {
-                var _el$21 = _tmpl$4$3(), _el$22 = _el$21.firstChild;
+                var _el$21 = _tmpl$4$2(), _el$22 = _el$21.firstChild;
                 _el$22.firstChild;
                 var _el$24 = _el$22.nextSibling;
                 insert(_el$22, () => {
@@ -24956,21 +24329,6 @@ function ArtworkViewer(props) {
         })());
         createRenderEffect(() => setAttribute(_el$39, "aria-label", state.isFullscreen() ? "Exit fullscreen" : "Enter fullscreen"));
         return _el$38;
-      }
-    }), null);
-    insert(_el$, createComponent(Show, {
-      get when() {
-        return state.viewerReady();
-      },
-      get children() {
-        return createComponent(AudioPlayer, {
-          get audioEngine() {
-            return state.components().audioEngine;
-          },
-          get currentHotspot() {
-            return state.currentPlayingHotspot;
-          }
-        });
       }
     }), null);
     return _el$;
@@ -41314,7 +40672,7 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-var _tmpl$$2 = /* @__PURE__ */ template(`<button style="background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer;font-size:11px;padding:4px 0;width:100%;text-align:center;">`), _tmpl$2$2 = /* @__PURE__ */ template(`<div style=margin-bottom:12px;>`), _tmpl$3$2 = /* @__PURE__ */ template(`<button style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.2);padding:6px 16px;border-radius:4px;cursor:pointer;font-size:12px;width:100%;">💬 Add feedback`), _tmpl$4$2 = /* @__PURE__ */ template(`<div style=margin-top:16px;>`), _tmpl$5$1 = /* @__PURE__ */ template(`<div><textarea style="width:100%;padding:6px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;border-radius:4px;font-size:13px;resize:vertical;min-height:50px;"></textarea><div style=margin-top:6px;><button style="background:#0088cc;color:white;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:11px;margin-right:6px;">Save</button><button style="background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);padding:4px 12px;border-radius:4px;cursor:pointer;font-size:11px;">Cancel`), _tmpl$6$1 = /* @__PURE__ */ template(`<div style="background:rgba(0,0,0,0.2);padding:10px;border-radius:6px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.1);">`), _tmpl$7$1 = /* @__PURE__ */ template(`<p style="margin:0 0 6px 0;color:rgba(255,255,255,0.9);font-size:13px;">`), _tmpl$8$1 = /* @__PURE__ */ template(`<div style=display:flex;justify-content:space-between;align-items:center;><span style=color:rgba(255,255,255,0.5);font-size:11px;> • </span><div><button style=background:none;border:none;color:#0088cc;cursor:pointer;font-size:11px;margin-right:8px;>Edit</button><button style=background:none;border:none;color:#ff4444;cursor:pointer;font-size:11px;>Delete`), _tmpl$9$1 = /* @__PURE__ */ template(`<div style=background:rgba(0,0,0,0.3);padding:8px;border-radius:4px;margin-bottom:8px;><div style=display:flex;gap:6px;><button>Leonard</button><button>Deji`), _tmpl$0$1 = /* @__PURE__ */ template(`<div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:12px;"><div style=margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;><span style=color:rgba(255,255,255,0.7);font-size:11px;>Posting as: <strong></strong></span><button style="background:none;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);padding:2px 6px;border-radius:3px;cursor:pointer;font-size:10px;">Change</button></div><form><textarea placeholder="Add your feedback here..."style="width:100%;padding:6px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;border-radius:4px;font-size:13px;resize:vertical;min-height:50px;"autofocus></textarea><div style=display:flex;gap:6px;margin-top:6px;><button type=submit></button><button type=button style="background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);padding:6px 16px;border-radius:4px;cursor:pointer;font-size:12px;">Cancel`);
+var _tmpl$$1 = /* @__PURE__ */ template(`<button style="background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer;font-size:11px;padding:4px 0;width:100%;text-align:center;">`), _tmpl$2$1 = /* @__PURE__ */ template(`<div style=margin-bottom:12px;>`), _tmpl$3$1 = /* @__PURE__ */ template(`<button style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.2);padding:6px 16px;border-radius:4px;cursor:pointer;font-size:12px;width:100%;">💬 Add feedback`), _tmpl$4$1 = /* @__PURE__ */ template(`<div style=margin-top:16px;>`), _tmpl$5$1 = /* @__PURE__ */ template(`<div><textarea style="width:100%;padding:6px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;border-radius:4px;font-size:13px;resize:vertical;min-height:50px;"></textarea><div style=margin-top:6px;><button style="background:#0088cc;color:white;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:11px;margin-right:6px;">Save</button><button style="background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);padding:4px 12px;border-radius:4px;cursor:pointer;font-size:11px;">Cancel`), _tmpl$6$1 = /* @__PURE__ */ template(`<div style="background:rgba(0,0,0,0.2);padding:10px;border-radius:6px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.1);">`), _tmpl$7$1 = /* @__PURE__ */ template(`<p style="margin:0 0 6px 0;color:rgba(255,255,255,0.9);font-size:13px;">`), _tmpl$8$1 = /* @__PURE__ */ template(`<div style=display:flex;justify-content:space-between;align-items:center;><span style=color:rgba(255,255,255,0.5);font-size:11px;> • </span><div><button style=background:none;border:none;color:#0088cc;cursor:pointer;font-size:11px;margin-right:8px;>Edit</button><button style=background:none;border:none;color:#ff4444;cursor:pointer;font-size:11px;>Delete`), _tmpl$9$1 = /* @__PURE__ */ template(`<div style=background:rgba(0,0,0,0.3);padding:8px;border-radius:4px;margin-bottom:8px;><div style=display:flex;gap:6px;><button>Leonard</button><button>Deji`), _tmpl$0$1 = /* @__PURE__ */ template(`<div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:12px;"><div style=margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;><span style=color:rgba(255,255,255,0.7);font-size:11px;>Posting as: <strong></strong></span><button style="background:none;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);padding:2px 6px;border-radius:3px;cursor:pointer;font-size:10px;">Change</button></div><form><textarea placeholder="Add your feedback here..."style="width:100%;padding:6px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;border-radius:4px;font-size:13px;resize:vertical;min-height:50px;"autofocus></textarea><div style=display:flex;gap:6px;margin-top:6px;><button type=submit></button><button type=button style="background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);padding:6px 16px;border-radius:4px;cursor:pointer;font-size:12px;">Cancel`);
 function FeedbackSection({
   updateId,
   updateTitle
@@ -41397,13 +40755,13 @@ function FeedbackSection({
     return date.toLocaleDateString();
   };
   return (() => {
-    var _el$ = _tmpl$4$2();
+    var _el$ = _tmpl$4$1();
     insert(_el$, createComponent(Show, {
       get when() {
         return feedbacks().length > 0;
       },
       get children() {
-        var _el$2 = _tmpl$2$2();
+        var _el$2 = _tmpl$2$1();
         insert(_el$2, createComponent(For, {
           get each() {
             return memo(() => !!showAllFeedbacks())() ? feedbacks() : feedbacks().slice(0, 2);
@@ -41452,7 +40810,7 @@ function FeedbackSection({
             return feedbacks().length > 2;
           },
           get children() {
-            var _el$3 = _tmpl$$2();
+            var _el$3 = _tmpl$$1();
             _el$3.$$click = () => setShowAllFeedbacks(!showAllFeedbacks());
             insert(_el$3, (() => {
               var _c$ = memo(() => !!showAllFeedbacks());
@@ -41524,7 +40882,7 @@ function FeedbackSection({
         })();
       },
       get children() {
-        var _el$4 = _tmpl$3$2();
+        var _el$4 = _tmpl$3$1();
         _el$4.$$click = () => setShowForm(true);
         return _el$4;
       }
@@ -41533,115 +40891,6 @@ function FeedbackSection({
   })();
 }
 delegateEvents(["click", "input"]);
-var _tmpl$$1 = /* @__PURE__ */ template(`<div class="floating-audio-player deji-style"><button class=player-close aria-label="Close player">×</button><div class=player-controls><button class=control-button>◀ Last</button><button class=control-button>⏪ 15</button><button class="control-button play-pause"></button><button class=control-button>15 ⏩</button><button class=control-button>Next ▶</button></div><div class=segment-indicator>Segment <!>/`), _tmpl$2$1 = /* @__PURE__ */ template(`<div class="floating-audio-player minimal-style"><button class=player-close-minimal aria-label="Close player">×</button><div class=player-controls-minimal><button class=control-minimal>◀</button><button class="control-minimal small">-15</button><button class="control-minimal play"></button><button class="control-minimal small">+15</button><button class=control-minimal>▶`), _tmpl$3$1 = /* @__PURE__ */ template(`<div class="floating-audio-player floating-style"><button class=player-close-floating aria-label="Close player">×</button><div class=player-bar><button class=control-floating>⏮</button><button class=control-floating>⏪</button><button class="control-floating play-button"></button><button class=control-floating>⏩</button><button class=control-floating>⏭</button></div><div class=segment-text>/`), _tmpl$4$1 = /* @__PURE__ */ template(`<div class="floating-audio-player spotify-style"><button class=player-close-spotify aria-label="Close player">×</button><div class=spotify-container><div class=spotify-controls><button class=control-spotify>⏮</button><button class=control-spotify>⏪</button><button class="control-spotify play-spotify"></button><button class=control-spotify>⏩</button><button class=control-spotify>⏭</button></div><div class=spotify-progress><span class=time-label>0:00</span><div class=progress-bar><div class=progress-fill></div></div><span class=time-label>1:30`);
-function FloatingAudioPlayer(props) {
-  const [isPlaying, setIsPlaying] = createSignal(false);
-  const [currentSegment, setCurrentSegment] = createSignal(1);
-  const [totalSegments] = createSignal(5);
-  const [isVisible, setIsVisible] = createSignal(false);
-  createEffect(() => {
-    if (props.selectedStyle && props.selectedStyle() !== null) {
-      setIsVisible(true);
-      console.log("[FloatingAudioPlayer] Showing player with style:", props.selectedStyle());
-    }
-  });
-  const togglePlayPause = () => {
-    setIsPlaying(!isPlaying());
-    console.log("[FloatingAudioPlayer] Play/Pause toggled:", isPlaying());
-  };
-  const previousSegment = () => {
-    if (currentSegment() > 1) {
-      setCurrentSegment(currentSegment() - 1);
-      console.log("[FloatingAudioPlayer] Previous segment:", currentSegment());
-    }
-  };
-  const nextSegment = () => {
-    if (currentSegment() < totalSegments()) {
-      setCurrentSegment(currentSegment() + 1);
-      console.log("[FloatingAudioPlayer] Next segment:", currentSegment());
-    }
-  };
-  const skip = (seconds) => {
-    console.log(`[FloatingAudioPlayer] Skip ${seconds} seconds`);
-  };
-  const closePlayer = () => {
-    setIsVisible(false);
-    if (props.onClose) {
-      props.onClose();
-    }
-  };
-  if (!isVisible() || !props.selectedStyle || !props.selectedStyle()) {
-    return null;
-  }
-  return [createComponent(Show, {
-    get when() {
-      return props.selectedStyle() === "deji";
-    },
-    get children() {
-      var _el$ = _tmpl$$1(), _el$2 = _el$.firstChild, _el$3 = _el$2.nextSibling, _el$4 = _el$3.firstChild, _el$5 = _el$4.nextSibling, _el$6 = _el$5.nextSibling, _el$7 = _el$6.nextSibling, _el$8 = _el$7.nextSibling, _el$9 = _el$3.nextSibling, _el$0 = _el$9.firstChild, _el$10 = _el$0.nextSibling;
-      _el$10.nextSibling;
-      _el$2.$$click = closePlayer;
-      _el$4.$$click = previousSegment;
-      _el$5.$$click = () => skip(-15);
-      _el$6.$$click = togglePlayPause;
-      insert(_el$6, () => isPlaying() ? "⏸" : "▶");
-      _el$7.$$click = () => skip(15);
-      _el$8.$$click = nextSegment;
-      insert(_el$9, currentSegment, _el$10);
-      insert(_el$9, totalSegments, null);
-      return _el$;
-    }
-  }), createComponent(Show, {
-    get when() {
-      return props.selectedStyle() === "minimal";
-    },
-    get children() {
-      var _el$11 = _tmpl$2$1(), _el$12 = _el$11.firstChild, _el$13 = _el$12.nextSibling, _el$14 = _el$13.firstChild, _el$15 = _el$14.nextSibling, _el$16 = _el$15.nextSibling, _el$17 = _el$16.nextSibling, _el$18 = _el$17.nextSibling;
-      _el$12.$$click = closePlayer;
-      _el$14.$$click = previousSegment;
-      _el$15.$$click = () => skip(-15);
-      _el$16.$$click = togglePlayPause;
-      insert(_el$16, () => isPlaying() ? "⏸" : "▶");
-      _el$17.$$click = () => skip(15);
-      _el$18.$$click = nextSegment;
-      return _el$11;
-    }
-  }), createComponent(Show, {
-    get when() {
-      return props.selectedStyle() === "floating";
-    },
-    get children() {
-      var _el$19 = _tmpl$3$1(), _el$20 = _el$19.firstChild, _el$21 = _el$20.nextSibling, _el$22 = _el$21.firstChild, _el$23 = _el$22.nextSibling, _el$24 = _el$23.nextSibling, _el$25 = _el$24.nextSibling, _el$26 = _el$25.nextSibling, _el$27 = _el$21.nextSibling, _el$28 = _el$27.firstChild;
-      _el$20.$$click = closePlayer;
-      _el$22.$$click = previousSegment;
-      _el$23.$$click = () => skip(-15);
-      _el$24.$$click = togglePlayPause;
-      insert(_el$24, () => isPlaying() ? "⏸" : "▶");
-      _el$25.$$click = () => skip(15);
-      _el$26.$$click = nextSegment;
-      insert(_el$27, currentSegment, _el$28);
-      insert(_el$27, totalSegments, null);
-      return _el$19;
-    }
-  }), createComponent(Show, {
-    get when() {
-      return props.selectedStyle() === "spotify";
-    },
-    get children() {
-      var _el$29 = _tmpl$4$1(), _el$30 = _el$29.firstChild, _el$31 = _el$30.nextSibling, _el$32 = _el$31.firstChild, _el$33 = _el$32.firstChild, _el$34 = _el$33.nextSibling, _el$35 = _el$34.nextSibling, _el$36 = _el$35.nextSibling, _el$37 = _el$36.nextSibling, _el$38 = _el$32.nextSibling, _el$39 = _el$38.firstChild, _el$40 = _el$39.nextSibling, _el$41 = _el$40.firstChild;
-      _el$30.$$click = closePlayer;
-      _el$33.$$click = previousSegment;
-      _el$34.$$click = () => skip(-15);
-      _el$35.$$click = togglePlayPause;
-      insert(_el$35, () => isPlaying() ? "⏸" : "▶");
-      _el$36.$$click = () => skip(15);
-      _el$37.$$click = nextSegment;
-      createRenderEffect((_$p) => (_$p = `${currentSegment() / totalSegments() * 100}%`) != null ? _el$41.style.setProperty("width", _$p) : _el$41.style.removeProperty("width"));
-      return _el$29;
-    }
-  })];
-}
-delegateEvents(["click"]);
 const tableauHaptic = "/assets/tableau-haptic-B_9CTT5E.png";
 var _tmpl$ = /* @__PURE__ */ template(`<p><strong>The fix:</strong> Resolved the issue where the entire artwork would disappear on iOS devices after panning or zooming.`), _tmpl$2 = /* @__PURE__ */ template(`<p><strong>What was happening:</strong> iOS canvas memory limitations were causing the entire display to fail and show a blank screen after interactions.`), _tmpl$3 = /* @__PURE__ */ template(`<p><strong>Still working on:</strong> Some tiles may appear black temporarily during fast panning or zooming. This is the next issue to address on iOS devices.`), _tmpl$4 = /* @__PURE__ */ template(`<p>Made some under-the-hood optimizations that should improve performance on mobile devices. The app should feel a bit smoother when zooming and panning. `), _tmpl$5 = /* @__PURE__ */ template(`<h4>What's improved`), _tmpl$6 = /* @__PURE__ */ template(`<p>Rewrote parts of the rendering system to be more efficient. You should notice slightly better frame rates and more responsive touch interactions on iPhone and iPad. These are incremental improvements while I work on bigger optimizations.`), _tmpl$7 = /* @__PURE__ */ template(`<p><em>This is ongoing work - more performance improvements are coming as I continue refining the mobile experience.`), _tmpl$8 = /* @__PURE__ */ template(`<p><strong>Good news:</strong> Haptic feedback now works on a wider range of devices when you tap to reveal hotspots. The vibration provides tactile confirmation that your interaction was registered.`), _tmpl$9 = /* @__PURE__ */ template(`<h4>Device Support Status`), _tmpl$0 = /* @__PURE__ */ template(`<div><img alt="Haptic Support Table">`), _tmpl$1 = /* @__PURE__ */ template(`<p><strong>Technical limitation:</strong> Apple deliberately blocks web-based vibration access on older iOS versions and all iPads for security reasons. Only iOS 17.4+ allows limited haptic feedback through a workaround. Android has always supported the standard Vibration API.`), _tmpl$10 = /* @__PURE__ */ template(`<p><strong>Note on iOS vibrations:</strong> The ios-haptics library uses the checkbox switch trick which produces a fixed, non-configurable feedback. I cannot test this myself on iOS 17.4+ devices, so the actual feel may differ from Android.`), _tmpl$11 = /* @__PURE__ */ template(`<p><em>The app automatically detects device capabilities and enables vibration where possible. No configuration needed. Also removed tap sounds on mobile to reduce sensory overload.`), _tmpl$12 = /* @__PURE__ */ template(`<h4>Next priority`), _tmpl$13 = /* @__PURE__ */ template(`<p>Rather than spending more time on iOS vibration alternatives (like pseudo-haptic effects for older devices), I'm shifting focus to <strong>mobile performance improvements</strong>. Getting the app running smoothly on all devices takes precedence over vibration fallbacks.`), _tmpl$14 = /* @__PURE__ */ template(`<p>Fixed a bug that was breaking the tap-to-reveal feature on mobile after a few uses. The app was essentially forgetting to clean up after itself, causing it to stop working entirely.`), _tmpl$15 = /* @__PURE__ */ template(`<h4>What was happening`), _tmpl$16 = /* @__PURE__ */ template(`<p><strong>The problem:</strong> After tapping 3-4 times to reveal hotspots, nothing would appear anymore. You had to reload the page to get it working again.<br><strong>Why it happened:</strong> The app was creating invisible timers that never got cleared, like setting multiple alarms but forgetting which ones you set. These orphaned timers would interfere with new reveals.`), _tmpl$17 = /* @__PURE__ */ template(`<h4>The fix`), _tmpl$18 = /* @__PURE__ */ template(`<p>Now the app properly tracks and cleans up all timers. You can tap and reveal hotspots indefinitely without any degradation. Mobile exploration is finally stable for extended sessions.`), _tmpl$19 = /* @__PURE__ */ template(`<p>Added an experimental "Ripple" exploration mode for mobile that reveals hotspots in an expanding pattern from where you tap. Just a weekend side project I wanted to try out.`), _tmpl$20 = /* @__PURE__ */ template(`<h4>What's new`), _tmpl$21 = /* @__PURE__ */ template(`<p>Tap anywhere and hotspots appear in a ripple effect around your touch point - like sonar discovering what's hidden nearby. You can switch between "Focus" (one hotspot) and "Ripple" exploration modes using the debug button (bottom left corner).`), _tmpl$22 = /* @__PURE__ */ template(`<h4>Known issues`), _tmpl$23 = /* @__PURE__ */ template(`<p>This is very experimental. Currently reveals way too many hotspots (sometimes 30+) and the visual effect is chaotic rather than elegant. The animations need refinement.`), _tmpl$24 = /* @__PURE__ */ template(`<h4>Why test this`), _tmpl$25 = /* @__PURE__ */ template(`<p>Testing if can we show 3-5 hotspots per tap in an elegant way without overwhelming users. Experimenting with finding the balance between helpful context and visual clarity for those tiny hotspots that single-tap might miss.`), _tmpl$26 = /* @__PURE__ */ template(`<h4>Four critical improvements today`), _tmpl$27 = /* @__PURE__ */ template(`<p><strong>1. Mobile fade finally works:</strong> Fixed the spotlight darkening that was stuck on mobile devices. The black overlay around hotspots now fades progressively when you pinch to zoom out on iPad, iPhone, and Android. I discovered that mobile browsers handle touch gestures differently than desktop, so I rewrote the entire fade system to work with how mobile devices actually track your finger movements.`), _tmpl$28 = /* @__PURE__ */ template(`<p><strong>2. Instant fade response:</strong> The fade now begins immediately when you start zooming out. Previously, you had to pinch excessively before seeing any change - this delay is now completely eliminated.`), _tmpl$29 = /* @__PURE__ */ template(`<p><strong>3. Clean transitions:</strong> Fixed the lingering white borders that would sometimes remain visible after the spotlight effect ended. All visual elements now synchronize properly for seamless transitions.`), _tmpl$30 = /* @__PURE__ */ template(`<p><strong>4. iPad clarity restored:</strong> Resolved the severe pixelation that was occurring during zoom and pan on iPad. The artwork now maintains crisp quality during all interactions while preserving smooth 30+ FPS performance.`), _tmpl$31 = /* @__PURE__ */ template(`<p><em>These fixes resolve all known mobile spotlight issues. The experience is now consistent and polished across every device.`), _tmpl$32 = /* @__PURE__ */ template(`<h4>1. Fixed a stability issue`), _tmpl$33 = /* @__PURE__ */ template(`<p>Discovered and fixed a bug where hotspot animations could stop working after multiple page refreshes. The issue was that old animation code was accumulating in the browser's memory. The app now properly cleans itself up between page loads, preventing any animation glitches.`), _tmpl$34 = /* @__PURE__ */ template(`<h4>2. Google Sheets pipeline is ready`), _tmpl$35 = /* @__PURE__ */ template(`<p>I've completed the pipeline to sync your Excel data. All 5 sheets (hotspots, journeys, gallery, overrides, settings) are mapped correctly with the 93 fields you defined. The app currently uses about 15% of these fields, but the pipeline preserves all of them for future features. Once you send me the Google Sheets credentials, you'll be able to update content directly in your spreadsheet, and I'll handle syncing the changes to the app when needed.`), _tmpl$36 = /* @__PURE__ */ template(`<p><em>The app is running smoothly and ready for the next phase with Google Sheets integration.`), _tmpl$37 = /* @__PURE__ */ template(`<p>Added a new "single" reveal mode for mobile that shows only the closest hotspot when tapping, addressing feedback about multiple hotspots being confusing.`), _tmpl$38 = /* @__PURE__ */ template(`<p><strong>Single mode (default on mobile)</strong><br>When you tap the screen, only the single closest hotspot is revealed instead of multiple hotspots in a radius. This makes the experience less overwhelming and more focused.`), _tmpl$39 = /* @__PURE__ */ template(`<p><strong>Multiple mode (optional)</strong><br>The original behavior of revealing multiple hotspots is still available for users who prefer seeing more context at once.`), _tmpl$40 = /* @__PURE__ */ template(`<p><strong>Debug panel toggle</strong><br>Added a new "Reveal" section to the mobile debug panel where users can switch between different reveal modes. The preference is saved and persists between sessions.`), _tmpl$41 = /* @__PURE__ */ template(`<p><em>Note: The visual styling hasn't been refined yet - this is a functional implementation to test the concept. The animations and visual feedback will be polished based on user feedback.`), _tmpl$42 = /* @__PURE__ */ template(`<p><strong>iPhone black line:</strong> Fixed! The horizontal black line at the bottom is gone. Issue was with canvas sizing calculations on iOS.`), _tmpl$43 = /* @__PURE__ */ template(`<p><strong>iPad performance:</strong> Improved significantly. Now auto-detects iPad model and adjusts performance settings accordingly. Resolution catches up faster when zooming.`), _tmpl$44 = /* @__PURE__ */ template(`<p><strong>Known issue:</strong> Tiles sometimes flicker on iPad (reload too often). Working on this next.`), _tmpl$45 = /* @__PURE__ */ template(`<p>Focused on making the viewer faster and more responsive, especially on phones. You should notice smoother panning and zooming now.`), _tmpl$46 = /* @__PURE__ */ template(`<h4>What's better`), _tmpl$47 = /* @__PURE__ */ template(`<p><strong>Mobile performance:</strong> Significantly improved how the viewer handles touch navigation.<br><strong>Smooth transitions:</strong> Added subtle fade effects that make exploring feel more fluid.<br><strong>Safari fixes:</strong> Resolved the visual issues that were happening on Apple devices.`), _tmpl$48 = /* @__PURE__ */ template(`<p><em>A week of under-the-hood improvements. Nothing flashy, but everything should feel more solid.`), _tmpl$49 = /* @__PURE__ */ template(`<p>Made significant progress on mobile performance, particularly for panning and zooming. The viewer now feels noticeably more responsive when navigating the artwork on phones and tablets.`), _tmpl$50 = /* @__PURE__ */ template(`<p><strong>Smoother panning:</strong> Dragging to explore the artwork now maintains better frame rates and feels more fluid.<br><strong>Responsive zoom:</strong> Pinch-to-zoom and double-tap zoom are more responsive with less lag.<br><strong>Smarter tile loading:</strong> The viewer now loads the right image tiles at the right time, reducing stuttering during navigation.<br><strong>Network adaptation:</strong> On slower connections, the viewer automatically adjusts quality to maintain smooth performance.`), _tmpl$51 = /* @__PURE__ */ template(`<h4>Technical improvements`), _tmpl$52 = /* @__PURE__ */ template(`<p>We've implemented several optimizations including spatial indexing for faster hotspot detection, intelligent caching for better memory usage, and GPU-accelerated rendering for smoother animations. These changes lay the groundwork for future improvements.`), _tmpl$53 = /* @__PURE__ */ template(`<h4>Work in progress`), _tmpl$54 = /* @__PURE__ */ template(`<p>While navigation is much improved, there's still work to be done. The cinematic zoom animations need refinement, and overall performance can be pushed further. We're continuing to optimize for that perfect, buttery-smooth experience across all devices.`), _tmpl$55 = /* @__PURE__ */ template(`<p><em>Performance optimization is an ongoing journey. Each improvement gets us closer to the ideal experience, and your feedback helps identify what to prioritize next.`), _tmpl$56 = /* @__PURE__ */ template(`<p>Added a ripple effect when tapping on mobile devices. Now when you tap anywhere on the screen, you'll see a subtle expanding circle that helps confirm your touch was registered.`), _tmpl$57 = /* @__PURE__ */ template(`<p><strong>Visual feedback:</strong> A gentle white ripple emanates from your tap location, making the interface feel more responsive.<br><strong>Hotspot revealing:</strong> The ripple helps you discover hidden hotspots - up to 10 nearby hotspots briefly appear with a staggered animation.<br><strong>Touch confirmation:</strong> Especially helpful on dense areas of the artwork where you might wonder if your tap registered.`), _tmpl$58 = /* @__PURE__ */ template(`<h4>Technical details`), _tmpl$59 = /* @__PURE__ */ template(`<p>The ripple expands to 200 pixels and reveals hotspots within that radius. Each hotspot appears with a 30ms delay, creating a smooth cascade effect. The entire sequence lasts 2 seconds before fading away.`), _tmpl$60 = /* @__PURE__ */ template(`<p><em>This makes exploring the artwork on phones and tablets feel more intuitive and satisfying.`), _tmpl$61 = /* @__PURE__ */ template(`<p>Enhanced the hotspot stroke animation with authentic pigment liner characteristics inspired by your original artwork. The hover effects now better match the organic, hand-drawn quality of your pen work.`), _tmpl$62 = /* @__PURE__ */ template(`<p><strong>Authentic pigment colors:</strong> Three color variants (neutral, warm, cool) that mirror real BlackPigment liner pens used in traditional ink work.<br><strong>Organic texture effects:</strong> Subtle micro-blur and grain that recreate the natural imperfections of physical ink on paper.<br><strong>Enhanced visibility:</strong> Improved contrast and brightness while maintaining the authentic look of hand-drawn lines.`), _tmpl$63 = /* @__PURE__ */ template(`<p><strong>Adaptive animation system:</strong> Three-speed animation levels that respond to zoom depth that brings the strokes to life.`), _tmpl$64 = /* @__PURE__ */ template(`<p>The stroke animation now starts from a different point each time you hover over a hotspot. Small detail, but it adds to the organic feel we've been building.`), _tmpl$65 = /* @__PURE__ */ template(`<h4>What changed`), _tmpl$66 = /* @__PURE__ */ template(`<p><strong>Random starting points:</strong> Each hover animation begins from a different position on the shape's outline.<br><strong>Safari compatibility:</strong> Fixed the implementation to work properly on Safari and iOS devices.`), _tmpl$67 = /* @__PURE__ */ template(`<p>Together with yesterday's timing variations, each hotspot interaction now feels more natural and less repetitive.`), _tmpl$68 = /* @__PURE__ */ template(`<p>Added subtle variations to animations to make them feel more organic and hand-drawn. Each hotspot now reveals with its own unique character, preventing the repetitive feel of identical animations.`), _tmpl$69 = /* @__PURE__ */ template(`<p><strong>Timing variations:</strong> Each animation has a slightly different speed (±10% variation), making the reveals feel more natural.<br><strong>Curve adjustments:</strong> The animation curves are subtly varied for each hotspot, creating unique motion personalities.<br><strong>Organic feel:</strong> As you explore and hover over different hotspots, each one feels hand-drawn and unique rather than computer-generated.`), _tmpl$70 = /* @__PURE__ */ template(`<h4>Why it matters`), _tmpl$71 = /* @__PURE__ */ template(`<p>When you hover over different hotspots throughout your exploration, each one now feels unique rather than repetitive. Every animation has its own rhythm and flow, creating a more artistic and engaging experience. It's a small detail that makes a big difference in how alive the artwork feels.`), _tmpl$72 = /* @__PURE__ */ template(`<p>These micro-variations are subtle enough to feel natural but significant enough to eliminate the "robot" feeling from animations.`), _tmpl$73 = /* @__PURE__ */ template(`<p>Refined the button controls and zoom behavior based on user feedback. The viewing experience is now more intuitive and responsive across all devices.`), _tmpl$74 = /* @__PURE__ */ template(`<h4>Button improvements`), _tmpl$75 = /* @__PURE__ */ template(`<p><strong>Better positioning:</strong> Buttons are now optimally placed on both landscape and portrait orientations.<br><strong>Visual refinements:</strong> Updated button styles for better visibility and a more modern look.<br><strong>Touch targets:</strong> Improved button sizes and spacing for easier interaction on mobile devices.`), _tmpl$76 = /* @__PURE__ */ template(`<h4>Zoom enhancements`), _tmpl$77 = /* @__PURE__ */ template(`<p><strong>Cinematic zoom:</strong> Smoother, more natural zoom animations when clicking on hotspots.<br><strong>Mouse wheel support:</strong> You can now zoom in and out using your mouse wheel or trackpad for precise control.<br><strong>Improved performance:</strong> Zoom operations are now more fluid, especially on mobile devices.`), _tmpl$78 = /* @__PURE__ */ template(`<p>These improvements make navigation feel more natural and give you better control over your viewing experience. The combination of refined buttons and enhanced zoom creates a more professional and polished interface.`), _tmpl$79 = /* @__PURE__ */ template(`<p>Completed a significant restructuring of the hotspot rendering system. The code is now much more organized and maintainable, which means faster improvements and easier bug fixes going forward.`), _tmpl$80 = /* @__PURE__ */ template(`<h4>What changed under the hood`), _tmpl$81 = /* @__PURE__ */ template(`<p>Split the renderer file into smaller, focused modules. Each piece now handles one specific job - animations, Safari compatibility, performance optimization, etc. It's like organizing a cluttered workshop where every tool now has its proper place.`), _tmpl$82 = /* @__PURE__ */ template(`<h4>What this means for you`), _tmpl$83 = /* @__PURE__ */ template(`<p><strong>More reliable performance:</strong> The rendering system is now more efficient and predictable.<br><strong>Easier updates:</strong> Adding new features or fixing issues is now much simpler.<br><strong>Better stability:</strong> Less chance of one change breaking something else.`), _tmpl$84 = /* @__PURE__ */ template(`<p>Everything should work exactly as before - this was purely about making the code cleaner and more professional. If you notice any differences in behavior, please let me know!`), _tmpl$85 = /* @__PURE__ */ template(`<p>Fixed the annoying flickering issue that occurred at the end of cinematic zoom animations. The zoom transitions are now smooth and stable across all platforms.`), _tmpl$86 = /* @__PURE__ */ template(`<p>When zooming to a hotspot or expanding to full view, the animation would flicker between two zoom levels during the final moments. This was caused by conflicting optimization systems fighting for control.`), _tmpl$87 = /* @__PURE__ */ template(`<h4>The complete solution`), _tmpl$88 = /* @__PURE__ */ template(`<p>The flickering issue is now mostly resolved, but a complete fix still requires switching renderers once. This is a known initialization issue that we're investigating.`), _tmpl$89 = /* @__PURE__ */ template(`<p><strong>Temporary workaround:</strong> If you still see flickering, press 'C' to open debug menu, click "Soft Glow" then "Sharp Outline" to fully eliminate the issue.`), _tmpl$90 = /* @__PURE__ */ template(`<p><strong>Alternative:</strong> Type <code>fixFlickering()</code> in the browser console.`), _tmpl$91 = /* @__PURE__ */ template(`<ol><li><strong>Applied TileCascadeFix at startup</strong> - Prevents tile cascade issues</li><li><strong>Implemented CinematicZoomManager</strong> - Coordinates all zoom animations with proper damping</li><li><strong>Added forceRedraw() calls</strong> - Ensures the viewer refreshes properly after animations</li><li><strong>State reset after initialization</strong> - Attempts to clean up any initialization issues`), _tmpl$92 = /* @__PURE__ */ template(`<p><strong>Desktop:</strong> 1.0s animation with 6.5 spring stiffness<br><strong>Mobile:</strong> 1.2s animation with 8.0 spring stiffness<br><strong>Cinematic mode:</strong> Temporarily disables tile optimizations during zoom`), _tmpl$93 = /* @__PURE__ */ template(`<p><em>The difference is immediately noticeable - zoom animations now feel professional and polished, matching the quality of the rest of the viewer.`), _tmpl$94 = /* @__PURE__ */ template(`<p>Removed the complex "Zoom Performance" section from the debug menu to simplify the interface.`), _tmpl$95 = /* @__PURE__ */ template(`<p>The debug menu now focuses on essential controls for visual customization, interaction behavior, and hotspot discovery. Advanced zoom tuning parameters have been removed as they were rarely used and added unnecessary complexity.`), _tmpl$96 = /* @__PURE__ */ template(`<p><em>The artwork already performs at 60 FPS with the default settings, making manual tuning unnecessary for most users.`), _tmpl$97 = /* @__PURE__ */ template(`<p>Fixed the issue where Playwright manual tests weren't opening a visible browser window. The tests were running in headless mode by default.`), _tmpl$98 = /* @__PURE__ */ template(`<p>Added the <code>--headed</code> option to all manual test scripts. Now when you run tests for Safari or mobile debugging, an actual browser window will open for visual inspection.`), _tmpl$99 = /* @__PURE__ */ template(`<h4>Available test commands`), _tmpl$100 = /* @__PURE__ */ template(`<p><strong>Safari Desktop Manual Test:</strong><br><code>npm run test:safari-desktop</code><br>Opens webkit browser for desktop Safari testing with debug overlays.`), _tmpl$101 = /* @__PURE__ */ template(`<p><strong>iOS Safari Manual Test:</strong><br><code>npm run test:ios-safari</code><br>Opens webkit browser for mobile Safari testing.`), _tmpl$102 = /* @__PURE__ */ template(`<p><strong>Direct command with options:</strong><br><code>npx playwright test tests/safari-desktop-manual-test.spec.js --project=webkit --headed`), _tmpl$103 = /* @__PURE__ */ template(`<p><em>The test window stays open for 10 minutes to allow thorough manual testing. Press Ctrl+C to stop the test when done.`), _tmpl$104 = /* @__PURE__ */ template(`<p>Fixed a visual issue where the artwork was displaying grainy artifacts. The monochrome drawings now render cleanly at all zoom levels.`), _tmpl$105 = /* @__PURE__ */ template(`<p>The image had a noisy, pixelated appearance that was distracting. Adjusted the rendering settings to better handle black and white artwork - the difference is quite striking.`), _tmpl$106 = /* @__PURE__ */ template(`<p>Fixed several mobile-specific issues that were affecting the zoom experience and made the debug controls more reliable across all devices.`), _tmpl$107 = /* @__PURE__ */ template(`<h4>Mobile zoom improvements`), _tmpl$108 = /* @__PURE__ */ template(`<p><strong>Smoother zooming</strong><br>The cinematic zoom when tapping hotspots now performs better on phones and tablets. Reduced stuttering during the animation and improved frame rates on lower-end devices.`), _tmpl$109 = /* @__PURE__ */ template(`<p><strong>Touch responsiveness</strong><br>Fixed an issue where hotspots would sometimes become unresponsive after zooming. Touch interactions now reset properly after each zoom animation completes.`), _tmpl$110 = /* @__PURE__ */ template(`<h4>Debug panel refinements`), _tmpl$111 = /* @__PURE__ */ template(`<p>Made the mobile debug controls more stable - the slide-up panel now opens and closes more reliably, and the FPS counter updates consistently. Also improved the visual spacing on smaller screens.`), _tmpl$112 = /* @__PURE__ */ template(`<p><em>Small but important fixes that should make the mobile experience feel more polished and responsive.`), _tmpl$113 = /* @__PURE__ */ template(`<p>The debug controls (press 'C' to open) now work on phones and tablets.`), _tmpl$114 = /* @__PURE__ */ template(`<p><strong>Mobile devices</strong><br>A compact bar at the bottom shows FPS and a settings icon. Tap it to reveal controls that slide up. Swipe down or tap outside to dismiss.`), _tmpl$115 = /* @__PURE__ */ template(`<p><strong>Desktop</strong><br>The panel can now be minimized to a small floating button instead of closing completely.`), _tmpl$116 = /* @__PURE__ */ template(`<p><em>Small quality-of-life improvement, but it makes testing on different devices much more pleasant!`), _tmpl$117 = /* @__PURE__ */ template(`<p>The experimental touch-hold system I mentioned yesterday is now more reliable. After testing, I found and fixed an issue where hotspots would sometimes stop responding after being activated once.`), _tmpl$118 = /* @__PURE__ */ template(`<p>If you enable "Temporal" mode in the debug menu (press 'C'), the hold-to-interact system now works consistently. Hotspots stay visible while you hold them, and each interaction resets cleanly for the next one.`), _tmpl$119 = /* @__PURE__ */ template(`<h4>Also tweaked`), _tmpl$120 = /* @__PURE__ */ template(`<p>Added white color options to the border palette since you're working with black ink artwork. More importantly, <strong>temporal mode is now the default on mobile devices</strong> - meaning visitors will use the hold-to-interact system instead of direct taps. You can always switch back to standard tap-to-zoom in the debug menu if needed.`), _tmpl$121 = /* @__PURE__ */ template(`<p>With ~600 interactive zones hidden throughout your artwork, I've added a way to briefly reveal what's clickable without disrupting the visual experience.`), _tmpl$122 = /* @__PURE__ */ template(`<h4>How it works`), _tmpl$123 = /* @__PURE__ */ template(`<p>Press 'H' (desktop) or triple-tap anywhere (mobile) to make all nearby hotspots gently pulse for 6 seconds. The effect uses contrast inversion to ensure visibility on your black ink artwork while staying subtle enough not to break immersion.`), _tmpl$124 = /* @__PURE__ */ template(`<h4>Also included: Alternative touch controls`), _tmpl$125 = /* @__PURE__ */ template(`<p>For mobile users, I've prepared an experimental hold-to-interact system that's currently tucked away in the debug menu. If you're curious, press 'C' to open debug options and switch from "Direct" to "Temporal" interaction. This changes how taps work - but the standard tap-to-zoom remains the default for now.`), _tmpl$126 = /* @__PURE__ */ template(`<p>The reveal helper should make exploration feel less like guesswork and more like discovery. Let me know if the visibility needs adjusting - it's easy to make it bolder or more subtle based on your preference.`), _tmpl$127 = /* @__PURE__ */ template(`<p><strong>Safari animations:</strong> Now working! Chrome/Firefox/Edge still have the edge visually, but Safari's functional. Requires Safari 13.1+ (2020 or newer).`), _tmpl$128 = /* @__PURE__ */ template(`<p><strong>Smart zoom behavior:</strong> Following Google Arts & Culture's approach, animations now adapt to zoom level. Below 8x zoom = full animations. Above 8x = quick 150ms transitions only. When you're examining details up close, decorative animations would just distract.`), _tmpl$129 = /* @__PURE__ */ template(`<p><strong>Next:</strong> Making the cinematic zoom buttery smooth when clicking hotspots. Also thinking the stroke animation makes sense for desktop, but mobile needs something snappier.`), _tmpl$130 = /* @__PURE__ */ template(`<p><em>Personal note: Getting really excited - it's starting to take shape! :D`), _tmpl$131 = /* @__PURE__ */ template(`<p><strong>Current status:</strong> While the hover animations now work on Safari, the visual effect isn't as pronounced as on Chrome/Firefox. I'm quite proud of the result on chrome at the moment. I think it's quite satisfying.`), _tmpl$132 = /* @__PURE__ */ template(`<p><strong>Recommendation:</strong> Use Chrome for now to see the intended visual impact. The difference is noticeable - Chrome displays richer glows and better depth.`), _tmpl$133 = /* @__PURE__ */ template(`<p><strong>What's next:</strong> Working on Safari-specific optimizations to improve the visual quality without compromising performance.`), _tmpl$134 = /* @__PURE__ */ template(`<p><strong>Following up on July 7th:</strong> The Safari issue is fixed! The stroke reveal animation now works properly on Safari desktop where you can actually hover.`), _tmpl$135 = /* @__PURE__ */ template(`<p><strong>Next up</strong>: Making the animation more visible and impactful for desktop users, plus exploring touch-friendly animations for mobile devices.`), _tmpl$136 = /* @__PURE__ */ template(`<p><strong>Responding to your feedback:</strong> You mentioned the hover effect felt static with just the white border appearing. I've implemented a first animation to bring more life to the interactions.`), _tmpl$137 = /* @__PURE__ */ template(`<p><strong>What's new:</strong> A stroke reveal animation that progressively traces the hotspot outline when you hover. Instead of the border just "popping" into view, it now draws itself smoothly around the shape - like watching someone trace the contour with a pen.`), _tmpl$138 = /* @__PURE__ */ template(`<p><strong>Current settings:</strong><br>• White stroke with subtle shadow for visibility<br>• 1.2 second drawing animation<br>• Works on Chrome, Firefox, and Edge`), _tmpl$139 = /* @__PURE__ */ template(`<p><strong>Needs refinement:</strong> The animation is quite subtle right now - you might have to look closely to see the progressive drawing effect. I'll be adjusting the timing and visibility to make it more noticeable and satisfying.`), _tmpl$140 = /* @__PURE__ */ template(`<p><strong>Safari issue discovered:</strong> Just noticed the animation isn't working properly on Safari (There's always something with Safari 🙃). Will fix this tomorrow along with the other refinements.`), _tmpl$141 = /* @__PURE__ */ template(`<p><strong>Note:</strong> This is one hover effect I wanted to try first. I'm planning to experiment with additional animations to find what feels best for your artwork. Let me know your thoughts!`), _tmpl$142 = /* @__PURE__ */ template(`<p><strong>What's improved:</strong> The circular spotlight effect in Apple Mode (Safari/iOS) now adapts much better to different hotspot shapes.`), _tmpl$143 = /* @__PURE__ */ template(`<p><strong>What changed:</strong><br>• Spotlights are now tighter and more focused around each hotspot (both mobile and desktop)<br>• Better detection of when to use circles vs ellipses based on hotspot shape`), _tmpl$144 = /* @__PURE__ */ template(`<p><strong>The result:</strong> Whether a hotspot is round, tall, wide, or irregular, the spotlight should now feel more natural and better frame the content the user is exploring.`), _tmpl$145 = /* @__PURE__ */ template(`<p>Try clicking on different shaped hotspots - the spotlight should feel more consistent and purposeful now!`), _tmpl$146 = /* @__PURE__ */ template(`<p><strong>The issue:</strong> Some complex hotspots still extend outside the spotlight area after yesterday's improvements.`), _tmpl$147 = /* @__PURE__ */ template(`<p><strong>Today's attempt:</strong> Since a single circular spotlight can't perfectly cover irregular shapes, I tried combining multiple circles at different positions to fill in the gaps. Unfortunately, Safari doesn't support this technique - it only displays one spotlight instead of blending them together like other browsers do.`), _tmpl$148 = /* @__PURE__ */ template(`<p><strong>Next:</strong> Fine-tuning the spotlight sizing parameters to better fit each hotspot's unique shape.`), _tmpl$149 = /* @__PURE__ */ template(`<p><strong>What's improved:</strong> The spotlight effect on Safari and iOS devices now much better matches the actual hotspot shapes, especially on desktop Safari!`), _tmpl$150 = /* @__PURE__ */ template(`<p><strong>Key changes:</strong><br>• Spotlights now use elliptical shapes for elongated hotspots<br>• Tighter, more precise spotlight coverage that follows the hotspot boundaries closely<br>• Better visual consistency between the outline of the hotspot and the darkened area<br>• Desktop Safari shows the most dramatic improvements, mobile iOS continues to be refined`), _tmpl$151 = /* @__PURE__ */ template(`<p><strong>Still fine-tuning:</strong> Some complex hotspots have small areas that peek slightly outside the spotlight. Mobile Safari needs additional optimization for the same precision as desktop.`), _tmpl$152 = /* @__PURE__ */ template(`<p><strong>What's new:</strong> You can now leave feedback directly on each update! No need to switch to Telegram for quick comments.`), _tmpl$153 = /* @__PURE__ */ template(`<p><strong>How it works:</strong><br>• Type your feedback in the text box below any update<br>• Click "Post Feedback" to send<br>• Edit or delete your comments anytime<br>• Everything syncs in real-time between us`), _tmpl$154 = /* @__PURE__ */ template(`<p><strong>Quick tip:</strong> The system remembers who you are. If it shows the wrong name, just click "Change" above the feedback box to switch between Deji and Leonard.`), _tmpl$155 = /* @__PURE__ */ template(`<p>Feel free to test it out below! This makes it much easier to discuss specific features without jumping between apps.`), _tmpl$156 = /* @__PURE__ */ template(`<p><strong>The Problem:</strong> In Apple Mode, the circular gradient spotlight doesn't show the exact boundaries of the clickable area. Users might not know where the hotspot actually ends.`), _tmpl$157 = /* @__PURE__ */ template(`<p><strong>Context:</strong> Since Apple/Safari doesn't support the precise polygon cutouts we have in Standard Mode (that's their technical limitation), we need to work within these constraints.`), _tmpl$158 = /* @__PURE__ */ template(`<p><strong>Today's Experiment:</strong> Added a subtle outline that follows the exact hotspot shape. The gradient spotlight stays circular, but now the actual boundaries are visible.`), _tmpl$159 = /* @__PURE__ */ template(`<p><strong>Note:</strong> This is very much a work in progress. The current implementation might be too distracting, not visible enough, or just not the right approach entirely.`), _tmpl$160 = /* @__PURE__ */ template(`<p><strong>Try it yourself:</strong> In debug mode (press 'C'), there's now a button to cycle through different border styles - from subtle to bold. Your feedback will help determine if we should refine this solution or try something completely different.`), _tmpl$161 = /* @__PURE__ */ template(`<p><strong>Following up on July 1st:</strong> The Safari compatibility issue has been resolved with a custom implementation.`), _tmpl$162 = /* @__PURE__ */ template(`<p><strong>The Solution:</strong> Created a Safari-specific spotlight system that works within WebKit's limitations:<br>• Uses radial gradient masks instead of polygon cutouts<br>• Provides a circular/elliptical spotlight effect around hotspots<br>• Maintains smooth 60 FPS performance on all iOS devices`), _tmpl$163 = /* @__PURE__ */ template(`<p><strong>What's Different:</strong><br>• <strong>Chrome/Firefox:</strong> Precise polygon cutout matching exact hotspot shape<br>• <strong>Safari/iOS:</strong> Smooth gradient spotlight that adapts to hotspot size`), _tmpl$164 = /* @__PURE__ */ template(`<p><strong>Added Intelligence:</strong> While implementing the Safari solution, the system now analyzes each hotspot's complexity to determine optimal spotlight sizing. Complex shapes get more breathing room, simple shapes stay tight and focused.`), _tmpl$165 = /* @__PURE__ */ template(`<p><strong>Current Status:</strong> The spotlight effect now works on ALL devices and browsers, with each platform getting an optimized implementation.`), _tmpl$166 = /* @__PURE__ */ template(`<p><strong>Good news:</strong> The spotlight effect works great on the vast majority of devices and browsers. It works on Mac computers except when using Safari.`), _tmpl$167 = /* @__PURE__ */ template(`<p><strong>The only exception:</strong> Apple devices with Safari/WebKit. This includes:<br>• iPhone (Safari & Chrome)<br>• iPad (Safari & Chrome)<br>• Mac (Safari only - Chrome works fine!)`), _tmpl$168 = /* @__PURE__ */ template(`<p><strong>Why it can't work on these devices:</strong> Safari has a long-standing bug with creating transparent cutouts in overlays. On iOS, Apple forces all browsers (including Chrome) to use Safari's engine internally, so they inherit the same limitation.`), _tmpl$169 = /* @__PURE__ */ template(`<p><strong>What happens instead:</strong> The darkening works, but the hotspot shape doesn't get cut out - so everything stays dark instead of creating a spotlight effect.`), _tmpl$170 = /* @__PURE__ */ template(`<p><strong>To see the full effect:</strong> Use any non-Apple device, or use Chrome/Firefox on your Mac. The effect is smooth, precise, and quite satisfying to interact with!`), _tmpl$171 = /* @__PURE__ */ template(`<p><strong>Next steps:</strong> Creating a fallback specifically for Safari/iOS that will still provide visual focus, just using a different method.`), _tmpl$172 = /* @__PURE__ */ template(`<p><strong>New Feature - Zoom Speed Slider:</strong> Added a debug panel slider (desktop only) so you can test different cinematic zoom speeds when clicking hotspots. Press 'C' to toggle the debug panel and adjust the speed from 0.5x to 2.5x. Once you find your preferred speed, let me know and I'll make it permanent.`), _tmpl$173 = /* @__PURE__ */ template(`<p><strong>Zoom Behavior:</strong> The current zoom animation is really basic right now and will be improved.`), _tmpl$174 = /* @__PURE__ */ template(`<p><strong>Known Issues:</strong> There are some bugs with the zoom system - sometimes hotspots don't respond properly to clicks, and the zoom can behave unpredictably. These will be fixed along with the performance improvements. Oh and the "Full View" button does not appear on mobile right now 🤷 `), _tmpl$175 = /* @__PURE__ */ template(`<p><strong>Performance Status:</strong> While the spotlight effect is now perfect at 60 FPS, I'm still working on zoom performance. Currently experiencing significant lag on mobile when zooming to distant hotspots, and occasional frame drops on desktop during the zoom animation. This is my top priority to fix.`), _tmpl$176 = /* @__PURE__ */ template(`<p><strong>Flawless Synchronization:</strong> Fixed the "elastic lag" where spotlight would trail behind during zoom/pan (was using DOM positioning, now uses OpenSeadragon's native overlay system for perfect sync). Added intelligent progressive fade: as you pan/zoom away, the darkening smoothly fades before releasing focus. Creates a natural, cinematic experience that guides viewer attention. <em>(Fade transitions still being refined)`), _tmpl$177 = /* @__PURE__ */ template(`<p><strong>Focus Mode (Darkening Overlay):</strong> Implemented the spotlight effect you requested! When clicking a hotspot, surrounding areas darken to help viewers focus. This first version is basic but functional - ready for your feedback and refinement.`), _tmpl$178 = /* @__PURE__ */ template(`<p>Hey Deji! 👋`), _tmpl$179 = /* @__PURE__ */ template(`<p>I've been visiting friends and family in my hometown for the past 3 days, so I haven't been able to work as intensively on the project during that time.`), _tmpl$180 = /* @__PURE__ */ template(`<p>I totally relate to your potato mode confession 😅 We all have those moments where we just need to disconnect and recharge. Though honestly, your project is so motivating that it's been the perfect antidote to my own potato tendencies - I find myself constantly drawn back to it.`), _tmpl$181 = /* @__PURE__ */ template(`<p>I'm back home today and excited to dedicate my full attention to the project again. Your feedback was incredibly valuable – I'll be implementing all the adjustments you mentioned progressively. Right now, I'm focusing hard on eliminating FPS drops on mobile as I now understand how critical the mobile experience is.`), _tmpl$182 = /* @__PURE__ */ template(`<p><strong>P.S.</strong> I've temporarily been locked out of Upwork (they flagged some "unusual activity" on my account). They said it should be resolved by Monday, but if you need to reach me before then, I'm available on Telegram: <a href=https://t.me/LeonardCote target=_blank>@LeonardCote`), _tmpl$183 = /* @__PURE__ */ template(`<p>Looking forward to showing you the improvements!<br>- Leonard`), _tmpl$184 = /* @__PURE__ */ template(`<div class=message-content><h3 style="margin-top:30px;margin-bottom:20px;font-size:18px;color:rgba(255, 255, 255, 0.95);">Previous Updates`), _tmpl$185 = /* @__PURE__ */ template(`<div class=developer-message><div class=message-header><h3>Project Updates</h3><button class=close-btn aria-label="Close updates"role=button tabindex=0>×</button></div><style>
     @keyframes fadeIn {
@@ -41932,8 +41181,6 @@ function App() {
   const [loaded, setLoaded] = createSignal(false);
   const [currentArtwork] = createSignal("zebra");
   const [showMessage, setShowMessage] = createSignal(true);
-  const [selectedAudioPlayerStyle, setSelectedAudioPlayerStyle] = createSignal(null);
-  window.setGlobalAudioPlayerStyle = setSelectedAudioPlayerStyle;
   const handleCloseMessage = () => {
     console.log("Closing developer message panel");
     setShowMessage(false);
@@ -41963,10 +41210,6 @@ function App() {
         }
       }) : memo(() => !!!showMessage())() ? _tmpl$188() : null;
     })(), null);
-    insert(_el$216, createComponent(FloatingAudioPlayer, {
-      selectedStyle: selectedAudioPlayerStyle,
-      onClose: () => setSelectedAudioPlayerStyle(null)
-    }), null);
     return _el$216;
   })();
 }
@@ -41978,10 +41221,10 @@ export {
   __vitePreload as _,
   applyTileCascadeFix as a,
   getTuningState as b,
-  commonjsGlobal$2 as c,
-  OverlayManagerFactory as d,
-  applyTuningToViewer as e,
-  getDefaultExportFromCjs as f,
+  OverlayManagerFactory as c,
+  applyTuningToViewer as d,
+  getDefaultExportFromCjs as e,
+  commonjsGlobal$2 as f,
   getBrowserOptimalDrawer as g,
   isMobile as i,
   removeTileCascadeFix as r

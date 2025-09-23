@@ -1,9 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-SsVhczyZ.js","assets/main-DEK_j6n6.js","assets/main-v701mYTx.css","assets/MinimalistAudioEngine-7fAJNllJ.js","assets/HapticManager-D7vOkNt6.js","assets/MultimodalSyncEngine-CHatiONL.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-kO0VWz1Z.js","assets/main-DYS-zRf1.js","assets/main-BPwV8ISW.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, _ as __vitePreload, i as isMobile, d as OverlayManagerFactory } from "./main-DEK_j6n6.js";
-import { c as createLogger, o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-bmu1YwRR.js";
+import { O as OpenSeadragon, _ as __vitePreload, i as isMobile, c as OverlayManagerFactory } from "./main-DYS-zRf1.js";
+import { c as createLogger, o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-B_52wcl-.js";
 class TemporalModeHandler {
   constructor(options = {}) {
     this.audioEngine = options.audioEngine || window.audioEngine;
@@ -8624,11 +8624,10 @@ function setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotCli
     if (updateTimer) clearTimeout(updateTimer);
     updateTimer = setTimeout(() => {
       scheduleIdleTask(() => {
-        const { viewportManager, spatialIndex, audioEngine } = componentsObj;
-        if (!viewportManager || !spatialIndex || !audioEngine) return;
+        const { viewportManager, spatialIndex } = componentsObj;
+        if (!viewportManager || !spatialIndex) return;
         const viewport = viewportManager.getCurrentViewport();
-        const visibleHotspots = spatialIndex.queryViewport(viewport.bounds, viewport.zoom);
-        audioEngine.preloadHotspots(visibleHotspots);
+        spatialIndex.queryViewport(viewport.bounds, viewport.zoom);
       });
     }, performanceConfig.viewport.updateDebounce);
   };
@@ -8993,7 +8992,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
   }
   if (renderer.eventCoordinator) {
     const TemporalEchoController = (await __vitePreload(async () => {
-      const { default: __vite_default__ } = await import("./TemporalEchoController-SsVhczyZ.js");
+      const { default: __vite_default__ } = await import("./TemporalEchoController-kO0VWz1Z.js");
       return { default: __vite_default__ };
     }, true ? __vite__mapDeps([0,1,2]) : void 0)).default;
     const echoController = new TemporalEchoController({
@@ -9009,35 +9008,6 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
     componentsObj.echoController = echoController;
     renderer.echoController = echoController;
     window.temporalEchoController = echoController;
-    if (isMobile()) {
-      const MinimalistAudioEngine = (await __vitePreload(async () => {
-        const { default: __vite_default__ } = await import("./MinimalistAudioEngine-7fAJNllJ.js");
-        return { default: __vite_default__ };
-      }, true ? __vite__mapDeps([3,4,1,2]) : void 0)).default;
-      const audioEngine = new MinimalistAudioEngine();
-      window.minimalistAudioEngine = audioEngine;
-      const initAudioOnInteraction = async () => {
-        try {
-          await audioEngine.init();
-          console.log("[ViewerEventHandlers] Minimalist audio engine initialized");
-          const { getMultimodalSyncEngine } = await __vitePreload(async () => {
-            const { getMultimodalSyncEngine: getMultimodalSyncEngine2 } = await import("./MultimodalSyncEngine-CHatiONL.js");
-            return { getMultimodalSyncEngine: getMultimodalSyncEngine2 };
-          }, true ? __vite__mapDeps([5,4,1,2]) : void 0);
-          const borderRadialAnimator = window.borderRadialAnimator || (echoController == null ? void 0 : echoController.borderRadialAnimator);
-          const syncEngine = getMultimodalSyncEngine(audioEngine, borderRadialAnimator);
-          window.multimodalSyncEngine = syncEngine;
-          console.log("[ViewerEventHandlers] MultimodalSyncEngine initialized");
-        } catch (error) {
-          console.error("[ViewerEventHandlers] Failed to initialize audio/sync:", error);
-        }
-        document.removeEventListener("touchstart", initAudioOnInteraction);
-        document.removeEventListener("click", initAudioOnInteraction);
-      };
-      document.addEventListener("touchstart", initAudioOnInteraction, { once: true });
-      document.addEventListener("click", initAudioOnInteraction, { once: true });
-      console.log("[ViewerEventHandlers] Minimalist audio engine ready for initialization");
-    }
     const storedRevealType = localStorage.getItem("revealType");
     if (storedRevealType && storedRevealType !== echoController.config.revealType) {
       console.log(`[ViewerEventHandlers] Syncing reveal type from localStorage: ${storedRevealType}`);
