@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-BaitP5wR.js","assets/main-CLkZPTzb.js","assets/main-BPwV8ISW.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-DZGdADaT.js","assets/main-yd0bPSS3.js","assets/main-BPwV8ISW.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, r as removeTileCascadeFix } from "./main-CLkZPTzb.js";
+import { i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, r as removeTileCascadeFix } from "./main-yd0bPSS3.js";
 class ImageOverlayManager {
   constructor() {
     this.overlays = /* @__PURE__ */ new Map();
@@ -10088,36 +10088,6 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
       const cleanupInterval = setupIOSHTMLMonitoring(viewer);
       componentsObj.iosCleanupInterval = cleanupInterval;
       window.iosDrawerType = drawerType2;
-      const indicator = document.createElement("div");
-      indicator.id = "drawer-type-indicator";
-      indicator.style.cssText = `
-                position: fixed;
-                top: 10px;
-                left: 10px;
-                background: ${drawerType2 === "HTMLDrawer" || !viewer.useCanvas ? "green" : "red"};
-                color: white;
-                padding: 10px;
-                border-radius: 5px;
-                z-index: 999999;
-                font-family: monospace;
-                font-size: 14px;
-                pointer-events: none;
-                opacity: 0.9;
-            `;
-      const isHTMLDrawer = drawerType2 === "HTMLDrawer" || !viewer.useCanvas;
-      indicator.innerHTML = `
-                <strong>iOS Drawer:</strong> ${isHTMLDrawer ? "✅ HTML" : "❌ Canvas"}<br>
-                <small>Device: ${deviceType}</small><br>
-                <small>useCanvas: ${viewer.useCanvas === false ? "false ✅" : "true ❌"}</small>
-            `;
-      document.body.appendChild(indicator);
-      setTimeout(() => {
-        if (indicator && indicator.parentNode) {
-          indicator.style.transition = "opacity 1s";
-          indicator.style.opacity = "0";
-          setTimeout(() => indicator.remove(), 1e3);
-        }
-      }, 1e4);
       console.log("[iOS HTML] Initialization complete");
       console.log("Features enabled:");
       console.log("- HTML-based tile rendering (no canvas)");
@@ -10200,53 +10170,14 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   setTimeout(() => {
     const actualDrawer = getDrawerType(viewer.drawer);
     console.log("RESEARCH VERIFICATION: Actual drawer in use:", actualDrawer);
-    if (!document.getElementById("drawer-type-indicator")) {
-      const universalIndicator = document.createElement("div");
-      universalIndicator.id = "drawer-type-indicator";
-      const expectedDrawer = isIOS2 ? "HTML" : "Canvas";
-      const isCorrectDrawer = isIOS2 && !viewer.useCanvas || !isIOS2 && actualDrawer === "canvas";
-      universalIndicator.style.cssText = `
-                position: fixed;
-                top: 10px;
-                left: 10px;
-                background: ${isCorrectDrawer ? "#4CAF50" : "#F44336"};
-                color: white;
-                padding: 10px 15px;
-                border-radius: 5px;
-                z-index: 999999;
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
-                font-size: 12px;
-                pointer-events: none;
-                opacity: 0.95;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            `;
-      const userAgent = navigator.userAgent.substring(0, 50);
-      const platform2 = navigator.platform;
-      const touchPoints = navigator.maxTouchPoints;
-      universalIndicator.innerHTML = `
-                <strong>Drawer Type:</strong> ${actualDrawer}<br>
-                <small>Expected: ${expectedDrawer}</small><br>
-                <small>useCanvas: ${viewer.useCanvas}</small><br>
-                <small>Platform: ${isIOS2 ? "iOS" : isMobileDevice ? "Mobile" : "Desktop"}</small><br>
-                <small style="opacity: 0.7">UA: ${userAgent}...</small><br>
-                <small style="opacity: 0.7">Platform: ${platform2}, Touch: ${touchPoints}</small>
-                ${!isCorrectDrawer ? "<br><strong>⚠️ Wrong drawer!</strong>" : ""}
-            `;
-      document.body.appendChild(universalIndicator);
-      setTimeout(() => {
-        if (universalIndicator && universalIndicator.parentNode) {
-          universalIndicator.style.transition = "opacity 1s";
-          universalIndicator.style.opacity = "0";
-          setTimeout(() => universalIndicator.remove(), 1e3);
-        }
-      }, 15e3);
-    }
     if ((isMobileDevice || isSafari || isIOS2) && actualDrawer !== "canvas" && !isIOS2) {
       console.error("CRITICAL: Canvas drawer not applied on non-iOS mobile! Performance will be poor.");
     } else if (isIOS2 && viewer.useCanvas !== false) {
       console.error("CRITICAL: HTML drawer not applied on iOS! Memory issues will occur.");
     } else {
       console.log("SUCCESS: Correct drawer applied for platform");
+      console.log("- iOS devices using HTML drawer (useCanvas: false)");
+      console.log("- Non-iOS devices using Canvas drawer");
     }
   }, 100);
   componentsObj.performanceMonitor.start();
@@ -10329,7 +10260,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-BaitP5wR.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-DZGdADaT.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspots);
   eventHandlers.setupAdaptiveSprings(viewer, performanceConfig);
   const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);
