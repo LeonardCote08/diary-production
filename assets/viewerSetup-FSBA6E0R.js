@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-yKUT5Lte.js","assets/main-wcGez-K8.js","assets/main-BPwV8ISW.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-CyeMA44l.js","assets/main-8LKEuMft.js","assets/main-BPwV8ISW.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, r as removeTileCascadeFix } from "./main-wcGez-K8.js";
+import { i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, r as removeTileCascadeFix } from "./main-8LKEuMft.js";
 class ImageOverlayManager {
   constructor() {
     this.overlays = /* @__PURE__ */ new Map();
@@ -4687,18 +4687,18 @@ function createIOSHTMLConfig(baseConfig) {
     // Force HTML drawer explicitly
     // Performance optimizations for HTML rendering
     immediateRender: true,
-    // CRITICAL: Immediate rendering for instant tiles
+    // CRITICAL: Immediate rendering to prevent black tiles
     alwaysBlend: false,
     // Better performance
     imageSmoothingEnabled: false,
     // Sharper tiles
-    // Memory management - OPTIMIZED for iOS capabilities
-    maxImageCacheCount: isIPhone() ? 100 : isIPad$1() ? 200 : 150,
-    // Increased cache
-    imageLoaderLimit: 6,
-    // iOS supports 6 concurrent HTTP connections
-    maxTilesPerFrame: 8,
-    // Process more tiles per frame for faster loading
+    // Memory management - OPTIMIZED based on research
+    maxImageCacheCount: isIPhone() ? 50 : isIPad$1() ? 100 : 75,
+    // Increased cache for better performance
+    imageLoaderLimit: isIPhone() ? 2 : 4,
+    // iOS can handle more concurrent loads
+    maxTilesPerFrame: isIPhone() ? 3 : 5,
+    // Process more tiles per frame
     // Disable problematic features
     flickEnabled: false,
     gestureSettingsTouch: {
@@ -4717,11 +4717,11 @@ function createIOSHTMLConfig(baseConfig) {
     minPixelRatio: 1,
     // Animation settings optimized for HTML rendering
     animationTime: 0.15,
-    // Faster animations
+    // Faster animations for responsive feel
     springStiffness: 10,
     // Tighter control
-    blendTime: 0.1,
-    // Minimal blend for smoother transitions
+    blendTime: 0.2,
+    // Small blend time for smoother transitions
     // Tile settings
     tileSize: 512,
     tileOverlap: 1,
@@ -4792,18 +4792,19 @@ function applyIOSHTMLStyles() {
             image-rendering: -webkit-optimize-contrast;
             image-rendering: crisp-edges;
             loading: eager !important;  /* Force eager loading */
-            decoding: sync !important;   /* Decode immediately */
+            decoding: sync !important;   /* CRITICAL: Sync decoding prevents black tiles */
         }
 
-        /* Optimize image loading on iOS */
+        /* Optimize tile container for HTML rendering */
         .openseadragon-tile {
             contain: layout style paint;  /* CSS containment for performance */
             will-change: auto;  /* Let browser optimize */
         }
 
-        /* Prevent iOS lazy loading */
+        /* Force eager loading on all images */
         img[src] {
             loading: eager !important;
+            decoding: sync !important;
         }
     `;
   document.head.appendChild(style);
@@ -9801,9 +9802,10 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
     viewerConfigOptions.subPixelRendering = false;
     viewerConfigOptions.blendTime = 0.5;
     viewerConfigOptions.alwaysBlend = false;
-    console.log("BALANCED: Canvas drawer with optimized smoothing management");
+    console.log("NON-iOS: Canvas drawer with optimized smoothing management");
   } else {
-    console.log("iOS: Using HTML drawer configuration from iOSHTMLConfig");
+    console.log("iOS: Using HTML drawer configuration to bypass Canvas memory limits");
+    viewerConfigOptions.useCanvas = false;
   }
   if (isMobileDevice) {
     if (numericTileSize === "256") {
@@ -9840,7 +9842,11 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
     // Research: Prevent expensive updates during zoom
   };
   delete viewerOptions.drawer;
-  console.log("Creating OpenSeadragon 4.1.0 viewer (canvas-only):", viewerOptions);
+  console.log("Creating OpenSeadragon 4.1.0 viewer with config:", {
+    useCanvas: viewerOptions.useCanvas,
+    isIOS: isIOS2,
+    expectedDrawer: isIOS2 ? "HTML (via useCanvas: false)" : "Canvas"
+  });
   const viewer = OpenSeadragon(viewerOptions);
   console.log("Applying TileCascadeFix for stable tile rendering...");
   applyTileCascadeFix(OpenSeadragon);
@@ -10175,7 +10181,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-yKUT5Lte.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-CyeMA44l.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspots);
   eventHandlers.setupAdaptiveSprings(viewer, performanceConfig);
   const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);
