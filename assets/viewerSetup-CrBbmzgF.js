@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-DdoBlW8d.js","assets/main-DYvVnj8A.js","assets/main-BPwV8ISW.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-BaitP5wR.js","assets/main-CLkZPTzb.js","assets/main-BPwV8ISW.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, r as removeTileCascadeFix } from "./main-DYvVnj8A.js";
+import { i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, r as removeTileCascadeFix } from "./main-CLkZPTzb.js";
 class ImageOverlayManager {
   constructor() {
     this.overlays = /* @__PURE__ */ new Map();
@@ -4670,14 +4670,14 @@ function applyIOSTileDisappearFix(viewer) {
   };
   console.log("iOS Tile Disappear Fix applied successfully");
 }
-const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
 const isIPhone = () => /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
-const isIPad$1 = () => /iPad/.test(navigator.userAgent);
+const isIPad = () => /iPad/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
 function createIOSHTMLConfig(baseConfig) {
   if (!isIOS()) {
     return baseConfig;
   }
-  const device = isIPhone() ? "iPhone" : isIPad$1() ? "iPad" : "iOS";
+  const device = isIPhone() ? "iPhone" : isIPad() ? "iPad" : "iOS";
   console.log(`[iOS HTML Config] Configuring HTML drawer for ${device} - bypassing canvas limitations`);
   return {
     ...baseConfig,
@@ -4693,7 +4693,7 @@ function createIOSHTMLConfig(baseConfig) {
     imageSmoothingEnabled: false,
     // Sharper tiles
     // Memory management - OPTIMIZED based on research
-    maxImageCacheCount: isIPhone() ? 50 : isIPad$1() ? 100 : 75,
+    maxImageCacheCount: isIPhone() ? 50 : isIPad() ? 100 : 75,
     // Increased cache for better performance
     imageLoaderLimit: isIPhone() ? 2 : 4,
     // iOS can handle more concurrent loads
@@ -9714,8 +9714,9 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   const intervals = {};
   let homeViewport = null;
   const isMobileDevice = isMobile();
-  const isIOS2 = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isIOS2 = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
   const isIPhone2 = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
+  const isIPad2 = /iPad/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
   const baseConfig = isMobileDevice ? getMobileOptimizedConfig(isMobileDevice, isIOS2) : performanceConfig.viewer;
   console.log("[PERF] Using mobile-optimized config:", isMobileDevice);
   console.log("[PERF] Config details:", {
@@ -10080,7 +10081,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   }
   if (isIOS2) {
     try {
-      const deviceType = isIPhone2 ? "iPhone" : isIPad ? "iPad" : "iOS device";
+      const deviceType = isIPhone2 ? "iPhone" : isIPad2 ? "iPad" : "iOS device";
       console.log(`[iOS HTML] Setting up HTML drawer for ${deviceType}`);
       const drawerType2 = verifyHTMLDrawer(viewer);
       console.log(`[iOS HTML] Drawer type verified: ${drawerType2}`);
@@ -10219,11 +10220,16 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
                 opacity: 0.95;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             `;
+      const userAgent = navigator.userAgent.substring(0, 50);
+      const platform2 = navigator.platform;
+      const touchPoints = navigator.maxTouchPoints;
       universalIndicator.innerHTML = `
                 <strong>Drawer Type:</strong> ${actualDrawer}<br>
                 <small>Expected: ${expectedDrawer}</small><br>
                 <small>useCanvas: ${viewer.useCanvas}</small><br>
-                <small>Platform: ${isIOS2 ? "iOS" : isMobileDevice ? "Mobile" : "Desktop"}</small>
+                <small>Platform: ${isIOS2 ? "iOS" : isMobileDevice ? "Mobile" : "Desktop"}</small><br>
+                <small style="opacity: 0.7">UA: ${userAgent}...</small><br>
+                <small style="opacity: 0.7">Platform: ${platform2}, Touch: ${touchPoints}</small>
                 ${!isCorrectDrawer ? "<br><strong>⚠️ Wrong drawer!</strong>" : ""}
             `;
       document.body.appendChild(universalIndicator);
@@ -10323,7 +10329,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-DdoBlW8d.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-BaitP5wR.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspots);
   eventHandlers.setupAdaptiveSprings(viewer, performanceConfig);
   const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);
