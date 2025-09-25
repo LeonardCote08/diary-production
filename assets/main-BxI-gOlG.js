@@ -17777,30 +17777,30 @@ class CSSOverlayManager {
     }
     let distanceScore = 1;
     if (this.state.selectedHotspot && currentCenter) {
-      const isInsideHotspot = this.isViewportInsideHotspot();
-      if (isInsideHotspot) {
+      const coords = this.state.selectedHotspot.shape === "polygon" ? this.state.selectedHotspot.coordinates : this.state.selectedHotspot.coordinates[0];
+      const imagePt = this.viewer.viewport.viewportToImageCoordinates(currentCenter);
+      const isInsidePolygon = this.isPointInPolygon({ x: imagePt.x, y: imagePt.y }, coords);
+      if (isInsidePolygon) {
         distanceScore = 1;
+        console.log("[CSS] Inside hotspot polygon - maintaining 100% opacity");
       } else {
-        const imagePoint = this.viewer.viewport.viewportToImageCoordinates(currentCenter);
-        const coords = this.state.selectedHotspot.shape === "polygon" ? this.state.selectedHotspot.coordinates : this.state.selectedHotspot.coordinates[0];
         const distanceToEdge = this.calculateDistanceToPolygon(
-          { x: imagePoint.x, y: imagePoint.y },
+          { x: imagePt.x, y: imagePt.y },
           coords
         );
         const imageSize = this.viewer.world.getItemAt(0).getContentSize();
-        const viewportScale = this.viewer.container.clientWidth / imageSize.x;
-        const distanceInViewport = distanceToEdge * viewportScale;
-        const EDGE_FADE_START = 1e-3;
-        const EDGE_FADE_END = 0.04;
+        const distanceInViewport = distanceToEdge / imageSize.x;
+        const EDGE_FADE_START = 0;
+        const EDGE_FADE_END = 0.015;
         if (distanceInViewport <= EDGE_FADE_START) {
           distanceScore = 1;
         } else if (distanceInViewport >= EDGE_FADE_END) {
           distanceScore = 0;
         } else {
-          const normalized = (distanceInViewport - EDGE_FADE_START) / (EDGE_FADE_END - EDGE_FADE_START);
-          distanceScore = 1 - Math.pow(normalized, 2.5);
+          const normalized = distanceInViewport / EDGE_FADE_END;
+          distanceScore = 1 - Math.pow(normalized, 1.8);
+          console.log(`[CSS] Outside polygon - distance: ${(distanceInViewport * 100).toFixed(2)}%, opacity: ${(distanceScore * 100).toFixed(0)}%`);
         }
-        console.log(`CSS Edge Distance: inside=${isInsideHotspot}, distance=${distanceToEdge.toFixed(1)}px, viewportDist=${distanceInViewport.toFixed(4)}, opacity=${distanceScore.toFixed(3)}`);
       }
     }
     if (distanceScore < 0.1) {
@@ -17890,29 +17890,6 @@ class CSSOverlayManager {
       const yi = polygon[i][1];
       const xj = polygon[j][0];
       const yj = polygon[j][1];
-      const intersect = yi > y !== yj > y && x2 < (xj - xi) * (y - yi) / (yj - yi) + xi;
-      if (intersect) inside = !inside;
-    }
-    return inside;
-  }
-  /**
-   * Check if viewport center is inside selected hotspot
-   */
-  isViewportInsideHotspot() {
-    if (!this.state.selectedHotspot) return false;
-    const viewportCenter = this.viewer.viewport.getCenter();
-    const imagePoint = this.viewer.viewport.viewportToImageCoordinates(viewportCenter);
-    const coords = this.state.selectedHotspot.shape === "polygon" ? this.state.selectedHotspot.coordinates : this.state.selectedHotspot.coordinates[0];
-    return this.pointInPolygon(imagePoint.x, imagePoint.y, coords);
-  }
-  /**
-   * Point-in-polygon test using ray casting algorithm
-   */
-  pointInPolygon(x2, y, coords) {
-    let inside = false;
-    for (let i = 0, j = coords.length - 1; i < coords.length; j = i++) {
-      const xi = coords[i][0], yi = coords[i][1];
-      const xj = coords[j][0], yj = coords[j][1];
       const intersect = yi > y !== yj > y && x2 < (xj - xi) * (y - yi) / (yj - yi) + xi;
       if (intersect) inside = !inside;
     }
@@ -19113,28 +19090,28 @@ class Canvas2DOverlayManager {
       if (this.state.selectedHotspot && !this.state.isCinematicZooming && this.state.cinematicZoomCompleted) {
         if (isInsideHotspot) {
           panOpacity = 1;
+          console.log("[Canvas2D] Inside hotspot polygon - maintaining 100% opacity");
         } else {
           const currentCenter = this.viewer.viewport.getCenter();
-          const imagePoint = this.viewer.viewport.viewportToImageCoordinates(currentCenter);
+          const imagePt = this.viewer.viewport.viewportToImageCoordinates(currentCenter);
           const coords = this.state.selectedHotspot.shape === "polygon" ? this.state.selectedHotspot.coordinates : this.state.selectedHotspot.coordinates[0];
           const distanceToEdge = this.calculateDistanceToPolygon(
-            { x: imagePoint.x, y: imagePoint.y },
+            { x: imagePt.x, y: imagePt.y },
             coords
           );
           const imageSize = this.viewer.world.getItemAt(0).getContentSize();
-          const viewportScale = this.viewer.viewport.getContainerSize().x / imageSize.x;
-          const distanceInViewport = distanceToEdge * viewportScale;
-          const EDGE_FADE_START = 1e-3;
-          const EDGE_FADE_END = 0.04;
+          const distanceInViewport = distanceToEdge / imageSize.x;
+          const EDGE_FADE_START = 0;
+          const EDGE_FADE_END = 0.015;
           if (distanceInViewport <= EDGE_FADE_START) {
             panOpacity = 1;
           } else if (distanceInViewport >= EDGE_FADE_END) {
             panOpacity = 0;
           } else {
-            const normalized = (distanceInViewport - EDGE_FADE_START) / (EDGE_FADE_END - EDGE_FADE_START);
-            panOpacity = 1 - Math.pow(normalized, 2.5);
+            const normalized = distanceInViewport / EDGE_FADE_END;
+            panOpacity = 1 - Math.pow(normalized, 1.8);
+            console.log(`[Canvas2D] Outside polygon - distance: ${(distanceInViewport * 100).toFixed(2)}%, opacity: ${(panOpacity * 100).toFixed(0)}%`);
           }
-          console.log(`Canvas2D Edge Distance: inside=${isInsideHotspot}, distance=${distanceToEdge.toFixed(1)}px, viewportDist=${distanceInViewport.toFixed(4)}, opacity=${panOpacity.toFixed(3)}`);
         }
       }
       const targetOpacity = Math.min(zoomOpacity, panOpacity);
@@ -22341,7 +22318,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-CjDT8Wbm.js").then((n) => n.v);
+      } = await import("./viewerSetup-sPOpyKgq.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
