@@ -1,4 +1,4 @@
-import { O as OpenSeadragon, i as isMobile, e as getDefaultExportFromCjs, f as commonjsGlobal } from "./main-yd0bPSS3.js";
+import { O as OpenSeadragon, i as isMobile, e as getDefaultExportFromCjs, f as commonjsGlobal } from "./main-VVd-_ACO.js";
 const GestureStates = {
   IDLE: "idle",
   UNDETERMINED: "undetermined",
@@ -4048,8 +4048,12 @@ class TemporalEchoController {
       // DISABLED: Let reveal modes handle their own selection logic
       adjacencyThreshold: options.adjacencyThreshold || 50,
       // Pixels - how close hotspots need to be to be considered adjacent
-      revealType
+      revealType,
       // Validated reveal type
+      tapMode: options.tapMode || "direct",
+      // 'direct' (new) or 'nearby' (old) - controls tap behavior
+      tapTolerance: options.tapTolerance || (this.isMobile ? 20 : 10)
+      // Tolerance zone in pixels
     };
     this.activeEchoes = /* @__PURE__ */ new Set();
     this.echoAnimations = /* @__PURE__ */ new Map();
@@ -4081,7 +4085,26 @@ class TemporalEchoController {
     this.lastFPSCheck = performance.now();
     this.currentFPS = 60;
     console.log("[TemporalEchoController] Initialized", this.config);
+    console.log("[TemporalEchoController] Tap mode:", this.config.tapMode, "- Tolerance:", this.config.tapTolerance, "px");
     window.temporalEchoController = this;
+    window.setTapMode = (mode) => {
+      if (mode === "direct" || mode === "nearby") {
+        this.config.tapMode = mode;
+        console.log(`[TemporalEchoController] Tap mode changed to: ${mode}`);
+        console.log(`  - direct: Reveal only the tapped hotspot with ${this.config.tapTolerance}px tolerance`);
+        console.log(`  - nearby: Reveal multiple hotspots within ${this.config.echoRadius}px radius`);
+        return `Tap mode set to: ${mode}`;
+      }
+      return 'Invalid mode. Use "direct" or "nearby"';
+    };
+    window.setTapTolerance = (pixels) => {
+      if (pixels > 0 && pixels <= 100) {
+        this.config.tapTolerance = pixels;
+        console.log(`[TemporalEchoController] Tap tolerance changed to: ${pixels}px`);
+        return `Tap tolerance set to: ${pixels}px`;
+      }
+      return "Tolerance must be between 1 and 100 pixels";
+    };
     window.debugRevealHotspot = (hotspotId) => {
       const hotspot = { id: hotspotId };
       const hotspotData = {
@@ -4358,22 +4381,61 @@ class TemporalEchoController {
       viewportX: tapData.viewportX,
       viewportY: tapData.viewportY
     });
-    let nearbyHotspots = this.findHotspotsInRadius(tapData, this.config.echoRadius);
-    if (this.config.revealType === "focus" && nearbyHotspots.length > 0) {
-      nearbyHotspots.sort((a, b) => a.distance - b.distance);
-      nearbyHotspots = [nearbyHotspots[0]];
-      console.log("[TemporalEchoController] Focus mode: revealing only closest hotspot:", nearbyHotspots[0].id);
-    } else if (this.config.revealType === "ripple" && nearbyHotspots.length > 0) {
-      console.log("[TemporalEchoController] Ripple mode: revealing", nearbyHotspots.length, "hotspots with wave propagation");
+    const tapImagePoint = this.viewer.viewport.viewportToImageCoordinates(viewportPoint);
+    let nearbyHotspots = [];
+    if (this.config.tapMode === "direct" && this.isMobile) {
+      console.log("[TemporalEchoController] Direct tap mode active (mobile)");
+      let directHotspot = this.spatialIndex.getHotspotAtPoint(tapImagePoint.x, tapImagePoint.y);
+      if (!directHotspot) {
+        console.log("[TemporalEchoController] No direct hit, searching within tolerance zone:", this.config.tapTolerance);
+        const toleranceCandidates = this.spatialIndex.findNearbyHotspots(
+          tapImagePoint.x,
+          tapImagePoint.y,
+          this.config.tapTolerance,
+          5
+          // Max 5 candidates to check
+        );
+        if (toleranceCandidates.length > 0) {
+          directHotspot = toleranceCandidates[0];
+          console.log("[TemporalEchoController] Found hotspot within tolerance zone:", directHotspot.id);
+        }
+      }
+      if (directHotspot) {
+        console.log("[TemporalEchoController] Direct tap on hotspot:", directHotspot.id);
+        nearbyHotspots = [{
+          id: directHotspot.id,
+          distance: 0,
+          hotspot: directHotspot
+        }];
+      } else {
+        console.log("[TemporalEchoController] No hotspot at tap location");
+        this.showMissedTapFeedback(tapData);
+        return true;
+      }
+    } else {
+      console.log("[TemporalEchoController] Nearby tap mode active (original behavior)");
+      nearbyHotspots = this.findHotspotsInRadius(tapData, this.config.echoRadius);
+      if (this.config.revealType === "focus" && nearbyHotspots.length > 0) {
+        nearbyHotspots.sort((a, b) => a.distance - b.distance);
+        nearbyHotspots = [nearbyHotspots[0]];
+        console.log("[TemporalEchoController] Focus mode: revealing only closest hotspot");
+      } else if (this.config.revealType === "ripple" && nearbyHotspots.length > 0) {
+        console.log("[TemporalEchoController] Ripple mode: revealing", nearbyHotspots.length, "hotspots");
+      }
+      if (nearbyHotspots.length === 0 && this.isMobile) {
+        console.log("[TemporalEchoController] No hotspots found nearby");
+        this.showMissedTapFeedback(tapData);
+        return true;
+      }
     }
     if (this.canvasRenderer && this.config.useCanvasAnimation && nearbyHotspots.length > 0) {
       console.log(`[TemporalEchoController] Using Canvas renderer for ${nearbyHotspots.length} hotspots`);
       this.isRevealing = true;
-      const tapImagePoint = {
+      const tapImagePoint2 = {
         x: imagePoint.x,
         y: imagePoint.y
       };
-      this.canvasRenderer.startRevealAnimation(nearbyHotspots, tapImagePoint);
+      this.canvasRenderer.startRevealAnimation(nearbyHotspots, tapImagePoint2);
       setTimeout(() => {
         this.revealHotspotsSVG(nearbyHotspots, tapData);
         setTimeout(() => {
@@ -5284,6 +5346,71 @@ class TemporalEchoController {
         element.style.willChange = "auto";
         delete element.dataset.willChangeApplied;
       }, delay);
+    }
+  }
+  /**
+   * Show visual feedback for missed tap (no hotspot at location)
+   * Mobile-specific feedback to indicate the tap was registered but no hotspot found
+   */
+  showMissedTapFeedback(tapData) {
+    var _a, _b, _c, _d, _e;
+    if (!this.isMobile) return;
+    console.log("[TemporalEchoController] Showing missed tap feedback at:", tapData.x, tapData.y);
+    const indicator = document.createElement("div");
+    indicator.className = "missed-tap-indicator";
+    indicator.style.cssText = `
+            position: fixed;
+            left: ${tapData.x}px;
+            top: ${tapData.y}px;
+            width: 40px;
+            height: 40px;
+            margin-left: -20px;
+            margin-top: -20px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 10000;
+            animation: missedTapPulse 0.4s ease-out;
+        `;
+    if (!document.querySelector("#missed-tap-styles")) {
+      const style = document.createElement("style");
+      style.id = "missed-tap-styles";
+      style.textContent = `
+                @keyframes missedTapPulse {
+                    0% {
+                        transform: scale(0.5);
+                        opacity: 0;
+                    }
+                    50% {
+                        transform: scale(1);
+                        opacity: 0.8;
+                    }
+                    100% {
+                        transform: scale(1.5);
+                        opacity: 0;
+                    }
+                }
+            `;
+      document.head.appendChild(style);
+    }
+    document.body.appendChild(indicator);
+    setTimeout(() => {
+      if (indicator.parentNode) {
+        indicator.parentNode.removeChild(indicator);
+      }
+    }, 400);
+    if ((_b = (_a = window.webkit) == null ? void 0 : _a.messageHandlers) == null ? void 0 : _b.haptic) {
+      try {
+        window.webkit.messageHandlers.haptic.postMessage("light");
+      } catch (e) {
+      }
+    }
+    if (((_c = window.minimalistAudioEngine) == null ? void 0 : _c.isUnlocked) && !this.isMobile) {
+      try {
+        (_e = (_d = window.minimalistAudioEngine).playMiss) == null ? void 0 : _e.call(_d);
+      } catch (e) {
+      }
     }
   }
   /**
