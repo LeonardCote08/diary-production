@@ -1,9 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-DdpFLsXS.js","assets/main-DMXJ674G.js","assets/main-BPwV8ISW.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-BxkmgzfL.js","assets/main-DdvsyOdW.js","assets/main-BPwV8ISW.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, e as createLogger, _ as __vitePreload, i as isMobile, c as OverlayManagerFactory } from "./main-DMXJ674G.js";
-import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-01yM3s59.js";
+import { O as OpenSeadragon, e as createLogger, _ as __vitePreload, i as isMobile, c as OverlayManagerFactory } from "./main-DdvsyOdW.js";
+import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-B3-eh927.js";
 class TemporalModeHandler {
   constructor(options = {}) {
     this.audioEngine = options.audioEngine || window.audioEngine;
@@ -6235,16 +6235,8 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
         const overlay = this.stateManager.getOverlay(currentSelected.id);
         if (overlay) {
           const currentState = overlay.element.getAttribute("data-current-state");
-          const animationCompleted = overlay.element.getAttribute("data-animation-completed") === "true";
-          if (currentState !== "selected" || crossingThreshold) {
-            console.log(`[Zoom] Reapplying selected style:`, {
-              hotspotId: currentSelected.id,
-              currentState,
-              animationCompleted,
-              crossingThreshold,
-              previousZoom: previousZoom.toFixed(2),
-              currentZoom: this.currentZoom.toFixed(2)
-            });
+          overlay.element.getAttribute("data-animation-completed") === "true";
+          if (currentState !== "selected" && crossingThreshold) {
             this.applyStyle(overlay.element, currentSelected.type, "selected", { skipAnimation: true });
           }
         }
@@ -6435,18 +6427,18 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
     });
   }
   handleClick(event) {
-    var _a, _b;
+    var _a, _b, _c, _d, _e, _f, _g;
     const timeSinceDrag = ((_a = this.eventCoordinator) == null ? void 0 : _a.lastDragEndTime) ? Date.now() - this.eventCoordinator.lastDragEndTime : Infinity;
     console.log("handleClick called", {
       isDragging: this.isDragging,
       isPinching: this.isPinching,
       activePointers: this.activePointers.size,
       timeSinceDrag,
-      targetTag: event.target.tagName,
-      targetClass: ((_b = event.target.className) == null ? void 0 : _b.baseVal) || event.target.className,
+      targetTag: ((_b = event.target) == null ? void 0 : _b.tagName) || "unknown",
+      targetClass: ((_d = (_c = event.target) == null ? void 0 : _c.className) == null ? void 0 : _d.baseVal) || ((_e = event.target) == null ? void 0 : _e.className) || "unknown",
       timestamp: Date.now()
     });
-    if (event.target.closest(".openseadragon-controls")) {
+    if ((_g = (_f = event.target) == null ? void 0 : _f.closest) == null ? void 0 : _g.call(_f, ".openseadragon-controls")) {
       return;
     }
     if (timeSinceDrag < 500) {
@@ -8992,7 +8984,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
   }
   if (renderer.eventCoordinator) {
     const TemporalEchoController = (await __vitePreload(async () => {
-      const { default: __vite_default__ } = await import("./TemporalEchoController-DdpFLsXS.js");
+      const { default: __vite_default__ } = await import("./TemporalEchoController-BxkmgzfL.js");
       return { default: __vite_default__ };
     }, true ? __vite__mapDeps([0,1,2]) : void 0)).default;
     const echoController = new TemporalEchoController({

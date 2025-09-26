@@ -18972,7 +18972,142 @@ let Logger$1 = class Logger {
 function createLogger(prefix) {
   return new Logger$1(prefix);
 }
+class PerformanceDiagnostics {
+  constructor() {
+    this.metrics = {
+      frame: { count: 0, slow: 0, verySllow: 0 },
+      cinematic: { active: false, startTime: 0, framesDuring: 0 },
+      systems: /* @__PURE__ */ new Map(),
+      // Track time by system
+      lastReport: 0
+    };
+    this.config = {
+      slowFrameThreshold: 20,
+      // >20ms = below 50 FPS
+      verySlowThreshold: 33,
+      // >33ms = below 30 FPS
+      reportInterval: 5e3,
+      // Report every 5 seconds
+      minReportableTime: 1
+      // Only report systems taking >1ms
+    };
+    this.frameStartTime = 0;
+    this.currentFrame = {};
+  }
+  startFrame() {
+    this.frameStartTime = performance.now();
+    this.currentFrame = {};
+    this.metrics.frame.count++;
+  }
+  measureSystem(systemName, fn) {
+    const start = performance.now();
+    const result = fn();
+    const duration = performance.now() - start;
+    this.currentFrame[systemName] = duration;
+    if (!this.metrics.systems.has(systemName)) {
+      this.metrics.systems.set(systemName, { total: 0, count: 0, max: 0 });
+    }
+    const systemMetrics = this.metrics.systems.get(systemName);
+    systemMetrics.total += duration;
+    systemMetrics.count++;
+    systemMetrics.max = Math.max(systemMetrics.max, duration);
+    return result;
+  }
+  endFrame() {
+    if (!this.frameStartTime) return;
+    const frameTime = performance.now() - this.frameStartTime;
+    if (frameTime > this.config.verySlowThreshold) {
+      this.metrics.frame.verySllow++;
+      this.logSlowFrame(frameTime);
+    } else if (frameTime > this.config.slowFrameThreshold) {
+      this.metrics.frame.slow++;
+    }
+    if (this.metrics.cinematic.active) {
+      this.metrics.cinematic.framesDuring++;
+    }
+    const now = performance.now();
+    if (now - this.metrics.lastReport > this.config.reportInterval) {
+      this.generateReport();
+      this.resetMetrics();
+      this.metrics.lastReport = now;
+    }
+  }
+  logSlowFrame(frameTime) {
+    const systems = Object.entries(this.currentFrame).filter(([_, time]) => time > this.config.minReportableTime).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name2, time]) => `${name2}:${time.toFixed(1)}ms`).join(" | ");
+    console.log(`[SLOW FRAME] ${frameTime.toFixed(1)}ms - ${systems}`);
+  }
+  setCinematicActive(active) {
+    if (active && !this.metrics.cinematic.active) {
+      this.metrics.cinematic.active = true;
+      this.metrics.cinematic.startTime = performance.now();
+      this.metrics.cinematic.framesDuring = 0;
+      console.log("[Perf] Cinematic zoom START");
+    } else if (!active && this.metrics.cinematic.active) {
+      const duration = performance.now() - this.metrics.cinematic.startTime;
+      const avgFPS = (this.metrics.cinematic.framesDuring / (duration / 1e3)).toFixed(1);
+      console.log(`[Perf] Cinematic zoom END - ${avgFPS} FPS avg (${this.metrics.cinematic.framesDuring} frames in ${duration.toFixed(0)}ms)`);
+      this.metrics.cinematic.active = false;
+      this.metrics.cinematic.framesDuring = 0;
+    }
+  }
+  generateReport() {
+    if (this.metrics.frame.count === 0) return;
+    const totalFrames = this.metrics.frame.count;
+    const slowPercent = ((this.metrics.frame.slow + this.metrics.frame.verySllow) / totalFrames * 100).toFixed(1);
+    const verySlowPercent = (this.metrics.frame.verySllow / totalFrames * 100).toFixed(1);
+    if (this.metrics.frame.slow > 0 || this.metrics.frame.verySllow > 0) {
+      const topSystems = Array.from(this.metrics.systems.entries()).map(([name2, data]) => ({
+        name: name2,
+        avg: data.total / data.count,
+        max: data.max
+      })).filter((s) => s.avg > this.config.minReportableTime).sort((a, b) => b.avg - a.avg).slice(0, 3);
+      const systemsReport = topSystems.map((s) => `${s.name}:${s.avg.toFixed(1)}ms(max:${s.max.toFixed(1)})`).join(" | ");
+      console.log(`[Perf Report] Frames:${totalFrames} Slow:${slowPercent}% VerySlow:${verySlowPercent}% | Top: ${systemsReport}`);
+    }
+  }
+  resetMetrics() {
+    this.metrics.frame = { count: 0, slow: 0, verySllow: 0 };
+    this.metrics.systems.clear();
+  }
+}
+const performanceDiagnostics = new PerformanceDiagnostics();
 const logger$1 = createLogger("Canvas2DOverlay");
+class RenderProfiler {
+  constructor() {
+    this.metrics = {
+      transform: [],
+      polygonDraw: [],
+      total: []
+    };
+    this.frameCount = 0;
+  }
+  measure(section, fn) {
+    const start = performance.now();
+    const result = fn();
+    const duration = performance.now() - start;
+    if (!this.metrics[section]) this.metrics[section] = [];
+    this.metrics[section].push(duration);
+    if (++this.frameCount % 60 === 0) {
+      this.logAverages();
+    }
+    return result;
+  }
+  logAverages() {
+    const avgs = {};
+    let totalTime = 0;
+    for (const [key, values] of Object.entries(this.metrics)) {
+      if (values.length > 0) {
+        const avg = values.reduce((a, b) => a + b) / values.length;
+        avgs[key] = avg.toFixed(2);
+        totalTime += avg;
+        this.metrics[key] = [];
+      }
+    }
+    if (totalTime > 5) {
+      console.log(`[Canvas2D Perf] Total: ${totalTime.toFixed(1)}ms | Transform: ${avgs.transform || 0}ms | Draw: ${avgs.polygonDraw || 0}ms`);
+    }
+  }
+}
 class Canvas2DOverlayManager {
   constructor(viewer) {
     this.viewer = viewer;
@@ -19045,6 +19180,14 @@ class Canvas2DOverlayManager {
     this.redraw = this.redraw.bind(this);
     this.handleViewportChange = this.handleViewportChange.bind(this);
     this.magneticInkAnimator = null;
+    this.profiler = new RenderProfiler();
+    this.diagnostics = {
+      frameStartTime: 0,
+      cinematicActive: false,
+      lastLogTime: 0,
+      slowFrames: 0,
+      totalFrames: 0
+    };
   }
   initialize() {
     if (this.isInitialized) return;
@@ -19329,6 +19472,7 @@ class Canvas2DOverlayManager {
       this.state.selectionCenter = null;
       this.state.isCinematicZooming = true;
       this.state.cinematicZoomCompleted = false;
+      performanceDiagnostics.setCinematicActive(true);
       this.state.isPinching = false;
       this.state.lastPinchZoom = currentZoom;
       logger$1.debug(`Starting cinematic zoom from zoom=${currentZoom.toFixed(2)}, scale=${currentScale.toFixed(1)}`);
@@ -19363,6 +19507,7 @@ class Canvas2DOverlayManager {
     this.state.selectionZoom = null;
     this.state.selectionCenter = null;
     this.state.isCinematicZooming = false;
+    performanceDiagnostics.setCinematicActive(false);
     if (this.canvas) {
       if (this.context) {
         const rect = this.viewer.container.getBoundingClientRect();
@@ -19455,6 +19600,7 @@ class Canvas2DOverlayManager {
       this.state.selectionCenter = this.viewer.viewport.getCenter();
       this.state.isCinematicZooming = false;
       this.state.cinematicZoomCompleted = true;
+      performanceDiagnostics.setCinematicActive(false);
       this.state.lastPinchZoom = stableZoom;
       logger$1.debug("Stable values captured:");
       logger$1.debug(`  - Zoom: ${stableZoom.toFixed(2)}`);
@@ -19671,6 +19817,9 @@ class Canvas2DOverlayManager {
    * Redraw synchronized with OpenSeadragon's viewport
    */
   redrawSynchronized() {
+    performanceDiagnostics.startFrame();
+    performance.now();
+    this.diagnostics.totalFrames++;
     if (!this.context) {
       logger$1.error("No context available for redraw!");
       if (!this.isInitialized) {
@@ -19695,10 +19844,9 @@ class Canvas2DOverlayManager {
     this.context.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.context.globalCompositeOperation = "source-over";
     this.context.globalAlpha = 1;
-    const fillOpacity = this.state.currentOpacity * this.config.maxOpacity;
-    this.context.fillStyle = `rgba(0, 0, 0, ${fillOpacity})`;
-    this.context.fillRect(0, 0, rect.width, rect.height);
-    const screenCoords = this.transformCoordinatesPrecise(maskData.coords);
+    const screenCoords = performanceDiagnostics.measureSystem("Canvas2D.transform", () => {
+      return this.transformCoordinatesPrecise(maskData.coords);
+    });
     const shrinkFactor = 0.99;
     const centerX = screenCoords.reduce((sum, coord) => sum + coord[0], 0) / screenCoords.length;
     const centerY = screenCoords.reduce((sum, coord) => sum + coord[1], 0) / screenCoords.length;
@@ -19706,33 +19854,76 @@ class Canvas2DOverlayManager {
       const dx = coord[0] - centerX;
       const dy = coord[1] - centerY;
       return [
-        centerX + dx * shrinkFactor,
-        centerY + dy * shrinkFactor
+        centerX + dx * shrinkFactor | 0,
+        // Integer coordinates for performance
+        centerY + dy * shrinkFactor | 0
+        // Integer coordinates for performance
       ];
     });
-    this.context.save();
-    this.context.globalCompositeOperation = "destination-out";
-    this.context.fillStyle = "rgba(255, 255, 255, 1)";
-    this.context.beginPath();
-    this.context.moveTo(shrunkCoords[0][0], shrunkCoords[0][1]);
-    for (let i = 1; i < shrunkCoords.length; i++) {
-      this.context.lineTo(shrunkCoords[i][0], shrunkCoords[i][1]);
-    }
-    this.context.closePath();
-    this.context.fill();
-    this.context.restore();
+    const fillOpacity = this.state.currentOpacity * this.config.maxOpacity;
+    performanceDiagnostics.measureSystem("Canvas2D.draw", () => {
+      this.context.save();
+      this.context.beginPath();
+      this.context.rect(0, 0, rect.width, rect.height);
+      this.context.moveTo(shrunkCoords[0][0], shrunkCoords[0][1]);
+      for (let i = 1; i < shrunkCoords.length; i++) {
+        this.context.lineTo(shrunkCoords[i][0], shrunkCoords[i][1]);
+      }
+      this.context.closePath();
+      this.context.fillStyle = `rgba(0, 0, 0, ${fillOpacity})`;
+      this.context.fill("evenodd");
+      this.context.restore();
+    });
+    performanceDiagnostics.endFrame();
   }
   /**
    * Transform coordinates with precise viewport-to-window mapping
    */
   transformCoordinatesPrecise(coords) {
     const viewport = this.viewer.viewport;
-    return coords.map(([x2, y]) => {
-      const imagePoint = new OpenSeadragon.Point(x2, y);
-      const viewportPoint = viewport.imageToViewportCoordinates(imagePoint);
-      const windowPoint = viewport.viewportToWindowCoordinates(viewportPoint);
-      return [windowPoint.x, windowPoint.y];
-    });
+    const coordCount = coords.length;
+    const start = coordCount > 50 ? performance.now() : 0;
+    try {
+      if (!viewport.contentSize) {
+        return coords.map(([x2, y]) => {
+          const imagePoint = new OpenSeadragon.Point(x2, y);
+          const viewportPoint = viewport.imageToViewportCoordinates(imagePoint);
+          const windowPoint = viewport.viewportToWindowCoordinates(viewportPoint);
+          return [windowPoint.x | 0, windowPoint.y | 0];
+        });
+      }
+      const imageWidth = viewport.contentSize.x;
+      const bounds = viewport.getBounds();
+      const scale = viewport.getContainerSize().x / bounds.width;
+      const offsetX = -bounds.x * scale;
+      const offsetY = -bounds.y * scale;
+      const result = coords.map(([x2, y]) => {
+        const vpX = x2 / imageWidth;
+        const vpY = y / imageWidth;
+        const windowX = vpX * scale + offsetX | 0;
+        const windowY = vpY * scale + offsetY | 0;
+        return [windowX, windowY];
+      });
+      if (start > 0) {
+        const time = performance.now() - start;
+        if (time > 5) {
+          console.log(`[Transform] ${coordCount} coords in ${time.toFixed(1)}ms (${(time / coordCount).toFixed(2)}ms per coord)`);
+        }
+      }
+      return result;
+    } catch (error) {
+      console.warn("[Canvas2D] Transform error, using fallback:", error.message);
+      return coords.map(([x2, y]) => {
+        try {
+          const imagePoint = new OpenSeadragon.Point(x2, y);
+          const viewportPoint = viewport.imageToViewportCoordinates(imagePoint);
+          const windowPoint = viewport.viewportToWindowCoordinates(viewportPoint);
+          return [windowPoint.x | 0, windowPoint.y | 0];
+        } catch (e) {
+          return [0, 0];
+        }
+      });
+    }
   }
   /**
    * Transform polygon coordinates from image space to screen space with smooth transform
@@ -19818,12 +20009,6 @@ class Canvas2DOverlayManager {
     this.context.clearRect(0, 0, rect.width, rect.height);
     this.context.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.context.globalCompositeOperation = "source-over";
-    const fillOpacity = this.state.currentOpacity * this.config.maxOpacity;
-    this.context.save();
-    this.context.globalAlpha = fillOpacity;
-    this.context.fillStyle = "black";
-    this.context.fillRect(0, 0, rect.width, rect.height);
-    this.context.restore();
     const maskData = this.maskCache.get(this.state.selectedHotspot.id);
     if (!maskData) {
       logger$1.warn("No mask data found for hotspot");
@@ -19837,22 +20022,25 @@ class Canvas2DOverlayManager {
       const dx = coord[0] - centerX;
       const dy = coord[1] - centerY;
       return [
-        centerX + dx * shrinkFactor,
-        centerY + dy * shrinkFactor
+        centerX + dx * shrinkFactor | 0,
+        // Integer coordinates for performance
+        centerY + dy * shrinkFactor | 0
+        // Integer coordinates for performance
       ];
     });
+    const fillOpacity = this.state.currentOpacity * this.config.maxOpacity;
     this.context.save();
-    this.context.globalCompositeOperation = "destination-out";
     this.context.imageSmoothingEnabled = true;
     this.context.imageSmoothingQuality = "high";
-    this.context.fillStyle = "rgba(255, 255, 255, 1)";
     this.context.beginPath();
+    this.context.rect(0, 0, rect.width, rect.height);
     this.context.moveTo(shrunkCoords[0][0], shrunkCoords[0][1]);
     for (let i = 1; i < shrunkCoords.length; i++) {
       this.context.lineTo(shrunkCoords[i][0], shrunkCoords[i][1]);
     }
     this.context.closePath();
-    this.context.fill();
+    this.context.fillStyle = `rgba(0, 0, 0, ${fillOpacity})`;
+    this.context.fill("evenodd");
     this.context.restore();
     const frameTime = performance.now() - frameStart;
     this.frameHistory.push(frameTime);
@@ -19873,28 +20061,23 @@ class Canvas2DOverlayManager {
     this.context.clearRect(0, 0, rect.width, rect.height);
     this.context.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.context.globalCompositeOperation = "source-over";
-    const fillOpacity = this.state.currentOpacity * this.config.maxOpacity;
-    this.context.save();
-    this.context.globalAlpha = fillOpacity;
-    this.context.fillStyle = "black";
-    this.context.fillRect(0, 0, rect.width, rect.height);
-    this.context.restore();
     const maskData = this.maskCache.get(this.state.selectedHotspot.id);
     if (!maskData) {
       logger$1.warn("No mask data found for hotspot");
       return;
     }
     const screenCoords = this.transformCoordinates(maskData.coords);
+    const fillOpacity = this.state.currentOpacity * this.config.maxOpacity;
     this.context.save();
-    this.context.globalCompositeOperation = "destination-out";
-    this.context.fillStyle = "rgba(255, 255, 255, 1)";
     this.context.beginPath();
-    this.context.moveTo(screenCoords[0][0], screenCoords[0][1]);
+    this.context.rect(0, 0, rect.width, rect.height);
+    this.context.moveTo(screenCoords[0][0] | 0, screenCoords[0][1] | 0);
     for (let i = 1; i < screenCoords.length; i++) {
-      this.context.lineTo(screenCoords[i][0], screenCoords[i][1]);
+      this.context.lineTo(screenCoords[i][0] | 0, screenCoords[i][1] | 0);
     }
     this.context.closePath();
-    this.context.fill();
+    this.context.fillStyle = `rgba(0, 0, 0, ${fillOpacity})`;
+    this.context.fill("evenodd");
     this.context.restore();
   }
   /**
@@ -22374,7 +22557,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-01yM3s59.js").then((n) => n.v);
+      } = await import("./viewerSetup-B3-eh927.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
