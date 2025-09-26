@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-agUSj9m_.js","assets/main-DR0fqR2H.js","assets/main-BPwV8ISW.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-BNvaP53G.js","assets/main-BaudKOVv.js","assets/main-BPwV8ISW.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, r as removeTileCascadeFix } from "./main-DR0fqR2H.js";
+import { i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, r as removeTileCascadeFix } from "./main-BaudKOVv.js";
 class ImageOverlayManager {
   constructor() {
     this.overlays = /* @__PURE__ */ new Map();
@@ -1006,61 +1006,6 @@ if (typeof window !== "undefined") {
       return "All variations cleared";
     }
   };
-}
-const DEBUG_ENABLED = typeof window !== "undefined" && (window.DEBUG || localStorage.getItem("debugLevel") === "1" || new URLSearchParams(window.location.search).has("debug"));
-const LogLevel = {
-  DEBUG: 0,
-  INFO: 1,
-  WARN: 2,
-  ERROR: 3
-};
-let currentLogLevel = LogLevel.WARN;
-class Logger {
-  constructor(prefix = "") {
-    this.prefix = prefix;
-  }
-  _shouldLog(level) {
-    return DEBUG_ENABLED && level >= currentLogLevel;
-  }
-  _formatMessage(message, ...args) {
-    (/* @__PURE__ */ new Date()).toISOString();
-    const prefixStr = this.prefix ? `[${this.prefix}] ` : "";
-    return [`${prefixStr}${message}`, ...args];
-  }
-  debug(message, ...args) {
-    if (this._shouldLog(LogLevel.DEBUG)) {
-      console.log(...this._formatMessage(message, ...args));
-    }
-  }
-  info(message, ...args) {
-    if (this._shouldLog(LogLevel.INFO)) {
-      console.info(...this._formatMessage(message, ...args));
-    }
-  }
-  warn(message, ...args) {
-    if (this._shouldLog(LogLevel.WARN)) {
-      console.warn(...this._formatMessage(message, ...args));
-    }
-  }
-  error(message, ...args) {
-    if (this._shouldLog(LogLevel.ERROR)) {
-      console.error(...this._formatMessage(message, ...args));
-    }
-  }
-  // Special method for performance-critical paths
-  perf(message, ...args) {
-    if (DEBUG_ENABLED && window.DEBUG_PERFORMANCE) {
-      console.log(`[PERF] ${this.prefix ? `[${this.prefix}] ` : ""}${message}`, ...args);
-    }
-  }
-  // Create a child logger with additional prefix
-  child(childPrefix) {
-    const newPrefix = this.prefix ? `${this.prefix}:${childPrefix}` : childPrefix;
-    return new Logger(newPrefix);
-  }
-}
-function createLogger(prefix) {
-  return new Logger(prefix);
 }
 class CentralizedEventManager {
   constructor(options = {}) {
@@ -10260,7 +10205,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-agUSj9m_.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-BNvaP53G.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspots);
   eventHandlers.setupAdaptiveSprings(viewer, performanceConfig);
   const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);
@@ -10424,7 +10369,6 @@ const viewerSetup = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineP
 export {
   CentralizedEventManager as C,
   adjustSettingsForPerformance as a,
-  createLogger as c,
   organicVariations as o,
   performanceConfig as p,
   viewerSetup as v

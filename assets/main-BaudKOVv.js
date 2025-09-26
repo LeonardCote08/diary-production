@@ -18917,6 +18917,62 @@ class PolygonObjectPool {
 if (typeof window !== "undefined") {
   window.MagneticInkAnimator = MagneticInkAnimator;
 }
+const DEBUG_ENABLED = typeof window !== "undefined" && (window.DEBUG || localStorage.getItem("debugLevel") === "1" || new URLSearchParams(window.location.search).has("debug"));
+const LogLevel$1 = {
+  DEBUG: 0,
+  INFO: 1,
+  WARN: 2,
+  ERROR: 3
+};
+let currentLogLevel = LogLevel$1.WARN;
+let Logger$1 = class Logger {
+  constructor(prefix = "") {
+    this.prefix = prefix;
+  }
+  _shouldLog(level) {
+    return DEBUG_ENABLED && level >= currentLogLevel;
+  }
+  _formatMessage(message, ...args) {
+    (/* @__PURE__ */ new Date()).toISOString();
+    const prefixStr = this.prefix ? `[${this.prefix}] ` : "";
+    return [`${prefixStr}${message}`, ...args];
+  }
+  debug(message, ...args) {
+    if (this._shouldLog(LogLevel$1.DEBUG)) {
+      console.log(...this._formatMessage(message, ...args));
+    }
+  }
+  info(message, ...args) {
+    if (this._shouldLog(LogLevel$1.INFO)) {
+      console.info(...this._formatMessage(message, ...args));
+    }
+  }
+  warn(message, ...args) {
+    if (this._shouldLog(LogLevel$1.WARN)) {
+      console.warn(...this._formatMessage(message, ...args));
+    }
+  }
+  error(message, ...args) {
+    if (this._shouldLog(LogLevel$1.ERROR)) {
+      console.error(...this._formatMessage(message, ...args));
+    }
+  }
+  // Special method for performance-critical paths
+  perf(message, ...args) {
+    if (DEBUG_ENABLED && window.DEBUG_PERFORMANCE) {
+      console.log(`[PERF] ${this.prefix ? `[${this.prefix}] ` : ""}${message}`, ...args);
+    }
+  }
+  // Create a child logger with additional prefix
+  child(childPrefix) {
+    const newPrefix = this.prefix ? `${this.prefix}:${childPrefix}` : childPrefix;
+    return new Logger(newPrefix);
+  }
+};
+function createLogger(prefix) {
+  return new Logger$1(prefix);
+}
+const logger$1 = createLogger("Canvas2DOverlay");
 class Canvas2DOverlayManager {
   constructor(viewer) {
     this.viewer = viewer;
@@ -18925,10 +18981,8 @@ class Canvas2DOverlayManager {
     this.isInitialized = false;
     this.isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || "ontouchstart" in window;
     this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    this.isAndroid = /Android/i.test(navigator.userAgent);
     this.maskCache = /* @__PURE__ */ new Map();
     this.transformCache = /* @__PURE__ */ new Map();
-    this.pathCache = /* @__PURE__ */ new Map();
     this.state = {
       selectedHotspot: null,
       currentOpacity: 0,
@@ -18968,7 +19022,7 @@ class Canvas2DOverlayManager {
       fadeSpeedQuickClose: 0.4,
       // Even faster for manual deselection
       updateThrottle: 16,
-      // 60 FPS target - was 33ms (30 FPS)
+      // 60 FPS target (was 33ms = 30 FPS)
       maxVerticesMobile: 50,
       simplificationTolerance: 2,
       devicePixelRatioMax: 2,
@@ -18981,7 +19035,7 @@ class Canvas2DOverlayManager {
       useInterpolation: true
       // Toggle for interpolation system
     };
-    console.log("Canvas2DOverlayManager: Constructor - auto-deselect threshold:", this.state.autoDeselectThreshold);
+    logger$1.debug("Constructor - auto-deselect threshold:", this.state.autoDeselectThreshold);
     this.frameCount = 0;
     this.lastFrameTime = 0;
     this.frameHistory = [];
@@ -18994,8 +19048,8 @@ class Canvas2DOverlayManager {
   }
   initialize() {
     if (this.isInitialized) return;
-    console.log("Canvas2DOverlayManager: Initializing...");
-    console.log("Canvas2DOverlayManager: Auto-deselect feature enabled, threshold:", this.state.autoDeselectThreshold);
+    logger$1.debug("Initializing...");
+    logger$1.debug("Auto-deselect feature enabled, threshold:", this.state.autoDeselectThreshold);
     this.canvas = document.createElement("canvas");
     this.canvas.className = "canvas2d-spotlight-overlay";
     Object.assign(this.canvas.style, {
@@ -19010,42 +19064,22 @@ class Canvas2DOverlayManager {
       transform: "translateZ(0)",
       willChange: "opacity"
     });
-    const needsAlpha = this.isAndroid || this.isIOS;
     this.context = this.canvas.getContext("2d", {
-      alpha: needsAlpha ? true : false,
-      // Mobile needs alpha for spotlight overlay
-      desynchronized: !this.isIOS,
-      // iOS Safari has issues with desynchronized
+      alpha: true,
+      desynchronized: false,
+      // Keep synchronized
       willReadFrequently: false
     });
-    if (this.isAndroid) {
-      console.log("Canvas2DOverlayManager: Android detected - using alpha channel for overlay compatibility");
-    }
-    if (this.isIOS) {
-      console.log("Canvas2DOverlayManager: iOS detected - using alpha channel for HTML drawer compatibility");
-    }
     this.resize();
-    if (this.isIOS) {
-      this.canvas.addEventListener("webglcontextlost", (e) => {
-        console.error("Canvas2DOverlayManager: Context lost on iOS!");
-        e.preventDefault();
-        this.handleContextLoss();
-      });
-      this.canvas.addEventListener("webglcontextrestored", () => {
-        console.log("Canvas2DOverlayManager: Context restored on iOS");
-        this.resize();
-        this.redrawSynchronized();
-      });
-    }
     const container = this.viewer.container;
     container.appendChild(this.canvas);
     container.classList.add("canvas2d-active");
-    console.log("Canvas2DOverlayManager: Canvas added to container");
+    logger$1.debug("Canvas added to container");
     this.setupEventListeners();
     this.isInitialized = true;
-    console.log("Canvas2DOverlayManager: Initialized successfully");
+    logger$1.debug("Initialized successfully");
     this.magneticInkAnimator = new MagneticInkAnimator(this.viewer, this.canvas, this.context);
-    console.log("Canvas2DOverlayManager: MagneticInkAnimator initialized");
+    logger$1.debug("MagneticInkAnimator initialized");
   }
   setupEventListeners() {
     let isAnimating = false;
@@ -19055,10 +19089,10 @@ class Canvas2DOverlayManager {
     this.viewer.addHandler("animation-finish", () => {
       isAnimating = false;
       if (this.state.isCinematicZooming && this.state.selectedHotspot) {
-        console.log("Canvas2D: Animation finished, checking if cinematic zoom completed...");
+        logger$1.debug("Animation finished, checking if cinematic zoom completed...");
         setTimeout(() => {
           if (this.state.isCinematicZooming) {
-            console.log("Canvas2D: Auto-completing cinematic zoom (mobile fallback)");
+            logger$1.debug("Auto-completing cinematic zoom (mobile fallback)");
             this.updateSelectionZoom();
           }
         }, 150);
@@ -19069,7 +19103,7 @@ class Canvas2DOverlayManager {
       const currentZoom = this.viewer.viewport.getZoom();
       if (!isAnimating && this.state.cinematicZoomCompleted && this.state.selectionZoom) {
         if (currentZoom < this.state.selectionZoom) {
-          console.log(`Canvas2D: Zooming out from ${this.state.selectionZoom.toFixed(2)} to ${currentZoom.toFixed(2)}`);
+          logger$1.debug(`Zooming out from ${this.state.selectionZoom.toFixed(2)} to ${currentZoom.toFixed(2)}`);
         }
       }
       let zoomOpacity = 1;
@@ -19084,7 +19118,7 @@ class Canvas2DOverlayManager {
         const referenceScale = this.state.selectionScale || this.state.startingScale;
         const scaleRatio = referenceScale ? currentScale / referenceScale : 1;
         if (Math.abs(this.state.lastLoggedScale - currentScale) > 1 || !this.state.debugInfo) {
-          console.log(`Canvas2D Bounds Debug: scale=${currentScale.toFixed(1)}, ref=${(referenceScale == null ? void 0 : referenceScale.toFixed(1)) || "null"}, ratio=${scaleRatio.toFixed(3)}, bounds.w=${viewportBounds.width.toFixed(3)}`);
+          logger$1.debug(`Bounds Debug: scale=${currentScale.toFixed(1)}, ref=${(referenceScale == null ? void 0 : referenceScale.toFixed(1)) || "null"}, ratio=${scaleRatio.toFixed(3)}, bounds.w=${viewportBounds.width.toFixed(3)}`);
           this.state.lastLoggedScale = currentScale;
         }
         this.state.debugInfo = {
@@ -19112,7 +19146,7 @@ class Canvas2DOverlayManager {
       if (this.state.selectedHotspot && !this.state.isCinematicZooming && this.state.cinematicZoomCompleted) {
         if (isInsideHotspot) {
           panOpacity = 1;
-          console.log("[Canvas2D] Inside hotspot polygon - maintaining 100% opacity");
+          logger$1.debug("Inside hotspot polygon - maintaining 100% opacity");
         } else {
           const currentCenter = this.viewer.viewport.getCenter();
           const imagePt = this.viewer.viewport.viewportToImageCoordinates(currentCenter);
@@ -19132,7 +19166,7 @@ class Canvas2DOverlayManager {
           } else {
             const normalized = distanceInViewport / EDGE_FADE_END;
             panOpacity = 1 - Math.pow(normalized, 1.8);
-            console.log(`[Canvas2D] Outside polygon - distance: ${(distanceInViewport * 100).toFixed(2)}%, opacity: ${(panOpacity * 100).toFixed(0)}%`);
+            logger$1.debug(`Outside polygon - distance: ${(distanceInViewport * 100).toFixed(2)}%, opacity: ${(panOpacity * 100).toFixed(0)}%`);
           }
         }
       }
@@ -19142,22 +19176,22 @@ class Canvas2DOverlayManager {
         const zoomRatio = referenceZoom ? currentZoom2 / referenceZoom : 1;
         const fadePhase = zoomRatio >= 0.95 ? " (full)" : zoomRatio <= 0.5 ? " (hidden)" : ` (fading ${((1 - zoomOpacity) * 100).toFixed(0)}%)`;
         const panStatus = panOpacity === 1 ? "" : panOpacity === 0 ? " PAN:hidden" : ` PAN:${(panOpacity * 100).toFixed(0)}%`;
-        console.log(`Canvas2D Fade: zoomRatio=${zoomRatio.toFixed(3)}${fadePhase}, zoom=${zoomOpacity.toFixed(3)}, pan=${panOpacity.toFixed(3)}${panStatus}, target=${targetOpacity.toFixed(3)}`);
+        logger$1.debug(`Fade: zoomRatio=${zoomRatio.toFixed(3)}${fadePhase}, zoom=${zoomOpacity.toFixed(3)}, pan=${panOpacity.toFixed(3)}${panStatus}, target=${targetOpacity.toFixed(3)}`);
       }
       if (Math.abs(this.state.targetOpacity - targetOpacity) > 1e-3) {
         this.state.targetOpacity = targetOpacity;
         this.startAnimation();
         const autoDeselectThreshold = 0.02;
         if (targetOpacity < autoDeselectThreshold && this.state.selectedHotspot && !this.state.isCinematicZooming) {
-          console.log(`Canvas2D: Auto-deselecting - opacity ${targetOpacity.toFixed(3)} below threshold ${autoDeselectThreshold}`);
+          logger$1.debug(`Auto-deselecting - opacity ${targetOpacity.toFixed(3)} below threshold ${autoDeselectThreshold}`);
           this.forceCompleteRemoval();
           this.autoDeselect();
           return;
         }
         if (this.state.isCinematicZooming) {
-          console.log(`Canvas2D: Cinematic zoom progress - currentZoom: ${this.viewer.viewport.getZoom().toFixed(2)}, targetOpacity: ${targetOpacity.toFixed(2)}`);
+          logger$1.debug(`Cinematic zoom progress - currentZoom: ${this.viewer.viewport.getZoom().toFixed(2)}, targetOpacity: ${targetOpacity.toFixed(2)}`);
         } else if (!this.state.previousInsideState !== isInsideHotspot) {
-          console.log(`Canvas2D: Viewport ${isInsideHotspot ? "INSIDE" : "OUTSIDE"} hotspot, opacity: ${targetOpacity.toFixed(2)}`);
+          logger$1.debug(`Viewport ${isInsideHotspot ? "INSIDE" : "OUTSIDE"} hotspot, opacity: ${targetOpacity.toFixed(2)}`);
           this.state.previousInsideState = isInsideHotspot;
         }
       }
@@ -19176,18 +19210,7 @@ class Canvas2DOverlayManager {
   resize() {
     if (!this.canvas) return;
     const rect = this.viewer.container.getBoundingClientRect();
-    let dpr = Math.min(window.devicePixelRatio || 1, this.config.devicePixelRatioMax);
-    if (this.isIOS) {
-      const proposedWidth = rect.width * dpr;
-      const proposedHeight = rect.height * dpr;
-      const totalPixels = proposedWidth * proposedHeight;
-      const maxPixels = window.screen.width >= 1024 ? 16777216 : 5242880;
-      if (totalPixels > maxPixels) {
-        const safeScale = Math.sqrt(maxPixels / (rect.width * rect.height));
-        dpr = Math.min(dpr, safeScale);
-        console.warn(`Canvas2DOverlayManager: iOS canvas limit - reducing DPR from ${window.devicePixelRatio} to ${dpr.toFixed(2)}`);
-      }
-    }
+    const dpr = Math.min(window.devicePixelRatio || 1, this.config.devicePixelRatioMax);
     this.canvas.width = Math.round(rect.width * dpr);
     this.canvas.height = Math.round(rect.height * dpr);
     this.canvas.style.width = `${Math.round(rect.width)}px`;
@@ -19195,7 +19218,7 @@ class Canvas2DOverlayManager {
     this.context.setTransform(1, 0, 0, 1, 0, 0);
     this.context.scale(dpr, dpr);
     this.transformCache.clear();
-    console.log(`Canvas2DOverlayManager: Resized to ${rect.width}x${rect.height} (DPR: ${dpr})`);
+    logger$1.debug(`Resized to ${rect.width}x${rect.height} (DPR: ${dpr})`);
   }
   /**
    * Create debug overlay for BrowserStack testing
@@ -19222,7 +19245,7 @@ class Canvas2DOverlayManager {
                 pointer-events: none;
             `;
       document.body.appendChild(this.debugDiv);
-      console.log("Canvas2DOverlayManager: Debug overlay created for mobile testing");
+      logger$1.debug("Debug overlay created for mobile testing");
     }
   }
   /**
@@ -19268,7 +19291,7 @@ class Canvas2DOverlayManager {
    */
   selectHotspot(hotspot) {
     var _a, _b, _c, _d;
-    console.log("Canvas2DOverlayManager: selectHotspot called", {
+    logger$1.debug("selectHotspot called", {
       newHotspotId: (hotspot == null ? void 0 : hotspot.id) || "null",
       currentHotspotId: ((_a = this.state.selectedHotspot) == null ? void 0 : _a.id) || "null",
       isInitialized: this.isInitialized,
@@ -19279,17 +19302,17 @@ class Canvas2DOverlayManager {
     });
     if (((_d = this.state.selectedHotspot) == null ? void 0 : _d.id) === (hotspot == null ? void 0 : hotspot.id)) {
       if (this.canvas && this.canvas.style.display === "none") {
-        console.warn("Canvas2DOverlayManager: Same hotspot but canvas is hidden, reinitializing spotlight");
+        logger$1.warn("Same hotspot but canvas is hidden, reinitializing spotlight");
       } else {
-        console.warn("Canvas2DOverlayManager: Same hotspot already selected and visible, skipping");
+        logger$1.warn("Same hotspot already selected and visible, skipping");
         return;
       }
     }
     if (!this.isInitialized) {
-      console.error("Canvas2DOverlayManager: Not initialized! Initializing now...");
+      logger$1.error("Not initialized! Initializing now...");
       this.initialize();
     }
-    console.log("Canvas2DOverlayManager: Selecting hotspot", (hotspot == null ? void 0 : hotspot.id) || "null");
+    logger$1.debug("Selecting hotspot", (hotspot == null ? void 0 : hotspot.id) || "null");
     this.state.selectedHotspot = hotspot;
     if (hotspot) {
       const currentZoom = this.viewer.viewport.getZoom();
@@ -19308,13 +19331,13 @@ class Canvas2DOverlayManager {
       this.state.cinematicZoomCompleted = false;
       this.state.isPinching = false;
       this.state.lastPinchZoom = currentZoom;
-      console.log(`Canvas2DOverlayManager: Starting cinematic zoom from zoom=${currentZoom.toFixed(2)}, scale=${currentScale.toFixed(1)}`);
+      logger$1.debug(`Starting cinematic zoom from zoom=${currentZoom.toFixed(2)}, scale=${currentScale.toFixed(1)}`);
       if (this.cinematicTimeout) {
         clearTimeout(this.cinematicTimeout);
       }
       this.cinematicTimeout = setTimeout(() => {
         if (this.state.isCinematicZooming && this.state.selectedHotspot) {
-          console.log("Canvas2D: Cinematic zoom timeout - forcing completion (mobile safety)");
+          logger$1.debug("Cinematic zoom timeout - forcing completion (mobile safety)");
           this.updateSelectionZoom();
         }
       }, 2e3);
@@ -19336,7 +19359,7 @@ class Canvas2DOverlayManager {
    * Clear the current selection
    */
   clearSelection() {
-    console.log("Canvas2DOverlayManager: Clearing selection");
+    logger$1.debug("Clearing selection");
     this.state.selectionZoom = null;
     this.state.selectionCenter = null;
     this.state.isCinematicZooming = false;
@@ -19379,7 +19402,7 @@ class Canvas2DOverlayManager {
       }
     });
     if (this.onSpotlightCleared) {
-      console.log("🔚 [SPOTLIGHT] Canvas2DOverlayManager: Notifying renderer that spotlight has been cleared");
+      logger$1.debug("🔚 [SPOTLIGHT] Notifying renderer that spotlight has been cleared");
       this.onSpotlightCleared();
     }
   }
@@ -19388,7 +19411,7 @@ class Canvas2DOverlayManager {
    */
   setSmoothingFactor(factor) {
     this.config.smoothingFactor = Math.max(0.1, Math.min(1, factor));
-    console.log(`Canvas2DOverlayManager: Smoothing factor set to ${this.config.smoothingFactor}`);
+    logger$1.debug(`Smoothing factor set to ${this.config.smoothingFactor}`);
   }
   /**
    * Toggle interpolation system
@@ -19398,21 +19421,21 @@ class Canvas2DOverlayManager {
     if (!enabled) {
       this.lastTransform = null;
     }
-    console.log(`Canvas2DOverlayManager: Interpolation ${enabled ? "enabled" : "disabled"}`);
+    logger$1.debug(`Interpolation ${enabled ? "enabled" : "disabled"}`);
   }
   /**
    * Set auto-deselect threshold (0-1, where 1 = 100% of selection zoom)
    */
   setAutoDeselectThreshold(threshold) {
     this.state.autoDeselectThreshold = Math.max(0.1, Math.min(1, threshold));
-    console.log(`Canvas2DOverlayManager: Auto-deselect threshold set to ${this.state.autoDeselectThreshold}`);
+    logger$1.debug(`Auto-deselect threshold set to ${this.state.autoDeselectThreshold}`);
   }
   /**
    * Update selection zoom after cinematic zoom completes
    */
   updateSelectionZoom() {
     if (!this.state.isCinematicZooming || !this.state.selectedHotspot) {
-      console.log("Canvas2D: updateSelectionZoom skipped - already completed or no hotspot");
+      logger$1.debug("updateSelectionZoom skipped - already completed or no hotspot");
       return;
     }
     if (this.cinematicTimeout) {
@@ -19433,13 +19456,13 @@ class Canvas2DOverlayManager {
       this.state.isCinematicZooming = false;
       this.state.cinematicZoomCompleted = true;
       this.state.lastPinchZoom = stableZoom;
-      console.log(`Canvas2DOverlayManager: Stable values captured:`);
-      console.log(`  - Zoom: ${stableZoom.toFixed(2)}`);
-      console.log(`  - Scale: ${stableScale.toFixed(1)}`);
-      console.log(`  - Bounds width: ${stableBounds.width.toFixed(3)}`);
-      console.log(`  - Previous starting scale: ${((_a = this.state.startingScale) == null ? void 0 : _a.toFixed(1)) || "null"}`);
-      console.log(`  - Delay: ${delay}ms`);
-      console.log(`Canvas2DOverlayManager: Ready for fade on dezoom`);
+      logger$1.debug("Stable values captured:");
+      logger$1.debug(`  - Zoom: ${stableZoom.toFixed(2)}`);
+      logger$1.debug(`  - Scale: ${stableScale.toFixed(1)}`);
+      logger$1.debug(`  - Bounds width: ${stableBounds.width.toFixed(3)}`);
+      logger$1.debug(`  - Previous starting scale: ${((_a = this.state.startingScale) == null ? void 0 : _a.toFixed(1)) || "null"}`);
+      logger$1.debug(`  - Delay: ${delay}ms`);
+      logger$1.debug("Ready for fade on dezoom");
     }, delay);
   }
   /**
@@ -19447,7 +19470,7 @@ class Canvas2DOverlayManager {
    */
   autoDeselect() {
     if (!this.state.selectedHotspot) return;
-    console.log("Canvas2DOverlayManager: Auto-deselecting hotspot");
+    logger$1.debug("Auto-deselecting hotspot");
     this.clearSelection();
     if (window.nativeHotspotRenderer) {
       window.nativeHotspotRenderer.deselectHotspot();
@@ -19458,7 +19481,7 @@ class Canvas2DOverlayManager {
    */
   forceCompleteRemoval() {
     if (!this.context || !this.canvas) return;
-    console.log("Canvas2DOverlayManager: Forcing complete removal of all artifacts");
+    logger$1.debug("Forcing complete removal of all artifacts");
     const rect = this.viewer.container.getBoundingClientRect();
     this.context.clearRect(0, 0, rect.width, rect.height);
     const dpr = Math.min(window.devicePixelRatio || 1, this.config.devicePixelRatioMax);
@@ -19482,58 +19505,17 @@ class Canvas2DOverlayManager {
    */
   forceRecalculation() {
     this.lastTransform = null;
-    console.log("Canvas2DOverlayManager: Forced recalculation");
-  }
-  /**
-   * Handle context loss on iOS
-   */
-  handleContextLoss() {
-    if (!this.isIOS) return;
-    console.warn("Canvas2DOverlayManager: Handling iOS context loss");
-    this.state.currentOpacity = 0;
-    this.state.targetOpacity = 0;
-    setTimeout(() => {
-      try {
-        this.context = this.canvas.getContext("2d", {
-          alpha: true,
-          desynchronized: false,
-          willReadFrequently: false
-        });
-        this.resize();
-        if (this.state.selectedHotspot) {
-          this.redrawSynchronized();
-        }
-        console.log("Canvas2DOverlayManager: iOS context recovered");
-      } catch (e) {
-        console.error("Canvas2DOverlayManager: Failed to recover iOS context", e);
-        this.canvas.style.display = "none";
-      }
-    }, 100);
-  }
-  /**
-   * Get cached Path2D for a hotspot (performance optimization)
-   */
-  getCachedPath(coords, hotspotId) {
-    if (!this.pathCache.has(hotspotId)) {
-      const path = new Path2D();
-      path.moveTo(coords[0][0], coords[0][1]);
-      for (let i = 1; i < coords.length; i++) {
-        path.lineTo(coords[i][0], coords[i][1]);
-      }
-      path.closePath();
-      this.pathCache.set(hotspotId, path);
-    }
-    return this.pathCache.get(hotspotId);
+    logger$1.debug("Forced recalculation");
   }
   /**
    * Pre-render a polygon mask for performance
    */
   preRenderMask(hotspot) {
-    console.log(`Canvas2DOverlayManager: Pre-rendering mask for hotspot ${hotspot.id}`);
+    logger$1.debug(`Pre-rendering mask for hotspot ${hotspot.id}`);
     let coords = hotspot.shape === "polygon" ? hotspot.coordinates : hotspot.coordinates[0];
     if (this.isMobile && coords.length > this.config.maxVerticesMobile) {
       coords = this.simplifyPolygon(coords, this.config.simplificationTolerance);
-      console.log(`Simplified polygon from ${hotspot.coordinates.length} to ${coords.length} vertices`);
+      logger$1.debug(`Simplified polygon from ${hotspot.coordinates.length} to ${coords.length} vertices`);
     }
     const bounds = this.getPolygonBounds(coords);
     const maskCanvas = document.createElement("canvas");
@@ -19542,8 +19524,13 @@ class Canvas2DOverlayManager {
     maskCanvas.height = bounds.height + padding * 2;
     const maskContext = maskCanvas.getContext("2d");
     maskContext.translate(-bounds.x + padding, -bounds.y + padding);
-    const path = this.getCachedPath(coords, hotspot.id);
-    maskContext.fill(path);
+    maskContext.beginPath();
+    maskContext.moveTo(coords[0][0], coords[0][1]);
+    for (let i = 1; i < coords.length; i++) {
+      maskContext.lineTo(coords[i][0], coords[i][1]);
+    }
+    maskContext.closePath();
+    maskContext.fill();
     this.maskCache.set(hotspot.id, {
       canvas: maskCanvas,
       bounds,
@@ -19685,20 +19672,20 @@ class Canvas2DOverlayManager {
    */
   redrawSynchronized() {
     if (!this.context) {
-      console.error("Canvas2DOverlayManager: No context available for redraw!");
+      logger$1.error("No context available for redraw!");
       if (!this.isInitialized) {
-        console.error("Canvas2DOverlayManager: Manager not initialized, initializing now...");
+        logger$1.error("Manager not initialized, initializing now...");
         this.initialize();
       }
       return;
     }
     if (!this.state.selectedHotspot) {
-      console.warn("Canvas2DOverlayManager: No selected hotspot for redraw");
+      logger$1.warn("No selected hotspot for redraw");
       return;
     }
     const maskData = this.maskCache.get(this.state.selectedHotspot.id);
     if (!maskData) {
-      console.error("Canvas2DOverlayManager: No mask data cached for hotspot:", this.state.selectedHotspot.id);
+      logger$1.error("No mask data cached for hotspot:", this.state.selectedHotspot.id);
       this.preRenderMask(this.state.selectedHotspot);
       return;
     }
@@ -19726,13 +19713,13 @@ class Canvas2DOverlayManager {
     this.context.save();
     this.context.globalCompositeOperation = "destination-out";
     this.context.fillStyle = "rgba(255, 255, 255, 1)";
-    const transformedPath = new Path2D();
-    transformedPath.moveTo(shrunkCoords[0][0], shrunkCoords[0][1]);
+    this.context.beginPath();
+    this.context.moveTo(shrunkCoords[0][0], shrunkCoords[0][1]);
     for (let i = 1; i < shrunkCoords.length; i++) {
-      transformedPath.lineTo(shrunkCoords[i][0], shrunkCoords[i][1]);
+      this.context.lineTo(shrunkCoords[i][0], shrunkCoords[i][1]);
     }
-    transformedPath.closePath();
-    this.context.fill(transformedPath);
+    this.context.closePath();
+    this.context.fill();
     this.context.restore();
   }
   /**
@@ -19744,7 +19731,7 @@ class Canvas2DOverlayManager {
       const imagePoint = new OpenSeadragon.Point(x2, y);
       const viewportPoint = viewport.imageToViewportCoordinates(imagePoint);
       const windowPoint = viewport.viewportToWindowCoordinates(viewportPoint);
-      return [Math.round(windowPoint.x), Math.round(windowPoint.y)];
+      return [windowPoint.x, windowPoint.y];
     });
   }
   /**
@@ -19760,7 +19747,7 @@ class Canvas2DOverlayManager {
         );
         const windowX = imageToViewport.x * scale + containerSize.x / 2 - smoothTransform.viewportCenter.x * scale;
         const windowY = imageToViewport.y * scale + containerSize.y / 2 - smoothTransform.viewportCenter.y * scale;
-        return [Math.round(windowX), Math.round(windowY)];
+        return [windowX, windowY];
       });
     } else {
       const screenCoords = coords.map(([x2, y]) => {
@@ -19768,7 +19755,7 @@ class Canvas2DOverlayManager {
           new OpenSeadragon.Point(x2, y)
         );
         const windowPoint = this.viewer.viewport.viewportToWindowCoordinates(viewportPoint);
-        return [Math.round(windowPoint.x), Math.round(windowPoint.y)];
+        return [windowPoint.x, windowPoint.y];
       });
       return screenCoords;
     }
@@ -19783,7 +19770,7 @@ class Canvas2DOverlayManager {
    */
   startAnimation() {
     if (this.state.isAnimating) return;
-    console.log("Canvas2DOverlayManager: Starting animation, target opacity:", this.state.targetOpacity);
+    logger$1.debug("Starting animation, target opacity:", this.state.targetOpacity);
     this.state.isAnimating = true;
     this.lastFrameTime = performance.now();
     this.animate();
@@ -19810,7 +19797,7 @@ class Canvas2DOverlayManager {
       if (this.state.currentOpacity === 0) {
         this.canvas.style.display = "none";
         if (this.state.selectedHotspot && this.onSpotlightCleared) {
-          console.log("🔚 [SPOTLIGHT] Canvas2DOverlayManager: Spotlight fully faded out, notifying renderer");
+          logger$1.debug("🔚 [SPOTLIGHT] Spotlight fully faded out, notifying renderer");
           this.onSpotlightCleared();
         }
       }
@@ -19839,7 +19826,7 @@ class Canvas2DOverlayManager {
     this.context.restore();
     const maskData = this.maskCache.get(this.state.selectedHotspot.id);
     if (!maskData) {
-      console.warn("Canvas2DOverlayManager: No mask data found for hotspot");
+      logger$1.warn("No mask data found for hotspot");
       return;
     }
     const screenCoords = this.transformCoordinates(maskData.coords, smoothTransform);
@@ -19859,13 +19846,13 @@ class Canvas2DOverlayManager {
     this.context.imageSmoothingEnabled = true;
     this.context.imageSmoothingQuality = "high";
     this.context.fillStyle = "rgba(255, 255, 255, 1)";
-    const transformedPath = new Path2D();
-    transformedPath.moveTo(shrunkCoords[0][0], shrunkCoords[0][1]);
+    this.context.beginPath();
+    this.context.moveTo(shrunkCoords[0][0], shrunkCoords[0][1]);
     for (let i = 1; i < shrunkCoords.length; i++) {
-      transformedPath.lineTo(shrunkCoords[i][0], shrunkCoords[i][1]);
+      this.context.lineTo(shrunkCoords[i][0], shrunkCoords[i][1]);
     }
-    transformedPath.closePath();
-    this.context.fill(transformedPath);
+    this.context.closePath();
+    this.context.fill();
     this.context.restore();
     const frameTime = performance.now() - frameStart;
     this.frameHistory.push(frameTime);
@@ -19894,20 +19881,20 @@ class Canvas2DOverlayManager {
     this.context.restore();
     const maskData = this.maskCache.get(this.state.selectedHotspot.id);
     if (!maskData) {
-      console.warn("Canvas2DOverlayManager: No mask data found for hotspot");
+      logger$1.warn("No mask data found for hotspot");
       return;
     }
     const screenCoords = this.transformCoordinates(maskData.coords);
     this.context.save();
     this.context.globalCompositeOperation = "destination-out";
     this.context.fillStyle = "rgba(255, 255, 255, 1)";
-    const transformedPath = new Path2D();
-    transformedPath.moveTo(screenCoords[0][0], screenCoords[0][1]);
+    this.context.beginPath();
+    this.context.moveTo(screenCoords[0][0], screenCoords[0][1]);
     for (let i = 1; i < screenCoords.length; i++) {
-      transformedPath.lineTo(screenCoords[i][0], screenCoords[i][1]);
+      this.context.lineTo(screenCoords[i][0], screenCoords[i][1]);
     }
-    transformedPath.closePath();
-    this.context.fill(transformedPath);
+    this.context.closePath();
+    this.context.fill();
     this.context.restore();
   }
   /**
@@ -19930,10 +19917,10 @@ class Canvas2DOverlayManager {
    */
   startMagneticInkReveal(centralHotspot, secondaryHotspots, tapPoint) {
     if (!this.magneticInkAnimator) {
-      console.error("Canvas2DOverlayManager: MagneticInkAnimator not initialized");
+      logger$1.error("MagneticInkAnimator not initialized");
       return;
     }
-    console.log("Canvas2DOverlayManager: Starting magnetic ink reveal", {
+    logger$1.debug("Starting magnetic ink reveal", {
       central: centralHotspot == null ? void 0 : centralHotspot.id,
       secondary: secondaryHotspots == null ? void 0 : secondaryHotspots.length,
       tapPoint
@@ -19978,7 +19965,6 @@ class Canvas2DOverlayManager {
     }
     this.maskCache.clear();
     this.transformCache.clear();
-    this.pathCache.clear();
     this.canvas = null;
     this.context = null;
     this.viewer = null;
@@ -22388,7 +22374,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-CTi2UYGy.js").then((n) => n.v);
+      } = await import("./viewerSetup-DtfRFr0J.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
@@ -24107,7 +24093,7 @@ const defaultLogHandler = (instance, logType, ...args) => {
     throw new Error(`Attempted to log a message with an invalid logType (value: ${logType})`);
   }
 };
-class Logger {
+class Logger2 {
   /**
    * Gives you an instance of a Logger to capture messages according to
    * Firebase's logging scheme.
@@ -24431,7 +24417,7 @@ const version$1 = "0.13.2";
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const logger = new Logger("@firebase/app");
+const logger = new Logger2("@firebase/app");
 const name$p = "@firebase/app-compat";
 const name$o = "@firebase/analytics-compat";
 const name$n = "@firebase/analytics";
@@ -27751,7 +27737,7 @@ let x = "11.10.0";
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const O = new Logger("@firebase/firestore");
+const O = new Logger2("@firebase/firestore");
 function __PRIVATE_getLogLevel() {
   return O.logLevel;
 }
@@ -39805,9 +39791,10 @@ export {
   getTuningState as b,
   OverlayManagerFactory as c,
   applyTuningToViewer as d,
-  getDefaultExportFromCjs as e,
-  commonjsGlobal$2 as f,
+  createLogger as e,
+  getDefaultExportFromCjs as f,
   getBrowserOptimalDrawer as g,
+  commonjsGlobal$2 as h,
   isMobile as i,
   removeTileCascadeFix as r
 };
