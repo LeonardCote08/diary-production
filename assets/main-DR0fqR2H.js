@@ -18925,6 +18925,7 @@ class Canvas2DOverlayManager {
     this.isInitialized = false;
     this.isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || "ontouchstart" in window;
     this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    this.isAndroid = /Android/i.test(navigator.userAgent);
     this.maskCache = /* @__PURE__ */ new Map();
     this.transformCache = /* @__PURE__ */ new Map();
     this.pathCache = /* @__PURE__ */ new Map();
@@ -19009,14 +19010,33 @@ class Canvas2DOverlayManager {
       transform: "translateZ(0)",
       willChange: "opacity"
     });
+    const needsAlpha = this.isAndroid || this.isIOS;
     this.context = this.canvas.getContext("2d", {
-      alpha: false,
-      // No alpha channel needed - 5-10% performance gain
-      desynchronized: true,
-      // GPU optimization - 2-5% additional gain
+      alpha: needsAlpha ? true : false,
+      // Mobile needs alpha for spotlight overlay
+      desynchronized: !this.isIOS,
+      // iOS Safari has issues with desynchronized
       willReadFrequently: false
     });
+    if (this.isAndroid) {
+      console.log("Canvas2DOverlayManager: Android detected - using alpha channel for overlay compatibility");
+    }
+    if (this.isIOS) {
+      console.log("Canvas2DOverlayManager: iOS detected - using alpha channel for HTML drawer compatibility");
+    }
     this.resize();
+    if (this.isIOS) {
+      this.canvas.addEventListener("webglcontextlost", (e) => {
+        console.error("Canvas2DOverlayManager: Context lost on iOS!");
+        e.preventDefault();
+        this.handleContextLoss();
+      });
+      this.canvas.addEventListener("webglcontextrestored", () => {
+        console.log("Canvas2DOverlayManager: Context restored on iOS");
+        this.resize();
+        this.redrawSynchronized();
+      });
+    }
     const container = this.viewer.container;
     container.appendChild(this.canvas);
     container.classList.add("canvas2d-active");
@@ -19156,7 +19176,18 @@ class Canvas2DOverlayManager {
   resize() {
     if (!this.canvas) return;
     const rect = this.viewer.container.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, this.config.devicePixelRatioMax);
+    let dpr = Math.min(window.devicePixelRatio || 1, this.config.devicePixelRatioMax);
+    if (this.isIOS) {
+      const proposedWidth = rect.width * dpr;
+      const proposedHeight = rect.height * dpr;
+      const totalPixels = proposedWidth * proposedHeight;
+      const maxPixels = window.screen.width >= 1024 ? 16777216 : 5242880;
+      if (totalPixels > maxPixels) {
+        const safeScale = Math.sqrt(maxPixels / (rect.width * rect.height));
+        dpr = Math.min(dpr, safeScale);
+        console.warn(`Canvas2DOverlayManager: iOS canvas limit - reducing DPR from ${window.devicePixelRatio} to ${dpr.toFixed(2)}`);
+      }
+    }
     this.canvas.width = Math.round(rect.width * dpr);
     this.canvas.height = Math.round(rect.height * dpr);
     this.canvas.style.width = `${Math.round(rect.width)}px`;
@@ -19452,6 +19483,32 @@ class Canvas2DOverlayManager {
   forceRecalculation() {
     this.lastTransform = null;
     console.log("Canvas2DOverlayManager: Forced recalculation");
+  }
+  /**
+   * Handle context loss on iOS
+   */
+  handleContextLoss() {
+    if (!this.isIOS) return;
+    console.warn("Canvas2DOverlayManager: Handling iOS context loss");
+    this.state.currentOpacity = 0;
+    this.state.targetOpacity = 0;
+    setTimeout(() => {
+      try {
+        this.context = this.canvas.getContext("2d", {
+          alpha: true,
+          desynchronized: false,
+          willReadFrequently: false
+        });
+        this.resize();
+        if (this.state.selectedHotspot) {
+          this.redrawSynchronized();
+        }
+        console.log("Canvas2DOverlayManager: iOS context recovered");
+      } catch (e) {
+        console.error("Canvas2DOverlayManager: Failed to recover iOS context", e);
+        this.canvas.style.display = "none";
+      }
+    }, 100);
   }
   /**
    * Get cached Path2D for a hotspot (performance optimization)
@@ -22331,7 +22388,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-CS3k1L42.js").then((n) => n.v);
+      } = await import("./viewerSetup-CTi2UYGy.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
