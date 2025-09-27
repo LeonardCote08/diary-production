@@ -22557,7 +22557,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-B3-eh927.js").then((n) => n.v);
+      } = await import("./viewerSetup-Bhtw_iBj.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
@@ -22644,8 +22644,10 @@ function ArtworkViewer(props) {
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchend", handleEnd);
       clearTimeout(failsafeTimer);
+      if (typeof cleanup === "function") {
+        cleanup();
+      }
     });
-    onCleanup(cleanup);
   });
   return (() => {
     var _el$ = _tmpl$0$2(), _el$3 = _el$.firstChild;

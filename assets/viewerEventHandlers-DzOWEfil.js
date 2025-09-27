@@ -1,9 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-BxkmgzfL.js","assets/main-DdvsyOdW.js","assets/main-BPwV8ISW.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-w8hl3hxt.js","assets/main-Jxor3RHY.js","assets/main-BPwV8ISW.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, e as createLogger, _ as __vitePreload, i as isMobile, c as OverlayManagerFactory } from "./main-DdvsyOdW.js";
-import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-B3-eh927.js";
+import { O as OpenSeadragon, e as createLogger, _ as __vitePreload, i as isMobile } from "./main-Jxor3RHY.js";
+import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-Bhtw_iBj.js";
 class TemporalModeHandler {
   constructor(options = {}) {
     this.audioEngine = options.audioEngine || window.audioEngine;
@@ -1223,8 +1223,12 @@ class HitDetectionCanvas {
       console.warn("[HIT_DETECTION] Hit test called before initialization");
       return null;
     }
+    if (!Number.isFinite(screenX) || !Number.isFinite(screenY)) {
+      console.warn("[HIT_DETECTION] Invalid coordinates:", screenX, screenY);
+      return null;
+    }
     this.stats.hitTestCount++;
-    const cacheKey = `${screenX},${screenY}`;
+    const cacheKey = `${Math.floor(screenX)},${Math.floor(screenY)}`;
     if (this.hitCache.has(cacheKey)) {
       this.stats.cacheHits++;
       return this.hitCache.get(cacheKey);
@@ -1233,8 +1237,14 @@ class HitDetectionCanvas {
       const rect = this.hitCanvas.getBoundingClientRect();
       const canvasX = (screenX - rect.left) / rect.width * this.hitCanvas.width;
       const canvasY = (screenY - rect.top) / rect.height * this.hitCanvas.height;
+      if (!Number.isFinite(canvasX) || !Number.isFinite(canvasY)) {
+        return null;
+      }
       const x = Math.max(0, Math.min(this.hitCanvas.width - 1, Math.floor(canvasX)));
       const y = Math.max(0, Math.min(this.hitCanvas.height - 1, Math.floor(canvasY)));
+      if (x < 0 || y < 0 || x >= this.hitCanvas.width || y >= this.hitCanvas.height) {
+        return null;
+      }
       const imageData = this.hitContext.getImageData(x, y, 1, 1);
       const [r, g, b] = imageData.data;
       const color = `rgb(${r},${g},${b})`;
@@ -6443,15 +6453,23 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
     }
     if (timeSinceDrag < 500) {
       console.log(`⚠️ Blocking click - only ${timeSinceDrag}ms since drag ended`);
-      event.preventDefault();
-      event.stopPropagation();
+      if (event && typeof event.preventDefault === "function") {
+        event.preventDefault();
+      }
+      if (event && typeof event.stopPropagation === "function") {
+        event.stopPropagation();
+      }
       return;
     }
     const currentHovered = this.stateManager.getHoveredHotspot();
     if (this.isMobile && currentHovered) {
       console.log("Using cached hover hotspot for mobile click");
-      event.stopPropagation();
-      event.preventDefault();
+      if (event && typeof event.stopPropagation === "function") {
+        event.stopPropagation();
+      }
+      if (event && typeof event.preventDefault === "function") {
+        event.preventDefault();
+      }
       this.activateHotspot(currentHovered);
       return;
     }
@@ -8984,7 +9002,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
   }
   if (renderer.eventCoordinator) {
     const TemporalEchoController = (await __vitePreload(async () => {
-      const { default: __vite_default__ } = await import("./TemporalEchoController-BxkmgzfL.js");
+      const { default: __vite_default__ } = await import("./TemporalEchoController-w8hl3hxt.js");
       return { default: __vite_default__ };
     }, true ? __vite__mapDeps([0,1,2]) : void 0)).default;
     const echoController = new TemporalEchoController({
@@ -9007,9 +9025,11 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
     }
     console.log("[ViewerEventHandlers] Temporal Echo Controller initialized with reveal type:", echoController.config.revealType);
   }
-  const overlayManager = OverlayManagerFactory.createWithOverride(viewer);
-  overlayManager.initialize();
-  window.overlayManager = overlayManager;
+  const overlayManager = window.overlayManager || (components == null ? void 0 : components.overlayManager);
+  if (!overlayManager) {
+    console.error("[ViewerEventHandlers] No overlay manager found! This should have been created in viewerSetup.js");
+    return;
+  }
   if (overlayManager.constructor.name === "Canvas2DOverlayManager") {
     console.log("[ViewerEventHandlers] Setting up Canvas2D spotlight callback");
     overlayManager.onSpotlightCleared = () => {

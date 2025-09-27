@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-Cph1qPmE.js","assets/main-DdvsyOdW.js","assets/main-BPwV8ISW.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-DzOWEfil.js","assets/main-Jxor3RHY.js","assets/main-BPwV8ISW.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, r as removeTileCascadeFix } from "./main-DdvsyOdW.js";
+import { i as isMobile, O as OpenSeadragon, _ as __vitePreload, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, r as removeTileCascadeFix } from "./main-Jxor3RHY.js";
 class ImageOverlayManager {
   constructor() {
     this.overlays = /* @__PURE__ */ new Map();
@@ -9787,10 +9787,18 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
     updatePixelDensityRatio: false
     // Research: Prevent expensive updates during zoom
   };
-  delete viewerOptions.drawer;
+  if (!isIOS2 && isMobile()) {
+    viewerOptions.drawer = "canvas";
+    viewerOptions.useCanvas = true;
+    console.log("ANDROID FIX: Forcing Canvas drawer for performance");
+  } else if (!isIOS2 && !isMobile()) {
+    delete viewerOptions.drawer;
+  }
   console.log("Creating OpenSeadragon 4.1.0 viewer with config:", {
     useCanvas: viewerOptions.useCanvas,
+    drawer: viewerOptions.drawer,
     isIOS: isIOS2,
+    isMobile: isMobile(),
     expectedDrawer: isIOS2 ? "HTML (via useCanvas: false)" : "Canvas"
   });
   const viewer = OpenSeadragon(viewerOptions);
@@ -10019,6 +10027,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   console.log("Is overlay manager present?", !!componentsObj.overlayManager);
   console.log("Does it have initialize method?", typeof ((_g = componentsObj.overlayManager) == null ? void 0 : _g.initialize));
   componentsObj.overlayManager.initialize();
+  window.overlayManager = componentsObj.overlayManager;
   if (componentsObj.overlayManager.constructor.name === "Canvas2DOverlayManager" && componentsObj.overlayManager.setAutoDeselectThreshold && state.autoDeselectThreshold) {
     const threshold = state.autoDeselectThreshold();
     componentsObj.overlayManager.setAutoDeselectThreshold(threshold);
@@ -10109,10 +10118,25 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   const getDrawerType = (drawer) => {
     if (!drawer) return "unknown";
     if (drawer.getType) return drawer.getType();
-    if (drawer.constructor && drawer.constructor.name) return drawer.constructor.name.replace("Drawer", "").toLowerCase();
+    if (drawer.canvas || drawer.context || drawer.ctx) return "canvas";
+    if (drawer.constructor && drawer.constructor.name) {
+      const name = drawer.constructor.name.toLowerCase();
+      if (name.includes("canvas")) return "canvas";
+      if (name.includes("html")) return "html";
+      if (name.includes("webgl")) return "webgl";
+      return name.replace("drawer", "").toLowerCase();
+    }
     return "canvas";
   };
   setTimeout(() => {
+    var _a2, _b2, _c2, _d2, _e2;
+    console.log("Drawer object properties:", {
+      hasCanvas: !!((_a2 = viewer.drawer) == null ? void 0 : _a2.canvas),
+      hasContext: !!((_b2 = viewer.drawer) == null ? void 0 : _b2.context),
+      hasCtx: !!((_c2 = viewer.drawer) == null ? void 0 : _c2.ctx),
+      constructorName: (_e2 = (_d2 = viewer.drawer) == null ? void 0 : _d2.constructor) == null ? void 0 : _e2.name,
+      drawerType: typeof viewer.drawer
+    });
     const actualDrawer = getDrawerType(viewer.drawer);
     console.log("RESEARCH VERIFICATION: Actual drawer in use:", actualDrawer);
     if ((isMobileDevice || isSafari || isIOS2) && actualDrawer !== "canvas" && !isIOS2) {
@@ -10205,7 +10229,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-Cph1qPmE.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-DzOWEfil.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspots);
   eventHandlers.setupAdaptiveSprings(viewer, performanceConfig);
   const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);
