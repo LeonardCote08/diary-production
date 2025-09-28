@@ -3929,7 +3929,7 @@ g.hotspot-echo-reveal {
         opacity: 0.9 !important; /* Darker for better contrast */
     }
 }
-/* Critical fix for OpenSeadragon 5.0.1 mobile performance */
+/* Critical fix for OpenSeadragon 4.1.0 mobile performance */
 .openseadragon-canvas:focus {
     outline: 0 !important;
 }

@@ -1,9 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-lTUoPIaF.js","assets/main-DR1WLfeU.js","assets/main-BPwV8ISW.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-CZGmyMoE.js","assets/main-Zk2OBNz3.js","assets/main-D2TKL3td.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, e as createLogger, _ as __vitePreload, i as isMobile } from "./main-DR1WLfeU.js";
-import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup--Gd3jmbV.js";
+import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-Zk2OBNz3.js";
+import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-BzWf_eUt.js";
 class TemporalModeHandler {
   constructor(options = {}) {
     this.audioEngine = options.audioEngine || window.audioEngine;
@@ -5938,20 +5938,8 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
         // Cool pigment liner equivalent
       }
     };
-    this.currentEasingName = "consciousnessOrganic";
-    this.timingEasing = "cubic-bezier(0.25, 0.40, 0.40, 0.90)";
-    __vitePreload(() => import("./EasingVariations-BEYkcikp.js"), true ? [] : void 0).then((module) => {
-      this.easingOptions = module.getAllEasingOptions();
-      console.log("[Easing] Loaded variations:", Object.keys(this.easingOptions));
-      if (this.easingOptions[this.currentEasingName]) {
-        this.timingEasing = this.easingOptions[this.currentEasingName];
-        console.log(`[Easing] Updated to ${this.currentEasingName}: ${this.timingEasing}`);
-        if (this.styleManager) {
-          this.styleManager.timingEasing = this.timingEasing;
-          this.styleManager.currentEasingName = this.currentEasingName;
-        }
-      }
-    });
+    this.currentEasingName = "standard";
+    this.timingEasing = "cubic-bezier(0.25, 0.1, 0.25, 1)";
     this.easingOptions = {
       organic: "cubic-bezier(0.15, 0.40, 0.32, 0.88)",
       // Organic Main
@@ -5959,8 +5947,8 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
       // #1
       organicDynamic: "cubic-bezier(0.22, 0.25, 0.38, 0.85)",
       // #2
-      consciousnessOrganic: "cubic-bezier(0.25, 0.40, 0.40, 0.90)"
-      // #4
+      standard: "cubic-bezier(0.25, 0.1, 0.25, 1)"
+      // Standard smooth
     };
     window.hotspotEasing = {
       current: this.currentEasingName,
@@ -9002,7 +8990,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
   }
   if (renderer.eventCoordinator) {
     const TemporalEchoController = (await __vitePreload(async () => {
-      const { default: __vite_default__ } = await import("./TemporalEchoController-lTUoPIaF.js");
+      const { default: __vite_default__ } = await import("./TemporalEchoController-CZGmyMoE.js");
       return { default: __vite_default__ };
     }, true ? __vite__mapDeps([0,1,2]) : void 0)).default;
     const echoController = new TemporalEchoController({

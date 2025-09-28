@@ -978,12 +978,6 @@ const isIPhone = () => {
   const userAgent = navigator.userAgent;
   return /iPhone/.test(userAgent) && !/iPad/.test(userAgent);
 };
-const browserDetection = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  getBrowserOptimalDrawer,
-  isIPhone,
-  isMobile
-}, Symbol.toStringTag, { value: "Module" }));
 var commonjsGlobal$2 = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
 function getDefaultExportFromCjs(x2) {
   return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
@@ -18148,775 +18142,6 @@ class CSSOverlayManager {
     this.isInitialized = false;
   }
 }
-class MagneticInkAnimator {
-  constructor(viewer, existingCanvas, existingContext) {
-    this.viewer = viewer;
-    this.canvas = document.createElement("canvas");
-    this.canvas.className = "magnetic-ink-canvas";
-    this.canvas.style.position = "absolute";
-    this.canvas.style.top = "0";
-    this.canvas.style.left = "0";
-    this.canvas.style.width = "100%";
-    this.canvas.style.height = "100%";
-    this.canvas.style.pointerEvents = "none";
-    this.canvas.style.zIndex = "10000";
-    this.canvas.style.opacity = "1";
-    if (this.viewer && this.viewer.container) {
-      this.viewer.container.appendChild(this.canvas);
-      const rect = this.viewer.container.getBoundingClientRect();
-      this.canvas.width = rect.width;
-      this.canvas.height = rect.height;
-    }
-    this.context = this.canvas.getContext("2d", {
-      alpha: true,
-      desynchronized: true
-    });
-    this.state = "IDLE";
-    this.stateStartTime = 0;
-    this.activeAnimations = /* @__PURE__ */ new Map();
-    this.animationFrame = null;
-    this.pathCache = /* @__PURE__ */ new Map();
-    this.polygonPool = new PolygonObjectPool(50);
-    this.frameTime = 1e3 / 30;
-    this.lastFrameTime = 0;
-    this.forceField = null;
-    this.config = {
-      // Phase 1: Central hotspot scaling
-      phase1: {
-        duration: 300,
-        scale: 1.15,
-        easing: this.elasticEaseOut
-      },
-      // Phase 2: Magnetic repulsion and progressive borders
-      phase2: {
-        duration: 800,
-        staggerDelay: 150,
-        magneticStrength: 5e3,
-        minRadius: 50,
-        progressSpeed: 0.02
-        // Much faster for visible effect
-      },
-      // Phase 3: Stabilization and undulation
-      phase3: {
-        duration: 600,
-        fadeInSpeed: 25e-4,
-        undulationDecay: 0.98
-      },
-      // Visual settings - Black borders to match Deji's style
-      inkThickness: 3,
-      // Thicker for better visibility on monochrome
-      shadowBlur: 8,
-      shadowColor: "rgba(0, 0, 0, 0.4)",
-      // Black shadow for depth
-      strokeColor: "#000000",
-      // Pure black to match artwork style
-      // Performance
-      simplifyTolerance: 3,
-      // Douglas-Peucker tolerance
-      maxCacheSize: 100,
-      usePathBatching: true
-    };
-    this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    if (this.isIOS) {
-      this.applyIOSOptimizations();
-    }
-    this.animate = this.animate.bind(this);
-  }
-  /**
-   * Start the magnetic ink reveal animation
-   * @param {Object} centralHotspot - The main hotspot (closest to tap)
-   * @param {Array} secondaryHotspots - Array of nearby hotspots to reveal
-   * @param {Object} tapPoint - The tap coordinates {x, y} in image space
-   */
-  startReveal(centralHotspot, secondaryHotspots, tapPoint) {
-    console.log("[MagneticInkAnimator] Starting magnetic ink reveal", {
-      central: centralHotspot == null ? void 0 : centralHotspot.id,
-      secondary: (secondaryHotspots == null ? void 0 : secondaryHotspots.length) || 0,
-      tapPoint
-    });
-    this.clearAnimations();
-    if (this.context && this.canvas) {
-      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    }
-    this.centralHotspot = centralHotspot;
-    this.secondaryHotspots = secondaryHotspots.slice(0, 4);
-    this.tapPoint = tapPoint;
-    const canvasRect = this.canvas.getBoundingClientRect();
-    this.forceField = new MagneticForceField(canvasRect.width, canvasRect.height);
-    this.setState("PHASE_1_SCALING");
-    this.animate(performance.now());
-  }
-  /**
-   * Set animation state and trigger phase initialization
-   */
-  setState(newState) {
-    this.state = newState;
-    this.stateStartTime = performance.now();
-    switch (newState) {
-      case "PHASE_1_SCALING":
-        this.startPhaseOne();
-        break;
-      case "PHASE_2_MAGNETIC":
-        this.startPhaseTwo();
-        break;
-      case "PHASE_3_STABILIZE":
-        this.startPhaseThree();
-        break;
-    }
-  }
-  /**
-   * Phase 1: Central hotspot appears with scaling animation
-   */
-  startPhaseOne() {
-    if (!this.centralHotspot) return;
-    const polygonData = this.polygonPool.acquire();
-    polygonData.hotspot = this.centralHotspot;
-    polygonData.type = "central";
-    polygonData.visible = true;
-    polygonData.progress = 1;
-    polygonData.scale = 1;
-    const processedPath = new ProgressivePolygonRenderer(
-      this.centralHotspot.coordinates || []
-    );
-    polygonData.renderer = processedPath;
-    polygonData.deformable = new DeformablePath(processedPath.polygon);
-    this.activeAnimations.set(this.centralHotspot.id, polygonData);
-    const tapScreen = this.imageToCanvasCoordinates(this.tapPoint);
-    this.forceField.addRepulsor(
-      tapScreen.x,
-      tapScreen.y,
-      this.config.phase2.magneticStrength,
-      this.config.phase2.minRadius
-    );
-    console.log("[MagneticInkAnimator] Phase 1 started - central hotspot scaling");
-  }
-  /**
-   * Phase 2: Secondary hotspots appear with magnetic repulsion
-   */
-  startPhaseTwo() {
-    if (!this.secondaryHotspots) return;
-    this.forceField.updateField();
-    this.secondaryHotspots.forEach((hotspot, index) => {
-      setTimeout(() => {
-        const polygonData = this.polygonPool.acquire();
-        polygonData.hotspot = hotspot;
-        polygonData.type = "secondary";
-        polygonData.visible = true;
-        polygonData.progress = 0;
-        polygonData.opacity = 0.3;
-        const simplifiedCoords = this.simplifyPolygon(
-          hotspot.coordinates || [],
-          this.config.simplifyTolerance
-        );
-        const processedPath = new ProgressivePolygonRenderer(simplifiedCoords);
-        polygonData.renderer = processedPath;
-        polygonData.deformable = new DeformablePath(processedPath.polygon);
-        this.activeAnimations.set(hotspot.id, polygonData);
-      }, index * this.config.phase2.staggerDelay);
-    });
-    console.log("[MagneticInkAnimator] Phase 2 started - magnetic repulsion");
-  }
-  /**
-   * Phase 3: Stabilization with decaying magnetic effect
-   */
-  startPhaseThree() {
-    this.magneticDecay = 1;
-    console.log("[MagneticInkAnimator] Phase 3 started - stabilization");
-  }
-  /**
-   * Main animation loop
-   */
-  animate(currentTime) {
-    if (currentTime - this.lastFrameTime < this.frameTime) {
-      this.animationFrame = requestAnimationFrame(this.animate);
-      return;
-    }
-    this.lastFrameTime = currentTime;
-    const stateElapsed = currentTime - this.stateStartTime;
-    const deltaTime = 0.016;
-    switch (this.state) {
-      case "PHASE_1_SCALING":
-        this.updatePhaseOne(stateElapsed);
-        if (stateElapsed > this.config.phase1.duration) {
-          this.setState("PHASE_2_MAGNETIC");
-        }
-        break;
-      case "PHASE_2_MAGNETIC":
-        this.updatePhaseTwo(stateElapsed, deltaTime, currentTime);
-        if (stateElapsed > this.config.phase2.duration) {
-          this.setState("PHASE_3_STABILIZE");
-        }
-        break;
-      case "PHASE_3_STABILIZE":
-        this.updatePhaseThree(stateElapsed, deltaTime, currentTime);
-        if (stateElapsed > this.config.phase3.duration) {
-          this.setState("COMPLETE");
-          setTimeout(() => {
-            this.clearAnimations();
-          }, 500);
-        }
-        break;
-    }
-    this.render();
-    if (this.state !== "COMPLETE" && this.state !== "IDLE") {
-      this.animationFrame = requestAnimationFrame(this.animate);
-    }
-  }
-  /**
-   * Update Phase 1: Scale animation for central hotspot
-   */
-  updatePhaseOne(elapsed) {
-    const centralAnim = Array.from(this.activeAnimations.values()).find((a) => a.type === "central");
-    if (!centralAnim) return;
-    const progress = elapsed / this.config.phase1.duration;
-    const scale = 1 + (this.config.phase1.scale - 1) * this.elasticEaseOut(progress);
-    centralAnim.scale = scale;
-  }
-  /**
-   * Update Phase 2: Progressive border drawing with magnetic deformation
-   */
-  updatePhaseTwo(elapsed, deltaTime, currentTime) {
-    this.activeAnimations.forEach((anim) => {
-      if (anim.type === "secondary" && anim.visible) {
-        anim.progress = Math.min(1, anim.progress + this.config.phase2.progressSpeed);
-        if (this.forceField && anim.deformable) {
-          anim.deformable.applyMagneticDeformation(
-            this.forceField,
-            deltaTime,
-            currentTime
-          );
-        }
-        anim.opacity = Math.min(1, anim.opacity + 2e-3);
-      }
-    });
-  }
-  /**
-   * Update Phase 3: Reduce magnetic effect and stabilize
-   */
-  updatePhaseThree(elapsed, deltaTime, currentTime) {
-    if (this.magneticDecay > 0.1) {
-      this.magneticDecay *= this.config.phase3.undulationDecay;
-      if (this.forceField) {
-        this.forceField.repulsors.forEach((repulsor) => {
-          repulsor.strength *= this.magneticDecay;
-        });
-        this.forceField.updateField();
-      }
-    }
-    this.activeAnimations.forEach((anim) => {
-      if (anim.deformable && this.forceField) {
-        anim.deformable.applyMagneticDeformation(
-          this.forceField,
-          deltaTime,
-          currentTime
-        );
-      }
-    });
-  }
-  /**
-   * Render all active animations
-   */
-  render() {
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.context.save();
-    this.context.strokeStyle = "#000000";
-    this.context.lineWidth = 3;
-    this.context.lineCap = "round";
-    this.context.shadowBlur = 6;
-    this.context.shadowColor = "rgba(0, 0, 0, 0.5)";
-    this.activeAnimations.forEach((anim) => {
-      if (!anim.visible || !anim.hotspot) return;
-      const coords = anim.hotspot.coordinates || [];
-      if (coords.length < 2) return;
-      const pointsToDraw = Math.floor(coords.length * anim.progress);
-      if (pointsToDraw < 2) return;
-      this.context.strokeStyle = "rgba(255, 255, 255, 0.3)";
-      this.context.lineWidth = 5;
-      this.context.shadowBlur = 0;
-      this.context.beginPath();
-      for (let i = 0; i <= pointsToDraw; i++) {
-        const coord = coords[i % coords.length];
-        const point = this.imageToCanvasCoordinates({ x: coord[0], y: coord[1] });
-        if (i === 0) {
-          this.context.moveTo(point.x, point.y);
-        } else {
-          this.context.lineTo(point.x, point.y);
-        }
-      }
-      if (anim.progress >= 1) {
-        this.context.closePath();
-      }
-      this.context.stroke();
-      this.context.strokeStyle = "#000000";
-      this.context.lineWidth = 3;
-      this.context.shadowBlur = 4;
-      this.context.shadowColor = "rgba(0, 0, 0, 0.6)";
-      this.context.beginPath();
-      for (let i = 0; i <= pointsToDraw; i++) {
-        const coord = coords[i % coords.length];
-        const point = this.imageToCanvasCoordinates({ x: coord[0], y: coord[1] });
-        if (i === 0) {
-          this.context.moveTo(point.x, point.y);
-        } else {
-          this.context.lineTo(point.x, point.y);
-        }
-      }
-      if (anim.progress >= 1) {
-        this.context.closePath();
-      }
-      if (anim.type === "central" && anim.scale) {
-        const center = this.getHotspotCenter(coords.map((c) => ({ x: c[0], y: c[1] })));
-        const screenCenter = this.imageToCanvasCoordinates(center);
-        this.context.save();
-        this.context.translate(screenCenter.x, screenCenter.y);
-        this.context.scale(anim.scale, anim.scale);
-        this.context.translate(-screenCenter.x, -screenCenter.y);
-      }
-      this.context.globalAlpha = anim.opacity || 1;
-      this.context.stroke();
-      if (anim.type === "central" && anim.scale) {
-        this.context.restore();
-      }
-    });
-    this.context.restore();
-  }
-  /**
-   * Get Path2D for a single animation
-   */
-  getAnimationPath(anim) {
-    let points;
-    if (anim.deformable) {
-      points = anim.deformable.currentPoints;
-    } else if (anim.renderer) {
-      points = anim.renderer.generateProgressivePath(anim.progress);
-    } else {
-      return null;
-    }
-    const screenPoints = this.convertToScreenCoords(points);
-    if (screenPoints.length < 2) return null;
-    const cacheKey = `${anim.hotspot.id}_${Math.floor(anim.progress * 100)}`;
-    let path = this.pathCache.get(cacheKey);
-    if (!path) {
-      path = new Path2D();
-      if (anim.type === "central" && anim.scale !== 1) {
-        const center = this.getHotspotCenter(screenPoints);
-        const transform = new DOMMatrix().translateSelf(center.x, center.y).scaleSelf(anim.scale, anim.scale).translateSelf(-center.x, -center.y);
-        path.addPath(this.createPolygonPath(screenPoints), transform);
-      } else {
-        path.addPath(this.createPolygonPath(screenPoints));
-      }
-      if (this.pathCache.size > this.config.maxCacheSize) {
-        const firstKey = this.pathCache.keys().next().value;
-        this.pathCache.delete(firstKey);
-      }
-      this.pathCache.set(cacheKey, path);
-    }
-    return path;
-  }
-  /**
-   * Create a polygon path from points
-   */
-  createPolygonPath(points) {
-    const path = new Path2D();
-    if (points.length < 2) return path;
-    path.moveTo(points[0].x, points[0].y);
-    for (let i = 1; i < points.length; i++) {
-      path.lineTo(points[i].x, points[i].y);
-    }
-    path.closePath();
-    return path;
-  }
-  /**
-   * Render a single animation (fallback)
-   */
-  renderSingleAnimation(anim) {
-    const path = this.getAnimationPath(anim);
-    if (!path) return;
-    this.context.save();
-    this.context.globalAlpha = anim.opacity || 1;
-    this.context.strokeStyle = this.config.strokeColor;
-    this.context.lineWidth = this.config.inkThickness;
-    this.context.lineCap = "round";
-    this.context.lineJoin = "round";
-    if (anim.type === "central") {
-      this.context.shadowBlur = this.config.shadowBlur * 1.5;
-      this.context.shadowColor = this.config.shadowColor;
-    }
-    this.context.stroke(path);
-    this.context.restore();
-  }
-  /**
-   * Convert image coordinates to canvas coordinates
-   */
-  imageToCanvasCoordinates(imagePoint) {
-    if (!this.viewer || !this.viewer.viewport) return { x: 0, y: 0 };
-    try {
-      const viewportPoint = this.viewer.viewport.imageToViewportCoordinates(
-        new OpenSeadragon.Point(imagePoint.x, imagePoint.y)
-      );
-      const pixelPoint = this.viewer.viewport.pixelFromPoint(viewportPoint);
-      return { x: pixelPoint.x, y: pixelPoint.y };
-    } catch (e) {
-      console.error("[MagneticInkAnimator] Coordinate conversion error:", e);
-      return { x: 0, y: 0 };
-    }
-  }
-  /**
-   * Convert points to screen coordinates
-   */
-  convertToScreenCoords(points) {
-    if (!Array.isArray(points)) return [];
-    return points.map((point) => {
-      if (typeof point.x !== "undefined" && typeof point.y !== "undefined") {
-        return this.imageToCanvasCoordinates(point);
-      } else if (Array.isArray(point) && point.length >= 2) {
-        return this.imageToCanvasCoordinates({ x: point[0], y: point[1] });
-      }
-      return { x: 0, y: 0 };
-    });
-  }
-  /**
-   * Get center point of a polygon
-   */
-  getHotspotCenter(points) {
-    if (!points || points.length === 0) return { x: 0, y: 0 };
-    let sumX = 0, sumY = 0;
-    points.forEach((p) => {
-      sumX += p.x;
-      sumY += p.y;
-    });
-    return {
-      x: sumX / points.length,
-      y: sumY / points.length
-    };
-  }
-  /**
-   * Douglas-Peucker polygon simplification
-   */
-  simplifyPolygon(points, tolerance) {
-    if (points.length <= 3) return points;
-    const simplifier = new AdaptivePolygonSimplifier();
-    return simplifier.simplify(points, tolerance);
-  }
-  /**
-   * Apply iOS-specific optimizations
-   */
-  applyIOSOptimizations() {
-    const maxSize = 3840;
-    const dpr = window.devicePixelRatio || 1;
-    if (this.canvas.width * dpr > maxSize || this.canvas.height * dpr > maxSize) {
-      const scale = maxSize / Math.max(this.canvas.width * dpr, this.canvas.height * dpr);
-      this.canvas.width *= scale;
-      this.canvas.height *= scale;
-    }
-    this.context.imageSmoothingEnabled = false;
-    this.context.webkitImageSmoothingEnabled = false;
-    this.canvas.style.transform = "translateZ(0)";
-    this.canvas.style.willChange = "transform";
-    this.frameTime = 1e3 / 24;
-  }
-  /**
-   * Clear all animations and reset state
-   */
-  clearAnimations() {
-    this.activeAnimations.forEach((anim) => {
-      this.polygonPool.release(anim);
-    });
-    this.activeAnimations.clear();
-    this.pathCache.clear();
-    if (this.animationFrame) {
-      cancelAnimationFrame(this.animationFrame);
-      this.animationFrame = null;
-    }
-    this.state = "IDLE";
-    if (this.context) {
-      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    }
-  }
-  /**
-   * Easing functions
-   */
-  elasticEaseOut(t) {
-    const p = 0.3;
-    const s = p / 4;
-    if (t === 0) return 0;
-    if (t === 1) return 1;
-    return Math.pow(2, -10 * t) * Math.sin((t - s) * (2 * Math.PI) / p) + 1;
-  }
-  easeOutCubic(t) {
-    return 1 - Math.pow(1 - t, 3);
-  }
-  /**
-   * Clean up resources
-   */
-  destroy() {
-    this.clearAnimations();
-    if (this.canvas && this.canvas.parentNode) {
-      this.canvas.parentNode.removeChild(this.canvas);
-    }
-    this.viewer = null;
-    this.canvas = null;
-    this.context = null;
-    this.forceField = null;
-  }
-}
-class ProgressivePolygonRenderer {
-  constructor(coordinates) {
-    this.polygon = this.normalizeCoordinates(coordinates);
-    this.segments = this.preprocessPolygon(this.polygon);
-    this.totalLength = this.segments.reduce((sum, seg) => sum + seg.length, 0);
-  }
-  normalizeCoordinates(coordinates) {
-    if (!coordinates || coordinates.length === 0) return [];
-    return coordinates.map((coord) => {
-      if (Array.isArray(coord) && coord.length >= 2) {
-        return { x: coord[0], y: coord[1] };
-      }
-      return coord;
-    });
-  }
-  preprocessPolygon(polygon) {
-    const segments = [];
-    let cumulativeLength = 0;
-    for (let i = 0; i < polygon.length; i++) {
-      const current = polygon[i];
-      const next = polygon[(i + 1) % polygon.length];
-      const distance = Math.hypot(next.x - current.x, next.y - current.y);
-      segments.push({
-        start: current,
-        end: next,
-        length: distance,
-        cumulativeLength
-      });
-      cumulativeLength += distance;
-    }
-    return segments;
-  }
-  getPointAtDistance(targetDistance) {
-    const normalizedDistance = targetDistance % this.totalLength;
-    for (const segment of this.segments) {
-      if (normalizedDistance <= segment.cumulativeLength + segment.length) {
-        const localDistance = normalizedDistance - segment.cumulativeLength;
-        const t = localDistance / segment.length;
-        return {
-          x: segment.start.x + (segment.end.x - segment.start.x) * t,
-          y: segment.start.y + (segment.end.y - segment.start.y) * t
-        };
-      }
-    }
-    return this.polygon[0] || { x: 0, y: 0 };
-  }
-  generateProgressivePath(progress) {
-    if (progress <= 0) return [];
-    if (progress >= 1) return [...this.polygon];
-    const pointCount = Math.max(2, Math.floor(this.polygon.length * 2));
-    const distanceToRender = this.totalLength * progress;
-    const points = [];
-    for (let i = 0; i <= distanceToRender; i += this.totalLength / pointCount) {
-      points.push(this.getPointAtDistance(i));
-    }
-    return points;
-  }
-}
-class MagneticForceField {
-  constructor(width, height, resolution = 20) {
-    this.width = width;
-    this.height = height;
-    this.resolution = resolution;
-    this.cols = Math.floor(width / resolution);
-    this.rows = Math.floor(height / resolution);
-    this.field = new Float32Array(this.cols * this.rows * 2);
-    this.repulsors = [];
-  }
-  addRepulsor(x2, y, strength, minRadius = 50) {
-    this.repulsors.push({
-      x: x2,
-      y,
-      strength,
-      minRadius,
-      maxForce: strength / (minRadius * minRadius)
-    });
-  }
-  calculateForce(particleX, particleY, repulsor) {
-    const dx = particleX - repulsor.x;
-    const dy = particleY - repulsor.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance < 1e-3) return { x: 0, y: 0 };
-    const effectiveDistance = Math.max(distance, repulsor.minRadius);
-    const forceMagnitude = repulsor.strength / (effectiveDistance * effectiveDistance);
-    const clampedForce = Math.min(forceMagnitude, repulsor.maxForce);
-    const unitX = dx / distance;
-    const unitY = dy / distance;
-    return {
-      x: unitX * clampedForce,
-      y: unitY * clampedForce
-    };
-  }
-  updateField() {
-    for (let row = 0; row < this.rows; row++) {
-      for (let col = 0; col < this.cols; col++) {
-        const worldX = col * this.resolution;
-        const worldY = row * this.resolution;
-        const index = (row * this.cols + col) * 2;
-        let totalForceX = 0;
-        let totalForceY = 0;
-        for (const repulsor of this.repulsors) {
-          const force = this.calculateForce(worldX, worldY, repulsor);
-          totalForceX += force.x;
-          totalForceY += force.y;
-        }
-        this.field[index] = totalForceX;
-        this.field[index + 1] = totalForceY;
-      }
-    }
-  }
-  getForceAt(x2, y) {
-    const col = Math.floor(x2 / this.resolution);
-    const row = Math.floor(y / this.resolution);
-    if (col >= 0 && col < this.cols && row >= 0 && row < this.rows) {
-      const index = (row * this.cols + col) * 2;
-      return {
-        x: this.field[index],
-        y: this.field[index + 1]
-      };
-    }
-    return { x: 0, y: 0 };
-  }
-}
-class DeformablePath {
-  constructor(originalPoints) {
-    this.originalPoints = [...originalPoints];
-    this.currentPoints = originalPoints.map((p) => ({ ...p, vx: 0, vy: 0 }));
-    this.noiseOffsets = originalPoints.map(() => Math.random() * 1e3);
-  }
-  applyMagneticDeformation(forceField, deltaTime, time) {
-    const damping = 0.92;
-    const elasticity = 0.08;
-    const turbulenceStrength = 3;
-    this.currentPoints.forEach((point, i) => {
-      const magneticForce = forceField.getForceAt(point.x, point.y);
-      const noiseX = Math.sin(time * 1e-3 + this.noiseOffsets[i]) * turbulenceStrength;
-      const noiseY = Math.cos(time * 1e-3 + this.noiseOffsets[i] * 1.3) * turbulenceStrength;
-      point.vx += (magneticForce.x + noiseX) * deltaTime;
-      point.vy += (magneticForce.y + noiseY) * deltaTime;
-      const restoreX = (this.originalPoints[i].x - point.x) * elasticity;
-      const restoreY = (this.originalPoints[i].y - point.y) * elasticity;
-      point.vx += restoreX;
-      point.vy += restoreY;
-      point.x += point.vx * deltaTime;
-      point.y += point.vy * deltaTime;
-      point.vx *= damping;
-      point.vy *= damping;
-    });
-  }
-}
-class AdaptivePolygonSimplifier {
-  simplify(points, tolerance) {
-    if (points.length <= 3) return points;
-    const normalized = this.normalizePoints(points);
-    const stack = [{ start: 0, end: normalized.length - 1 }];
-    const keep = /* @__PURE__ */ new Set([0, normalized.length - 1]);
-    while (stack.length > 0) {
-      const { start, end } = stack.pop();
-      let maxDist = 0;
-      let maxIndex = -1;
-      for (let i = start + 1; i < end; i++) {
-        const dist = this.perpendicularDistance(
-          normalized[i],
-          normalized[start],
-          normalized[end]
-        );
-        if (dist > maxDist) {
-          maxDist = dist;
-          maxIndex = i;
-        }
-      }
-      if (maxDist > tolerance && maxIndex !== -1) {
-        keep.add(maxIndex);
-        stack.push({ start, end: maxIndex });
-        stack.push({ start: maxIndex, end });
-      }
-    }
-    return normalized.filter((_, i) => keep.has(i));
-  }
-  normalizePoints(points) {
-    return points.map((p) => {
-      if (Array.isArray(p) && p.length >= 2) {
-        return { x: p[0], y: p[1] };
-      }
-      return p;
-    });
-  }
-  perpendicularDistance(point, lineStart, lineEnd) {
-    const A = point.x - lineStart.x;
-    const B2 = point.y - lineStart.y;
-    const C = lineEnd.x - lineStart.x;
-    const D = lineEnd.y - lineStart.y;
-    const dot = A * C + B2 * D;
-    const lenSq = C * C + D * D;
-    const param = lenSq !== 0 ? dot / lenSq : -1;
-    let xx, yy;
-    if (param < 0) {
-      xx = lineStart.x;
-      yy = lineStart.y;
-    } else if (param > 1) {
-      xx = lineEnd.x;
-      yy = lineEnd.y;
-    } else {
-      xx = lineStart.x + param * C;
-      yy = lineStart.y + param * D;
-    }
-    const dx = point.x - xx;
-    const dy = point.y - yy;
-    return Math.sqrt(dx * dx + dy * dy);
-  }
-}
-class PolygonObjectPool {
-  constructor(size = 50) {
-    this.available = [];
-    this.inUse = /* @__PURE__ */ new Set();
-    for (let i = 0; i < size; i++) {
-      this.available.push(this.createNew());
-    }
-  }
-  acquire() {
-    let polygon = this.available.pop() || this.createNew();
-    this.inUse.add(polygon);
-    this.reset(polygon);
-    return polygon;
-  }
-  release(polygon) {
-    if (this.inUse.has(polygon)) {
-      this.inUse.delete(polygon);
-      this.available.push(polygon);
-    }
-  }
-  reset(polygon) {
-    polygon.hotspot = null;
-    polygon.type = null;
-    polygon.visible = false;
-    polygon.progress = 0;
-    polygon.opacity = 1;
-    polygon.scale = 1;
-    polygon.renderer = null;
-    polygon.deformable = null;
-  }
-  createNew() {
-    return {
-      hotspot: null,
-      type: null,
-      visible: false,
-      progress: 0,
-      opacity: 1,
-      scale: 1,
-      renderer: null,
-      deformable: null
-    };
-  }
-}
-if (typeof window !== "undefined") {
-  window.MagneticInkAnimator = MagneticInkAnimator;
-}
 const DEBUG_ENABLED = typeof window !== "undefined" && (window.DEBUG || localStorage.getItem("debugLevel") === "1" || new URLSearchParams(window.location.search).has("debug"));
 const LogLevel$1 = {
   DEBUG: 0,
@@ -19221,8 +18446,6 @@ class Canvas2DOverlayManager {
     this.setupEventListeners();
     this.isInitialized = true;
     logger$1.debug("Initialized successfully");
-    this.magneticInkAnimator = new MagneticInkAnimator(this.viewer, this.canvas, this.context);
-    logger$1.debug("MagneticInkAnimator initialized");
   }
   setupEventListeners() {
     let isAnimating = false;
@@ -20100,7 +19323,6 @@ class Canvas2DOverlayManager {
    */
   startMagneticInkReveal(centralHotspot, secondaryHotspots, tapPoint) {
     if (!this.magneticInkAnimator) {
-      logger$1.error("MagneticInkAnimator not initialized");
       return;
     }
     logger$1.debug("Starting magnetic ink reveal", {
@@ -20649,10 +19871,6 @@ const calculateHotspotBounds = (hotspot, viewer, isMobile2) => {
   });
   return zoomBounds;
 };
-const hotspotCalculations = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  calculateHotspotBounds
-}, Symbol.toStringTag, { value: "Module" }));
 let levelCache = /* @__PURE__ */ new Map();
 let lastCacheZoom = null;
 let cacheTimeout = null;
@@ -20814,8 +20032,6 @@ function useViewerAnimations(viewer, state, components) {
     }
     setCinematicMode(true);
     const zoomOptions = {
-      type: "consciousness",
-      // Use new consciousness stream animation
       useSpringPhysics: true,
       // Fallback option
       onComplete: () => {
@@ -20853,7 +20069,7 @@ function useViewerAnimations(viewer, state, components) {
       if (components().overlayManager && components().overlayManager.startZoomAnimation) {
         components().overlayManager.startZoomAnimation();
       }
-      await cinematicManager.performAdaptiveZoom(bounds, zoomOptions);
+      await cinematicManager.performZoom(bounds, zoomOptions);
     } catch (error) {
       console.error("Cinematic zoom failed:", error);
       setIsZoomingToHotspot(false);
@@ -20967,8 +20183,6 @@ function addGlassButtonEffects(event, button) {
     setTimeout(() => button.classList.remove("tapped"), 200);
   }
 }
-delegateEvents(["click"]);
-delegateEvents(["click"]);
 const CACHE_VERSION_KEY = "app_cache_version";
 const CURRENT_VERSION = "1.0.2";
 class CacheManager {
@@ -21051,7 +20265,6 @@ class CacheManager {
         "borderStyle",
         "interactionMode",
         "temporalRevealStyle",
-        "consciousnessMode",
         "performanceMode"
       ];
       problematicKeys.forEach((key) => {
@@ -21070,7 +20283,7 @@ class CacheManager {
 }
 const cacheManager = new CacheManager();
 cacheManager.initDevelopmentMode();
-var _tmpl$$4 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Hovered</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Selected</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Type</span><span class=debug-stat-value>`), _tmpl$2$4 = /* @__PURE__ */ template(`<div class=debug-stat-row style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.1);"><span class=debug-stat-label style=color:#00ffff;>Safari Hybrid</span><span class=debug-stat-value style=color:#00ffff;>Active`), _tmpl$3$3 = /* @__PURE__ */ template(`<div class=debug-stat-row><span class=debug-stat-label>Render Time</span><span class=debug-stat-value>ms`), _tmpl$4$3 = /* @__PURE__ */ template(`<div class=debug-stat-row><span class=debug-stat-label>Visible/Total</span><span class=debug-stat-value>/`), _tmpl$5$3 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>FPS</span><span class=debug-stat-value><span style=opacity:0.7;font-size:10px> (avg: <!>)</span></span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Memory</span><span class=debug-stat-value>MB</span></div><div class=debug-stat-row><span class=debug-stat-label>Frame Time</span><span class=debug-stat-value>ms</span></div><div class=debug-stat-row><span class=debug-stat-label>Zoom</span><span class=debug-stat-value>x`), _tmpl$6$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Zoom Animation Speed<span class=debug-control-value>x</span></label><input type=range class=debug-slider min=0.5 max=2.5 step=0.1><p class=debug-control-description>How fast the artwork zooms when you click on elements`), _tmpl$7$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Color Theme<span class=debug-help-icon title="Changes the highlight colors">?</span></label><div class=debug-toggle-group><button type=button>Cyan Tech</button><button type=button>Golden Magic</button><button type=button>Blue Moon</button></div><div class=debug-toggle-group style=margin-top:8px;><button type=button>Pure White</button><button type=button>Soft White</button><button type=button>Dark Mode`), _tmpl$8$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Stroke Animation Speed</label><div style=display:flex;align-items:center;gap:12px;><span style=font-size:11px;color:#888;min-width:30px;>Fast</span><input type=range min=0.3 max=4.0 step=0.1 style=flex:1;cursor:pointer;><span style=font-size:11px;color:#888;min-width:30px;text-align:right;>Slow</span></div><p class=debug-control-description style=margin-top:8px;text-align:center;><span style=color:#666;font-size:10px;>`), _tmpl$9$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Hotspot Reveal Mode</label><div class=debug-toggle-group><button type=button>Focus</button><button type=button>Ripple (experimental)</button></div><p class=debug-control-description>`), _tmpl$0$3 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>FPS Target</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Effects</span><span class=debug-stat-value style=font-size:10px;></span></div><div class=debug-stat-row><span class=debug-stat-label>GPU</span><span class=debug-stat-value>`), _tmpl$1$2 = /* @__PURE__ */ template(`<div class=debug-control style=margin-top:16px;><button class="debug-toggle-option active"style=width:100%; type=button>Test Random Zoom`), _tmpl$10$2 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Cache Version</span><span class=debug-stat-value>1.0.2</span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value>Active</span></div><div class=debug-stat-row><span class=debug-stat-label>localStorage Size</span><span class=debug-stat-value>`), _tmpl$11$1 = /* @__PURE__ */ template(`<div class=debug-control style=margin-top:16px;><button class=debug-toggle-option>🗑️ Clear Cache & Reload</button><p class=debug-control-description>Fixes stuck animations and broken hover states`), _tmpl$12$1 = /* @__PURE__ */ template(`<span class=debug-mobile-compact-fps> FPS`), _tmpl$13$1 = /* @__PURE__ */ template(`<div class="debug-mobile-compact glass-button"><div class=debug-mobile-compact-content><span class=debug-mobile-compact-icon><svg width=16 height=16 viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round></path></svg></span><span class=debug-mobile-compact-label>Debug`), _tmpl$14$1 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Cache Version</span><span class=debug-stat-value>1.0.2</span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value style=color:#4CAF50>Active</span></div><div style=margin-top:20px;><button class=glass-button>🗑️ Clear Cache & Reload</button><p style=margin-top:10px;font-size:11px;opacity:0.6;text-align:center;>Clears localStorage, sessionStorage and reloads the app`), _tmpl$15$1 = /* @__PURE__ */ template(`<div><div><div class=debug-mobile-sheet-handle><div class=debug-mobile-sheet-handle-bar></div></div><div class=debug-mobile-sheet-header><h3 class=debug-mobile-sheet-title><svg width=18 height=18 viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round></path></svg>Artwork Controls</h3></div><div class=debug-mobile-tabs></div><div class=debug-mobile-content>`), _tmpl$16$1 = /* @__PURE__ */ template(`<button><span class=debug-mobile-tab-icon></span><span class=debug-mobile-tab-label>`), _tmpl$17$1 = /* @__PURE__ */ template(`<span style=margin-left:8px;>Artwork Controls`), _tmpl$18$1 = /* @__PURE__ */ template(`<button title="Minimize panel"><svg viewBox="0 0 20 20"><rect x=11 y=15 width=14 height=2>`), _tmpl$19$1 = /* @__PURE__ */ template(`<div><div class=debug-panel-header><h3 class=debug-panel-title style="margin:0;display:'flex';alignItems:'center';"><svg viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round>`), _tmpl$20$1 = /* @__PURE__ */ template(`<div><div class=debug-section-header><div class=debug-section-title><span class=debug-section-icon></span><span></span></div><span class=debug-section-chevron>▼</span></div><div class=debug-section-content><div class=debug-section-body>`);
+var _tmpl$$4 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Hovered</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Selected</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Type</span><span class=debug-stat-value>`), _tmpl$2$4 = /* @__PURE__ */ template(`<div class=debug-stat-row style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.1);"><span class=debug-stat-label style=color:#00ffff;>Safari Hybrid</span><span class=debug-stat-value style=color:#00ffff;>Active`), _tmpl$3$3 = /* @__PURE__ */ template(`<div class=debug-stat-row><span class=debug-stat-label>Render Time</span><span class=debug-stat-value>ms`), _tmpl$4$3 = /* @__PURE__ */ template(`<div class=debug-stat-row><span class=debug-stat-label>Visible/Total</span><span class=debug-stat-value>/`), _tmpl$5$3 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>FPS</span><span class=debug-stat-value><span style=opacity:0.7;font-size:10px> (avg: <!>)</span></span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Memory</span><span class=debug-stat-value>MB</span></div><div class=debug-stat-row><span class=debug-stat-label>Frame Time</span><span class=debug-stat-value>ms</span></div><div class=debug-stat-row><span class=debug-stat-label>Zoom</span><span class=debug-stat-value>x`), _tmpl$6$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Zoom Animation Speed<span class=debug-control-value>x</span></label><input type=range class=debug-slider min=0.5 max=2.5 step=0.1><p class=debug-control-description>How fast the artwork zooms when you click on elements`), _tmpl$7$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Color Theme<span class=debug-help-icon title="Changes the highlight colors">?</span></label><div class=debug-toggle-group><button type=button>Cyan Tech</button><button type=button>Golden Magic</button><button type=button>Blue Moon</button></div><div class=debug-toggle-group style=margin-top:8px;><button type=button>Pure White</button><button type=button>Soft White</button><button type=button>Dark Mode`), _tmpl$8$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Stroke Animation Speed</label><div style=display:flex;align-items:center;gap:12px;><span style=font-size:11px;color:#888;min-width:30px;>Fast</span><input type=range min=0.3 max=4.0 step=0.1 style=flex:1;cursor:pointer;><span style=font-size:11px;color:#888;min-width:30px;text-align:right;>Slow</span></div><p class=debug-control-description style=margin-top:8px;text-align:center;><span style=color:#666;font-size:10px;>`), _tmpl$9$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Hotspot Reveal Mode</label><div class=debug-toggle-group><button type=button>Focus</button><button type=button>Ripple (experimental)</button></div><p class=debug-control-description>`), _tmpl$0$3 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Cache Version</span><span class=debug-stat-value>1.0.2</span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value>Active</span></div><div class=debug-stat-row><span class=debug-stat-label>localStorage Size</span><span class=debug-stat-value>`), _tmpl$1$2 = /* @__PURE__ */ template(`<div class=debug-control style=margin-top:16px;><button class=debug-toggle-option>🗑️ Clear Cache & Reload</button><p class=debug-control-description>Fixes stuck animations and broken hover states`), _tmpl$10$2 = /* @__PURE__ */ template(`<span class=debug-mobile-compact-fps> FPS`), _tmpl$11$1 = /* @__PURE__ */ template(`<div class="debug-mobile-compact glass-button"><div class=debug-mobile-compact-content><span class=debug-mobile-compact-icon><svg width=16 height=16 viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round></path></svg></span><span class=debug-mobile-compact-label>Debug`), _tmpl$12$1 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Cache Version</span><span class=debug-stat-value>1.0.2</span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value style=color:#4CAF50>Active</span></div><div style=margin-top:20px;><button class=glass-button>🗑️ Clear Cache & Reload</button><p style=margin-top:10px;font-size:11px;opacity:0.6;text-align:center;>Clears localStorage, sessionStorage and reloads the app`), _tmpl$13$1 = /* @__PURE__ */ template(`<div><div><div class=debug-mobile-sheet-handle><div class=debug-mobile-sheet-handle-bar></div></div><div class=debug-mobile-sheet-header><h3 class=debug-mobile-sheet-title><svg width=18 height=18 viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round></path></svg>Artwork Controls</h3></div><div class=debug-mobile-tabs></div><div class=debug-mobile-content>`), _tmpl$14$1 = /* @__PURE__ */ template(`<button><span class=debug-mobile-tab-icon></span><span class=debug-mobile-tab-label>`), _tmpl$15$1 = /* @__PURE__ */ template(`<span style=margin-left:8px;>Artwork Controls`), _tmpl$16$1 = /* @__PURE__ */ template(`<button title="Minimize panel"><svg viewBox="0 0 20 20"><rect x=11 y=15 width=14 height=2>`), _tmpl$17$1 = /* @__PURE__ */ template(`<div><div class=debug-panel-header><h3 class=debug-panel-title style="margin:0;display:'flex';alignItems:'center';"><svg viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round>`), _tmpl$18$1 = /* @__PURE__ */ template(`<div><div class=debug-section-header><div class=debug-section-title><span class=debug-section-icon></span><span></span></div><span class=debug-section-chevron>▼</span></div><div class=debug-section-content><div class=debug-section-body>`);
 function DebugPanel(props) {
   const [isMinimized, setIsMinimized] = createSignal(true);
   const [expandedSections, setExpandedSections] = createSignal({
@@ -21080,7 +20293,6 @@ function DebugPanel(props) {
     navigation: false,
     overlay: false,
     easing: false,
-    consciousness: false,
     cache: false,
     osrsAudio: false,
     audioPlayerTest: false
@@ -21352,61 +20564,13 @@ function DebugPanel(props) {
       })()
     }] : [],
     {
-      id: "consciousness",
-      icon: "🚀",
-      title: "Journey Mode (Test)",
-      content: () => {
-        var _a;
-        const metrics = ((_a = props.consciousnessMetrics) == null ? void 0 : _a.call(props)) || {};
-        return [(() => {
-          var _el$71 = _tmpl$0$3(), _el$72 = _el$71.firstChild, _el$73 = _el$72.firstChild, _el$74 = _el$73.nextSibling, _el$75 = _el$72.nextSibling, _el$76 = _el$75.firstChild, _el$77 = _el$76.nextSibling, _el$78 = _el$75.nextSibling, _el$79 = _el$78.firstChild, _el$80 = _el$79.nextSibling;
-          insert(_el$74, () => metrics.targetFPS || "60");
-          insert(_el$77, () => {
-            var _a2;
-            return ((_a2 = metrics.effects) == null ? void 0 : _a2.join(", ")) || "none";
-          });
-          insert(_el$80, () => metrics.gpu || "unknown");
-          return _el$71;
-        })(), (() => {
-          var _el$81 = _tmpl$1$2(), _el$82 = _el$81.firstChild;
-          _el$82.$$click = () => {
-            var _a2, _b;
-            console.log("🌊 Testing consciousness zoom...");
-            const renderer = window.nativeHotspotRenderer;
-            if (!renderer) {
-              console.error("❌ NativeHotspotRenderer not found");
-              return;
-            }
-            const hotspots = ((_a2 = renderer.spatialIndex) == null ? void 0 : _a2.getAllHotspots()) || [];
-            console.log(`📊 Found ${hotspots.length} hotspots`);
-            if (hotspots.length > 0) {
-              const randomHotspot = hotspots[Math.floor(Math.random() * hotspots.length)];
-              console.log("🎯 Selected hotspot:", randomHotspot.id);
-              const bounds = calculateHotspotBounds(randomHotspot, window.viewer, isMobile());
-              if (bounds) {
-                console.log("📏 Bounds:", bounds);
-                (_b = window.cinematicZoomManager) == null ? void 0 : _b.performAdaptiveZoom(bounds, {
-                  type: "consciousness"
-                });
-              } else {
-                console.error("❌ Could not calculate bounds for hotspot");
-              }
-            } else {
-              console.warn("❌ No hotspots found");
-            }
-          };
-          return _el$81;
-        })()];
-      }
-    },
-    {
       id: "cache",
       icon: "🗑️",
       title: "Cache Management",
       content: () => [(() => {
-        var _el$83 = _tmpl$10$2(), _el$84 = _el$83.firstChild, _el$85 = _el$84.nextSibling, _el$86 = _el$85.firstChild, _el$87 = _el$86.nextSibling, _el$88 = _el$85.nextSibling, _el$89 = _el$88.firstChild, _el$90 = _el$89.nextSibling;
-        _el$87.style.setProperty("color", "#4CAF50");
-        insert(_el$90, () => {
+        var _el$71 = _tmpl$0$3(), _el$72 = _el$71.firstChild, _el$73 = _el$72.nextSibling, _el$74 = _el$73.firstChild, _el$75 = _el$74.nextSibling, _el$76 = _el$73.nextSibling, _el$77 = _el$76.firstChild, _el$78 = _el$77.nextSibling;
+        _el$75.style.setProperty("color", "#4CAF50");
+        insert(_el$78, () => {
           let size = 0;
           for (let key in localStorage) {
             if (localStorage.hasOwnProperty(key)) {
@@ -21415,19 +20579,19 @@ function DebugPanel(props) {
           }
           return (size / 1024).toFixed(1) + " KB";
         });
-        return _el$83;
+        return _el$71;
       })(), (() => {
-        var _el$91 = _tmpl$11$1(), _el$92 = _el$91.firstChild;
-        _el$92.$$click = () => {
+        var _el$79 = _tmpl$1$2(), _el$80 = _el$79.firstChild;
+        _el$80.$$click = () => {
           if (confirm("Clear all cached data and reload? This will fix any stuck animations or broken state.")) {
             cacheManager.forceReset();
           }
         };
-        _el$92.style.setProperty("width", "100%");
-        _el$92.style.setProperty("background", "rgba(255, 87, 34, 0.08)");
-        _el$92.style.setProperty("border", "1px solid rgba(255, 87, 34, 0.2)");
-        _el$92.style.setProperty("color", "#FF5722");
-        return _el$91;
+        _el$80.style.setProperty("width", "100%");
+        _el$80.style.setProperty("background", "rgba(255, 87, 34, 0.08)");
+        _el$80.style.setProperty("border", "1px solid rgba(255, 87, 34, 0.2)");
+        _el$80.style.setProperty("color", "#FF5722");
+        return _el$79;
       })()]
     }
   ];
@@ -21437,100 +20601,96 @@ function DebugPanel(props) {
       label: "Reveal",
       icon: "👁️"
     }, {
-      id: "consciousness",
-      label: "Journey (test)",
-      icon: "🚀"
-    }, {
       id: "cache",
       label: "Cache",
       icon: "🗑️"
     }];
     return [(() => {
-      var _el$93 = _tmpl$13$1(), _el$94 = _el$93.firstChild, _el$95 = _el$94.firstChild;
-      _el$95.nextSibling;
-      _el$93.$$click = (e) => {
+      var _el$81 = _tmpl$11$1(), _el$82 = _el$81.firstChild, _el$83 = _el$82.firstChild;
+      _el$83.nextSibling;
+      _el$81.$$click = (e) => {
         addGlassButtonEffects(e, e.currentTarget);
         setMobileExpanded(true);
       };
-      _el$93.style.setProperty("position", "fixed");
-      _el$93.style.setProperty("bottom", "20px");
-      _el$93.style.setProperty("left", "20px");
-      _el$93.style.setProperty("transform", "none");
-      _el$93.style.setProperty("zIndex", "1000");
-      insert(_el$94, createComponent(Show, {
+      _el$81.style.setProperty("position", "fixed");
+      _el$81.style.setProperty("bottom", "20px");
+      _el$81.style.setProperty("left", "20px");
+      _el$81.style.setProperty("transform", "none");
+      _el$81.style.setProperty("zIndex", "1000");
+      insert(_el$82, createComponent(Show, {
         get when() {
           var _a;
           return (_a = props.performanceMetrics) == null ? void 0 : _a.currentFPS;
         },
         get children() {
-          var _el$97 = _tmpl$12$1(), _el$98 = _el$97.firstChild;
-          insert(_el$97, () => {
+          var _el$85 = _tmpl$10$2(), _el$86 = _el$85.firstChild;
+          insert(_el$85, () => {
             var _a, _b;
             return (_b = (_a = props.performanceMetrics) == null ? void 0 : _a.currentFPS) == null ? void 0 : _b.toFixed(0);
-          }, _el$98);
+          }, _el$86);
           createRenderEffect((_$p) => {
             var _a;
-            return (_$p = (((_a = props.performanceMetrics) == null ? void 0 : _a.currentFPS) || 60) < 45 ? "#FF9800" : "#4CAF50") != null ? _el$97.style.setProperty("color", _$p) : _el$97.style.removeProperty("color");
+            return (_$p = (((_a = props.performanceMetrics) == null ? void 0 : _a.currentFPS) || 60) < 45 ? "#FF9800" : "#4CAF50") != null ? _el$85.style.setProperty("color", _$p) : _el$85.style.removeProperty("color");
           });
-          return _el$97;
+          return _el$85;
         }
       }), null);
-      createRenderEffect((_$p) => (_$p = mobileExpanded() ? "none" : "flex") != null ? _el$93.style.setProperty("display", _$p) : _el$93.style.removeProperty("display"));
-      return _el$93;
+      createRenderEffect((_$p) => (_$p = mobileExpanded() ? "none" : "flex") != null ? _el$81.style.setProperty("display", _$p) : _el$81.style.removeProperty("display"));
+      return _el$81;
     })(), createComponent(Show, {
       get when() {
         return mobileExpanded();
       },
       get children() {
-        var _el$99 = _tmpl$15$1(), _el$100 = _el$99.firstChild, _el$101 = _el$100.firstChild, _el$102 = _el$101.nextSibling, _el$103 = _el$102.firstChild, _el$104 = _el$102.nextSibling, _el$105 = _el$104.nextSibling;
-        _el$99.$$click = (e) => {
+        var _el$87 = _tmpl$13$1(), _el$88 = _el$87.firstChild, _el$89 = _el$88.firstChild, _el$90 = _el$89.nextSibling, _el$91 = _el$90.firstChild, _el$92 = _el$90.nextSibling, _el$93 = _el$92.nextSibling;
+        _el$87.$$click = (e) => {
           if (e.target === e.currentTarget) {
             closeBottomSheet();
           }
         };
-        _el$100.$$pointerdown = (e) => e.stopPropagation();
-        _el$100.$$click = (e) => e.stopPropagation();
-        _el$100.$$touchend = handleTouchEnd;
-        _el$100.$$touchmove = handleTouchMove;
-        _el$100.$$touchstart = handleTouchStart;
+        _el$88.$$pointerdown = (e) => e.stopPropagation();
+        _el$88.$$click = (e) => e.stopPropagation();
+        _el$88.$$touchend = handleTouchEnd;
+        _el$88.$$touchmove = handleTouchMove;
+        _el$88.$$touchstart = handleTouchStart;
         var _ref$ = bottomSheetRef;
-        typeof _ref$ === "function" ? use(_ref$, _el$100) : bottomSheetRef = _el$100;
-        _el$100.style.setProperty("position", "fixed");
-        _el$100.style.setProperty("bottom", "0");
-        _el$100.style.setProperty("left", "50%");
-        _el$100.style.setProperty("transform", "translateX(-50%)");
-        _el$100.style.setProperty("transition", "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)");
-        _el$100.style.setProperty("willChange", "transform");
-        _el$100.style.setProperty("width", "90%");
-        _el$100.style.setProperty("maxWidth", "500px");
-        _el$100.style.setProperty("minHeight", "60vh");
-        _el$100.style.setProperty("maxHeight", "85vh");
-        _el$100.style.setProperty("display", "flex");
-        _el$100.style.setProperty("flexDirection", "column");
-        _el$101.style.setProperty("padding", "8px");
-        _el$102.style.setProperty("padding", "12px 20px");
-        _el$103.style.setProperty("fontSize", "14px");
-        _el$103.style.setProperty("margin", "0");
-        _el$103.style.setProperty("display", "flex");
-        _el$103.style.setProperty("alignItems", "center");
-        _el$103.style.setProperty("gap", "8px");
-        insert(_el$104, createComponent(For, {
+        typeof _ref$ === "function" ? use(_ref$, _el$88) : bottomSheetRef = _el$88;
+        _el$88.style.setProperty("position", "fixed");
+        _el$88.style.setProperty("bottom", "0");
+        _el$88.style.setProperty("left", "50%");
+        _el$88.style.setProperty("transform", "translateX(-50%)");
+        _el$88.style.setProperty("transition", "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)");
+        _el$88.style.setProperty("willChange", "transform");
+        _el$88.style.setProperty("width", "90%");
+        _el$88.style.setProperty("maxWidth", "500px");
+        _el$88.style.setProperty("minHeight", "60vh");
+        _el$88.style.setProperty("maxHeight", "85vh");
+        _el$88.style.setProperty("display", "flex");
+        _el$88.style.setProperty("flexDirection", "column");
+        _el$89.style.setProperty("padding", "8px");
+        _el$90.style.setProperty("padding", "12px 20px");
+        _el$91.style.setProperty("fontSize", "14px");
+        _el$91.style.setProperty("margin", "0");
+        _el$91.style.setProperty("display", "flex");
+        _el$91.style.setProperty("alignItems", "center");
+        _el$91.style.setProperty("gap", "8px");
+        insert(_el$92, createComponent(For, {
           each: tabs,
           children: (tab, index) => (() => {
-            var _el$111 = _tmpl$16$1(), _el$112 = _el$111.firstChild, _el$113 = _el$112.nextSibling;
-            _el$111.$$click = () => setActiveTab(index());
-            insert(_el$112, () => tab.icon);
-            insert(_el$113, () => tab.label);
-            createRenderEffect(() => className(_el$111, `debug-mobile-tab ${activeTab() === index() ? "active" : ""}`));
-            return _el$111;
+            var _el$99 = _tmpl$14$1(), _el$100 = _el$99.firstChild, _el$101 = _el$100.nextSibling;
+            _el$99.$$click = () => setActiveTab(index());
+            insert(_el$100, () => tab.icon);
+            insert(_el$101, () => tab.label);
+            createRenderEffect(() => className(_el$99, `debug-mobile-tab ${activeTab() === index() ? "active" : ""}`));
+            return _el$99;
           })()
         }));
-        _el$105.style.setProperty("flex", "1");
-        _el$105.style.setProperty("overflowY", "auto");
-        _el$105.style.setProperty("WebkitOverflowScrolling", "touch");
-        _el$105.style.setProperty("padding", "32px 24px 40px");
-        _el$105.style.setProperty("minHeight", "300px");
-        insert(_el$105, createComponent(Switch, {
+        _el$93.style.setProperty("flex", "1");
+        _el$93.style.setProperty("overflowY", "auto");
+        _el$93.style.setProperty("WebkitOverflowScrolling", "touch");
+        _el$93.style.setProperty("padding", "32px 24px 40px");
+        _el$93.style.setProperty("minHeight", "300px");
+        insert(_el$93, createComponent(Switch, {
           get children() {
             return [createComponent(Match, {
               get when() {
@@ -21545,82 +20705,18 @@ function DebugPanel(props) {
                 return activeTab() === 1;
               },
               get children() {
-                return (() => {
-                  var _a;
-                  const metrics = ((_a = props.consciousnessMetrics) == null ? void 0 : _a.call(props)) || {};
-                  return [(() => {
-                    var _el$114 = _tmpl$0$3(), _el$115 = _el$114.firstChild, _el$116 = _el$115.firstChild, _el$117 = _el$116.nextSibling, _el$118 = _el$115.nextSibling, _el$119 = _el$118.firstChild, _el$120 = _el$119.nextSibling, _el$121 = _el$118.nextSibling, _el$122 = _el$121.firstChild, _el$123 = _el$122.nextSibling;
-                    insert(_el$117, () => metrics.targetFPS || "60");
-                    insert(_el$120, () => {
-                      var _a2;
-                      return ((_a2 = metrics.effects) == null ? void 0 : _a2.join(", ")) || "none";
-                    });
-                    insert(_el$123, () => metrics.gpu || "unknown");
-                    return _el$114;
-                  })(), (() => {
-                    var _el$124 = _tmpl$1$2(), _el$125 = _el$124.firstChild;
-                    _el$125.$$click = () => {
-                      var _a2;
-                      console.log("🌊 Testing consciousness zoom...");
-                      const renderer = window.nativeHotspotRenderer;
-                      if (!renderer) {
-                        console.error("❌ NativeHotspotRenderer not found");
-                        return;
-                      }
-                      const hotspots = ((_a2 = renderer.spatialIndex) == null ? void 0 : _a2.getAllHotspots()) || [];
-                      console.log(`📊 Found ${hotspots.length} hotspots`);
-                      if (hotspots.length > 0) {
-                        const randomHotspot = hotspots[Math.floor(Math.random() * hotspots.length)];
-                        console.log("🎯 Selected hotspot:", randomHotspot.id);
-                        __vitePreload(async () => {
-                          const { calculateHotspotBounds: calculateHotspotBounds2 } = await Promise.resolve().then(() => hotspotCalculations);
-                          return { calculateHotspotBounds: calculateHotspotBounds2 };
-                        }, true ? void 0 : void 0).then(({
-                          calculateHotspotBounds: calculateHotspotBounds2
-                        }) => {
-                          __vitePreload(async () => {
-                            const { isMobile: isMobile2 } = await Promise.resolve().then(() => browserDetection);
-                            return { isMobile: isMobile2 };
-                          }, true ? void 0 : void 0).then(({
-                            isMobile: isMobile2
-                          }) => {
-                            var _a3;
-                            const bounds = calculateHotspotBounds2(randomHotspot, window.viewer, isMobile2());
-                            if (bounds) {
-                              console.log("📏 Bounds:", bounds);
-                              (_a3 = window.cinematicZoomManager) == null ? void 0 : _a3.performAdaptiveZoom(bounds, {
-                                type: "consciousness"
-                              });
-                            } else {
-                              console.error("❌ Could not calculate bounds for hotspot");
-                            }
-                          });
-                        });
-                      } else {
-                        console.warn("❌ No hotspots found");
-                      }
-                    };
-                    return _el$124;
-                  })()];
-                })();
-              }
-            }), createComponent(Match, {
-              get when() {
-                return activeTab() === 2;
-              },
-              get children() {
-                var _el$106 = _tmpl$14$1(), _el$107 = _el$106.firstChild, _el$108 = _el$107.nextSibling, _el$109 = _el$108.nextSibling, _el$110 = _el$109.firstChild;
-                _el$110.$$click = () => {
+                var _el$94 = _tmpl$12$1(), _el$95 = _el$94.firstChild, _el$96 = _el$95.nextSibling, _el$97 = _el$96.nextSibling, _el$98 = _el$97.firstChild;
+                _el$98.$$click = () => {
                   if (confirm("Clear all cached data and reload?")) {
                     cacheManager.forceReset();
                   }
                 };
-                _el$110.style.setProperty("width", "100%");
-                _el$110.style.setProperty("padding", "12px");
-                _el$110.style.setProperty("background", "rgba(255, 87, 34, 0.1)");
-                _el$110.style.setProperty("border", "1px solid rgba(255, 87, 34, 0.3)");
-                _el$110.style.setProperty("color", "#FF5722");
-                return _el$106;
+                _el$98.style.setProperty("width", "100%");
+                _el$98.style.setProperty("padding", "12px");
+                _el$98.style.setProperty("background", "rgba(255, 87, 34, 0.1)");
+                _el$98.style.setProperty("border", "1px solid rgba(255, 87, 34, 0.3)");
+                _el$98.style.setProperty("color", "#FF5722");
+                return _el$94;
               }
             }), createComponent(Match, {
               get when() {
@@ -21643,14 +20739,14 @@ function DebugPanel(props) {
         }));
         createRenderEffect((_p$) => {
           var _v$11 = `debug-mobile-backdrop ${isClosing() ? "closing" : ""}`, _v$12 = `debug-mobile-sheet ${isClosing() ? "closing" : "expanded"}`;
-          _v$11 !== _p$.e && className(_el$99, _p$.e = _v$11);
-          _v$12 !== _p$.t && className(_el$100, _p$.t = _v$12);
+          _v$11 !== _p$.e && className(_el$87, _p$.e = _v$11);
+          _v$12 !== _p$.t && className(_el$88, _p$.t = _v$12);
           return _p$;
         }, {
           e: void 0,
           t: void 0
         });
-        return _el$99;
+        return _el$87;
       }
     })];
   }
@@ -21710,67 +20806,67 @@ function DebugPanel(props) {
     }));
   };
   return (() => {
-    var _el$126 = _tmpl$19$1(), _el$127 = _el$126.firstChild, _el$128 = _el$127.firstChild, _el$129 = _el$128.firstChild;
-    _el$126.$$mousedown = handleMouseDown;
-    _el$127.$$click = () => {
+    var _el$102 = _tmpl$17$1(), _el$103 = _el$102.firstChild, _el$104 = _el$103.firstChild, _el$105 = _el$104.firstChild;
+    _el$102.$$mousedown = handleMouseDown;
+    _el$103.$$click = () => {
       if (isMinimized()) {
         setIsMinimized(false);
       }
     };
-    _el$129.style.setProperty("transition", "all 0.3s");
-    _el$129.style.setProperty("color", "rgba(255, 255, 255, 0.9)");
-    insert(_el$128, createComponent(Show, {
+    _el$105.style.setProperty("transition", "all 0.3s");
+    _el$105.style.setProperty("color", "rgba(255, 255, 255, 0.9)");
+    insert(_el$104, createComponent(Show, {
       get when() {
         return !isMinimized();
       },
       get children() {
-        return _tmpl$17$1();
+        return _tmpl$15$1();
       }
     }), null);
-    insert(_el$127, createComponent(Show, {
+    insert(_el$103, createComponent(Show, {
       get when() {
         return !isMinimized();
       },
       get children() {
-        var _el$131 = _tmpl$18$1(), _el$132 = _el$131.firstChild;
-        _el$131.addEventListener("mouseleave", (e) => {
+        var _el$107 = _tmpl$16$1(), _el$108 = _el$107.firstChild;
+        _el$107.addEventListener("mouseleave", (e) => {
           e.currentTarget.style.background = "rgba(255,255,255,0.08)";
           e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
           e.currentTarget.style.color = "rgba(255,255,255,0.5)";
         });
-        _el$131.addEventListener("mouseenter", (e) => {
+        _el$107.addEventListener("mouseenter", (e) => {
           e.currentTarget.style.background = "rgba(255,255,255,0.12)";
           e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
           e.currentTarget.style.color = "rgba(255,255,255,0.8)";
         });
-        _el$131.$$click = (e) => {
+        _el$107.$$click = (e) => {
           e.stopPropagation();
           setIsMinimized(!isMinimized());
         };
-        _el$131.style.setProperty("position", "absolute");
-        _el$131.style.setProperty("top", "12px");
-        _el$131.style.setProperty("right", "12px");
-        _el$131.style.setProperty("background", "rgba(255,255,255,0.08)");
-        _el$131.style.setProperty("border", "1px solid rgba(255,255,255,0.12)");
-        _el$131.style.setProperty("color", "rgba(255,255,255,0.5)");
-        _el$131.style.setProperty("fontSize", "14px");
-        _el$131.style.setProperty("lineHeight", "1");
-        _el$131.style.setProperty("cursor", "pointer");
-        _el$131.style.setProperty("padding", "0");
-        _el$131.style.setProperty("width", "28px");
-        _el$131.style.setProperty("height", "28px");
-        _el$131.style.setProperty("display", "flex");
-        _el$131.style.setProperty("alignItems", "center");
-        _el$131.style.setProperty("justifyContent", "center");
-        _el$131.style.setProperty("borderRadius", "8px");
-        _el$131.style.setProperty("transition", "all 0.2s");
-        _el$132.style.setProperty("width", "16px");
-        _el$132.style.setProperty("height", "16px");
-        _el$132.style.setProperty("fill", "currentColor");
-        return _el$131;
+        _el$107.style.setProperty("position", "absolute");
+        _el$107.style.setProperty("top", "12px");
+        _el$107.style.setProperty("right", "12px");
+        _el$107.style.setProperty("background", "rgba(255,255,255,0.08)");
+        _el$107.style.setProperty("border", "1px solid rgba(255,255,255,0.12)");
+        _el$107.style.setProperty("color", "rgba(255,255,255,0.5)");
+        _el$107.style.setProperty("fontSize", "14px");
+        _el$107.style.setProperty("lineHeight", "1");
+        _el$107.style.setProperty("cursor", "pointer");
+        _el$107.style.setProperty("padding", "0");
+        _el$107.style.setProperty("width", "28px");
+        _el$107.style.setProperty("height", "28px");
+        _el$107.style.setProperty("display", "flex");
+        _el$107.style.setProperty("alignItems", "center");
+        _el$107.style.setProperty("justifyContent", "center");
+        _el$107.style.setProperty("borderRadius", "8px");
+        _el$107.style.setProperty("transition", "all 0.2s");
+        _el$108.style.setProperty("width", "16px");
+        _el$108.style.setProperty("height", "16px");
+        _el$108.style.setProperty("fill", "currentColor");
+        return _el$107;
       }
     }), null);
-    insert(_el$126, createComponent(Show, {
+    insert(_el$102, createComponent(Show, {
       get when() {
         return !isMinimized();
       },
@@ -21778,13 +20874,13 @@ function DebugPanel(props) {
         return createComponent(For, {
           each: sections,
           children: (section) => (() => {
-            var _el$133 = _tmpl$20$1(), _el$134 = _el$133.firstChild, _el$135 = _el$134.firstChild, _el$136 = _el$135.firstChild, _el$137 = _el$136.nextSibling, _el$138 = _el$134.nextSibling, _el$139 = _el$138.firstChild;
-            _el$134.$$click = () => toggleSection(section.id);
-            insert(_el$136, () => section.icon);
-            insert(_el$137, () => section.title);
-            insert(_el$139, () => section.content());
-            createRenderEffect(() => className(_el$133, `debug-section ${expandedSections()[section.id] ? "expanded" : ""}`));
-            return _el$133;
+            var _el$109 = _tmpl$18$1(), _el$110 = _el$109.firstChild, _el$111 = _el$110.firstChild, _el$112 = _el$111.firstChild, _el$113 = _el$112.nextSibling, _el$114 = _el$110.nextSibling, _el$115 = _el$114.firstChild;
+            _el$110.$$click = () => toggleSection(section.id);
+            insert(_el$112, () => section.icon);
+            insert(_el$113, () => section.title);
+            insert(_el$115, () => section.content());
+            createRenderEffect(() => className(_el$109, `debug-section ${expandedSections()[section.id] ? "expanded" : ""}`));
+            return _el$109;
           })()
         });
       }
@@ -21839,11 +20935,11 @@ function DebugPanel(props) {
           padding: 0
         } : {}
       }, _v$16 = isMinimized() ? "20" : "18", _v$17 = isMinimized() ? "20" : "18";
-      _v$13 !== _p$.e && className(_el$126, _p$.e = _v$13);
-      _p$.t = style(_el$126, _v$14, _p$.t);
-      _p$.a = style(_el$127, _v$15, _p$.a);
-      _v$16 !== _p$.o && setAttribute(_el$129, "width", _p$.o = _v$16);
-      _v$17 !== _p$.i && setAttribute(_el$129, "height", _p$.i = _v$17);
+      _v$13 !== _p$.e && className(_el$102, _p$.e = _v$13);
+      _p$.t = style(_el$102, _v$14, _p$.t);
+      _p$.a = style(_el$103, _v$15, _p$.a);
+      _v$16 !== _p$.o && setAttribute(_el$105, "width", _p$.o = _v$16);
+      _v$17 !== _p$.i && setAttribute(_el$105, "height", _p$.i = _v$17);
       return _p$;
     }, {
       e: void 0,
@@ -21852,7 +20948,7 @@ function DebugPanel(props) {
       o: void 0,
       i: void 0
     });
-    return _el$126;
+    return _el$102;
   })();
 }
 delegateEvents(["input", "click", "touchstart", "touchmove", "touchend", "pointerdown", "mousedown"]);
@@ -22557,7 +21653,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup--Gd3jmbV.js").then((n) => n.v);
+      } = await import("./viewerSetup-BzWf_eUt.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
@@ -22779,7 +21875,7 @@ function ArtworkViewer(props) {
           get safariHybridMetrics() {
             return state.safariHybridMetrics();
           },
-          consciousnessMetrics: () => {
+          debugMetrics: () => {
             var _a, _b, _c, _d, _e, _f;
             const cinematicManager = window.cinematicZoomManager;
             if (!cinematicManager) return {};
@@ -22795,7 +21891,6 @@ function ArtworkViewer(props) {
                 console.error("❌ Failed to initialize adaptive renderer:", err);
               });
               return {
-                mode: "consciousness",
                 tier: "initializing...",
                 targetFPS: "...",
                 effects: [],
@@ -22805,7 +21900,6 @@ function ArtworkViewer(props) {
             if (cinematicManager.adaptiveRenderer) {
               const metrics = cinematicManager.adaptiveRenderer.getMetrics();
               return {
-                mode: "consciousness",
                 tier: metrics.tier,
                 targetFPS: (_c = metrics.settings) == null ? void 0 : _c.targetFPS,
                 effects: (_d = metrics.settings) == null ? void 0 : _d.effects,
