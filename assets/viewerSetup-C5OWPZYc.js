@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-Dlbgqr9k.js","assets/main-Zk2OBNz3.js","assets/main-D2TKL3td.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-fr9mLCw2.js","assets/main-q1ncyXI7.js","assets/main-D2TKL3td.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-Zk2OBNz3.js";
+import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-q1ncyXI7.js";
 class ImageOverlayManager {
   constructor() {
     this.overlays = /* @__PURE__ */ new Map();
@@ -6210,9 +6210,9 @@ const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourc
     const isIPadPro = isIOS2 && window.screen.width >= 1024;
     const isIPadAir = isIOS2 && !isIPadPro && window.screen.width >= 820;
     const isStandardIPad = isIOS2 && !isIPadPro && !isIPadAir;
-    config.animationTime = isIOS2 ? 0.2 : 0.3;
-    config.springStiffness = isIOS2 ? 9 : 10;
-    config.blendTime = isIOS2 ? 0.2 : 0.3;
+    config.animationTime = isIOS2 ? 0.15 : 0.2;
+    config.springStiffness = 20;
+    config.blendTime = 0;
     config.immediateRender = true;
     if (isIPadPro) {
       config.imageLoaderLimit = 4;
@@ -7766,11 +7766,369 @@ class IndexedDBTileCache {
 }
 const tileCache = new IndexedDBTileCache(200);
 window.tileCache = tileCache;
+class CanvasAlphaOptimizer {
+  constructor() {
+    this.originalGetContext = null;
+    this.initialized = false;
+  }
+  /**
+   * Initialize the optimizer before OpenSeadragon creates its canvases
+   * Must be called before viewer initialization
+   */
+  initialize() {
+    if (this.initialized) {
+      console.warn("[CanvasAlphaOptimizer] Already initialized");
+      return;
+    }
+    this.originalGetContext = HTMLCanvasElement.prototype.getContext;
+    const originalMethod = this.originalGetContext;
+    HTMLCanvasElement.prototype.getContext = function(contextType, contextAttributes = {}) {
+      var _a, _b, _c, _d;
+      if (contextType === "2d") {
+        const isOpenSeadragonCanvas = ((_a = this.id) == null ? void 0 : _a.includes("openseadragon")) || ((_b = this.className) == null ? void 0 : _b.includes("openseadragon")) || ((_d = (_c = this.parentElement) == null ? void 0 : _c.className) == null ? void 0 : _d.includes("openseadragon"));
+        if (isOpenSeadragonCanvas) {
+          contextAttributes.alpha = false;
+          contextAttributes.desynchronized = false;
+          contextAttributes.willReadFrequently = false;
+          console.log("[CanvasAlphaOptimizer] Forcing alpha: false for OpenSeadragon canvas");
+        }
+      }
+      return originalMethod.call(this, contextType, contextAttributes);
+    };
+    this.initialized = true;
+    console.log("[CanvasAlphaOptimizer] Initialized - alpha channel disabled for performance");
+  }
+  /**
+   * Restore original getContext behavior
+   */
+  restore() {
+    if (!this.initialized || !this.originalGetContext) {
+      return;
+    }
+    HTMLCanvasElement.prototype.getContext = this.originalGetContext;
+    this.initialized = false;
+    console.log("[CanvasAlphaOptimizer] Restored original getContext behavior");
+  }
+  /**
+   * Apply additional monochrome-specific optimizations to a context
+   */
+  optimizeForMonochrome(ctx) {
+    if (!ctx || typeof ctx.imageSmoothingEnabled === "undefined") {
+      return;
+    }
+    ctx.imageSmoothingEnabled = false;
+    ctx.mozImageSmoothingEnabled = false;
+    ctx.webkitImageSmoothingEnabled = false;
+    ctx.msImageSmoothingEnabled = false;
+    ctx.globalCompositeOperation = "source-over";
+    console.log("[CanvasAlphaOptimizer] Applied monochrome optimizations to context");
+  }
+  /**
+   * Check if a context has alpha disabled (for validation)
+   */
+  static isOptimized(ctx) {
+    if (!ctx) return false;
+    const attrs = ctx.getContextAttributes();
+    return attrs && attrs.alpha === false;
+  }
+}
+const canvasAlphaOptimizer = new CanvasAlphaOptimizer();
+class SpringStiffnessTester {
+  constructor(viewer) {
+    this.viewer = viewer;
+    this.originalStiffness = viewer ? viewer.viewport.springStiffness : 20;
+    this.testResults = [];
+    this.setupDebugCommands();
+  }
+  /**
+   * Test different spring stiffness values
+   */
+  testStiffness(value) {
+    if (!this.viewer) {
+      console.error("[SpringTester] No viewer available");
+      return;
+    }
+    const viewport = this.viewer.viewport;
+    const previousValue = viewport.springStiffness;
+    viewport.springStiffness = value;
+    viewport.applyConstraints(true);
+    console.log(`[SpringTester] Changed springStiffness from ${previousValue} to ${value}`);
+    this.measureAnimation(value);
+    return value;
+  }
+  /**
+   * Measure animation performance with current settings
+   */
+  measureAnimation(stiffnessValue) {
+    const startTime = performance.now();
+    const startZoom = this.viewer.viewport.getZoom();
+    const targetZoom = startZoom * 2;
+    let frameCount = 0;
+    let settleTime = 0;
+    let overshoot = 0;
+    let maxZoom = startZoom;
+    const measureFrame = () => {
+      frameCount++;
+      const currentZoom = this.viewer.viewport.getZoom();
+      maxZoom = Math.max(maxZoom, currentZoom);
+      if (Math.abs(currentZoom - targetZoom) < 0.01) {
+        settleTime = performance.now() - startTime;
+        overshoot = (maxZoom - targetZoom) / targetZoom * 100;
+        const result = {
+          stiffness: stiffnessValue,
+          settleTime: Math.round(settleTime),
+          frameCount,
+          overshoot: Math.round(overshoot * 10) / 10,
+          fps: Math.round(frameCount / (settleTime / 1e3))
+        };
+        this.testResults.push(result);
+        console.log("[SpringTester] Animation metrics:", result);
+        this.showResult(result);
+      } else if (performance.now() - startTime < 3e3) {
+        requestAnimationFrame(measureFrame);
+      }
+    };
+    this.viewer.viewport.zoomTo(targetZoom);
+    requestAnimationFrame(measureFrame);
+  }
+  /**
+   * Show test result on screen
+   */
+  showResult(result) {
+    const existingDiv = document.getElementById("spring-test-result");
+    if (existingDiv) {
+      existingDiv.remove();
+    }
+    const div = document.createElement("div");
+    div.id = "spring-test-result";
+    div.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: #FFD700;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            z-index: 10000;
+            min-width: 250px;
+        `;
+    div.innerHTML = `
+            <h3 style="margin: 0 0 10px 0; color: white;">Spring Test Results</h3>
+            <div>Stiffness: <strong>${result.stiffness}</strong></div>
+            <div>Settle Time: <strong>${result.settleTime}ms</strong></div>
+            <div>Avg FPS: <strong>${result.fps}</strong></div>
+            <div>Overshoot: <strong>${result.overshoot}%</strong></div>
+            <div style="margin-top: 10px; font-size: 0.9em; color: #888;">
+                ${this.getRecommendation(result.stiffness)}
+            </div>
+        `;
+    document.body.appendChild(div);
+    setTimeout(() => {
+      if (div.parentNode) {
+        div.style.opacity = "0";
+        div.style.transition = "opacity 0.5s";
+        setTimeout(() => div.remove(), 500);
+      }
+    }, 5e3);
+  }
+  /**
+   * Get recommendation based on stiffness value
+   */
+  getRecommendation(stiffness) {
+    if (stiffness < 10) {
+      return "Very smooth but may feel sluggish";
+    } else if (stiffness < 20) {
+      return "Balanced - good for most users";
+    } else if (stiffness < 50) {
+      return "Responsive - recommended for mobile";
+    } else if (stiffness < 100) {
+      return "Very responsive - minimal animation";
+    } else {
+      return "Near instant - almost no animation";
+    }
+  }
+  /**
+   * Setup debug commands for testing
+   */
+  setupDebugCommands() {
+    window.testSpring = (value) => this.testStiffness(value);
+    window.testSpringPresets = () => {
+      console.log("[SpringTester] Testing common presets...");
+      const presets = [
+        { name: "OpenSeadragon Default", value: 6.5 },
+        { name: "Research Balanced", value: 20 },
+        { name: "Research Mobile", value: 50 },
+        { name: "Current Mobile", value: 200 },
+        { name: "Desktop Optimal", value: 325 }
+      ];
+      let index = 0;
+      const testNext = () => {
+        if (index < presets.length) {
+          const preset = presets[index];
+          console.log(`[SpringTester] Testing: ${preset.name} (${preset.value})`);
+          this.testStiffness(preset.value);
+          index++;
+          setTimeout(testNext, 3e3);
+        } else {
+          this.showSummary();
+        }
+      };
+      testNext();
+    };
+    console.log("[SpringTester] Debug commands available:");
+    console.log("  window.testSpring(value) - Test specific stiffness value");
+    console.log("  window.testSpringPresets() - Test all common presets");
+  }
+  /**
+   * Show summary of all test results
+   */
+  showSummary() {
+    console.table(this.testResults);
+    const optimal = this.testResults.reduce((best, current) => {
+      const currentScore = current.settleTime + current.overshoot * 10;
+      const bestScore = best.settleTime + best.overshoot * 10;
+      return currentScore < bestScore ? current : best;
+    });
+    console.log("[SpringTester] Optimal stiffness based on tests:", optimal.stiffness);
+  }
+  /**
+   * Restore original stiffness value
+   */
+  restore() {
+    if (this.viewer) {
+      this.viewer.viewport.springStiffness = this.originalStiffness;
+      console.log(`[SpringTester] Restored original stiffness: ${this.originalStiffness}`);
+    }
+  }
+}
+class SimplifiedPerformanceMode {
+  constructor() {
+    this.enabled = false;
+    this.originalSettings = {};
+    this.disabledSystems = [];
+  }
+  /**
+   * Enable simplified mode for better performance
+   */
+  enable(viewer) {
+    var _a;
+    if (this.enabled) {
+      return;
+    }
+    console.log("[SimplifiedMode] Enabling performance mode...");
+    this.enabled = true;
+    if (window.performanceMonitor) {
+      this.originalSettings.monitoringInterval = window.performanceMonitor.samplingInterval;
+      window.performanceMonitor.samplingInterval = 5e3;
+      this.disabledSystems.push("performanceMonitor");
+      console.log("[SimplifiedMode] Reduced performance monitoring frequency");
+    }
+    const isMobile2 = /Android|iPhone|iPad/i.test(navigator.userAgent);
+    if (isMobile2 && ((_a = window.temporalEchoController) == null ? void 0 : _a.rippleRenderer)) {
+      this.originalSettings.rippleEnabled = true;
+      window.temporalEchoController.rippleRenderer.disable();
+      this.disabledSystems.push("rippleRenderer");
+      console.log("[SimplifiedMode] Disabled ripple animations");
+    }
+    if (window.activeHotspotManager) {
+      this.originalSettings.maxActiveHotspots = 30;
+      window.activeHotspotManager.maxActiveHotspots = 10;
+      console.log("[SimplifiedMode] Reduced active hotspots to 10");
+    }
+    if (window.eventCoordinator) {
+      this.originalSettings.debugLogging = window.eventCoordinator.debugLogging;
+      window.eventCoordinator.debugLogging = false;
+      console.log("[SimplifiedMode] Disabled event debug logging");
+    }
+    if (viewer) {
+      this.originalSettings.immediateRender = viewer.immediateRender;
+      this.originalSettings.debugMode = viewer.debugMode;
+      this.originalSettings.showNavigationControl = viewer.showNavigationControl;
+      viewer.immediateRender = true;
+      viewer.debugMode = false;
+      viewer.showNavigationControl = false;
+      if (isMobile2) {
+        this.originalSettings.maxImageCacheCount = viewer.maxImageCacheCount;
+        viewer.maxImageCacheCount = Math.min(50, viewer.maxImageCacheCount);
+      }
+      console.log("[SimplifiedMode] Optimized viewer settings");
+    }
+    if (window.styleManager) {
+      this.originalSettings.animationsEnabled = true;
+      window.styleManager.disableAnimations = true;
+      console.log("[SimplifiedMode] Disabled style animations");
+    }
+    console.log(`[SimplifiedMode] Enabled - disabled ${this.disabledSystems.length} systems`);
+  }
+  /**
+   * Disable simplified mode and restore normal settings
+   */
+  disable() {
+    var _a;
+    if (!this.enabled) {
+      return;
+    }
+    console.log("[SimplifiedMode] Disabling performance mode...");
+    if (window.performanceMonitor && this.originalSettings.monitoringInterval) {
+      window.performanceMonitor.samplingInterval = this.originalSettings.monitoringInterval;
+    }
+    if (((_a = window.temporalEchoController) == null ? void 0 : _a.rippleRenderer) && this.originalSettings.rippleEnabled) {
+      window.temporalEchoController.rippleRenderer.enable();
+    }
+    if (window.activeHotspotManager && this.originalSettings.maxActiveHotspots) {
+      window.activeHotspotManager.maxActiveHotspots = this.originalSettings.maxActiveHotspots;
+    }
+    if (window.eventCoordinator && "debugLogging" in this.originalSettings) {
+      window.eventCoordinator.debugLogging = this.originalSettings.debugLogging;
+    }
+    if (window.styleManager && this.originalSettings.animationsEnabled) {
+      window.styleManager.disableAnimations = false;
+    }
+    this.enabled = false;
+    this.originalSettings = {};
+    this.disabledSystems = [];
+    console.log("[SimplifiedMode] Disabled - all systems restored");
+  }
+  /**
+   * Toggle simplified mode based on performance
+   */
+  autoToggle(currentFPS) {
+    const threshold = 30;
+    if (!this.enabled && currentFPS < threshold) {
+      console.log(`[SimplifiedMode] FPS ${currentFPS} < ${threshold}, enabling...`);
+      this.enable(window.viewer);
+    } else if (this.enabled && currentFPS > threshold + 10) {
+      console.log(`[SimplifiedMode] FPS ${currentFPS} recovered, disabling...`);
+      this.disable();
+    }
+  }
+  /**
+   * Check if simplified mode should be enabled
+   */
+  static shouldEnable() {
+    const isMobile2 = /Android|iPhone|iPad/i.test(navigator.userAgent);
+    const isLowEnd = navigator.hardwareConcurrency <= 4;
+    const hasLowMemory = navigator.deviceMemory && navigator.deviceMemory <= 4;
+    return isMobile2 && (isLowEnd || hasLowMemory);
+  }
+}
+const simplifiedMode = new SimplifiedPerformanceMode();
+if (SimplifiedPerformanceMode.shouldEnable()) {
+  console.log("[SimplifiedMode] Low-end device detected, will enable on viewer init");
+  window.addEventListener("viewer-initialized", () => {
+    simplifiedMode.enable(window.viewer);
+  });
+}
 async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
   console.log("initializeViewer called with:", { viewerRef, props, state: !!state, handleHotspotClick: !!handleHotspotClick });
   const intervals = {};
   let homeViewport = null;
+  if (isMobile()) {
+    console.log("[PERFORMANCE] Initializing Canvas Alpha Optimizer for mobile");
+    canvasAlphaOptimizer.initialize();
+  }
   const isMobileDevice = isMobile();
   const isIOS2 = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
   const isIPhone2 = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
@@ -8220,6 +8578,20 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   window.performanceMonitor = componentsObj.performanceMonitor;
   window.tileOptimizer = componentsObj.tileOptimizer;
   window.tileCleanupManager = componentsObj.tileCleanupManager;
+  if (isMobileDevice) {
+    const springTester = new SpringStiffnessTester(viewer);
+    window.springTester = springTester;
+    console.log("[SpringTester] Initialized - use window.testSpring(value) or window.testSpringPresets()");
+    const isLowEnd = navigator.hardwareConcurrency <= 4 || navigator.deviceMemory && navigator.deviceMemory <= 4;
+    if (isLowEnd) {
+      console.log("[PERFORMANCE] Low-end mobile device detected, enabling simplified mode");
+      simplifiedMode.enable(viewer);
+      window.simplifiedMode = simplifiedMode;
+    } else {
+      window.simplifiedMode = simplifiedMode;
+      console.log("[PERFORMANCE] Simplified mode available: window.simplifiedMode.enable(viewer)");
+    }
+  }
   window.lowZoomOptimizer = componentsObj.lowZoomOptimizer;
   window.safariPerformanceOptimizer = componentsObj.safariPerformanceOptimizer;
   window.frameSkipManager = componentsObj.frameSkipManager;
@@ -8342,7 +8714,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-Dlbgqr9k.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-fr9mLCw2.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspots);
   eventHandlers.setupAdaptiveSprings(viewer, performanceConfig);
   const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);
