@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-DRKz8zvc.js","assets/main-IRnNTf7L.js","assets/main-D2TKL3td.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-GZqLfpDM.js","assets/main-D9N27JPU.js","assets/main-D2TKL3td.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-IRnNTf7L.js";
+import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-D9N27JPU.js";
 class ImageOverlayManager {
   constructor() {
     this.overlays = /* @__PURE__ */ new Map();
@@ -1489,59 +1489,7 @@ class NetworkAdaptiveManager {
    * Show network status notification to user
    */
   showNetworkNotification() {
-    let notification = document.getElementById("network-notification");
-    if (!notification) {
-      notification = document.createElement("div");
-      notification.id = "network-notification";
-      notification.style.cssText = `
-                position: fixed;
-                top: 10px;
-                right: 10px;
-                background: rgba(0, 0, 0, 0.8);
-                color: white;
-                padding: 10px 15px;
-                border-radius: 5px;
-                font-size: 14px;
-                z-index: 10000;
-                opacity: 0;
-                transition: opacity 0.3s;
-                pointer-events: none;
-            `;
-      document.body.appendChild(notification);
-    }
-    let message = "";
-    let icon = "";
-    switch (this.networkType) {
-      case "slow-2g":
-        message = "Very slow connection - Quality reduced";
-        icon = "🐌";
-        break;
-      case "2g":
-        message = "Slow connection - Quality reduced";
-        icon = "🐢";
-        break;
-      case "3g":
-        message = "Moderate connection - Balanced quality";
-        icon = "📶";
-        break;
-      case "4g":
-        message = "Good connection";
-        icon = "📶";
-        break;
-      case "wifi":
-        message = "Excellent connection";
-        icon = "📶";
-        break;
-    }
-    if (this.saveDataMode) {
-      message += " (Data saver on)";
-      icon = "💾";
-    }
-    notification.textContent = `${icon} ${message}`;
-    notification.style.opacity = "1";
-    setTimeout(() => {
-      notification.style.opacity = "0";
-    }, 3e3);
+    return;
   }
   /**
    * Get current network status
@@ -8714,7 +8662,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-DRKz8zvc.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-GZqLfpDM.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspots);
   eventHandlers.setupAdaptiveSprings(viewer, performanceConfig);
   const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);
