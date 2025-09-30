@@ -1,4 +1,4 @@
-import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-FjJU3P4V.js";
+import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-CituIoK4.js";
 const GestureStates = {
   IDLE: "idle",
   UNDETERMINED: "undetermined",
@@ -4154,6 +4154,21 @@ class TemporalEchoController {
       "px"
     );
     window.temporalEchoController = this;
+    this.viewer.addHandler("zoom", () => {
+      requestAnimationFrame(() => {
+        const currentZoom = this.viewer.viewport.getZoom();
+        const lowZoomThreshold = 1.5;
+        let zoomFactor;
+        if (currentZoom >= lowZoomThreshold) {
+          zoomFactor = 1;
+        } else {
+          zoomFactor = Math.min(3, lowZoomThreshold / currentZoom);
+        }
+        document.querySelectorAll(".hotspot-echo-reveal").forEach((el) => {
+          el.style.setProperty("--zoom-factor", zoomFactor);
+        });
+      });
+    });
     window.setTapMode = (mode) => {
       if (mode === "direct" || mode === "nearby") {
         this.config.tapMode = mode;
@@ -5712,6 +5727,22 @@ class TemporalEchoController {
           shadowSpriteManager.applyShadow(pathElement, "echoReveal");
         }
       }
+      const currentZoom = this.viewer.viewport.getZoom();
+      const lowZoomThreshold = 1.5;
+      let zoomFactor;
+      if (currentZoom >= lowZoomThreshold) {
+        zoomFactor = 1;
+      } else {
+        zoomFactor = Math.min(3, lowZoomThreshold / currentZoom);
+      }
+      element.style.setProperty("--zoom-factor", zoomFactor);
+      console.log("[TemporalEchoController] Zoom-adaptive stroke:", {
+        currentZoom: currentZoom.toFixed(2),
+        lowZoomThreshold,
+        zoomFactor: zoomFactor.toFixed(3),
+        effectiveStrokePigment: (6 * zoomFactor).toFixed(2) + "px",
+        effectiveStrokeEmboss: (6.5 * zoomFactor).toFixed(2) + "px"
+      });
       let borderStyle = localStorage.getItem("borderStyle") || "default";
       console.log(
         "[TemporalEchoController] Initial borderStyle from localStorage:",

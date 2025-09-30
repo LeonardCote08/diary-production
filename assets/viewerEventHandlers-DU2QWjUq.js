@@ -1,9 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-B1F0dgN3.js","assets/main-FjJU3P4V.js","assets/main-Cmo_Jyp4.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-D2lWGiV5.js","assets/main-CituIoK4.js","assets/main-DB3Bs8MB.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-FjJU3P4V.js";
-import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-CjJCz0R3.js";
+import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-CituIoK4.js";
+import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-i4cR12r1.js";
 class TemporalModeHandler {
   constructor(options = {}) {
     this.audioEngine = options.audioEngine || window.audioEngine;
@@ -5699,9 +5699,7 @@ class ActiveHotspotManager {
       }
     });
     if (toShow.length > 0 || toHide.length > 0) {
-      const totalOps = toShow.length + toHide.length;
-      const useRAF = totalOps >= 5;
-      const applyChanges = () => {
+      requestAnimationFrame(() => {
         const batchStart = performance.now();
         toHide.forEach((data) => {
           if (data.element) {
@@ -5730,15 +5728,10 @@ class ActiveHotspotManager {
         const batchTime = performance.now() - batchStart;
         if (this.stats.lastUpdateTime > 10) {
           console.log(
-            `[ActiveHotspotManager] Update: ${this.stats.activeHotspots} active, ${this.stats.domOperations} ops in ${this.stats.lastUpdateTime.toFixed(2)}ms (batch: ${batchTime.toFixed(2)}ms, mode: ${useRAF ? "RAF" : "SYNC"})`
+            `[ActiveHotspotManager] Update: ${this.stats.activeHotspots} active, ${this.stats.domOperations} ops in ${this.stats.lastUpdateTime.toFixed(2)}ms (batch: ${batchTime.toFixed(2)}ms)`
           );
         }
-      };
-      if (useRAF) {
-        requestAnimationFrame(applyChanges);
-      } else {
-        applyChanges();
-      }
+      });
     } else {
       this.stats.lastUpdateTime = performance.now() - startTime;
     }
@@ -9458,7 +9451,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
   }
   if (renderer.eventCoordinator) {
     const TemporalEchoController = (await __vitePreload(async () => {
-      const { default: __vite_default__ } = await import("./TemporalEchoController-B1F0dgN3.js");
+      const { default: __vite_default__ } = await import("./TemporalEchoController-D2lWGiV5.js");
       return { default: __vite_default__ };
     }, true ? __vite__mapDeps([0,1,2]) : void 0)).default;
     const echoController = new TemporalEchoController({
