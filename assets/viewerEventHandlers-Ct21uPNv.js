@@ -1,9 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-BQJPnIQ6.js","assets/main-D9N27JPU.js","assets/main-D2TKL3td.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-B1F0dgN3.js","assets/main-FjJU3P4V.js","assets/main-Cmo_Jyp4.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-D9N27JPU.js";
-import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-BqsNY9uS.js";
+import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-FjJU3P4V.js";
+import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-CjJCz0R3.js";
 class TemporalModeHandler {
   constructor(options = {}) {
     this.audioEngine = options.audioEngine || window.audioEngine;
@@ -279,7 +279,7 @@ class TemporalHoldDetectionEngine {
       intentionDelay: 100,
       // NEW: 100ms delay before starting temporal detection
       navigation: 150,
-      // 0-150ms: immediate navigation response  
+      // 0-150ms: immediate navigation response
       discovery: 400,
       // 400ms: discovery mode with haptic pulse
       activation: 800,
@@ -337,7 +337,7 @@ class TemporalHoldDetectionEngine {
   /**
    * Start temporal hold detection
    * @param {Object} hotspot - Target hotspot
-   * @param {number} x - Initial touch X coordinate  
+   * @param {number} x - Initial touch X coordinate
    * @param {number} y - Initial touch Y coordinate
    */
   startHold(hotspot, x, y) {
@@ -362,7 +362,9 @@ class TemporalHoldDetectionEngine {
     this.update();
     this.state.intentionTimer = setTimeout(() => {
       if (!this.state.isHolding) return;
-      console.log("[TemporalHoldEngine] Intention delay passed - starting temporal detection");
+      console.log(
+        "[TemporalHoldEngine] Intention delay passed - starting temporal detection"
+      );
       this.state.temporalStarted = true;
       this.state.currentPhase = "initiated";
       this.startEarlyVelocityMonitoring();
@@ -383,7 +385,7 @@ class TemporalHoldDetectionEngine {
   /**
    * Update position and calculate velocity (called on every touch move)
    * @param {number} x - Current touch X coordinate
-   * @param {number} y - Current touch Y coordinate  
+   * @param {number} y - Current touch Y coordinate
    */
   updatePosition(x, y) {
     if (!this.state.isHolding) return;
@@ -422,7 +424,7 @@ class TemporalHoldDetectionEngine {
   /**
    * Calculate instantaneous velocity
    * @param {number} x - Current X position
-   * @param {number} y - Current Y position  
+   * @param {number} y - Current Y position
    * @param {number} deltaTime - Time since last update (ms)
    * @returns {number} Velocity in pixels per frame
    */
@@ -453,7 +455,7 @@ class TemporalHoldDetectionEngine {
     }, this.thresholds.earlyVelocityCheck);
   }
   /**
-   * Start distance monitoring (200ms after intention delay)  
+   * Start distance monitoring (200ms after intention delay)
    */
   startDistanceMonitoring() {
     this.state.distanceTimer = setTimeout(() => {
@@ -497,7 +499,9 @@ class TemporalHoldDetectionEngine {
    */
   schedulePhases() {
     if (!this.state.temporalStarted) {
-      console.log("[TemporalHoldEngine] Cannot schedule phases - temporal detection not started");
+      console.log(
+        "[TemporalHoldEngine] Cannot schedule phases - temporal detection not started"
+      );
       return;
     }
     if (this.state.timer) {
@@ -751,13 +755,13 @@ class TemporalHoldDetectionEngine {
 class ModeStateManager {
   constructor() {
     this.modes = {
-      "direct": {
+      direct: {
         name: "Direct (Classic)",
         description: "Tap to select and zoom immediately",
         mobile: true,
         desktop: true
       },
-      "temporal": {
+      temporal: {
         name: "Temporal (Hold)",
         description: "Hold duration determines action",
         mobile: true,
@@ -778,11 +782,12 @@ class ModeStateManager {
       reveal: {
         active: false,
         timer: null,
-        style: this.loadStateWithValidation(
-          "revealStyle",
+        style: this.loadStateWithValidation("revealStyle", "invert", [
           "invert",
-          ["invert", "glow", "outline", "shadow"]
-        )
+          "glow",
+          "outline",
+          "shadow"
+        ])
       }
     };
     this.listeners = {
@@ -801,11 +806,15 @@ class ModeStateManager {
     try {
       const stored = localStorage.getItem(key);
       if (!stored) {
-        console.log(`[ModeStateManager] No stored value for ${key}, using default: ${defaultValue}`);
+        console.log(
+          `[ModeStateManager] No stored value for ${key}, using default: ${defaultValue}`
+        );
         return defaultValue;
       }
       if (validValues && !validValues.includes(stored)) {
-        console.warn(`[ModeStateManager] Invalid stored value for ${key}: "${stored}". Valid values: ${validValues.join(", ")}. Using default: ${defaultValue}`);
+        console.warn(
+          `[ModeStateManager] Invalid stored value for ${key}: "${stored}". Valid values: ${validValues.join(", ")}. Using default: ${defaultValue}`
+        );
         localStorage.removeItem(key);
         return defaultValue;
       }
@@ -1003,7 +1012,9 @@ class HitDetectionCanvas {
           canvasHeight = Math.floor(canvasWidth / aspectRatio);
         }
       }
-      console.log(`[MOBILE_OPTIMIZATION] Canvas reduced for performance: ${canvasWidth}x${canvasHeight}`);
+      console.log(
+        `[MOBILE_OPTIMIZATION] Canvas reduced for performance: ${canvasWidth}x${canvasHeight}`
+      );
     } else {
       const maxSize = 4096;
       canvasWidth = Math.min(maxSize, imageSize.x);
@@ -1080,15 +1091,21 @@ class HitDetectionCanvas {
       this.colorToHotspot.set(color, hotspot);
       this.hotspotToColor.set(hotspot.id, color);
       if (this.debug && index < 10) {
-        console.log(`[HIT_DETECTION] Hotspot ${hotspot.id} → ${color} (index: ${colorIndex})`);
+        console.log(
+          `[HIT_DETECTION] Hotspot ${hotspot.id} → ${color} (index: ${colorIndex})`
+        );
       }
     });
     this.stats.totalHotspots = hotspots.length;
     const mappingTime = performance.now() - startTime;
-    console.log(`[HIT_DETECTION] Generated ${hotspots.length} unique colors in ${mappingTime.toFixed(2)}ms`);
+    console.log(
+      `[HIT_DETECTION] Generated ${hotspots.length} unique colors in ${mappingTime.toFixed(2)}ms`
+    );
     const uniqueColors = new Set(this.hotspotToColor.values()).size;
     if (uniqueColors !== hotspots.length) {
-      console.error(`[HIT_DETECTION] Color collision detected! Expected ${hotspots.length}, got ${uniqueColors}`);
+      console.error(
+        `[HIT_DETECTION] Color collision detected! Expected ${hotspots.length}, got ${uniqueColors}`
+      );
     }
   }
   /**
@@ -1117,9 +1134,12 @@ class HitDetectionCanvas {
     let redrawTimer = null;
     this.viewer.addHandler("viewport-change", () => {
       if (redrawTimer) clearTimeout(redrawTimer);
-      redrawTimer = setTimeout(() => {
-        this.scheduleRedraw();
-      }, this.isMobile ? 100 : 50);
+      redrawTimer = setTimeout(
+        () => {
+          this.scheduleRedraw();
+        },
+        this.isMobile ? 100 : 50
+      );
     });
     setInterval(() => {
       this.clearHitCache();
@@ -1171,7 +1191,9 @@ class HitDetectionCanvas {
     this.stats.renderedHotspots = renderedCount;
     this.stats.lastRenderTime = performance.now() - startTime;
     this.needsRedraw = false;
-    console.log(`[HIT_DETECTION] Rendered ${renderedCount} hotspots in ${this.stats.lastRenderTime.toFixed(2)}ms`);
+    console.log(
+      `[HIT_DETECTION] Rendered ${renderedCount} hotspots in ${this.stats.lastRenderTime.toFixed(2)}ms`
+    );
   }
   /**
    * Render a single hotspot to canvas
@@ -1341,7 +1363,7 @@ class LevelOfDetailManager {
         low: 50,
         // zoom < 2.0
         medium: 100,
-        // zoom 2.0-5.0  
+        // zoom 2.0-5.0
         high: 150,
         // zoom > 5.0
         critical: 200
@@ -1366,11 +1388,11 @@ class LevelOfDetailManager {
       // Importance scoring weights
       scoring: {
         typeWeights: {
-          "audio_only": 1,
-          "audio_image": 0.9,
-          "image_only": 0.7,
-          "link_only": 0.5,
-          "mixed": 0.8
+          audio_only: 1,
+          audio_image: 0.9,
+          image_only: 0.7,
+          link_only: 0.5,
+          mixed: 0.8
         },
         sizeWeight: 0.3,
         // larger hotspots get higher priority
@@ -1402,6 +1424,10 @@ class LevelOfDetailManager {
     this.performanceMode = "normal";
     this.boundsCache = /* @__PURE__ */ new Map();
     this.centerCache = /* @__PURE__ */ new Map();
+    this.lastViewportBounds = null;
+    this.cachedVisibleHotspots = null;
+    this.lastUpdateTime = 0;
+    this.MIN_UPDATE_INTERVAL = 32;
     this.stats = {
       totalHotspots: 0,
       visibleHotspots: 0,
@@ -1413,20 +1439,67 @@ class LevelOfDetailManager {
   }
   /**
    * Main LOD processing method - converts 469 hotspots to intelligent ~150 selection
+   * PHASE 1 OPTIMIZATION: Added early exit cache to reduce 43ms → 15-20ms average
    */
   selectVisibleHotspots(allHotspots, viewport, currentZoom, selectedHotspot, hoveredHotspot) {
     const startTime = performance.now();
+    const now = performance.now();
+    if (now - this.lastUpdateTime < this.MIN_UPDATE_INTERVAL) {
+      if (this.cachedVisibleHotspots) {
+        return this.cachedVisibleHotspots;
+      }
+    }
     const bounds = viewport.getBounds();
     const center = bounds.getCenter();
+    if (this.lastViewportBounds && this.cachedVisibleHotspots) {
+      const lastBounds = this.lastViewportBounds;
+      const deltaX = Math.abs(bounds.x - lastBounds.x);
+      const deltaY = Math.abs(bounds.y - lastBounds.y);
+      const deltaZoom = Math.abs(currentZoom - this.lastZoom);
+      const viewportWidth = bounds.width;
+      const viewportHeight = bounds.height;
+      const movementThreshold = 0.1;
+      const movedX = deltaX / viewportWidth;
+      const movedY = deltaY / viewportHeight;
+      const zoomThreshold = 0.1;
+      if (movedX < movementThreshold && movedY < movementThreshold && deltaZoom < zoomThreshold) {
+        return this.cachedVisibleHotspots;
+      }
+    }
     const lodLevel = this.getLODLevel(currentZoom);
     const maxVisible = this.getMaxVisibleCount(lodLevel, currentZoom);
     const candidateHotspots = this.filterViewportCandidates(allHotspots, viewport);
-    const clusteredHotspots = this.applySpatialClustering(candidateHotspots, currentZoom, viewport);
-    const scoredHotspots = this.scoreHotspots(clusteredHotspots, center, selectedHotspot, hoveredHotspot);
-    const visibleHotspots = this.selectTopHotspots(scoredHotspots, maxVisible, selectedHotspot, hoveredHotspot);
+    const clusteredHotspots = this.applySpatialClustering(
+      candidateHotspots,
+      currentZoom,
+      viewport
+    );
+    const scoredHotspots = this.scoreHotspots(
+      clusteredHotspots,
+      center,
+      selectedHotspot,
+      hoveredHotspot
+    );
+    const visibleHotspots = this.selectTopHotspots(
+      scoredHotspots,
+      maxVisible,
+      selectedHotspot,
+      hoveredHotspot
+    );
     this.updateStats(candidateHotspots.length, visibleHotspots.length, startTime);
+    this.lastViewportBounds = {
+      x: bounds.x,
+      y: bounds.y,
+      width: bounds.width,
+      height: bounds.height
+    };
+    this.lastZoom = currentZoom;
+    this.cachedVisibleHotspots = visibleHotspots;
+    this.lastUpdateTime = now;
     if (candidateHotspots.length > maxVisible && (visibleHotspots.length < candidateHotspots.length * 0.3 || this.stats.lastUpdateTime > 20)) {
-      console.log(`[LOD] Reduced ${candidateHotspots.length} → ${visibleHotspots.length} hotspots (zoom: ${currentZoom.toFixed(2)})`);
+      console.log(
+        `[LOD] Reduced ${candidateHotspots.length} → ${visibleHotspots.length} hotspots (zoom: ${currentZoom.toFixed(2)})`
+      );
     }
     return visibleHotspots;
   }
@@ -1450,8 +1523,13 @@ class LevelOfDetailManager {
       maxVisible = Math.floor(maxVisible * this.config.performance.emergencyReduction);
     }
     if (lodLevel === "medium") {
-      const progress = Math.min(1, (zoom - this.config.zoomThresholds.low) / (this.config.zoomThresholds.medium - this.config.zoomThresholds.low));
-      maxVisible = Math.floor(this.config.maxVisibleHotspots.low + (this.config.maxVisibleHotspots.medium - this.config.maxVisibleHotspots.low) * progress);
+      const progress = Math.min(
+        1,
+        (zoom - this.config.zoomThresholds.low) / (this.config.zoomThresholds.medium - this.config.zoomThresholds.low)
+      );
+      maxVisible = Math.floor(
+        this.config.maxVisibleHotspots.low + (this.config.maxVisibleHotspots.medium - this.config.maxVisibleHotspots.low) * progress
+      );
     }
     const minHotspots = this.isMobile ? 15 : 25;
     return Math.max(minHotspots, maxVisible);
@@ -1499,13 +1577,15 @@ class LevelOfDetailManager {
     const clusters = [];
     const processed = /* @__PURE__ */ new Set();
     const minDistance = this.config.clustering.minDistance / viewport.getZoom();
+    const minDistanceSquared = minDistance * minDistance;
     for (const hotspot of hotspots) {
       if (processed.has(hotspot.id)) continue;
       const cluster = [hotspot];
       processed.add(hotspot.id);
       for (const other of hotspots) {
-        if (processed.has(other.id) || cluster.length >= this.config.clustering.maxClusterSize) continue;
-        if (this.calculateDistance(hotspot, other) < minDistance) {
+        if (processed.has(other.id) || cluster.length >= this.config.clustering.maxClusterSize)
+          continue;
+        if (this.calculateDistanceSquared(hotspot, other) < minDistanceSquared) {
           cluster.push(other);
           processed.add(other.id);
         }
@@ -1547,8 +1627,10 @@ class LevelOfDetailManager {
       const center = this.getHotspotCenter(hotspot);
       const dx = viewportCenter.x - center.x;
       const dy = viewportCenter.y - center.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      score += Math.max(0, 1 - distance / maxDistance) * this.config.scoring.distanceWeight;
+      const distanceSquared = dx * dx + dy * dy;
+      const maxDistanceSquared = maxDistance * maxDistance;
+      const distanceRatio = Math.min(1, distanceSquared / maxDistanceSquared);
+      score += Math.max(0, 1 - distanceRatio) * this.config.scoring.distanceWeight;
       const lastInteraction = this.interactionHistory.get(hotspot.id);
       if (lastInteraction && now - lastInteraction < 3e4) {
         score += Math.max(0, 1 - (now - lastInteraction) / 3e4) * this.config.scoring.interactionWeight;
@@ -1621,12 +1703,21 @@ class LevelOfDetailManager {
     if (prevMode !== this.performanceMode) ;
   }
   /**
-   * Utility: Calculate distance between two points
+   * Utility: Calculate squared distance between two points
+   * OPTIMIZATION: Avoid Math.sqrt() - use squared distance for comparisons (5-10x faster)
+   * Only use sqrt for display values, not for comparisons
    */
-  calculateDistance(point1, point2) {
+  calculateDistanceSquared(point1, point2) {
     const dx = point1.x - point2.x;
     const dy = point1.y - point2.y;
-    return Math.sqrt(dx * dx + dy * dy);
+    return dx * dx + dy * dy;
+  }
+  /**
+   * Utility: Calculate actual distance (only when needed for display)
+   * @deprecated Use calculateDistanceSquared() for comparisons
+   */
+  calculateDistance(point1, point2) {
+    return Math.sqrt(this.calculateDistanceSquared(point1, point2));
   }
   /**
    * Utility: Calculate bounding box for hotspot coordinates (with caching)
@@ -1705,7 +1796,9 @@ class LevelOfDetailManager {
     const reductionPercent = totalCandidates > 0 ? ((totalCandidates - visibleCount) / totalCandidates * 100).toFixed(1) : 0;
     if (totalCandidates > visibleCount) {
       if (this.stats.lastUpdateTime > 20) {
-        console.log(`[LOD] Slow processing: ${this.stats.lastUpdateTime.toFixed(2)}ms | Reduction: ${reductionPercent}% | Mode: ${this.performanceMode}`);
+        console.log(
+          `[LOD] Slow processing: ${this.stats.lastUpdateTime.toFixed(2)}ms | Reduction: ${reductionPercent}% | Mode: ${this.performanceMode}`
+        );
       }
     }
   }
@@ -1730,6 +1823,9 @@ class LevelOfDetailManager {
     this.boundsCache.clear();
     this.centerCache.clear();
     this.performanceMode = "normal";
+    this.lastViewportBounds = null;
+    this.cachedVisibleHotspots = null;
+    this.lastUpdateTime = 0;
   }
 }
 function normalizePath(coordinates, isMultiPolygon) {
@@ -1816,7 +1912,9 @@ class SafariCompatibility {
     if (!this.isSafari) return;
     let zIndex = 1e-4;
     overlays.forEach((overlay) => {
-      const glowLayers = overlay.element.querySelectorAll(".glow-layer-1, .glow-layer-2, .glow-layer-3");
+      const glowLayers = overlay.element.querySelectorAll(
+        ".glow-layer-1, .glow-layer-2, .glow-layer-3"
+      );
       glowLayers.forEach((layer) => {
         layer.style.transform = `translateZ(${zIndex}px)`;
         zIndex += 1e-4;
@@ -1930,25 +2028,32 @@ class SafariCompatibility {
    */
   setupIOSClickHandler(svg, findHotspotCallback, activateHotspotCallback) {
     if (!this.isMobile && !this.isSafariOrWebKit) return;
-    svg.addEventListener("click", (event) => {
-      var _a, _b, _c;
-      if (event.target.tagName === "path" || event.target.tagName === "g" || event.target.closest("g[data-hotspot-id]")) {
-        return;
-      }
-      const modeStateManager = (_a = window.nativeHotspotRenderer) == null ? void 0 : _a.modeStateManager;
-      const echoController = (_b = window.nativeHotspotRenderer) == null ? void 0 : _b.echoController;
-      if (modeStateManager && echoController && modeStateManager.getCurrentMode() === "direct" && ((_c = echoController.config) == null ? void 0 : _c.enabled)) {
-        console.log("iOS/Safari: Skipping click - echo mode active");
-        return;
-      }
-      const clickedHotspot = findHotspotCallback(event);
-      if (clickedHotspot) {
-        console.log("iOS/Safari: Found hotspot at SVG click position:", clickedHotspot.id);
-        event.stopPropagation();
-        event.preventDefault();
-        activateHotspotCallback(clickedHotspot);
-      }
-    }, true);
+    svg.addEventListener(
+      "click",
+      (event) => {
+        var _a, _b, _c;
+        if (event.target.tagName === "path" || event.target.tagName === "g" || event.target.closest("g[data-hotspot-id]")) {
+          return;
+        }
+        const modeStateManager = (_a = window.nativeHotspotRenderer) == null ? void 0 : _a.modeStateManager;
+        const echoController = (_b = window.nativeHotspotRenderer) == null ? void 0 : _b.echoController;
+        if (modeStateManager && echoController && modeStateManager.getCurrentMode() === "direct" && ((_c = echoController.config) == null ? void 0 : _c.enabled)) {
+          console.log("iOS/Safari: Skipping click - echo mode active");
+          return;
+        }
+        const clickedHotspot = findHotspotCallback(event);
+        if (clickedHotspot) {
+          console.log(
+            "iOS/Safari: Found hotspot at SVG click position:",
+            clickedHotspot.id
+          );
+          event.stopPropagation();
+          event.preventDefault();
+          activateHotspotCallback(clickedHotspot);
+        }
+      },
+      true
+    );
   }
   /**
    * Create hover throttle for Safari performance
@@ -2007,14 +2112,28 @@ class SafariCompatibility {
     const hotspotId = group.getAttribute("data-hotspot-id");
     const pathLength = 100;
     const randomStart = Math.random() * pathLength;
-    console.log(`[Safari Random Start] Rotating dash animation for ${hotspotId}: offset ${randomStart.toFixed(1)}% of path`);
+    console.log(
+      `[Safari Random Start] Rotating dash animation for ${hotspotId}: offset ${randomStart.toFixed(1)}% of path`
+    );
     const isBlackOnBlack = colorScheme.main === "#000000";
     const glowLayers = [
       { element: mainPath, delay: 0, opacity: "1" },
       // Always full opacity
-      { element: glowLayer1, delay: 0, opacity: state === "selected" ? isBlackOnBlack ? "0.9" : "1" : isBlackOnBlack ? "0.85" : "0.95" },
-      { element: glowLayer2, delay: 0, opacity: state === "selected" ? isBlackOnBlack ? "0.8" : "0.9" : isBlackOnBlack ? "0.7" : "0.85" },
-      { element: glowLayer3, delay: 0, opacity: state === "selected" ? isBlackOnBlack ? "0.6" : "0.8" : isBlackOnBlack ? "0.5" : "0.7" },
+      {
+        element: glowLayer1,
+        delay: 0,
+        opacity: state === "selected" ? isBlackOnBlack ? "0.9" : "1" : isBlackOnBlack ? "0.85" : "0.95"
+      },
+      {
+        element: glowLayer2,
+        delay: 0,
+        opacity: state === "selected" ? isBlackOnBlack ? "0.8" : "0.9" : isBlackOnBlack ? "0.7" : "0.85"
+      },
+      {
+        element: glowLayer3,
+        delay: 0,
+        opacity: state === "selected" ? isBlackOnBlack ? "0.6" : "0.8" : isBlackOnBlack ? "0.5" : "0.7"
+      },
       { element: glowLayer4, delay: 0, opacity: state === "selected" ? "0.35" : "0.3" }
       // Strong white contrast layer
     ];
@@ -2035,48 +2154,51 @@ class SafariCompatibility {
           transform: `translateZ(${delay * 1e-3}px)`,
           willChange: "stroke-dasharray, stroke-dashoffset, opacity"
         });
-        const animation = element.animate([
+        const animation = element.animate(
+          [
+            {
+              // Start: completely invisible
+              strokeDasharray: "0 100",
+              strokeDashoffset: `-${randomStart}`,
+              opacity: "0",
+              offset: 0
+            },
+            {
+              // Early: small dash appears
+              strokeDasharray: "10 90",
+              strokeDashoffset: `-${randomStart}`,
+              opacity: "0.1",
+              offset: 0.1
+            },
+            {
+              // Middle: half of the path is drawn
+              strokeDasharray: "50 50",
+              strokeDashoffset: `-${randomStart}`,
+              opacity: "0.3",
+              offset: 0.5
+            },
+            {
+              // Near end: almost complete
+              strokeDasharray: "95 5",
+              strokeDashoffset: `-${randomStart}`,
+              opacity: finalOpacity,
+              offset: 0.95
+            },
+            {
+              // End: complete path visible - keep the same offset to avoid jump
+              strokeDasharray: "100 0",
+              strokeDashoffset: `-${randomStart}`,
+              opacity: finalOpacity,
+              offset: 1
+            }
+          ],
           {
-            // Start: completely invisible
-            strokeDasharray: "0 100",
-            strokeDashoffset: `-${randomStart}`,
-            opacity: "0",
-            offset: 0
-          },
-          {
-            // Early: small dash appears
-            strokeDasharray: "10 90",
-            strokeDashoffset: `-${randomStart}`,
-            opacity: "0.1",
-            offset: 0.1
-          },
-          {
-            // Middle: half of the path is drawn
-            strokeDasharray: "50 50",
-            strokeDashoffset: `-${randomStart}`,
-            opacity: "0.3",
-            offset: 0.5
-          },
-          {
-            // Near end: almost complete
-            strokeDasharray: "95 5",
-            strokeDashoffset: `-${randomStart}`,
-            opacity: finalOpacity,
-            offset: 0.95
-          },
-          {
-            // End: complete path visible - keep the same offset to avoid jump
-            strokeDasharray: "100 0",
-            strokeDashoffset: `-${randomStart}`,
-            opacity: finalOpacity,
-            offset: 1
+            duration: animationDuration * 1e3,
+            delay,
+            easing: timingEasing,
+            fill: "forwards"
           }
-        ], {
-          duration: animationDuration * 1e3,
-          delay,
-          easing: timingEasing,
-          fill: "forwards"
-        });
+        );
         if (element.currentAnimation) {
           element.currentAnimation.cancel();
           element.currentAnimation = null;
@@ -2103,7 +2225,9 @@ class SafariCompatibility {
    * Reset Safari glow layers to normal state
    */
   resetSafariGlowLayers(group) {
-    const glowLayers = group.querySelectorAll(".glow-layer-1, .glow-layer-2, .glow-layer-3, .glow-layer-4");
+    const glowLayers = group.querySelectorAll(
+      ".glow-layer-1, .glow-layer-2, .glow-layer-3, .glow-layer-4"
+    );
     const mainPath = group.querySelector(".main-path");
     const allLayers = mainPath ? [mainPath, ...glowLayers] : [...glowLayers];
     allLayers.forEach((layer) => {
@@ -2400,7 +2524,9 @@ class HoverIntentDetector {
     const velocity = this.calculateVelocity();
     const dwellTime = this.calculateDwellTime();
     if (window.DEBUG_ANIMATIONS) {
-      console.log(`[HoverIntent] Velocity: ${velocity.toFixed(0)} px/s, Dwell: ${dwellTime.toFixed(0)}ms, VelThreshold: ${this.velocityThreshold}, DwellThreshold: ${this.dwellThreshold}`);
+      console.log(
+        `[HoverIntent] Velocity: ${velocity.toFixed(0)} px/s, Dwell: ${dwellTime.toFixed(0)}ms, VelThreshold: ${this.velocityThreshold}, DwellThreshold: ${this.dwellThreshold}`
+      );
     }
     if (velocity > this.velocityThreshold) {
       return false;
@@ -2543,7 +2669,9 @@ class EventCoordinator extends EventEmitter {
     }
     this.hoverThrottleDelay = baseDelay;
     if (window.DEBUG_ANIMATIONS) {
-      console.log(`[EventCoordinator] Hover delay updated: mode=${mode}, delay=${this.hoverThrottleDelay}ms`);
+      console.log(
+        `[EventCoordinator] Hover delay updated: mode=${mode}, delay=${this.hoverThrottleDelay}ms`
+      );
     }
   }
   /**
@@ -2714,7 +2842,10 @@ class EventCoordinator extends EventEmitter {
         // Default to false, will be set to true if handled as tempo 1
       };
       this.emit(this.eventTypes.ECHO_TAP, tapData);
-      console.log("[EventCoordinator] After ECHO_TAP, wasHandledAsEcho:", tapData.wasHandledAsEcho);
+      console.log(
+        "[EventCoordinator] After ECHO_TAP, wasHandledAsEcho:",
+        tapData.wasHandledAsEcho
+      );
       if (tapData.wasHandledAsEcho) {
         console.log("[EventCoordinator] Fast tap handled as echo (tempo 1), exiting");
         this.activePointers.delete(event.pointerId);
@@ -2727,7 +2858,9 @@ class EventCoordinator extends EventEmitter {
         }
         return;
       } else {
-        console.log("[EventCoordinator] Fast tap was on revealed hotspot (tempo 2), continuing to click handler");
+        console.log(
+          "[EventCoordinator] Fast tap was on revealed hotspot (tempo 2), continuing to click handler"
+        );
       }
     }
     const pointerIdValid = this.primaryPointerId === null && this.activePointers.size === 1 || event.pointerId === this.primaryPointerId;
@@ -2781,7 +2914,9 @@ class EventCoordinator extends EventEmitter {
       }
       if (!shouldSuppressClick) {
         if (this.isMobile && wasClick) {
-          console.log("[EventCoordinator] Mobile tap detected in normal path, checking for tempo handling");
+          console.log(
+            "[EventCoordinator] Mobile tap detected in normal path, checking for tempo handling"
+          );
           const tapData = {
             x: event.clientX,
             y: event.clientY,
@@ -2789,14 +2924,23 @@ class EventCoordinator extends EventEmitter {
             wasHandledAsEcho: false
           };
           this.emit(this.eventTypes.ECHO_TAP, tapData);
-          console.log("[EventCoordinator] After ECHO_TAP (normal path), wasHandledAsEcho:", tapData.wasHandledAsEcho);
+          console.log(
+            "[EventCoordinator] After ECHO_TAP (normal path), wasHandledAsEcho:",
+            tapData.wasHandledAsEcho
+          );
           if (tapData.wasHandledAsEcho) {
-            console.log("[EventCoordinator] Normal path tap handled as tempo 1, suppressing CLICK");
+            console.log(
+              "[EventCoordinator] Normal path tap handled as tempo 1, suppressing CLICK"
+            );
             shouldSuppressClick = true;
           }
         }
         if (!shouldSuppressClick) {
-          console.log("[EventCoordinator] Emitting CLICK event at", event.clientX, event.clientY);
+          console.log(
+            "[EventCoordinator] Emitting CLICK event at",
+            event.clientX,
+            event.clientY
+          );
           this.emit(this.eventTypes.CLICK, {
             x: event.clientX,
             y: event.clientY,
@@ -2805,7 +2949,12 @@ class EventCoordinator extends EventEmitter {
           });
         }
       } else {
-        console.log("[EventCoordinator] Click suppressed - recentEchoTap:", recentEchoTap, "wasRecentlyDragging:", wasRecentlyDragging);
+        console.log(
+          "[EventCoordinator] Click suppressed - recentEchoTap:",
+          recentEchoTap,
+          "wasRecentlyDragging:",
+          wasRecentlyDragging
+        );
       }
       setTimeout(() => {
         if (this.isDragging) {
@@ -2839,7 +2988,9 @@ class EventCoordinator extends EventEmitter {
       this.dragStartTime = 0;
       this.dragStartPoint = null;
     } else if (wasClick) {
-      console.log("[EventCoordinator] Resetting drag state after click even with active pointers");
+      console.log(
+        "[EventCoordinator] Resetting drag state after click even with active pointers"
+      );
       this.isDragging = false;
     }
   }
@@ -2857,7 +3008,9 @@ class EventCoordinator extends EventEmitter {
    */
   handleMouseMove(event) {
     if (this.isDragging && this.activePointers.size === 0) {
-      console.warn("[EventCoordinator] Detected stuck drag state with no active pointers, resetting");
+      console.warn(
+        "[EventCoordinator] Detected stuck drag state with no active pointers, resetting"
+      );
       this.isDragging = false;
       this.dragStartTime = 0;
       this.dragStartPoint = null;
@@ -3153,15 +3306,14 @@ class StaticRenderer {
    * Apply static styling to Safari glow layers
    */
   applySafariStaticStyle(group, state) {
-    const glowLayers = group.querySelectorAll(".glow-layer-1, .glow-layer-2, .glow-layer-3, .glow-layer-4, .glow-layer-5");
+    const glowLayers = group.querySelectorAll(
+      ".glow-layer-1, .glow-layer-2, .glow-layer-3, .glow-layer-4, .glow-layer-5"
+    );
     glowLayers.forEach((layer, index) => {
       layer.style.transition = `opacity ${this.config.transitionDuration} ease-out`;
       layer.style.strokeDasharray = "none";
       layer.style.strokeDashoffset = "0";
-      const opacities = state === "selected" ? ["1.0", "0.8", "0.7", "0.6", "0.3"] : (
-        // Strong shadows for selected
-        ["1.0", "0.7", "0.6", "0.5", "0.25"]
-      );
+      const opacities = state === "selected" ? ["1.0", "0.8", "0.7", "0.6", "0.3"] : ["1.0", "0.7", "0.6", "0.5", "0.25"];
       layer.style.opacity = opacities[index] || "0";
     });
   }
@@ -3529,7 +3681,9 @@ class AnimationQueue {
     this.isProcessing = false;
     this.immediateExecutionThreshold = isMobile2 ? 3 : 25;
     if (isMobile2) {
-      console.log(`[MOBILE_OPTIMIZATION] Animation queue limited to ${this.maxConcurrent} concurrent animations`);
+      console.log(
+        `[MOBILE_OPTIMIZATION] Animation queue limited to ${this.maxConcurrent} concurrent animations`
+      );
     }
   }
   add(element, animationCallback) {
@@ -3909,8 +4063,8 @@ class RenderOptimizer {
     this.lastViewportZoom = zoom;
   }
   /**
-  * Set animation in progress state
-  */
+   * Set animation in progress state
+   */
   setAnimationInProgress(inProgress) {
     this.isAnimationInProgress = inProgress;
   }
@@ -4079,7 +4233,10 @@ class RendererEngine {
     });
     this.onHotspotHover = options.onHotspotHover || (() => {
     });
-    console.log("[RendererEngine] Initialized with mode renderers:", Object.keys(this.modeRenderers));
+    console.log(
+      "[RendererEngine] Initialized with mode renderers:",
+      Object.keys(this.modeRenderers)
+    );
   }
   // === INITIALIZATION ===
   /**
@@ -4107,9 +4264,9 @@ class RendererEngine {
     console.log("[RendererEngine] Initialization complete");
   }
   /**
-  * Create the complete SVG structure
-  * Orchestrates all SVG creation methods in the correct order
-  */
+   * Create the complete SVG structure
+   * Orchestrates all SVG creation methods in the correct order
+   */
   async createSVGStructure() {
     const tiledImage = this.viewer.world.getItemAt(0);
     const imageSize = tiledImage.getContentSize();
@@ -4128,10 +4285,10 @@ class RendererEngine {
     console.log("[RendererEngine] SVG structure created successfully");
   }
   /**
-  * Create the main SVG element
-  * @param {Object} imageSize - Object with x and y dimensions
-  * @returns {SVGElement} The created SVG element
-  */
+   * Create the main SVG element
+   * @param {Object} imageSize - Object with x and y dimensions
+   * @returns {SVGElement} The created SVG element
+   */
   createSVG(imageSize) {
     const svgString = `<svg xmlns="http://www.w3.org/2000/svg" 
            width="${imageSize.x}" height="${imageSize.y}" 
@@ -4142,9 +4299,9 @@ class RendererEngine {
     return svg;
   }
   /**
-  * Create mask definitions for multipolygon support
-  * Initializes the defs element and mask counter
-  */
+   * Create mask definitions for multipolygon support
+   * Initializes the defs element and mask counter
+   */
   createMaskDefs() {
     if (this.defs) return;
     this.defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
@@ -4152,9 +4309,9 @@ class RendererEngine {
     this.maskCounter = 0;
   }
   /**
-  * Create clip path definitions
-  * Creates a dedicated defs element for clip paths
-  */
+   * Create clip path definitions
+   * Creates a dedicated defs element for clip paths
+   */
   createClipPathDefs() {
     if (!this.defs) {
       this.createMaskDefs();
@@ -4165,9 +4322,9 @@ class RendererEngine {
     this.clipDefs = clipDefs;
   }
   /**
-  * Create SVG filter definitions for glow effects
-  * Creates optimized multi-layer filters for hover and selected states
-  */
+   * Create SVG filter definitions for glow effects
+   * Creates optimized multi-layer filters for hover and selected states
+   */
   createSVGFilters() {
     const filterDefs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
     const selectedFilter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
@@ -4179,24 +4336,39 @@ class RendererEngine {
     selectedFilter.setAttribute("filterUnits", "objectBoundingBox");
     selectedFilter.setAttribute("primitiveUnits", "userSpaceOnUse");
     selectedFilter.setAttribute("color-interpolation-filters", "sRGB");
-    const selectedMorph = document.createElementNS("http://www.w3.org/2000/svg", "feMorphology");
+    const selectedMorph = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "feMorphology"
+    );
     selectedMorph.setAttribute("operator", "dilate");
     selectedMorph.setAttribute("radius", "2");
     selectedMorph.setAttribute("in", "SourceAlpha");
     selectedMorph.setAttribute("result", "expanded");
-    const selectedBlur1 = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
+    const selectedBlur1 = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "feGaussianBlur"
+    );
     selectedBlur1.setAttribute("in", "expanded");
     selectedBlur1.setAttribute("stdDeviation", "3");
     selectedBlur1.setAttribute("result", "blur1");
-    const selectedBlur2 = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
+    const selectedBlur2 = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "feGaussianBlur"
+    );
     selectedBlur2.setAttribute("in", "expanded");
     selectedBlur2.setAttribute("stdDeviation", "8");
     selectedBlur2.setAttribute("result", "blur2");
-    const selectedBlur3 = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
+    const selectedBlur3 = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "feGaussianBlur"
+    );
     selectedBlur3.setAttribute("in", "expanded");
     selectedBlur3.setAttribute("stdDeviation", "15");
     selectedBlur3.setAttribute("result", "blur3");
-    const selectedTransfer1 = document.createElementNS("http://www.w3.org/2000/svg", "feComponentTransfer");
+    const selectedTransfer1 = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "feComponentTransfer"
+    );
     selectedTransfer1.setAttribute("in", "blur1");
     selectedTransfer1.setAttribute("result", "glow1");
     const selectedAlpha1 = document.createElementNS("http://www.w3.org/2000/svg", "feFuncA");
@@ -4204,7 +4376,10 @@ class RendererEngine {
     selectedAlpha1.setAttribute("slope", "0.8");
     selectedAlpha1.setAttribute("intercept", "0");
     selectedTransfer1.appendChild(selectedAlpha1);
-    const selectedTransfer2 = document.createElementNS("http://www.w3.org/2000/svg", "feComponentTransfer");
+    const selectedTransfer2 = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "feComponentTransfer"
+    );
     selectedTransfer2.setAttribute("in", "blur2");
     selectedTransfer2.setAttribute("result", "glow2");
     const selectedAlpha2 = document.createElementNS("http://www.w3.org/2000/svg", "feFuncA");
@@ -4212,7 +4387,10 @@ class RendererEngine {
     selectedAlpha2.setAttribute("slope", "0.5");
     selectedAlpha2.setAttribute("intercept", "0");
     selectedTransfer2.appendChild(selectedAlpha2);
-    const selectedTransfer3 = document.createElementNS("http://www.w3.org/2000/svg", "feComponentTransfer");
+    const selectedTransfer3 = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "feComponentTransfer"
+    );
     selectedTransfer3.setAttribute("in", "blur3");
     selectedTransfer3.setAttribute("result", "glow3");
     const selectedAlpha3 = document.createElementNS("http://www.w3.org/2000/svg", "feFuncA");
@@ -4220,18 +4398,30 @@ class RendererEngine {
     selectedAlpha3.setAttribute("slope", "0.3");
     selectedAlpha3.setAttribute("intercept", "0");
     selectedTransfer3.appendChild(selectedAlpha3);
-    const selectedInnerColor = document.createElementNS("http://www.w3.org/2000/svg", "feFlood");
+    const selectedInnerColor = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "feFlood"
+    );
     selectedInnerColor.setAttribute("flood-color", this.colorScheme.glow || "#87CEEB");
     selectedInnerColor.setAttribute("result", "innerColor");
-    const selectedOuterColor = document.createElementNS("http://www.w3.org/2000/svg", "feFlood");
+    const selectedOuterColor = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "feFlood"
+    );
     selectedOuterColor.setAttribute("flood-color", this.colorScheme.glow2 || "#4682B4");
     selectedOuterColor.setAttribute("result", "outerColor");
-    const selectedComposite1 = document.createElementNS("http://www.w3.org/2000/svg", "feComposite");
+    const selectedComposite1 = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "feComposite"
+    );
     selectedComposite1.setAttribute("in", "innerColor");
     selectedComposite1.setAttribute("in2", "glow1");
     selectedComposite1.setAttribute("operator", "in");
     selectedComposite1.setAttribute("result", "innerGlow");
-    const selectedComposite2 = document.createElementNS("http://www.w3.org/2000/svg", "feComposite");
+    const selectedComposite2 = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "feComposite"
+    );
     selectedComposite2.setAttribute("in", "outerColor");
     selectedComposite2.setAttribute("in2", "glow3");
     selectedComposite2.setAttribute("operator", "in");
@@ -4239,19 +4429,34 @@ class RendererEngine {
     const selectedMidColor = document.createElementNS("http://www.w3.org/2000/svg", "feFlood");
     selectedMidColor.setAttribute("flood-color", this.colorScheme.main || "#4682B4");
     selectedMidColor.setAttribute("result", "midColor");
-    const selectedComposite3 = document.createElementNS("http://www.w3.org/2000/svg", "feComposite");
+    const selectedComposite3 = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "feComposite"
+    );
     selectedComposite3.setAttribute("in", "midColor");
     selectedComposite3.setAttribute("in2", "glow2");
     selectedComposite3.setAttribute("operator", "in");
     selectedComposite3.setAttribute("result", "midGlow");
     const selectedMerge = document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
-    const selectedMergeNode1 = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+    const selectedMergeNode1 = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "feMergeNode"
+    );
     selectedMergeNode1.setAttribute("in", "outerGlow");
-    const selectedMergeNode2 = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+    const selectedMergeNode2 = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "feMergeNode"
+    );
     selectedMergeNode2.setAttribute("in", "midGlow");
-    const selectedMergeNode3 = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+    const selectedMergeNode3 = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "feMergeNode"
+    );
     selectedMergeNode3.setAttribute("in", "innerGlow");
-    const selectedMergeNode4 = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+    const selectedMergeNode4 = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "feMergeNode"
+    );
     selectedMergeNode4.setAttribute("in", "SourceGraphic");
     selectedMerge.appendChild(selectedMergeNode1);
     selectedMerge.appendChild(selectedMergeNode2);
@@ -4290,15 +4495,24 @@ class RendererEngine {
     const hoverOuterColor = document.createElementNS("http://www.w3.org/2000/svg", "feFlood");
     hoverOuterColor.setAttribute("flood-color", this.colorScheme.main || "#4682B4");
     hoverOuterColor.setAttribute("result", "outerColor");
-    const hoverComposite = document.createElementNS("http://www.w3.org/2000/svg", "feComposite");
+    const hoverComposite = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "feComposite"
+    );
     hoverComposite.setAttribute("in", "innerColor");
     hoverComposite.setAttribute("in2", "blur");
     hoverComposite.setAttribute("operator", "in");
     hoverComposite.setAttribute("result", "coloredBlur");
     const hoverMerge = document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
-    const hoverMergeNode1 = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+    const hoverMergeNode1 = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "feMergeNode"
+    );
     hoverMergeNode1.setAttribute("in", "coloredBlur");
-    const hoverMergeNode2 = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+    const hoverMergeNode2 = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "feMergeNode"
+    );
     hoverMergeNode2.setAttribute("in", "SourceGraphic");
     hoverMerge.appendChild(hoverMergeNode1);
     hoverMerge.appendChild(hoverMergeNode2);
@@ -4318,10 +4532,10 @@ class RendererEngine {
   }
   // === HOTSPOT MANAGEMENT ===
   /**
-  * Create a hotspot overlay element
-  * Creates the complete SVG structure for a hotspot including paths, masks, and styles
-  * Returns the created element without adding it to the DOM
-  */
+   * Create a hotspot overlay element
+   * Creates the complete SVG structure for a hotspot including paths, masks, and styles
+   * Returns the created element without adding it to the DOM
+   */
   createHotspotOverlay(hotspot, applyStyleCallback) {
     const g = this.createGroup(hotspot);
     const isMultiPolygon = hotspot.shape === "multipolygon";
@@ -4358,7 +4572,10 @@ class RendererEngine {
       hotspot.coordinates.forEach((polygon, index) => {
         if (index > 0) {
           const maskPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-          const d = polygon.reduce((acc, [x, y], i) => acc + (i === 0 ? "M" : "L") + `${Math.round(x)},${Math.round(y)}`, "") + "Z";
+          const d = polygon.reduce(
+            (acc, [x, y], i) => acc + (i === 0 ? "M" : "L") + `${Math.round(x)},${Math.round(y)}`,
+            ""
+          ) + "Z";
           maskPath.setAttribute("d", d);
           maskPath.setAttribute("fill", "black");
           maskPath.setAttribute("stroke", "black");
@@ -4382,9 +4599,9 @@ class RendererEngine {
     };
   }
   /**
-  * Create SVG group for a hotspot
-  * Creates the main <g> element with proper styling and attributes
-  */
+   * Create SVG group for a hotspot
+   * Creates the main <g> element with proper styling and attributes
+   */
   createGroup(hotspot) {
     const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
     Object.assign(g.style, {
@@ -4405,9 +4622,9 @@ class RendererEngine {
     return g;
   }
   /**
-  * Create HTML wrapper for Safari optimization
-  * Creates a div wrapper with Safari-specific performance optimizations
-  */
+   * Create HTML wrapper for Safari optimization
+   * Creates a div wrapper with Safari-specific performance optimizations
+   */
   createHotspotWrapper(hotspotId) {
     const wrapper = document.createElement("div");
     wrapper.className = "hotspot-wrapper";
@@ -4428,9 +4645,9 @@ class RendererEngine {
   }
   // === HIT DETECTION ===
   /**
-  * Initialize the hit detection canvas system
-  * Creates optimized canvas for fast hotspot detection
-  */
+   * Initialize the hit detection canvas system
+   * Creates optimized canvas for fast hotspot detection
+   */
   async initializeHitDetectionCanvas() {
     try {
       console.log("[HIT_DETECTION] Initializing canvas-based hit detection...");
@@ -4463,12 +4680,12 @@ class RendererEngine {
     console.log("[RendererEngine] LOD Manager initialized");
   }
   /**
-  * Find the smallest hotspot at a given point
-  * Uses optimized canvas-based detection when available
-  * LOD FIX - Hotspots remain clickable even if not visually rendered
-  * This ensures smaller hotspots take priority over larger ones
-  * ENHANCED: Better handling for large hotspots with nested smaller ones
-  */
+   * Find the smallest hotspot at a given point
+   * Uses optimized canvas-based detection when available
+   * LOD FIX - Hotspots remain clickable even if not visually rendered
+   * This ensures smaller hotspots take priority over larger ones
+   * ENHANCED: Better handling for large hotspots with nested smaller ones
+   */
   findSmallestHotspotAtPoint(point) {
     if (this.useHitDetectionCanvas && this.hitDetectionCanvas) {
       const hotspot = this.findHotspotUsingCanvas(point);
@@ -4491,7 +4708,9 @@ class RendererEngine {
       }
     });
     if (candidates.length === 0 && checkedCount > 0) {
-      console.log(`[HIT_DETECTION] No hotspots found at point (${point.x.toFixed(0)}, ${point.y.toFixed(0)}) - checked ${checkedCount} hotspots`);
+      console.log(
+        `[HIT_DETECTION] No hotspots found at point (${point.x.toFixed(0)}, ${point.y.toFixed(0)}) - checked ${checkedCount} hotspots`
+      );
     }
     if (candidates.length === 0) {
       return null;
@@ -4506,12 +4725,16 @@ class RendererEngine {
           return s.centerDistance < 20;
         });
         if (veryCloseSmall) {
-          console.log(`[HIT_DETECTION] Selected small hotspot very close to tap: ${veryCloseSmall.hotspot.id}`);
+          console.log(
+            `[HIT_DETECTION] Selected small hotspot very close to tap: ${veryCloseSmall.hotspot.id}`
+          );
           return veryCloseSmall.hotspot;
         }
       }
       largeHotspots.sort((a, b) => a.centerDistance - b.centerDistance);
-      console.log(`[HIT_DETECTION] Selected large hotspot (tap on surface): ${largeHotspots[0].hotspot.id} (area: ${largeHotspots[0].area})`);
+      console.log(
+        `[HIT_DETECTION] Selected large hotspot (tap on surface): ${largeHotspots[0].hotspot.id} (area: ${largeHotspots[0].area})`
+      );
       return largeHotspots[0].hotspot;
     }
     candidates.sort((a, b) => a.area - b.area);
@@ -4542,13 +4765,16 @@ class RendererEngine {
     return Math.sqrt(dx * dx + dy * dy);
   }
   /**
-  * Find hotspot using optimized canvas-based hit detection
-  * LOD FIX - Don't check visibility, allow clicks on all hotspots
-  * Converts image coordinates to screen coordinates and uses hit detection canvas
-  */
+   * Find hotspot using optimized canvas-based hit detection
+   * LOD FIX - Don't check visibility, allow clicks on all hotspots
+   * Converts image coordinates to screen coordinates and uses hit detection canvas
+   */
   findHotspotUsingCanvas(imagePoint) {
     try {
-      const viewportPoint = this.viewer.viewport.imageToViewportCoordinates(imagePoint.x, imagePoint.y);
+      const viewportPoint = this.viewer.viewport.imageToViewportCoordinates(
+        imagePoint.x,
+        imagePoint.y
+      );
       const screenPoint = this.viewer.viewport.viewportToWindowCoordinates(viewportPoint);
       const rect = this.viewer.container.getBoundingClientRect();
       const screenX = screenPoint.x - rect.left;
@@ -4567,8 +4793,8 @@ class RendererEngine {
     }
   }
   /**
-  * Check if point is inside hotspot using precise polygon detection
-  */
+   * Check if point is inside hotspot using precise polygon detection
+   */
   isPointInHotspot(point, overlay) {
     const hotspot = overlay.hotspot;
     const bounds = overlay.bounds;
@@ -4578,9 +4804,7 @@ class RendererEngine {
     if (hotspot.shape === "polygon") {
       return pointInPolygon(point.x, point.y, hotspot.coordinates);
     } else if (hotspot.shape === "multipolygon") {
-      return hotspot.coordinates.some(
-        (polygon) => pointInPolygon(point.x, point.y, polygon)
-      );
+      return hotspot.coordinates.some((polygon) => pointInPolygon(point.x, point.y, polygon));
     }
     return false;
   }
@@ -4738,7 +4962,9 @@ class StyleManager {
       }
     });
     const mainPath = group.querySelector(".main-path");
-    const glowLayers = group.querySelectorAll(".glow-layer-1, .glow-layer-2, .glow-layer-3, .glow-layer-4, .glow-layer-5");
+    const glowLayers = group.querySelectorAll(
+      ".glow-layer-1, .glow-layer-2, .glow-layer-3, .glow-layer-4, .glow-layer-5"
+    );
     if (mainPath) {
       if (mainPath.currentAnimation) {
         mainPath.currentAnimation.cancel();
@@ -4765,7 +4991,10 @@ class StyleManager {
       layer.style.animation = "none";
       layer.style.visibility = "visible";
     });
-    group.setAttribute("class", `hotspot-${group.getAttribute("data-hotspot-type") || "area"} hotspot-normal`);
+    group.setAttribute(
+      "class",
+      `hotspot-${group.getAttribute("data-hotspot-type") || "area"} hotspot-normal`
+    );
     group.setAttribute("data-current-state", "normal");
     group.setAttribute("data-animation-active", "false");
     group.setAttribute("data-animation-completed", "false");
@@ -4860,7 +5089,10 @@ class StyleManager {
     const isInSpotlight = this.areAnimationsPaused() && state === "hover" && this.allowHoverDuringSpotlight;
     const useStaticStyle = currentZoom > 8 && !isInSpotlight;
     if (isInSpotlight && currentZoom > 8) {
-      logger$1.debug("🎯 Spotlight hover detected - bypassing static mode to allow animation at zoom:", currentZoom.toFixed(2));
+      logger$1.debug(
+        "🎯 Spotlight hover detected - bypassing static mode to allow animation at zoom:",
+        currentZoom.toFixed(2)
+      );
     }
     const stateChanged = currentState !== state;
     const isUserInteraction = state !== "normal" && stateChanged;
@@ -4878,7 +5110,15 @@ class StyleManager {
       return;
     }
     if ((state === "hover" || state === "selected") && useStaticStyle && !this.temporalRenderer.isActive()) {
-      logger$1.debug("Using static mode at zoom:", currentZoom.toFixed(2), "for state:", state, "(spotlight check:", isInSpotlight, ")");
+      logger$1.debug(
+        "Using static mode at zoom:",
+        currentZoom.toFixed(2),
+        "for state:",
+        state,
+        "(spotlight check:",
+        isInSpotlight,
+        ")"
+      );
       this.staticRenderer.applyStaticStyle(group, type, state, this.colorScheme);
       return;
     }
@@ -4886,7 +5126,9 @@ class StyleManager {
       const isAnimationActive = group.getAttribute("data-animation-active");
       const animationCompleted2 = group.getAttribute("data-animation-completed") === "true";
       if (state === "selected" && currentState === "hover") {
-        logger$1.debug(`Transition hover → selected for ${hotspotId}, animationActive=${isAnimationActive}, animationCompleted=${animationCompleted2}`);
+        logger$1.debug(
+          `Transition hover → selected for ${hotspotId}, animationActive=${isAnimationActive}, animationCompleted=${animationCompleted2}`
+        );
         group.setAttribute("data-current-state", "selected");
         group.setAttribute("data-animation-active", "false");
         group.setAttribute("data-animation-completed", "true");
@@ -4904,9 +5146,13 @@ class StyleManager {
         }
       } else if (state === "selected") {
         const wasSelected = group.getAttribute("data-was-selected") === "true";
-        logger$1.debug(`Direct to selected for ${hotspotId}, wasSelected=${wasSelected}, animationCompleted=${animationCompleted2}`);
+        logger$1.debug(
+          `Direct to selected for ${hotspotId}, wasSelected=${wasSelected}, animationCompleted=${animationCompleted2}`
+        );
         if (wasSelected || animationCompleted2) {
-          logger$1.debug(`Preventing animation for selected state (wasSelected=${wasSelected}, completed=${animationCompleted2}`);
+          logger$1.debug(
+            `Preventing animation for selected state (wasSelected=${wasSelected}, completed=${animationCompleted2}`
+          );
           group.setAttribute("data-current-state", "selected");
           group.removeAttribute("data-was-selected");
         }
@@ -4976,7 +5222,9 @@ class StyleManager {
         }
         this.memoryManager.registerAnimation(stateKey);
       } else if (this.isSafari && disableStrokeAnimation) {
-        const glowLayers = group.querySelectorAll(".glow-layer-1, .glow-layer-2, .glow-layer-3");
+        const glowLayers = group.querySelectorAll(
+          ".glow-layer-1, .glow-layer-2, .glow-layer-3"
+        );
         const mainPath2 = group.querySelector(".main-path");
         const opacities = {
           mainPath: "1",
@@ -5017,7 +5265,9 @@ class StyleManager {
           strokeConfig.stroke = "transparent";
           strokeConfig.strokeWidth = "0";
           strokeConfig.opacity = "0";
-          logger$1.debug(`Canvas2D detected - making borders transparent for hotspot ${hotspotId}`);
+          logger$1.debug(
+            `Canvas2D detected - making borders transparent for hotspot ${hotspotId}`
+          );
         }
         if (state === "selected") {
           logger$1.debug(`Initial style config for selected:`, strokeConfig);
@@ -5089,7 +5339,9 @@ class StyleManager {
           });
           let shouldExecuteAnimation = false;
           if (state === "selected") {
-            logger$1.debug(`Selected state - showing stroke immediately for ${hotspotId}`);
+            logger$1.debug(
+              `Selected state - showing stroke immediately for ${hotspotId}`
+            );
             logger$1.debug(`BLOCKING animation for selected state`);
             mainPath.style.strokeDasharray = "none";
             mainPath.style.strokeDashoffset = "0";
@@ -5100,7 +5352,9 @@ class StyleManager {
             group.removeAttribute("data-was-selected");
             options.skipAnimation = true;
           } else if (state === "hover" && !isCurrentlySelected) {
-            logger$1.debug(`Starting hover animation for ${hotspotId} (not in spotlight)`);
+            logger$1.debug(
+              `Starting hover animation for ${hotspotId} (not in spotlight)`
+            );
             shouldExecuteAnimation = true;
             group.setAttribute("data-animation-active", "true");
             const isOrganicAnimation2 = this.currentEasingName && this.currentEasingName.toLowerCase().includes("organic") || this.timingEasing && this.timingEasing.includes("organic");
@@ -5119,11 +5373,15 @@ class StyleManager {
             void mainPath.offsetWidth;
             if (isOrganicAnimation2 && hotspotId) {
               if (window.DEBUG_ANIMATIONS) {
-                logger$1.perf(`[Random Start] Organic animation will use random starting point`);
+                logger$1.perf(
+                  `[Random Start] Organic animation will use random starting point`
+                );
               }
             }
           } else {
-            logger$1.debug(`Skipping animation for ${hotspotId} - isCurrentlySelected=${isCurrentlySelected}, state=${state}`);
+            logger$1.debug(
+              `Skipping animation for ${hotspotId} - isCurrentlySelected=${isCurrentlySelected}, state=${state}`
+            );
             mainPath.style.strokeDasharray = "none";
             mainPath.style.strokeDashoffset = "0";
             mainPath.style.opacity = isCanvas2D2 ? "0" : "1.0";
@@ -5141,10 +5399,15 @@ class StyleManager {
           const isOrganicAnimation = this.currentEasingName && this.currentEasingName.toLowerCase().includes("organic") || this.timingEasing && this.timingEasing.includes("organic");
           if (isOrganicAnimation && hotspotId) {
             const originalDuration = animationDuration;
-            animationDuration = organicVariations.applyDurationVariation(animationDuration, hotspotId);
+            animationDuration = organicVariations.applyDurationVariation(
+              animationDuration,
+              hotspotId
+            );
             const percentChange = ((animationDuration - originalDuration) / originalDuration * 100).toFixed(1);
             if (window.DEBUG_ANIMATIONS) {
-              logger$1.perf(`[Micro-Variations] ⏱️ Duration variation for ${hotspotId}: ${originalDuration.toFixed(3)}s → ${animationDuration.toFixed(3)}s (${percentChange}%)`);
+              logger$1.perf(
+                `[Micro-Variations] ⏱️ Duration variation for ${hotspotId}: ${originalDuration.toFixed(3)}s → ${animationDuration.toFixed(3)}s (${percentChange}%)`
+              );
             }
           }
           const currentZoom2 = ((_g = (_f = this.viewer) == null ? void 0 : _f.viewport) == null ? void 0 : _g.getZoom()) || 1;
@@ -5155,10 +5418,14 @@ class StyleManager {
           const animateFunction = () => {
             var _a2;
             if (state === "selected") {
-              logger$1.debug(`ANIMATION FUNCTION: Blocking animation for selected state`);
+              logger$1.debug(
+                `ANIMATION FUNCTION: Blocking animation for selected state`
+              );
               return;
             }
-            logger$1.debug(`ANIMATION FUNCTION: Starting animation for ${hotspotId} in ${state} state`);
+            logger$1.debug(
+              `ANIMATION FUNCTION: Starting animation for ${hotspotId} in ${state} state`
+            );
             const overlayManager3 = window.overlayManager || ((_a2 = this.viewer) == null ? void 0 : _a2.overlayManager);
             const isCanvas2DInner = overlayManager3 && overlayManager3.constructor.name === "Canvas2DOverlayManager";
             const maxZoom = 10;
@@ -5177,76 +5444,91 @@ class StyleManager {
             const isOrganicAnimation2 = this.currentEasingName && this.currentEasingName.toLowerCase().includes("organic") || this.timingEasing && this.timingEasing.includes("organic");
             if (isOrganicAnimation2 && hotspotId) {
               const originalEasing = this.timingEasing;
-              animationEasing = organicVariations.applyEasingVariation(this.timingEasing, hotspotId);
+              animationEasing = organicVariations.applyEasingVariation(
+                this.timingEasing,
+                hotspotId
+              );
               if (window.DEBUG_ANIMATIONS) {
-                logger$1.perf(`[Micro-Variations] 🎨 Easing variation for ${hotspotId}:`, {
-                  original: originalEasing,
-                  varied: animationEasing
-                });
+                logger$1.perf(
+                  `[Micro-Variations] 🎨 Easing variation for ${hotspotId}:`,
+                  {
+                    original: originalEasing,
+                    varied: animationEasing
+                  }
+                );
               }
             }
             const pathLength = 100;
             const randomStart = Math.random() * pathLength;
             if (window.DEBUG_ANIMATIONS) {
-              logger$1.perf(`[Random Start] Rotating dash animation for ${hotspotId}: starting at ${randomStart.toFixed(1)}% of path`);
+              logger$1.perf(
+                `[Random Start] Rotating dash animation for ${hotspotId}: starting at ${randomStart.toFixed(1)}% of path`
+              );
             }
             mainPath.style.strokeDasharray = `0 ${pathLength}`;
             mainPath.style.strokeDashoffset = "0";
             mainPath.style.opacity = finalOpacity;
             void mainPath.offsetWidth;
-            mainPath.currentAnimation = mainPath.animate([
+            mainPath.currentAnimation = mainPath.animate(
+              [
+                {
+                  // Start: completely hidden stroke (via dasharray, not opacity)
+                  strokeDasharray: `0 ${pathLength}`,
+                  strokeDashoffset: `${-randomStart}`,
+                  opacity: finalOpacity,
+                  // Keep constant opacity
+                  offset: 0
+                },
+                {
+                  // Early: ink flow begins to appear
+                  strokeDasharray: `${pathLength * 0.1} ${pathLength * 0.9}`,
+                  strokeDashoffset: `${-randomStart}`,
+                  opacity: finalOpacity,
+                  // Keep constant opacity
+                  offset: 0.1
+                },
+                {
+                  // Middle: confident ink flow
+                  strokeDasharray: `${pathLength * 0.5} ${pathLength * 0.5}`,
+                  strokeDashoffset: `${-randomStart}`,
+                  opacity: finalOpacity,
+                  // Keep constant opacity
+                  offset: 0.5
+                },
+                {
+                  // Near end: almost complete
+                  strokeDasharray: `${pathLength * 0.95} ${pathLength * 0.05}`,
+                  strokeDashoffset: `${-randomStart}`,
+                  opacity: finalOpacity,
+                  offset: 0.95
+                },
+                {
+                  // End: complete path visible - keep the same offset to avoid jump
+                  strokeDasharray: `${pathLength} 0`,
+                  strokeDashoffset: `${-randomStart}`,
+                  opacity: finalOpacity,
+                  offset: 1
+                }
+              ],
               {
-                // Start: completely hidden stroke (via dasharray, not opacity)
-                strokeDasharray: `0 ${pathLength}`,
-                strokeDashoffset: `${-randomStart}`,
-                opacity: finalOpacity,
-                // Keep constant opacity
-                offset: 0
-              },
-              {
-                // Early: ink flow begins to appear
-                strokeDasharray: `${pathLength * 0.1} ${pathLength * 0.9}`,
-                strokeDashoffset: `${-randomStart}`,
-                opacity: finalOpacity,
-                // Keep constant opacity
-                offset: 0.1
-              },
-              {
-                // Middle: confident ink flow
-                strokeDasharray: `${pathLength * 0.5} ${pathLength * 0.5}`,
-                strokeDashoffset: `${-randomStart}`,
-                opacity: finalOpacity,
-                // Keep constant opacity
-                offset: 0.5
-              },
-              {
-                // Near end: almost complete
-                strokeDasharray: `${pathLength * 0.95} ${pathLength * 0.05}`,
-                strokeDashoffset: `${-randomStart}`,
-                opacity: finalOpacity,
-                offset: 0.95
-              },
-              {
-                // End: complete path visible - keep the same offset to avoid jump
-                strokeDasharray: `${pathLength} 0`,
-                strokeDashoffset: `${-randomStart}`,
-                opacity: finalOpacity,
-                offset: 1
+                duration: animationDuration * 1e3,
+                easing: animationEasing,
+                fill: "forwards"
               }
-            ], {
-              duration: animationDuration * 1e3,
-              easing: animationEasing,
-              fill: "forwards"
-            });
+            );
             const animationStartTime = performance.now();
             if (window.DEBUG_ANIMATIONS) {
-              logger$1.perf(`[Animation] Stroke animation STARTED for ${group.getAttribute("data-hotspot-id")} at ${animationStartTime.toFixed(0)}ms`);
+              logger$1.perf(
+                `[Animation] Stroke animation STARTED for ${group.getAttribute("data-hotspot-id")} at ${animationStartTime.toFixed(0)}ms`
+              );
             }
             mainPath.currentAnimation.onfinish = () => {
               const animationEndTime = performance.now();
               const actualDuration = animationEndTime - animationStartTime;
               if (window.DEBUG_ANIMATIONS) {
-                logger$1.perf(`[Animation] Stroke animation FINISHED for ${group.getAttribute("data-hotspot-id")} at ${animationEndTime.toFixed(0)}ms (actual duration: ${actualDuration.toFixed(0)}ms, expected: ${(animationDuration * 1e3).toFixed(0)}ms`);
+                logger$1.perf(
+                  `[Animation] Stroke animation FINISHED for ${group.getAttribute("data-hotspot-id")} at ${animationEndTime.toFixed(0)}ms (actual duration: ${actualDuration.toFixed(0)}ms, expected: ${(animationDuration * 1e3).toFixed(0)}ms`
+                );
               }
               mainPath.currentAnimation = null;
               group.setAttribute("data-animation-active", "false");
@@ -5257,7 +5539,9 @@ class StyleManager {
                 mainPath.style.strokeDashoffset = "0";
                 mainPath.style.opacity = finalOpacity;
               } else {
-                logger$1.debug(`Animation finished but state is now '${currentState2}' - hiding stroke`);
+                logger$1.debug(
+                  `Animation finished but state is now '${currentState2}' - hiding stroke`
+                );
                 mainPath.style.strokeDasharray = "none";
                 mainPath.style.strokeDashoffset = "0";
                 mainPath.style.opacity = "0";
@@ -5271,16 +5555,22 @@ class StyleManager {
           if (shouldExecuteAnimation) {
             logger$1.debug(`Animation should be executed for ${hotspotId}`);
             if (useQueue) {
-              logger$1.debug(`🎭 Adding animation to queue for hotspot ${hotspotId}`);
+              logger$1.debug(
+                `🎭 Adding animation to queue for hotspot ${hotspotId}`
+              );
               this.animationQueue.add(group, animateFunction);
             } else {
-              logger$1.debug(`⚡ QUICK WIN #4: Immediate animation execution for hotspot ${hotspotId}`);
+              logger$1.debug(
+                `⚡ QUICK WIN #4: Immediate animation execution for hotspot ${hotspotId}`
+              );
               animateFunction();
             }
             group.setAttribute("data-animation-active", "true");
             this.memoryManager.registerAnimation(stateKey);
           } else {
-            logger$1.debug(`Animation execution SKIPPED for ${hotspotId} - shouldExecuteAnimation=${shouldExecuteAnimation}`);
+            logger$1.debug(
+              `Animation execution SKIPPED for ${hotspotId} - shouldExecuteAnimation=${shouldExecuteAnimation}`
+            );
           }
         } else {
           mainPath.style.strokeDasharray = "none";
@@ -5387,13 +5677,78 @@ class ActiveHotspotManager {
   }
   /**
    * Update which hotspots should be active based on LOD selection
-   * This is the key optimization - only manage active hotspots
+   * PHASE 2 OPTIMIZATION: Batched single-class toggle (86ms → <10ms)
+   * Instead of 2 classList operations per hotspot (remove + add), use 1 operation
    */
   updateActiveSet(selectedHotspotIds) {
     if (window.temporalEchoController && window.temporalEchoController.isRevealing) {
       console.log("[ActiveHotspotManager] Skipped - temporal echo active");
       return;
     }
+    const startTime = performance.now();
+    const newVisibleIds = new Set(selectedHotspotIds);
+    const toShow = [];
+    const toHide = [];
+    this.allHotspots.forEach((data, id) => {
+      const shouldBeVisible = newVisibleIds.has(id);
+      const isCurrentlyVisible = this.activeHotspots.has(id);
+      if (shouldBeVisible && !isCurrentlyVisible) {
+        toShow.push(data);
+      } else if (!shouldBeVisible && isCurrentlyVisible) {
+        toHide.push(data);
+      }
+    });
+    if (toShow.length > 0 || toHide.length > 0) {
+      const totalOps = toShow.length + toHide.length;
+      const useRAF = totalOps >= 5;
+      const applyChanges = () => {
+        const batchStart = performance.now();
+        toHide.forEach((data) => {
+          if (data.element) {
+            const classes = data.element.className.baseVal || data.element.className;
+            data.element.className.baseVal = classes.replace(
+              "hotspot-visible",
+              "hotspot-hidden"
+            );
+          }
+        });
+        toShow.forEach((data) => {
+          if (data.element) {
+            const classes = data.element.className.baseVal || data.element.className;
+            data.element.className.baseVal = classes.replace(
+              "hotspot-hidden",
+              "hotspot-visible"
+            );
+          }
+        });
+        toHide.forEach((data) => this.activeHotspots.delete(data.id));
+        toShow.forEach((data) => this.activeHotspots.set(data.id, data));
+        this.visibleIds = newVisibleIds;
+        this.stats.activeHotspots = this.activeHotspots.size;
+        this.stats.domOperations = toShow.length + toHide.length;
+        this.stats.lastUpdateTime = performance.now() - startTime;
+        const batchTime = performance.now() - batchStart;
+        if (this.stats.lastUpdateTime > 10) {
+          console.log(
+            `[ActiveHotspotManager] Update: ${this.stats.activeHotspots} active, ${this.stats.domOperations} ops in ${this.stats.lastUpdateTime.toFixed(2)}ms (batch: ${batchTime.toFixed(2)}ms, mode: ${useRAF ? "RAF" : "SYNC"})`
+          );
+        }
+      };
+      if (useRAF) {
+        requestAnimationFrame(applyChanges);
+      } else {
+        applyChanges();
+      }
+    } else {
+      this.stats.lastUpdateTime = performance.now() - startTime;
+    }
+  }
+  /**
+   * Legacy update method using individual classList operations
+   * Kept as fallback if SVG container is not found
+   * This is the OLD slow method (86ms for 15 hotspots)
+   */
+  _updateActiveSetLegacy(selectedHotspotIds) {
     const startTime = performance.now();
     const newVisibleIds = new Set(selectedHotspotIds);
     const toShow = [];
@@ -5428,7 +5783,9 @@ class ActiveHotspotManager {
         this.stats.domOperations = toShow.length + toHide.length;
         this.stats.lastUpdateTime = performance.now() - startTime;
         if (this.stats.lastUpdateTime > 50) {
-          console.log(`[ActiveHotspotManager] Slow update: ${this.stats.activeHotspots} active, ${this.stats.domOperations} DOM ops in ${this.stats.lastUpdateTime.toFixed(2)}ms`);
+          console.log(
+            `[ActiveHotspotManager] LEGACY Slow update: ${this.stats.activeHotspots} active, ${this.stats.domOperations} DOM ops in ${this.stats.lastUpdateTime.toFixed(2)}ms`
+          );
         }
       });
     } else {
@@ -5474,7 +5831,9 @@ class ActiveHotspotManager {
       });
     }
     if (hotspotIds.length > maxForceShow) {
-      console.log(`[ActiveHotspotManager] Limited forced hotspots from ${hotspotIds.length} to ${maxForceShow} for performance`);
+      console.log(
+        `[ActiveHotspotManager] Limited forced hotspots from ${hotspotIds.length} to ${maxForceShow} for performance`
+      );
     }
   }
   /**
@@ -5603,9 +5962,7 @@ class AsyncHitDetector {
     const bounds = hotspotData.bounds;
     const centerX = (bounds.minX + bounds.maxX) / 2;
     const centerY = (bounds.minY + bounds.maxY) / 2;
-    return Math.sqrt(
-      Math.pow(point.x - centerX, 2) + Math.pow(point.y - centerY, 2)
-    );
+    return Math.sqrt(Math.pow(point.x - centerX, 2) + Math.pow(point.y - centerY, 2));
   }
   /**
    * Pre-calculate viewport bounds for hit testing
@@ -5950,7 +6307,9 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
           if (this.memoryManager) {
             this.memoryManager.clearAllAnimations();
           }
-          const allHotspots = document.querySelectorAll('[data-animation-completed="true"], [data-animation-active="true"]');
+          const allHotspots = document.querySelectorAll(
+            '[data-animation-completed="true"], [data-animation-active="true"]'
+          );
           allHotspots.forEach((hotspot) => {
             hotspot.removeAttribute("data-animation-completed");
             hotspot.removeAttribute("data-animation-active");
@@ -5969,7 +6328,11 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
     };
     this.currentPalette = "pigmentLinerNeutral";
     this.colorScheme = this.colorPalettes[this.currentPalette];
-    console.log("[PigmentLiner] Using authentic pigment liner palette:", this.currentPalette, this.colorScheme);
+    console.log(
+      "[PigmentLiner] Using authentic pigment liner palette:",
+      this.currentPalette,
+      this.colorScheme
+    );
     window.hotspotColorScheme = this.colorScheme;
     window.setPigmentLinerVariant = (variant) => {
       const validVariants = ["pigmentLinerNeutral", "pigmentLinerWarm", "pigmentLinerCool"];
@@ -5987,7 +6350,9 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
       }
     };
     console.log("[PigmentLiner] Available variants: neutral (default), warm, cool");
-    console.log('[PigmentLiner] Switch with: window.setPigmentLinerVariant("pigmentLinerWarm") or "pigmentLinerCool"');
+    console.log(
+      '[PigmentLiner] Switch with: window.setPigmentLinerVariant("pigmentLinerWarm") or "pigmentLinerCool"'
+    );
     if (this.staticRenderer) {
       this.staticRenderer.colorScheme = this.colorScheme;
     }
@@ -6146,7 +6511,9 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
     this.maskCounter = this.engine.maskCounter;
     if (this.centralEventManager && this.svg) {
       this.centralEventManager.initialize(this.svg);
-      console.log("[PERF] CentralizedEventManager initialized - replaced 2400+ listeners with 1");
+      console.log(
+        "[PERF] CentralizedEventManager initialized - replaced 2400+ listeners with 1"
+      );
       const stats = this.centralEventManager.getStats();
       console.log("[PERF] Event delegation stats:", stats);
     }
@@ -6210,7 +6577,9 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
               previousZoom: previousZoom.toFixed(2),
               currentZoom: this.currentZoom.toFixed(2)
             });
-            this.applyStyle(overlay.element, currentHovered.type, "hover", { skipAnimation: animationCompleted });
+            this.applyStyle(overlay.element, currentHovered.type, "hover", {
+              skipAnimation: animationCompleted
+            });
           }
         }
       }
@@ -6220,7 +6589,9 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
           const currentState = overlay.element.getAttribute("data-current-state");
           overlay.element.getAttribute("data-animation-completed") === "true";
           if (currentState !== "selected" && crossingThreshold) {
-            this.applyStyle(overlay.element, currentSelected.type, "selected", { skipAnimation: true });
+            this.applyStyle(overlay.element, currentSelected.type, "selected", {
+              skipAnimation: true
+            });
           }
         }
       }
@@ -6271,10 +6642,7 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
         return;
       }
       const rect = this.viewer.element.getBoundingClientRect();
-      const pixelPoint = new OpenSeadragon.Point(
-        data.x - rect.left,
-        data.y - rect.top
-      );
+      const pixelPoint = new OpenSeadragon.Point(data.x - rect.left, data.y - rect.top);
       const viewportPoint = this.viewer.viewport.pointFromPixel(pixelPoint);
       const imagePoint = this.viewer.viewport.viewportToImageCoordinates(viewportPoint);
       const foundHotspot = this.engine.findSmallestHotspotAtPoint(imagePoint);
@@ -6354,10 +6722,7 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
         return;
       }
       const rect = this.viewer.element.getBoundingClientRect();
-      const pixelPoint = new OpenSeadragon.Point(
-        data.x - rect.left,
-        data.y - rect.top
-      );
+      const pixelPoint = new OpenSeadragon.Point(data.x - rect.left, data.y - rect.top);
       const viewportPoint = this.viewer.viewport.pointFromPixel(pixelPoint);
       const imagePoint = this.viewer.viewport.viewportToImageCoordinates(viewportPoint);
       const clickedHotspot = this.engine.findSmallestHotspotAtPoint(imagePoint);
@@ -6369,10 +6734,16 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
           const overlay = this.stateManager.getOverlay(clickedHotspot.id);
           const isRevealed = overlay && overlay.element && overlay.element.getAttribute("data-hotspot-revealed") === "true";
           if (isRevealed) {
-            console.log("Revealed hotspot clicked, triggering cinematic zoom:", clickedHotspot.id);
+            console.log(
+              "Revealed hotspot clicked, triggering cinematic zoom:",
+              clickedHotspot.id
+            );
             this.activateHotspot(clickedHotspot);
           } else {
-            console.log("Non-revealed hotspot clicked, triggering echo reveal:", clickedHotspot.id);
+            console.log(
+              "Non-revealed hotspot clicked, triggering echo reveal:",
+              clickedHotspot.id
+            );
             this.viewer.element.getBoundingClientRect();
             const tapData = {
               x: data.event.clientX,
@@ -6434,9 +6805,13 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
       }
       return;
     }
+    const hasValidCoords = event && typeof event.clientX === "number" && typeof event.clientY === "number";
     const currentHovered = this.stateManager.getHoveredHotspot();
-    if (this.isMobile && currentHovered) {
-      console.log("Using cached hover hotspot for mobile click");
+    if ((this.isMobile || !hasValidCoords) && currentHovered) {
+      console.log("[NativeHotspotRenderer] Using cached hover hotspot", {
+        reason: !hasValidCoords ? "invalid_coords" : "mobile_optimization",
+        hotspotId: currentHovered
+      });
       if (event && typeof event.stopPropagation === "function") {
         event.stopPropagation();
       }
@@ -6446,13 +6821,41 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
       this.activateHotspot(currentHovered);
       return;
     }
+    if (!hasValidCoords) {
+      console.warn("[NativeHotspotRenderer] Invalid coords and no cached hotspot", {
+        hasEvent: !!event,
+        clientX: event == null ? void 0 : event.clientX,
+        clientY: event == null ? void 0 : event.clientY,
+        eventType: event == null ? void 0 : event.type,
+        cachedHovered: currentHovered
+      });
+      return;
+    }
     const rect = this.viewer.element.getBoundingClientRect();
     const pixelPoint = new OpenSeadragon.Point(
       event.clientX - rect.left,
       event.clientY - rect.top
     );
+    if (!Number.isFinite(pixelPoint.x) || !Number.isFinite(pixelPoint.y)) {
+      console.warn("[NativeHotspotRenderer] Invalid pixel point calculated", {
+        pixelPoint,
+        clientX: event.clientX,
+        clientY: event.clientY,
+        rectLeft: rect.left,
+        rectTop: rect.top
+      });
+      return;
+    }
     const viewportPoint = this.viewer.viewport.pointFromPixel(pixelPoint);
     const imagePoint = this.viewer.viewport.viewportToImageCoordinates(viewportPoint);
+    if (!Number.isFinite(imagePoint.x) || !Number.isFinite(imagePoint.y)) {
+      console.warn("[NativeHotspotRenderer] Invalid image point calculated", {
+        imagePoint,
+        viewportPoint,
+        pixelPoint
+      });
+      return;
+    }
     const clickedHotspot = this.engine.findSmallestHotspotAtPoint(imagePoint);
     if (clickedHotspot) {
       event.stopPropagation();
@@ -6480,7 +6883,9 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
         const timeSinceDrag = Date.now() - this.eventCoordinator.lastDragEndTime;
         const dragBlockThreshold = this.isMobile ? 100 : 300;
         if (timeSinceDrag < dragBlockThreshold) {
-          console.log(`⚠️ Blocking hotspot activation - only ${timeSinceDrag}ms since drag ended (threshold: ${dragBlockThreshold}ms)`);
+          console.log(
+            `⚠️ Blocking hotspot activation - only ${timeSinceDrag}ms since drag ended (threshold: ${dragBlockThreshold}ms)`
+          );
           return;
         }
       }
@@ -6533,8 +6938,8 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
     });
   }
   /**
-  * Deselect current hotspot
-  */
+   * Deselect current hotspot
+   */
   deselectHotspot() {
     var _a, _b;
     const previousSelected = this.stateManager.getSelectedHotspot();
@@ -6542,7 +6947,9 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
       previousSelected: (previousSelected == null ? void 0 : previousSelected.id) || "none"
     });
     this.stateManager.setSelectedHotspot(null);
-    const allHotspotGroups = document.querySelectorAll('g[data-canvas2d-selected="true"], g[style*="display: none"]');
+    const allHotspotGroups = document.querySelectorAll(
+      'g[data-canvas2d-selected="true"], g[style*="display: none"]'
+    );
     allHotspotGroups.forEach((group) => {
       if (this.styleManager && this.styleManager.ensureHotspotVisibility) {
         this.styleManager.ensureHotspotVisibility(group);
@@ -6663,12 +7070,12 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
     console.log("✅ Animation state reset complete");
   }
   /**
-  * Instantly deselect without transitions (for synchronized auto-deselect)
-  */
+   * Instantly deselect without transitions (for synchronized auto-deselect)
+   */
   /**
-  * Instantly deselect without transitions (for synchronized auto-deselect)
-  * @param {boolean} isFromHoverExit - True if called from leaving hover, false for real deselection
-  */
+   * Instantly deselect without transitions (for synchronized auto-deselect)
+   * @param {boolean} isFromHoverExit - True if called from leaving hover, false for real deselection
+   */
   instantDeselect(isFromHoverExit = false) {
     const currentSelected = this.stateManager.getSelectedHotspot();
     if (!currentSelected) {
@@ -6718,7 +7125,9 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
         }
         const mainPath = hotspotGroup.querySelector(".main-path");
         const hasVisibleBorder = mainPath && (mainPath.style.opacity !== "0" && mainPath.style.opacity !== "" || mainPath.style.strokeDasharray === "none" || mainPath.style.strokeDasharray === "100 0" || // Improved Safari detection: check animation-completed attribute and glow layers presence
-        this.isSafari && (hotspotGroup.getAttribute("data-animation-completed") === "true" || hotspotGroup.querySelector(".glow-layer-1, .glow-layer-2, .glow-layer-3") !== null));
+        this.isSafari && (hotspotGroup.getAttribute("data-animation-completed") === "true" || hotspotGroup.querySelector(
+          ".glow-layer-1, .glow-layer-2, .glow-layer-3"
+        ) !== null));
         let shouldReset = false;
         if (this.isSafari) {
           if (this.isLeavingHover) {
@@ -6730,7 +7139,9 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
           shouldReset = hasVisibleBorder || currentState === "hover" || currentState === "selected";
         }
         if (shouldReset) {
-          console.log(`Resetting hotspot ${hotspotId} to normal state (visible=${hasVisibleBorder}, state=${currentState})`);
+          console.log(
+            `Resetting hotspot ${hotspotId} to normal state (visible=${hasVisibleBorder}, state=${currentState})`
+          );
           const overlayData = this.stateManager.getOverlay(hotspotId);
           if (overlayData && overlayData.hotspot) {
             this.applyStyle(hotspotGroup, overlayData.hotspot.type, "normal");
@@ -6787,10 +7198,16 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
       }
     }
     if (state === "hover" && hotspotId === this.recentlyAutoDeselected && !this.isAutoDeselecting) {
-      console.log("⛔ Blocking hover animation on recently auto-deselected hotspot:", hotspotId);
+      console.log(
+        "⛔ Blocking hover animation on recently auto-deselected hotspot:",
+        hotspotId
+      );
       if (!this._recentlyAutoDeselectedClearTimeout) {
         this._recentlyAutoDeselectedClearTimeout = setTimeout(() => {
-          console.log("🗳️ Clearing recentlyAutoDeselected flag for:", this.recentlyAutoDeselected);
+          console.log(
+            "🗳️ Clearing recentlyAutoDeselected flag for:",
+            this.recentlyAutoDeselected
+          );
           this.recentlyAutoDeselected = null;
           this._recentlyAutoDeselectedClearTimeout = null;
         }, 1e3);
@@ -6845,21 +7262,24 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
                     `;
         }
         this.memoryManager.registerAnimation(`${hotspot.id}-hover`);
-        console.log("🏁 Added hover maintenance flags and registered animation as completed for hotspot:", hotspot.id);
+        console.log(
+          "🏁 Added hover maintenance flags and registered animation as completed for hotspot:",
+          hotspot.id
+        );
       }
     }
   }
   /**
-  * Reset transition styles when exiting static mode
-  * Ensures animations can play again properly
-  */
+   * Reset transition styles when exiting static mode
+   * Ensures animations can play again properly
+   */
   resetStaticTransitions(group) {
     this.staticRenderer.resetTransitions(group);
   }
   /**
-  * Clear all animation registry entries when crossing zoom threshold
-  * This prevents stale entries from blocking future animations
-  */
+   * Clear all animation registry entries when crossing zoom threshold
+   * This prevents stale entries from blocking future animations
+   */
   clearAnimationRegistryForZoomChange() {
     const preserveStates = /* @__PURE__ */ new Set();
     const currentHovered = this.stateManager.getHoveredHotspot();
@@ -6952,11 +7372,21 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
     if (!this.isSafari) return;
   }
   updateFilterColors() {
-    const selectedInnerColor = this.svg.querySelector('#hotspot-glow-selected feFlood[result="innerColor"]');
-    const selectedOuterColor = this.svg.querySelector('#hotspot-glow-selected feFlood[result="outerColor"]');
-    const selectedMidColor = this.svg.querySelector('#hotspot-glow-selected feFlood[result="midColor"]');
-    const hoverInnerColor = this.svg.querySelector('#hotspot-glow-hover feFlood[result="innerColor"]');
-    const hoverOuterColor = this.svg.querySelector('#hotspot-glow-hover feFlood[result="outerColor"]');
+    const selectedInnerColor = this.svg.querySelector(
+      '#hotspot-glow-selected feFlood[result="innerColor"]'
+    );
+    const selectedOuterColor = this.svg.querySelector(
+      '#hotspot-glow-selected feFlood[result="outerColor"]'
+    );
+    const selectedMidColor = this.svg.querySelector(
+      '#hotspot-glow-selected feFlood[result="midColor"]'
+    );
+    const hoverInnerColor = this.svg.querySelector(
+      '#hotspot-glow-hover feFlood[result="innerColor"]'
+    );
+    const hoverOuterColor = this.svg.querySelector(
+      '#hotspot-glow-hover feFlood[result="outerColor"]'
+    );
     if (selectedInnerColor) {
       selectedInnerColor.setAttribute("flood-color", this.colorScheme.glow || "#87CEEB");
     }
@@ -6974,8 +7404,8 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
     }
   }
   /**
-  * Get hotspot bounds for a specific hotspot
-  */
+   * Get hotspot bounds for a specific hotspot
+   */
   getHotspotBounds(hotspot) {
     const overlay = this.stateManager.getOverlay(hotspot.id);
     if (overlay && overlay.bounds) {
@@ -7037,7 +7467,9 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
     const finalDuration = baseDuration * transitionMultiplier * pathComplexityMultiplier * densityFactor * speedMultiplier;
     const clampedDuration = Math.max(0.4, Math.min(5, finalDuration));
     {
-      console.log(`[Animation Duration] Mode: ${mode}, Zoom: ${zoomPercent.toFixed(0)}%, Duration: ${(clampedDuration * 1e3).toFixed(0)}ms, Base: ${(baseDuration * 1e3).toFixed(0)}ms`);
+      console.log(
+        `[Animation Duration] Mode: ${mode}, Zoom: ${zoomPercent.toFixed(0)}%, Duration: ${(clampedDuration * 1e3).toFixed(0)}ms, Base: ${(baseDuration * 1e3).toFixed(0)}ms`
+      );
     }
     return clampedDuration;
   }
@@ -7049,8 +7481,8 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
     return 1;
   }
   /**
-  * Optimize stroke animations for Safari/iOS
-  */
+   * Optimize stroke animations for Safari/iOS
+   */
   optimizeForSafari() {
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     if (isSafari) {
@@ -7123,10 +7555,12 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
       }
       return;
     }
-    const allHotspots = Array.from(this.stateManager.getAllOverlays().values()).map((overlay) => ({
-      ...overlay.hotspot,
-      overlay
-    }));
+    const allHotspots = Array.from(this.stateManager.getAllOverlays().values()).map(
+      (overlay) => ({
+        ...overlay.hotspot,
+        overlay
+      })
+    );
     const selectedHotspot = this.stateManager.getSelectedHotspot();
     const isSpotlightMode = !!selectedHotspot;
     let selectedHotspots;
@@ -7150,7 +7584,9 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
           return distance < maxDistance;
         }).slice(0, 50);
         selectedHotspots = nearbyHotspots;
-        console.log(`🎯 Spotlight mode: showing ${nearbyHotspots.length} nearby hotspots for hover interaction`);
+        console.log(
+          `🎯 Spotlight mode: showing ${nearbyHotspots.length} nearby hotspots for hover interaction`
+        );
       } else {
         selectedHotspots = this.engine.lodManager.selectVisibleHotspots(
           allHotspots,
@@ -7169,7 +7605,9 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
         this.stateManager.getHoveredHotspot()
       );
     }
-    console.log(`[NativeHotspotRenderer] Active: ${selectedHotspots.length} | Total: ${allHotspots.length} | Zoom: ${currentZoomLevel.toFixed(2)} | Spotlight: ${isSpotlightMode}`);
+    console.log(
+      `[NativeHotspotRenderer] Active: ${selectedHotspots.length} | Total: ${allHotspots.length} | Zoom: ${currentZoomLevel.toFixed(2)} | Spotlight: ${isSpotlightMode}`
+    );
     const selectedIds = selectedHotspots.map((h) => h.id);
     this.activeHotspotManager.updateActiveSet(selectedIds);
     const activeHotspots = this.activeHotspotManager.getActiveHotspots();
@@ -7209,7 +7647,9 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
     if (!this._lastStatsLog || now - this._lastStatsLog > 2e3) {
       this._lastStatsLog = now;
       const stats = this.activeHotspotManager.getStats();
-      console.log(`[LOD+Active] Active: ${stats.activeHotspots} | Total: ${stats.totalHotspots} | Zoom: ${currentZoom.toFixed(2)} | Visible: ${visibleCount}`);
+      console.log(
+        `[LOD+Active] Active: ${stats.activeHotspots} | Total: ${stats.totalHotspots} | Zoom: ${currentZoom.toFixed(2)} | Visible: ${visibleCount}`
+      );
     }
     if (visibleCount > _NativeHotspotRenderer.HIGH_HOTSPOT_COUNT_THRESHOLD && this.animationQueue) {
       this.animationQueue.clearFinished();
@@ -7230,8 +7670,8 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
     }
   }
   /**
-  * Enable performance mode when too many hotspots are visible
-  */
+   * Enable performance mode when too many hotspots are visible
+   */
   checkPerformanceMode() {
     const visibleCount = this.stateManager.getVisibleCount();
     this.renderOptimizer.checkPerformanceMode(visibleCount, this.svg);
@@ -7357,8 +7797,14 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
     }
     if (this.eventCoordinator) {
       if (this.svg) {
-        this.svg.removeEventListener("pointermove", this.eventCoordinator.handlePointerMove);
-        this.svg.removeEventListener("pointerdown", this.eventCoordinator.handlePointerDown);
+        this.svg.removeEventListener(
+          "pointermove",
+          this.eventCoordinator.handlePointerMove
+        );
+        this.svg.removeEventListener(
+          "pointerdown",
+          this.eventCoordinator.handlePointerDown
+        );
         this.svg.removeEventListener("pointerup", this.eventCoordinator.handlePointerUp);
       }
     }
@@ -8008,9 +8454,15 @@ class Canvas2DRenderer {
   setupEventHandlers() {
     window.addEventListener("resize", this.handleResize.bind(this));
     if (this.isMobile) {
-      this.canvas.addEventListener("touchstart", this.handleTouchStart.bind(this), { passive: false });
-      this.canvas.addEventListener("touchmove", this.handleTouchMove.bind(this), { passive: false });
-      this.canvas.addEventListener("touchend", this.handleTouchEnd.bind(this), { passive: false });
+      this.canvas.addEventListener("touchstart", this.handleTouchStart.bind(this), {
+        passive: false
+      });
+      this.canvas.addEventListener("touchmove", this.handleTouchMove.bind(this), {
+        passive: false
+      });
+      this.canvas.addEventListener("touchend", this.handleTouchEnd.bind(this), {
+        passive: false
+      });
     }
     this.canvas.addEventListener("mousemove", this.handleMouseMove.bind(this));
     this.canvas.addEventListener("click", this.handleClick.bind(this));
@@ -8241,13 +8693,16 @@ class Canvas2DRenderer {
     if (!hotspot) return;
     this.hotspots.delete(id);
     const bounds = hotspot.bounds;
-    this.spatialIndex.remove({
-      minX: bounds.minX,
-      minY: bounds.minY,
-      maxX: bounds.maxX,
-      maxY: bounds.maxY,
-      id
-    }, (a, b) => a.id === b.id);
+    this.spatialIndex.remove(
+      {
+        minX: bounds.minX,
+        minY: bounds.minY,
+        maxX: bounds.maxX,
+        maxY: bounds.maxY,
+        id
+      },
+      (a, b) => a.id === b.id
+    );
     logger.debug(`Removed hotspot ${id}`);
   }
   /**
@@ -8513,7 +8968,16 @@ function setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotCli
         }
       }, 100);
     }
-    setTimeout(() => initializeHotspotSystem(viewer, state, componentsObj, handleHotspotClick, hotspotData), 100);
+    setTimeout(
+      () => initializeHotspotSystem(
+        viewer,
+        state,
+        componentsObj,
+        handleHotspotClick,
+        hotspotData
+      ),
+      100
+    );
   });
   viewer.addHandler("zoom", () => {
     if (componentsObj.tileCleanupManager) {
@@ -8540,7 +9004,9 @@ function setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotCli
     const timeSincePan = Date.now() - lastPanEndTime;
     const panBlockThreshold = isMobile() ? 100 : 300;
     if (isPanning || timeSincePan < panBlockThreshold) {
-      console.log(`[ViewerEventHandlers] Blocking canvas-click during/after pan (${timeSincePan}ms since pan, threshold: ${panBlockThreshold}ms)`);
+      console.log(
+        `[ViewerEventHandlers] Blocking canvas-click during/after pan (${timeSincePan}ms since pan, threshold: ${panBlockThreshold}ms)`
+      );
       event.preventDefaultAction = true;
     }
   });
@@ -8557,16 +9023,21 @@ function setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotCli
     if (componentsObj.performanceMonitor) {
       const metrics = componentsObj.performanceMonitor.getMetrics();
       if (metrics.averageFPS < performanceConfig.debug.warnThreshold.fps) {
-        const performanceMode = adjustSettingsForPerformance(metrics.averageFPS, metrics.memoryUsage);
+        const performanceMode = adjustSettingsForPerformance(
+          metrics.averageFPS,
+          metrics.memoryUsage
+        );
         if (componentsObj.tileCleanupManager) {
           const pressureMap = {
-            "emergency": "critical",
-            "critical": "critical",
-            "reduced": "high",
+            emergency: "critical",
+            critical: "critical",
+            reduced: "high",
             "memory-limited": "high",
-            "normal": "normal"
+            normal: "normal"
           };
-          componentsObj.tileCleanupManager.setPressure(pressureMap[performanceMode] || "normal");
+          componentsObj.tileCleanupManager.setPressure(
+            pressureMap[performanceMode] || "normal"
+          );
         }
       }
     }
@@ -8651,7 +9122,11 @@ function setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotCli
             const hotspotId = overlay.element.getAttribute("data-hotspot-id");
             if (currentState === "hover" && (!hoveredHotspot || hoveredHotspot.id !== hotspotId)) {
               if (componentsObj.renderer.styleManager) {
-                componentsObj.renderer.styleManager.applyStyle(overlay.element, "standard", "normal");
+                componentsObj.renderer.styleManager.applyStyle(
+                  overlay.element,
+                  "standard",
+                  "normal"
+                );
               }
             }
           }
@@ -8660,7 +9135,10 @@ function setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotCli
           componentsObj.renderer.isAutoDeselecting = false;
         }
         if (componentsObj.renderer.recentlyAutoDeselected) {
-          console.log("🗑️ Clearing recentlyAutoDeselected on canvas click:", componentsObj.renderer.recentlyAutoDeselected);
+          console.log(
+            "🗑️ Clearing recentlyAutoDeselected on canvas click:",
+            componentsObj.renderer.recentlyAutoDeselected
+          );
           componentsObj.renderer.recentlyAutoDeselected = null;
           if (componentsObj.renderer._recentlyAutoDeselectedClearTimeout) {
             clearTimeout(componentsObj.renderer._recentlyAutoDeselectedClearTimeout);
@@ -8712,9 +9190,11 @@ function setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotCli
           console.log(`Debug mode: ${newLevel === 1 ? "ON" : "OFF"}`);
           state.setTapCount(0);
         } else {
-          state.setTapTimeout(setTimeout(() => {
-            state.setTapCount(0);
-          }, 1e3));
+          state.setTapTimeout(
+            setTimeout(() => {
+              state.setTapCount(0);
+            }, 1e3)
+          );
         }
       }
     });
@@ -8735,10 +9215,13 @@ function setupAdaptiveSprings(viewer, performanceConfig2) {
     viewer.viewport.zoomSpring.animationTime = duration;
     const stiffness = Math.max(4, 8 - zoomDistance);
     viewer.viewport.zoomSpring.springStiffness = stiffness;
-    setTimeout(() => {
-      viewer.viewport.zoomSpring.animationTime = performanceConfig2.viewer.animationTime;
-      viewer.viewport.zoomSpring.springStiffness = originalSprings.zoom;
-    }, duration * 1e3 + 100);
+    setTimeout(
+      () => {
+        viewer.viewport.zoomSpring.animationTime = performanceConfig2.viewer.animationTime;
+        viewer.viewport.zoomSpring.springStiffness = originalSprings.zoom;
+      },
+      duration * 1e3 + 100
+    );
   });
 }
 function setupKeyboardHandler(viewer, state, componentsObj) {
@@ -8746,16 +9229,16 @@ function setupKeyboardHandler(viewer, state, componentsObj) {
     "+": () => viewer.viewport.zoomBy(performanceConfig.viewer.zoomPerScroll),
     "=": () => viewer.viewport.zoomBy(performanceConfig.viewer.zoomPerScroll),
     "-": () => viewer.viewport.zoomBy(1 / performanceConfig.viewer.zoomPerScroll),
-    "_": () => viewer.viewport.zoomBy(1 / performanceConfig.viewer.zoomPerScroll),
-    "0": () => {
+    _: () => viewer.viewport.zoomBy(1 / performanceConfig.viewer.zoomPerScroll),
+    0: () => {
       var _a;
       if ((_a = window.animations) == null ? void 0 : _a.expandToFullView) {
         window.animations.expandToFullView();
       }
     },
-    "f": () => viewer.viewport.fitBounds(viewer.world.getHomeBounds()),
-    "F": () => viewer.viewport.fitBounds(viewer.world.getHomeBounds()),
-    "c": () => {
+    f: () => viewer.viewport.fitBounds(viewer.world.getHomeBounds()),
+    F: () => viewer.viewport.fitBounds(viewer.world.getHomeBounds()),
+    c: () => {
       if (isMobile()) return;
       const currentLevel = state.debugLevel();
       const newLevel = currentLevel === 0 ? 1 : 0;
@@ -8769,17 +9252,17 @@ function setupKeyboardHandler(viewer, state, componentsObj) {
       }
       console.log(`Debug mode: ${newLevel === 1 ? "ON" : "OFF"}`);
     },
-    "h": () => {
+    h: () => {
       if (componentsObj.renderer) {
         componentsObj.renderer.toggleRevealMode();
       }
     },
-    "H": () => {
+    H: () => {
       if (componentsObj.renderer) {
         componentsObj.renderer.toggleRevealMode();
       }
     },
-    "e": () => {
+    e: () => {
       if (componentsObj.echoController) {
         if (componentsObj.echoController.config.enabled) {
           componentsObj.echoController.disable();
@@ -8790,7 +9273,7 @@ function setupKeyboardHandler(viewer, state, componentsObj) {
         }
       }
     },
-    "E": () => {
+    E: () => {
       if (componentsObj.echoController) {
         if (componentsObj.echoController.config.enabled) {
           componentsObj.echoController.disable();
@@ -8975,7 +9458,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
   }
   if (renderer.eventCoordinator) {
     const TemporalEchoController = (await __vitePreload(async () => {
-      const { default: __vite_default__ } = await import("./TemporalEchoController-BQJPnIQ6.js");
+      const { default: __vite_default__ } = await import("./TemporalEchoController-B1F0dgN3.js");
       return { default: __vite_default__ };
     }, true ? __vite__mapDeps([0,1,2]) : void 0)).default;
     const echoController = new TemporalEchoController({
@@ -8993,14 +9476,21 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
     window.temporalEchoController = echoController;
     const storedRevealType = localStorage.getItem("revealType");
     if (storedRevealType && storedRevealType !== echoController.config.revealType) {
-      console.log(`[ViewerEventHandlers] Syncing reveal type from localStorage: ${storedRevealType}`);
+      console.log(
+        `[ViewerEventHandlers] Syncing reveal type from localStorage: ${storedRevealType}`
+      );
       echoController.setRevealType(storedRevealType);
     }
-    console.log("[ViewerEventHandlers] Temporal Echo Controller initialized with reveal type:", echoController.config.revealType);
+    console.log(
+      "[ViewerEventHandlers] Temporal Echo Controller initialized with reveal type:",
+      echoController.config.revealType
+    );
   }
   const overlayManager = window.overlayManager || (components == null ? void 0 : components.overlayManager);
   if (!overlayManager) {
-    console.error("[ViewerEventHandlers] No overlay manager found! This should have been created in viewerSetup.js");
+    console.error(
+      "[ViewerEventHandlers] No overlay manager found! This should have been created in viewerSetup.js"
+    );
     return;
   }
   if (overlayManager.constructor.name === "Canvas2DOverlayManager") {

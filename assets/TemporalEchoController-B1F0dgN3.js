@@ -1,4 +1,4 @@
-import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-D9N27JPU.js";
+import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-FjJU3P4V.js";
 const GestureStates = {
   IDLE: "idle",
   UNDETERMINED: "undetermined",
@@ -649,7 +649,9 @@ class PerformanceMonitor {
       this.performanceState = "critical";
     }
     if (previousState !== this.performanceState) {
-      console.log(`[PerformanceMonitor] State changed: ${previousState} → ${this.performanceState}`);
+      console.log(
+        `[PerformanceMonitor] State changed: ${previousState} → ${this.performanceState}`
+      );
       this.onPerformanceChange(this.performanceState, this.metrics);
       if (this.performanceState === "critical") {
         this.onCriticalPerformance(this.metrics);
@@ -1388,8 +1390,18 @@ class CanvasHotspotRenderer {
     this.resizeHandler = () => this.updateCanvasSize();
     window.addEventListener("resize", this.resizeHandler);
     const size = this.canvas.getBoundingClientRect();
-    console.log("[CanvasHotspotRenderer] Initialized with size:", size.width, "x", size.height, "DPR:", this.config.dpr);
-    console.log("[CanvasHotspotRenderer] Canvas attached to:", this.canvas.parentElement.tagName);
+    console.log(
+      "[CanvasHotspotRenderer] Initialized with size:",
+      size.width,
+      "x",
+      size.height,
+      "DPR:",
+      this.config.dpr
+    );
+    console.log(
+      "[CanvasHotspotRenderer] Canvas attached to:",
+      this.canvas.parentElement.tagName
+    );
   }
   /**
    * Update canvas size to match window
@@ -1446,7 +1458,12 @@ class CanvasHotspotRenderer {
     this.animations = [];
     this.canvas.style.opacity = "1";
     this.canvas.style.display = "block";
-    console.log("[CanvasHotspotRenderer] Starting animation for", hotspots.length, "hotspots at tap point:", tapPoint);
+    console.log(
+      "[CanvasHotspotRenderer] Starting animation for",
+      hotspots.length,
+      "hotspots at tap point:",
+      tapPoint
+    );
     const startTime = performance.now();
     this.animations.push({
       type: "ripple",
@@ -1478,7 +1495,12 @@ class CanvasHotspotRenderer {
    */
   animate() {
     const now = performance.now();
-    this.ctx.clearRect(0, 0, this.canvas.width / this.config.dpr, this.canvas.height / this.config.dpr);
+    this.ctx.clearRect(
+      0,
+      0,
+      this.canvas.width / this.config.dpr,
+      this.canvas.height / this.config.dpr
+    );
     let hasActiveAnimations = false;
     this.animations.forEach((anim) => {
       const elapsed = now - anim.startTime;
@@ -1761,9 +1783,13 @@ class CanvasHitDetector {
     const renderTime = performance.now() - startTime;
     this.metrics.lastRenderTime = renderTime;
     if (renderTime > 10) {
-      console.warn(`[CanvasHitDetector] Slow render: ${renderTime.toFixed(2)}ms for ${hotspots.length} hotspots`);
+      console.warn(
+        `[CanvasHitDetector] Slow render: ${renderTime.toFixed(2)}ms for ${hotspots.length} hotspots`
+      );
     } else {
-      console.log(`[CanvasHitDetector] Canvas updated in ${renderTime.toFixed(2)}ms for ${hotspots.length} hotspots`);
+      console.log(
+        `[CanvasHitDetector] Canvas updated in ${renderTime.toFixed(2)}ms for ${hotspots.length} hotspots`
+      );
     }
   }
   /**
@@ -1853,7 +1879,9 @@ class CanvasHitDetector {
     }
     const sorted = Array.from(nearbyHotspots.entries()).sort((a, b) => a[1] - b[1]).slice(0, maxResults).map((entry) => entry[0]);
     const searchTime = performance.now() - startTime;
-    console.log(`[CanvasHitDetector] Found ${sorted.length} nearby hotspots in ${searchTime.toFixed(2)}ms`);
+    console.log(
+      `[CanvasHitDetector] Found ${sorted.length} nearby hotspots in ${searchTime.toFixed(2)}ms`
+    );
     return sorted;
   }
   /**
@@ -2109,11 +2137,7 @@ class BatchDOMManager {
    */
   batchRevealHotspots(elements, options = {}) {
     const startTime = performance.now();
-    const {
-      staggerDelay = 30,
-      revealDuration = 2e3,
-      borderStyle = "default"
-    } = options;
+    const { staggerDelay = 30, revealDuration = 2e3, borderStyle = "default" } = options;
     console.log(`[BatchDOMManager] Batching reveal for ${elements.length} hotspots`);
     const measurements = new Array(elements.length);
     elements.forEach((element, index) => {
@@ -2223,7 +2247,9 @@ class BatchDOMManager {
         }
       });
       const updateTime = performance.now() - startTime;
-      console.log(`[BatchDOMManager] Visibility update for ${updates.length} elements in ${updateTime.toFixed(2)}ms`);
+      console.log(
+        `[BatchDOMManager] Visibility update for ${updates.length} elements in ${updateTime.toFixed(2)}ms`
+      );
     });
   }
   /**
@@ -2263,7 +2289,9 @@ class BatchDOMManager {
     this.metrics.batchCount++;
     this.metrics.averageBatchTime = (this.metrics.averageBatchTime * (this.metrics.batchCount - 1) + batchTime) / this.metrics.batchCount;
     if (batchTime > 5) {
-      console.warn(`[BatchDOMManager] Batch operation exceeded 5ms target: ${batchTime.toFixed(2)}ms`);
+      console.warn(
+        `[BatchDOMManager] Batch operation exceeded 5ms target: ${batchTime.toFixed(2)}ms`
+      );
     }
   }
   /**
@@ -2697,7 +2725,9 @@ function debugHotspotPosition(element, hotspotId) {
 }
 window.enableHotspotPositionDebug = () => {
   window.hotspotPositionDebugEnabled = true;
-  console.log("[HotspotDebug] Position debugging enabled. Red dots will show hotspot centers during reveal.");
+  console.log(
+    "[HotspotDebug] Position debugging enabled. Red dots will show hotspot centers during reveal."
+  );
 };
 window.disableHotspotPositionDebug = () => {
   window.hotspotPositionDebugEnabled = false;
@@ -2735,10 +2765,7 @@ class Point {
     const sin = Math.sin(radians);
     const x = this.x - pivot.x;
     const y = this.y - pivot.y;
-    return new Point(
-      x * cos - y * sin + pivot.x,
-      x * sin + y * cos + pivot.y
-    );
+    return new Point(x * cos - y * sin + pivot.x, x * sin + y * cos + pivot.y);
   }
   apply(func) {
     return new Point(func(this.x), func(this.y));
@@ -2898,7 +2925,11 @@ class OpacityRadialWaveAnimator {
       this.animationFrame = null;
     }
     if (this.activeAnimations.size > 0) {
-      console.log("[OpacityWave] Cleaning up", this.activeAnimations.size, "active animations");
+      console.log(
+        "[OpacityWave] Cleaning up",
+        this.activeAnimations.size,
+        "active animations"
+      );
       this.activeAnimations.forEach((anim) => {
         if (anim.element) {
           anim.element.classList.remove("hotspot-wave-ready", "hotspot-wave-revealing");
@@ -2929,7 +2960,11 @@ class OpacityRadialWaveAnimator {
     }).filter((a) => a !== null);
     animations.sort((a, b) => a.distance - b.distance);
     console.log("[OpacityWave] Prepared", animations.length, "animations");
-    console.log("[OpacityWave] Delays range from 0ms to", Math.max(...animations.map((a) => a.delay)).toFixed(0), "ms");
+    console.log(
+      "[OpacityWave] Delays range from 0ms to",
+      Math.max(...animations.map((a) => a.delay)).toFixed(0),
+      "ms"
+    );
     this.currentAnimations = animations;
     this.animateWave(animations);
   }
@@ -3108,7 +3143,9 @@ class BorderPointCalculator {
       const pointVector = { x: externalPoint.x - p1.x, y: externalPoint.y - p1.y };
       const segmentLengthSq = segmentVector.x * segmentVector.x + segmentVector.y * segmentVector.y;
       if (segmentLengthSq === 0) {
-        const dist2 = Math.sqrt(pointVector.x * pointVector.x + pointVector.y * pointVector.y);
+        const dist2 = Math.sqrt(
+          pointVector.x * pointVector.x + pointVector.y * pointVector.y
+        );
         if (dist2 < minDistance) {
           minDistance = dist2;
           closestPoint = p1;
@@ -3138,7 +3175,11 @@ class BorderPointCalculator {
       distance: minDistance,
       segmentIndex: closestSegmentIndex,
       ratio: segmentRatio,
-      pathLength: this.calculatePathLengthToPoint(polygonElement, closestSegmentIndex, segmentRatio)
+      pathLength: this.calculatePathLengthToPoint(
+        polygonElement,
+        closestSegmentIndex,
+        segmentRatio
+      )
     };
   }
   calculatePathLengthToPoint(element, segmentIndex, ratio) {
@@ -3151,16 +3192,12 @@ class BorderPointCalculator {
     for (let i = 0; i < segmentIndex; i++) {
       const p1 = vertices[i];
       const p2 = vertices[(i + 1) % vertices.length];
-      accumulatedLength += Math.sqrt(
-        Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2)
-      );
+      accumulatedLength += Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
     }
     if (segmentIndex < vertices.length) {
       const p1 = vertices[segmentIndex];
       const p2 = vertices[(segmentIndex + 1) % vertices.length];
-      const segmentLength = Math.sqrt(
-        Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2)
-      );
+      const segmentLength = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
       accumulatedLength += segmentLength * ratio;
     }
     return accumulatedLength;
@@ -3541,7 +3578,9 @@ class BorderRadialAnimator {
         distance,
         revealTime
       });
-      console.log(`[BorderRadial] Zone ${hotspot.id} will reveal at ${revealTime.toFixed(0)}ms (distance: ${distance.toFixed(0)}px)`);
+      console.log(
+        `[BorderRadial] Zone ${hotspot.id} will reveal at ${revealTime.toFixed(0)}ms (distance: ${distance.toFixed(0)}px)`
+      );
     });
   }
   calculateBorderToBorderDistance(bbox1, bbox2) {
@@ -3556,7 +3595,9 @@ class BorderRadialAnimator {
     const distance = Math.sqrt(
       Math.pow(center2.x - center1.x, 2) + Math.pow(center2.y - center1.y, 2)
     );
-    console.log(`[BorderRadial] Distance calculation: center1=(${center1.x.toFixed(0)},${center1.y.toFixed(0)}), center2=(${center2.x.toFixed(0)},${center2.y.toFixed(0)}), distance=${distance.toFixed(0)}px`);
+    console.log(
+      `[BorderRadial] Distance calculation: center1=(${center1.x.toFixed(0)},${center1.y.toFixed(0)}), center2=(${center2.x.toFixed(0)},${center2.y.toFixed(0)}), distance=${distance.toFixed(0)}px`
+    );
     return distance;
   }
   // ========== ANIMATION LOOP ==========
@@ -3580,7 +3621,9 @@ class BorderRadialAnimator {
           animation.revealedZones.add(zoneId);
         }
       }
-      const maxRevealTime = Math.max(...Array.from(animation.pendingZones.values()).map((z) => z.revealTime));
+      const maxRevealTime = Math.max(
+        ...Array.from(animation.pendingZones.values()).map((z) => z.revealTime)
+      );
       if (elapsed >= maxRevealTime + this.config.secondaryRevealDuration) {
         completedAnimations.push(id);
       }
@@ -3634,8 +3677,15 @@ class BorderRadialAnimator {
       path.setAttribute("stroke-width", this.config.borderWidth);
       path.setAttribute("fill", "none");
       path.getBoundingClientRect();
-      console.log("[BorderRadial] Applying bidirectional stroke reveal to path:", path.tagName);
-      this.applyBidirectionalStrokeReveal(path, principalCenter, this.config.secondaryRevealDuration);
+      console.log(
+        "[BorderRadial] Applying bidirectional stroke reveal to path:",
+        path.tagName
+      );
+      this.applyBidirectionalStrokeReveal(
+        path,
+        principalCenter,
+        this.config.secondaryRevealDuration
+      );
     });
     element.setAttribute("data-hotspot-revealed", "true");
     this.revealedHotspots.add(zoneData.zone.id);
@@ -3671,7 +3721,10 @@ class BorderRadialAnimator {
    * in two directions simultaneously until they meet at the opposite point
    */
   applyBidirectionalStrokeReveal(path, principalCenter, animationDuration) {
-    console.log("[BorderRadial] Starting bidirectional reveal for path, principal center:", principalCenter);
+    console.log(
+      "[BorderRadial] Starting bidirectional reveal for path, principal center:",
+      principalCenter
+    );
     this.applyProgressiveStrokeReveal(path, principalCenter, animationDuration);
   }
   /**
@@ -3709,7 +3762,9 @@ class BorderRadialAnimator {
         const currentProgressInt = Math.floor(progress * 10);
         if (currentProgressInt !== lastLoggedProgress && currentProgressInt !== Math.floor((progress - 0.1) * 10)) {
           lastLoggedProgress = currentProgressInt;
-          console.log(`[BorderRadial] Drawing progress: ${(progress * 100).toFixed(0)}%, visible: ${visibleLength.toFixed(0)}/${totalLength.toFixed(0)}px`);
+          console.log(
+            `[BorderRadial] Drawing progress: ${(progress * 100).toFixed(0)}%, visible: ${visibleLength.toFixed(0)}/${totalLength.toFixed(0)}px`
+          );
         }
         if (progress < 1) {
           requestAnimationFrame(animate);
@@ -3775,7 +3830,9 @@ class BorderRadialAnimator {
         path1.style.strokeDasharray = `${visibleLength} ${gapLength}`;
         path2.style.strokeDasharray = `${visibleLength} ${gapLength}`;
         if (Math.floor(progress * 10) !== Math.floor((progress - 0.1) * 10)) {
-          console.log(`[BorderRadial] Animation progress: ${(progress * 100).toFixed(0)}%, visible: ${visibleLength.toFixed(0)}px`);
+          console.log(
+            `[BorderRadial] Animation progress: ${(progress * 100).toFixed(0)}%, visible: ${visibleLength.toFixed(0)}px`
+          );
         }
       } else {
         const offset = totalLength * (1 - easedProgress) / 2;
@@ -3916,7 +3973,9 @@ class BorderRadialAnimator {
         return overlay.element;
       }
     }
-    const svgContainers = document.querySelectorAll(".openseadragon-svg-overlay, .hotspot-overlay-svg, svg");
+    const svgContainers = document.querySelectorAll(
+      ".openseadragon-svg-overlay, .hotspot-overlay-svg, svg"
+    );
     for (const container of svgContainers) {
       const element = container.querySelector(`[data-hotspot-id="${hotspotId}"]`);
       if (element) return element;
@@ -4021,7 +4080,9 @@ class TemporalEchoController {
         revealType = storedRevealType;
       }
     } else if (storedRevealType) {
-      console.warn(`[TemporalEchoController] Invalid revealType in localStorage: "${storedRevealType}". Using default: ${defaultRevealType}`);
+      console.warn(
+        `[TemporalEchoController] Invalid revealType in localStorage: "${storedRevealType}". Using default: ${defaultRevealType}`
+      );
       localStorage.removeItem("revealType");
     }
     this.config = {
@@ -4085,14 +4146,24 @@ class TemporalEchoController {
     this.lastFPSCheck = performance.now();
     this.currentFPS = 60;
     console.log("[TemporalEchoController] Initialized", this.config);
-    console.log("[TemporalEchoController] Tap mode:", this.config.tapMode, "- Tolerance:", this.config.tapTolerance, "px");
+    console.log(
+      "[TemporalEchoController] Tap mode:",
+      this.config.tapMode,
+      "- Tolerance:",
+      this.config.tapTolerance,
+      "px"
+    );
     window.temporalEchoController = this;
     window.setTapMode = (mode) => {
       if (mode === "direct" || mode === "nearby") {
         this.config.tapMode = mode;
         console.log(`[TemporalEchoController] Tap mode changed to: ${mode}`);
-        console.log(`  - direct: Reveal only the tapped hotspot with ${this.config.tapTolerance}px tolerance`);
-        console.log(`  - nearby: Reveal multiple hotspots within ${this.config.echoRadius}px radius`);
+        console.log(
+          `  - direct: Reveal only the tapped hotspot with ${this.config.tapTolerance}px tolerance`
+        );
+        console.log(
+          `  - nearby: Reveal multiple hotspots within ${this.config.echoRadius}px radius`
+        );
         return `Tap mode set to: ${mode}`;
       }
       return 'Invalid mode. Use "direct" or "nearby"';
@@ -4156,7 +4227,9 @@ class TemporalEchoController {
         overlay.element.removeAttribute("data-hotspot-revealed");
         overlay.element.removeAttribute("data-reveal-time");
         overlay.element.classList.remove("hotspot-echo-active", "hotspot-echo-reveal");
-        console.log(`[TemporalEcho] Cleaned revealed state from overlay element for ${hotspotId}`);
+        console.log(
+          `[TemporalEcho] Cleaned revealed state from overlay element for ${hotspotId}`
+        );
       }
       const elements = document.querySelectorAll(`[data-hotspot-id="${hotspotId}"]`);
       elements.forEach((element) => {
@@ -4164,7 +4237,9 @@ class TemporalEchoController {
           element.removeAttribute("data-hotspot-revealed");
           element.removeAttribute("data-reveal-time");
           element.classList.remove("hotspot-echo-active", "hotspot-echo-reveal");
-          console.log(`[TemporalEcho] Cleaned revealed state from DOM element for ${hotspotId}`);
+          console.log(
+            `[TemporalEcho] Cleaned revealed state from DOM element for ${hotspotId}`
+          );
         }
       });
       const gElements = document.querySelectorAll(`g[data-hotspot-id="${hotspotId}"]`);
@@ -4173,7 +4248,9 @@ class TemporalEchoController {
           element.removeAttribute("data-hotspot-revealed");
           element.removeAttribute("data-reveal-time");
           element.classList.remove("hotspot-echo-active", "hotspot-echo-reveal");
-          console.log(`[TemporalEcho] Cleaned revealed state from g element for ${hotspotId}`);
+          console.log(
+            `[TemporalEcho] Cleaned revealed state from g element for ${hotspotId}`
+          );
         }
       });
       this.activeEchoes.delete(hotspotId);
@@ -4266,7 +4343,9 @@ class TemporalEchoController {
     }
     this.batchDOMManager = new BatchDOMManager();
     window.batchDOMManager = this.batchDOMManager;
-    console.log("[TemporalEchoController] BatchDOMManager initialized for Phase 3 optimization");
+    console.log(
+      "[TemporalEchoController] BatchDOMManager initialized for Phase 3 optimization"
+    );
   }
   /**
    * Initialize Canvas Hit Detector for Phase 4 optimization
@@ -4282,7 +4361,9 @@ class TemporalEchoController {
       enabled: true
     });
     window.hitDetector = this.hitDetector;
-    console.log("[TemporalEchoController] CanvasHitDetector initialized for Phase 4 optimization");
+    console.log(
+      "[TemporalEchoController] CanvasHitDetector initialized for Phase 4 optimization"
+    );
   }
   // Removed animation system initialization methods
   /**
@@ -4290,7 +4371,10 @@ class TemporalEchoController {
    */
   handleQuickTap(tapData) {
     var _a, _b, _c;
-    console.log("[TemporalEchoController] handleQuickTap called, enabled:", this.config.enabled);
+    console.log(
+      "[TemporalEchoController] handleQuickTap called, enabled:",
+      this.config.enabled
+    );
     if (!this.revealCount) this.revealCount = 0;
     this.revealCount++;
     console.log(`[TemporalEchoController] Reveal #${this.revealCount} starting`);
@@ -4304,10 +4388,7 @@ class TemporalEchoController {
     }
     this.cleanupExpiredRevealedStates();
     const rect = this.viewer.element.getBoundingClientRect();
-    const pixelPoint = new OpenSeadragon.Point(
-      tapData.x - rect.left,
-      tapData.y - rect.top
-    );
+    const pixelPoint = new OpenSeadragon.Point(tapData.x - rect.left, tapData.y - rect.top);
     const viewportPoint = this.viewer.viewport.pointFromPixel(pixelPoint);
     const imagePoint = this.viewer.viewport.viewportToImageCoordinates(viewportPoint);
     const hotspotAtPoint = window.nativeHotspotRenderer && window.nativeHotspotRenderer.engine.findSmallestHotspotAtPoint(imagePoint);
@@ -4317,7 +4398,10 @@ class TemporalEchoController {
       for (const nearby of nearbyHotspots2) {
         if (this.isHotspotRevealed(nearby.hotspot.id || nearby.id)) {
           revealedHotspotNearby = nearby.hotspot || nearby;
-          console.log("[TemporalEchoController] Found revealed hotspot nearby:", revealedHotspotNearby.id);
+          console.log(
+            "[TemporalEchoController] Found revealed hotspot nearby:",
+            revealedHotspotNearby.id
+          );
           break;
         }
       }
@@ -4330,27 +4414,39 @@ class TemporalEchoController {
         isRevealed,
         activeEchoes: Array.from(this.activeEchoes),
         animationExists: this.echoAnimations.has(targetHotspot.id),
-        domRevealed: (_a = this.getHotspotElement(targetHotspot.id)) == null ? void 0 : _a.getAttribute("data-hotspot-revealed")
+        domRevealed: (_a = this.getHotspotElement(targetHotspot.id)) == null ? void 0 : _a.getAttribute(
+          "data-hotspot-revealed"
+        )
       });
       if (isRevealed) {
-        console.log("[TemporalEchoController] Tapped on/near revealed hotspot, triggering zoom (TEMPO 2):", targetHotspot.id);
+        console.log(
+          "[TemporalEchoController] Tapped on/near revealed hotspot, triggering zoom (TEMPO 2):",
+          targetHotspot.id
+        );
         if (window.multimodalSyncEngine) {
           window.multimodalSyncEngine.triggerSynchronizedFeedback({
             ...tapData,
             type: "activate"
           }).then((results) => {
-            console.log("[TemporalEchoController] Tempo 2 feedback triggered:", results);
+            console.log(
+              "[TemporalEchoController] Tempo 2 feedback triggered:",
+              results
+            );
           });
         } else if ((_b = window.minimalistAudioEngine) == null ? void 0 : _b.isUnlocked) {
           const isMobile2 = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || "ontouchstart" in window;
           if (!isMobile2) {
             window.minimalistAudioEngine.playActivate();
           } else {
-            console.log("[TemporalEchoController] Audio disabled on mobile for activation");
+            console.log(
+              "[TemporalEchoController] Audio disabled on mobile for activation"
+            );
           }
         }
         if (window.nativeHotspotRenderer) {
-          console.log("[TemporalEchoController] Directly activating revealed hotspot for zoom");
+          console.log(
+            "[TemporalEchoController] Directly activating revealed hotspot for zoom"
+          );
           setTimeout(() => {
             window.nativeHotspotRenderer.activateHotspot(targetHotspot, true);
           }, 50);
@@ -4358,13 +4454,19 @@ class TemporalEchoController {
         return false;
       }
     }
-    console.log("[TemporalEchoController] Quick tap detected on mobile, triggering echo (TEMPO 1)", tapData);
+    console.log(
+      "[TemporalEchoController] Quick tap detected on mobile, triggering echo (TEMPO 1)",
+      tapData
+    );
     if (window.multimodalSyncEngine) {
       window.multimodalSyncEngine.triggerSynchronizedFeedback({
         ...tapData,
         type: "reveal"
       }).then((results) => {
-        console.log("[TemporalEchoController] Synchronized feedback triggered:", results);
+        console.log(
+          "[TemporalEchoController] Synchronized feedback triggered:",
+          results
+        );
       });
     } else {
       const isMobile2 = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || "ontouchstart" in window;
@@ -4385,9 +4487,15 @@ class TemporalEchoController {
     let nearbyHotspots = [];
     if (this.config.tapMode === "direct" && this.isMobile) {
       console.log("[TemporalEchoController] Direct tap mode active (mobile)");
-      let directHotspot = this.spatialIndex.getHotspotAtPoint(tapImagePoint.x, tapImagePoint.y);
+      let directHotspot = this.spatialIndex.getHotspotAtPoint(
+        tapImagePoint.x,
+        tapImagePoint.y
+      );
       if (!directHotspot) {
-        console.log("[TemporalEchoController] No direct hit, searching within tolerance zone:", this.config.tapTolerance);
+        console.log(
+          "[TemporalEchoController] No direct hit, searching within tolerance zone:",
+          this.config.tapTolerance
+        );
         const toleranceCandidates = this.spatialIndex.findNearbyHotspots(
           tapImagePoint.x,
           tapImagePoint.y,
@@ -4397,16 +4505,21 @@ class TemporalEchoController {
         );
         if (toleranceCandidates.length > 0) {
           directHotspot = toleranceCandidates[0];
-          console.log("[TemporalEchoController] Found hotspot within tolerance zone:", directHotspot.id);
+          console.log(
+            "[TemporalEchoController] Found hotspot within tolerance zone:",
+            directHotspot.id
+          );
         }
       }
       if (directHotspot) {
         console.log("[TemporalEchoController] Direct tap on hotspot:", directHotspot.id);
-        nearbyHotspots = [{
-          id: directHotspot.id,
-          distance: 0,
-          hotspot: directHotspot
-        }];
+        nearbyHotspots = [
+          {
+            id: directHotspot.id,
+            distance: 0,
+            hotspot: directHotspot
+          }
+        ];
       } else {
         console.log("[TemporalEchoController] No hotspot at tap location");
         this.showMissedTapFeedback(tapData);
@@ -4420,7 +4533,11 @@ class TemporalEchoController {
         nearbyHotspots = [nearbyHotspots[0]];
         console.log("[TemporalEchoController] Focus mode: revealing only closest hotspot");
       } else if (this.config.revealType === "ripple" && nearbyHotspots.length > 0) {
-        console.log("[TemporalEchoController] Ripple mode: revealing", nearbyHotspots.length, "hotspots");
+        console.log(
+          "[TemporalEchoController] Ripple mode: revealing",
+          nearbyHotspots.length,
+          "hotspots"
+        );
       }
       if (nearbyHotspots.length === 0 && this.isMobile) {
         console.log("[TemporalEchoController] No hotspots found nearby");
@@ -4429,7 +4546,9 @@ class TemporalEchoController {
       }
     }
     if (this.canvasRenderer && this.config.useCanvasAnimation && nearbyHotspots.length > 0) {
-      console.log(`[TemporalEchoController] Using Canvas renderer for ${nearbyHotspots.length} hotspots`);
+      console.log(
+        `[TemporalEchoController] Using Canvas renderer for ${nearbyHotspots.length} hotspots`
+      );
       this.isRevealing = true;
       const tapImagePoint2 = {
         x: imagePoint.x,
@@ -4451,7 +4570,9 @@ class TemporalEchoController {
         this.revealHotspots(nearbyHotspots, tapData);
       } else {
         if (nearbyHotspots.length > 0) {
-          console.log(`[TemporalEchoController] Found ${nearbyHotspots.length} hotspots in radius (focus mode)`);
+          console.log(
+            `[TemporalEchoController] Found ${nearbyHotspots.length} hotspots in radius (focus mode)`
+          );
           this.revealHotspots(nearbyHotspots, tapData);
         } else {
           console.log("[TemporalEchoController] No hotspots found in echo radius");
@@ -4488,7 +4609,9 @@ class TemporalEchoController {
     this.spatialIndex.loadHotspots(hotspotData);
     this.spatialIndexReady = true;
     const buildTime = performance.now() - startTime;
-    console.log(`[TemporalEchoController] Flatbush index built with ${hotspotData.length} hotspots in ${buildTime.toFixed(2)}ms`);
+    console.log(
+      `[TemporalEchoController] Flatbush index built with ${hotspotData.length} hotspots in ${buildTime.toFixed(2)}ms`
+    );
   }
   /**
    * Find hotspots within radius of tap point
@@ -4523,14 +4646,14 @@ class TemporalEchoController {
   canvasHitSearch(tapData, radius) {
     const startTime = performance.now();
     const rect = this.viewer.element.getBoundingClientRect();
-    const pixelPoint = new OpenSeadragon.Point(
-      tapData.x - rect.left,
-      tapData.y - rect.top
-    );
+    const pixelPoint = new OpenSeadragon.Point(tapData.x - rect.left, tapData.y - rect.top);
     const viewportPoint = this.viewer.viewport.pointFromPixel(pixelPoint);
     const tapImagePoint = this.viewer.viewport.viewportToImageCoordinates(viewportPoint);
     const viewportBounds = this.viewer.viewport.getBounds();
-    const topLeft = this.viewer.viewport.viewportToImageCoordinates(viewportBounds.x, viewportBounds.y);
+    const topLeft = this.viewer.viewport.viewportToImageCoordinates(
+      viewportBounds.x,
+      viewportBounds.y
+    );
     const bottomRight = this.viewer.viewport.viewportToImageCoordinates(
       viewportBounds.x + viewportBounds.width,
       viewportBounds.y + viewportBounds.height
@@ -4575,9 +4698,13 @@ class TemporalEchoController {
     }
     const searchTime = performance.now() - startTime;
     if (searchTime > 2) {
-      console.warn(`[TemporalEchoController] Canvas hit search exceeded 2ms: ${searchTime.toFixed(2)}ms`);
+      console.warn(
+        `[TemporalEchoController] Canvas hit search exceeded 2ms: ${searchTime.toFixed(2)}ms`
+      );
     } else {
-      console.log(`[TemporalEchoController] Ultra-fast Canvas hit: ${searchTime.toFixed(2)}ms for ${hotspots.length} hotspots`);
+      console.log(
+        `[TemporalEchoController] Ultra-fast Canvas hit: ${searchTime.toFixed(2)}ms for ${hotspots.length} hotspots`
+      );
     }
     return hotspots;
   }
@@ -4589,20 +4716,21 @@ class TemporalEchoController {
   spatialIndexSearch(tapData, radius, useAdjacent = true) {
     const startTime = performance.now();
     if (this.config.revealType === "ripple") {
-      console.log(`[TemporalEchoController] Using contiguous clustering for ${this.config.revealType} mode`);
+      console.log(
+        `[TemporalEchoController] Using contiguous clustering for ${this.config.revealType} mode`
+      );
       return this.findContiguousClusters(tapData, radius);
     }
     const rect = this.viewer.element.getBoundingClientRect();
-    const pixelPoint = new OpenSeadragon.Point(
-      tapData.x - rect.left,
-      tapData.y - rect.top
-    );
+    const pixelPoint = new OpenSeadragon.Point(tapData.x - rect.left, tapData.y - rect.top);
     const viewportPoint = this.viewer.viewport.pointFromPixel(pixelPoint);
     const tapImagePoint = this.viewer.viewport.viewportToImageCoordinates(viewportPoint);
     const maxHotspots = this.isMobile ? this.config.mobileMaxHotspots : this.config.maxSimultaneous;
     let nearbyHotspots;
     if (useAdjacent && this.spatialIndex.findAdjacentHotspots) {
-      console.log("[TemporalEchoController] Using adjacent hotspot selection for contiguous group");
+      console.log(
+        "[TemporalEchoController] Using adjacent hotspot selection for contiguous group"
+      );
       const adjacencyPixels = 50;
       const edgePixel = new OpenSeadragon.Point(pixelPoint.x + adjacencyPixels, pixelPoint.y);
       const edgeViewport = this.viewer.viewport.pointFromPixel(edgePixel);
@@ -4640,9 +4768,13 @@ class TemporalEchoController {
     const searchTime = performance.now() - startTime;
     const searchType = useAdjacent ? "adjacent" : "distance";
     if (searchTime > 5) {
-      console.warn(`[TemporalEchoController] Slow ${searchType} search: ${searchTime.toFixed(2)}ms for ${hotspots.length} hotspots`);
+      console.warn(
+        `[TemporalEchoController] Slow ${searchType} search: ${searchTime.toFixed(2)}ms for ${hotspots.length} hotspots`
+      );
     } else {
-      console.log(`[TemporalEchoController] Fast ${searchType} search: ${searchTime.toFixed(2)}ms for ${hotspots.length} hotspots`);
+      console.log(
+        `[TemporalEchoController] Fast ${searchType} search: ${searchTime.toFixed(2)}ms for ${hotspots.length} hotspots`
+      );
     }
     return hotspots;
   }
@@ -4653,10 +4785,7 @@ class TemporalEchoController {
   findContiguousClusters(tapData, radius) {
     const startTime = performance.now();
     const rect = this.viewer.element.getBoundingClientRect();
-    const pixelPoint = new OpenSeadragon.Point(
-      tapData.x - rect.left,
-      tapData.y - rect.top
-    );
+    const pixelPoint = new OpenSeadragon.Point(tapData.x - rect.left, tapData.y - rect.top);
     const viewportPoint = this.viewer.viewport.pointFromPixel(pixelPoint);
     const tapImagePoint = this.viewer.viewport.viewportToImageCoordinates(viewportPoint);
     const seedHotspot = this.findSeedHotspot(tapImagePoint, radius);
@@ -4665,10 +4794,15 @@ class TemporalEchoController {
       return [];
     }
     if (this.config.revealType === "ripple") {
-      console.log("[Ripple] Finding only direct neighbors of principal hotspot:", seedHotspot.id);
+      console.log(
+        "[Ripple] Finding only direct neighbors of principal hotspot:",
+        seedHotspot.id
+      );
       const directNeighbors = this.findDirectNeighborsOnly(seedHotspot);
       const elapsed2 = performance.now() - startTime;
-      console.log(`[Ripple] Found ${directNeighbors.length} direct neighbors in ${elapsed2.toFixed(2)}ms`);
+      console.log(
+        `[Ripple] Found ${directNeighbors.length} direct neighbors in ${elapsed2.toFixed(2)}ms`
+      );
       const cluster2 = [seedHotspot, ...directNeighbors];
       return cluster2.map((h) => ({
         id: h.id,
@@ -4698,7 +4832,9 @@ class TemporalEchoController {
     console.log("[ContiguousCluster] Starting BFS region growing from seed:", seedHotspot.id);
     const cluster = this.growContiguousRegion(seedHotspot, params, startTime);
     const elapsed = performance.now() - startTime;
-    console.log(`[ContiguousCluster] Selected ${cluster.length} contiguous hotspots in ${elapsed.toFixed(2)}ms`);
+    console.log(
+      `[ContiguousCluster] Selected ${cluster.length} contiguous hotspots in ${elapsed.toFixed(2)}ms`
+    );
     return cluster.map((h) => ({
       id: h.id,
       distance: h.distance || 0,
@@ -4716,7 +4852,11 @@ class TemporalEchoController {
     visited.add(principalHotspot.id);
     const adjacencyPixels = 40;
     const adjacencyInImageSpace = this.convertPixelsToImageSpace(adjacencyPixels);
-    const neighbors = this.findAdjacentHotspots(principalHotspot, adjacencyInImageSpace, visited);
+    const neighbors = this.findAdjacentHotspots(
+      principalHotspot,
+      adjacencyInImageSpace,
+      visited
+    );
     const principalBounds = this.getHotspotBounds(principalHotspot);
     const principalCenter = {
       x: (principalBounds.minX + principalBounds.maxX) / 2,
@@ -4735,7 +4875,9 @@ class TemporalEchoController {
       visited.add(neighbor.id);
     });
     directNeighbors.sort((a, b) => a.distance - b.distance);
-    console.log(`[Ripple] Found ${directNeighbors.length} direct neighbors within ${adjacencyPixels}px of principal hotspot`);
+    console.log(
+      `[Ripple] Found ${directNeighbors.length} direct neighbors within ${adjacencyPixels}px of principal hotspot`
+    );
     if (directNeighbors.length > 0) {
       const neighborIds = directNeighbors.slice(0, 5).map((n) => n.id).join(", ");
       const moreText = directNeighbors.length > 5 ? ` and ${directNeighbors.length - 5} more` : "";
@@ -4785,7 +4927,9 @@ class TemporalEchoController {
       if (cluster.length > 3) {
         const coherence = this.calculateClusterCoherence([...cluster, ...neighbors]);
         if (coherence < params.coherenceThreshold) {
-          console.log("[ContiguousCluster] Coherence threshold reached, stopping expansion");
+          console.log(
+            "[ContiguousCluster] Coherence threshold reached, stopping expansion"
+          );
           break;
         }
       }
@@ -4813,10 +4957,7 @@ class TemporalEchoController {
     if (this.spatialIndex && this.spatialIndex.findNearbyHotspots) {
       const centerX = (bounds.minX + bounds.maxX) / 2;
       const centerY = (bounds.minY + bounds.maxY) / 2;
-      const searchRadius = Math.max(
-        (bounds.maxX - bounds.minX) / 2,
-        (bounds.maxY - bounds.minY) / 2
-      ) + threshold;
+      const searchRadius = Math.max((bounds.maxX - bounds.minX) / 2, (bounds.maxY - bounds.minY) / 2) + threshold;
       const candidates = this.spatialIndex.findNearbyHotspots(
         centerX,
         centerY,
@@ -4925,10 +5066,7 @@ class TemporalEchoController {
   findIntelligentHotspots(tapData, radius) {
     const startTime = performance.now();
     const rect = this.viewer.element.getBoundingClientRect();
-    const pixelPoint = new OpenSeadragon.Point(
-      tapData.x - rect.left,
-      tapData.y - rect.top
-    );
+    const pixelPoint = new OpenSeadragon.Point(tapData.x - rect.left, tapData.y - rect.top);
     const viewportPoint = this.viewer.viewport.pointFromPixel(pixelPoint);
     const tapImagePoint = this.viewer.viewport.viewportToImageCoordinates(viewportPoint);
     const edgePixel = new OpenSeadragon.Point(pixelPoint.x + radius, pixelPoint.y);
@@ -4950,7 +5088,9 @@ class TemporalEchoController {
       console.log("[IntelligentSelection] No hotspots found in radius");
       return [];
     }
-    console.log(`[IntelligentSelection] Found ${candidateHotspots.length} candidates, applying intelligence...`);
+    console.log(
+      `[IntelligentSelection] Found ${candidateHotspots.length} candidates, applying intelligence...`
+    );
     const hotspotsWithMetrics = candidateHotspots.map((hotspot) => {
       var _a, _b;
       const h = hotspot.hotspot || hotspot;
@@ -5011,7 +5151,9 @@ class TemporalEchoController {
         break;
       }
     }
-    console.log(`[IntelligentSelection] Tap is in ${tapIsInEmptyArea ? "empty area (animal)" : "text area"}`);
+    console.log(
+      `[IntelligentSelection] Tap is in ${tapIsInEmptyArea ? "empty area (animal)" : "text area"}`
+    );
     const scoredHotspots = hotspotsWithMetrics.map((h) => {
       let score = 0;
       const distanceScore = Math.max(0, 1 - h.distance / radiusInImageSpace);
@@ -5047,7 +5189,10 @@ class TemporalEchoController {
       const clusterScore = Math.min(1, nearbyCount / 5);
       score += clusterScore * 0.15;
       if (tapIsInEmptyArea) {
-        Math.atan2(h.centerY - tapImagePoint.y, h.centerX - tapImagePoint.x);
+        Math.atan2(
+          h.centerY - tapImagePoint.y,
+          h.centerX - tapImagePoint.x
+        );
         score += 0.1;
       }
       return {
@@ -5122,7 +5267,9 @@ class TemporalEchoController {
       }
     }
     const searchTime = performance.now() - startTime;
-    console.log(`[IntelligentSelection] Selected ${selectedHotspots.length} hotspots in ${searchTime.toFixed(2)}ms`);
+    console.log(
+      `[IntelligentSelection] Selected ${selectedHotspots.length} hotspots in ${searchTime.toFixed(2)}ms`
+    );
     return selectedHotspots.map((h) => ({
       id: h.hotspot.id,
       distance: h.distance,
@@ -5136,10 +5283,7 @@ class TemporalEchoController {
   linearHotspotSearch(tapData, radius) {
     const hotspots = [];
     const rect = this.viewer.element.getBoundingClientRect();
-    const pixelPoint = new OpenSeadragon.Point(
-      tapData.x - rect.left,
-      tapData.y - rect.top
-    );
+    const pixelPoint = new OpenSeadragon.Point(tapData.x - rect.left, tapData.y - rect.top);
     const viewportPoint = this.viewer.viewport.pointFromPixel(pixelPoint);
     const tapImagePoint = this.viewer.viewport.viewportToImageCoordinates(viewportPoint);
     console.log("[TemporalEchoController] Searching for hotspots at:", {
@@ -5157,7 +5301,9 @@ class TemporalEchoController {
       if (!hotspot.coordinates || hotspot.coordinates.length === 0) return;
       if (this.activeEchoes.has(hotspotId)) {
         skippedRevealed++;
-        console.log(`[TemporalEchoController] Skipping already active hotspot: ${hotspotId}`);
+        console.log(
+          `[TemporalEchoController] Skipping already active hotspot: ${hotspotId}`
+        );
         return;
       }
       const element = overlayData.element || this.getHotspotElement(hotspotId);
@@ -5168,10 +5314,14 @@ class TemporalEchoController {
           const expirationTime = 2500;
           if (now - revealTime <= expirationTime) {
             skippedRevealed++;
-            console.log(`[TemporalEchoController] Skipping validly revealed hotspot: ${hotspotId}`);
+            console.log(
+              `[TemporalEchoController] Skipping validly revealed hotspot: ${hotspotId}`
+            );
             return;
           } else {
-            console.log(`[TemporalEchoController] Cleaning expired state for: ${hotspotId}`);
+            console.log(
+              `[TemporalEchoController] Cleaning expired state for: ${hotspotId}`
+            );
             element.removeAttribute("data-hotspot-revealed");
             element.removeAttribute("data-reveal-time");
           }
@@ -5219,7 +5369,9 @@ class TemporalEchoController {
         });
       }
     });
-    console.log(`[TemporalEchoController] Checked ${checkedCount} hotspots, skipped ${skippedRevealed} already revealed, found ${hotspots.length} in radius`);
+    console.log(
+      `[TemporalEchoController] Checked ${checkedCount} hotspots, skipped ${skippedRevealed} already revealed, found ${hotspots.length} in radius`
+    );
     hotspots.sort((a, b) => a.distance - b.distance);
     const maxHotspots = this.isMobile ? this.config.mobileMaxHotspots : this.config.maxSimultaneous;
     return hotspots.slice(0, maxHotspots);
@@ -5248,7 +5400,11 @@ class TemporalEchoController {
     const hotspotsToReveal = validHotspots;
     const hotspotIds = hotspotsToReveal.map((h) => h.hotspot.id);
     if (window.nativeHotspotRenderer && window.nativeHotspotRenderer.activeHotspotManager) {
-      console.log("[TemporalEchoController] Preparing", hotspotIds.length, "hotspots for reveal animation");
+      console.log(
+        "[TemporalEchoController] Preparing",
+        hotspotIds.length,
+        "hotspots for reveal animation"
+      );
       window.nativeHotspotRenderer.activeHotspotManager.forceShowHotspots(hotspotIds, {
         maxForceShow: this.isMobile ? this.config.mobileMaxHotspots : this.config.maxSimultaneous
       });
@@ -5274,7 +5430,9 @@ class TemporalEchoController {
           });
           element.setAttribute("data-hotspot-revealed", "true");
           element.setAttribute("data-reveal-time", Date.now().toString());
-          console.log(`[RIPPLE] Marked hotspot ${hotspot.id} as revealed (${index + 1}/${hotspotsToReveal.length}`);
+          console.log(
+            `[RIPPLE] Marked hotspot ${hotspot.id} as revealed (${index + 1}/${hotspotsToReveal.length}`
+          );
         }
       });
       this.borderRadialAnimator.triggerBorderRadialAnimation(tapData, hotspotsToReveal);
@@ -5284,11 +5442,15 @@ class TemporalEchoController {
         this.scheduleHotspotCleanup(hotspot.id, totalDuration2);
       });
       setTimeout(() => {
-        const allRevealedElements = document.querySelectorAll('[data-hotspot-revealed="true"]');
+        const allRevealedElements = document.querySelectorAll(
+          '[data-hotspot-revealed="true"]'
+        );
         allRevealedElements.forEach((element) => {
           const hotspotId = element.getAttribute("data-hotspot-id");
           if (hotspotId && !this.hotspotCleanupTimeouts.has(hotspotId)) {
-            console.log(`[RIPPLE] Found untracked revealed hotspot: ${hotspotId}, scheduling cleanup`);
+            console.log(
+              `[RIPPLE] Found untracked revealed hotspot: ${hotspotId}, scheduling cleanup`
+            );
             this.scheduleHotspotCleanup(hotspotId, totalDuration2);
           }
         });
@@ -5355,7 +5517,11 @@ class TemporalEchoController {
   showMissedTapFeedback(tapData) {
     var _a, _b, _c, _d, _e;
     if (!this.isMobile) return;
-    console.log("[TemporalEchoController] Showing missed tap feedback at:", tapData.x, tapData.y);
+    console.log(
+      "[TemporalEchoController] Showing missed tap feedback at:",
+      tapData.x,
+      tapData.y
+    );
     const indicator = document.createElement("div");
     indicator.className = "missed-tap-indicator";
     indicator.style.cssText = `
@@ -5423,7 +5589,9 @@ class TemporalEchoController {
       element = overlay.element;
     }
     if (!element) {
-      const svgContainers = document.querySelectorAll(".openseadragon-svg-overlay, .hotspot-overlay-svg, svg");
+      const svgContainers = document.querySelectorAll(
+        ".openseadragon-svg-overlay, .hotspot-overlay-svg, svg"
+      );
       for (const container of svgContainers) {
         element = container.querySelector(`[data-hotspot-id="${hotspotId}"]`);
         if (element) break;
@@ -5454,11 +5622,16 @@ class TemporalEchoController {
       console.log("[TemporalEchoController] Found element via state manager");
     }
     if (!element) {
-      const svgContainers = document.querySelectorAll(".openseadragon-svg-overlay, .hotspot-overlay-svg, svg");
+      const svgContainers = document.querySelectorAll(
+        ".openseadragon-svg-overlay, .hotspot-overlay-svg, svg"
+      );
       for (const container of svgContainers) {
         element = container.querySelector(`[data-hotspot-id="${hotspot.id}"]`);
         if (element) {
-          console.log("[TemporalEchoController] Found element in container:", container.className);
+          console.log(
+            "[TemporalEchoController] Found element in container:",
+            container.className
+          );
           break;
         }
       }
@@ -5488,12 +5661,25 @@ class TemporalEchoController {
     const originalVisibility = element.style.visibility || "";
     const wasHidden = element.classList.contains("hotspot-hidden");
     const wasVisible = element.classList.contains("hotspot-visible");
-    const darkPalettes = ["blackOnBlack", "pigmentLinerNeutral", "pigmentLinerWarm", "pigmentLinerCool"];
+    const darkPalettes = [
+      "blackOnBlack",
+      "pigmentLinerNeutral",
+      "pigmentLinerWarm",
+      "pigmentLinerCool"
+    ];
     const currentPalette = (_b = window.nativeHotspotRenderer) == null ? void 0 : _b.currentPalette;
     const isBlackMode = darkPalettes.includes(currentPalette);
-    console.log("[TemporalEchoController] Current palette:", currentPalette, "isDarkMode:", isBlackMode);
+    console.log(
+      "[TemporalEchoController] Current palette:",
+      currentPalette,
+      "isDarkMode:",
+      isBlackMode
+    );
     if (this.activeEchoes.has(hotspot.id)) {
-      console.log("[TemporalEchoController] Hotspot already animating, skipping:", hotspot.id);
+      console.log(
+        "[TemporalEchoController] Hotspot already animating, skipping:",
+        hotspot.id
+      );
       return;
     }
     element.classList.remove("hotspot-echo-reveal", "hotspot-echo-fade-out", "black-mode");
@@ -5527,21 +5713,28 @@ class TemporalEchoController {
         }
       }
       let borderStyle = localStorage.getItem("borderStyle") || "default";
-      console.log("[TemporalEchoController] Initial borderStyle from localStorage:", borderStyle);
+      console.log(
+        "[TemporalEchoController] Initial borderStyle from localStorage:",
+        borderStyle
+      );
       console.log("[TemporalEchoController] isMobile:", this.isMobile);
       console.log("[TemporalEchoController] isBlackMode:", isBlackMode);
       const isAndroid = /Android/i.test(navigator.userAgent);
       console.log("[TemporalEchoController] isAndroid:", isAndroid);
       if (isAndroid && this.isMobile) {
         borderStyle = "pigment";
-        console.log("[TemporalEchoController] Forcing pigment style (black borders) for Android mobile");
+        console.log(
+          "[TemporalEchoController] Forcing pigment style (black borders) for Android mobile"
+        );
       } else if (this.isMobile && borderStyle === "default") {
         borderStyle = "emboss";
         console.log("[TemporalEchoController] Overriding to emboss for mobile");
       }
       if (!isAndroid && isBlackMode && (borderStyle === "default" || borderStyle === "pigment")) {
         borderStyle = "emboss";
-        console.log("[TemporalEchoController] Forcing emboss style for dark palette visibility");
+        console.log(
+          "[TemporalEchoController] Forcing emboss style for dark palette visibility"
+        );
       }
       console.log("[TemporalEchoController] Final borderStyle to apply:", borderStyle);
       if (borderStyle !== "default") {
@@ -5558,7 +5751,10 @@ class TemporalEchoController {
           if (paths.length > 0 && paths.length <= 2) {
             const path = paths[0];
             const computedStyle = window.getComputedStyle(path);
-            console.log(`[TemporalEchoController] Path style check - filter:`, ((_a2 = computedStyle.filter) == null ? void 0 : _a2.substring(0, 50)) + "...");
+            console.log(
+              `[TemporalEchoController] Path style check - filter:`,
+              ((_a2 = computedStyle.filter) == null ? void 0 : _a2.substring(0, 50)) + "..."
+            );
           }
           this.activeTimeouts.delete(debugTimeout);
         }, 100);
@@ -5582,16 +5778,23 @@ class TemporalEchoController {
               // Sample radius
             );
             element.classList.add(luminanceData.recommendedEffect);
-            console.log("[TemporalEchoController] Applied contrast effect:", luminanceData.recommendedEffect);
+            console.log(
+              "[TemporalEchoController] Applied contrast effect:",
+              luminanceData.recommendedEffect
+            );
           } catch (error) {
-            console.warn("[TemporalEchoController] Contrast detection failed, using default");
+            console.warn(
+              "[TemporalEchoController] Contrast detection failed, using default"
+            );
             element.classList.add("contrast-adaptive-medium");
           }
         }
       }
       const delay = index * this.config.staggerDelay;
       element.style.animationDelay = `${delay}ms`;
-      console.log(`[TemporalEchoController] Hotspot ${hotspot.id} animation delay: ${delay}ms (index: ${index})`);
+      console.log(
+        `[TemporalEchoController] Hotspot ${hotspot.id} animation delay: ${delay}ms (index: ${index})`
+      );
       if (element.tagName.toLowerCase() === "g") {
         const paths = element.querySelectorAll("path, polygon, polyline");
         paths.forEach((path) => {
@@ -5637,7 +5840,13 @@ class TemporalEchoController {
           "contrast-adaptive-medium",
           "contrast-adaptive-complex"
         );
-        element.classList.remove("border-gradient", "border-double", "border-emboss", "border-pulse", "border-pigment");
+        element.classList.remove(
+          "border-gradient",
+          "border-double",
+          "border-emboss",
+          "border-pulse",
+          "border-pigment"
+        );
         if (element.getAnimations) {
           element.getAnimations().forEach((animation) => {
             animation.cancel();
@@ -5699,7 +5908,9 @@ class TemporalEchoController {
       element = overlay.element;
     }
     if (!element) {
-      const svgContainers = document.querySelectorAll(".openseadragon-svg-overlay, .hotspot-overlay-svg, svg");
+      const svgContainers = document.querySelectorAll(
+        ".openseadragon-svg-overlay, .hotspot-overlay-svg, svg"
+      );
       for (const container of svgContainers) {
         element = container.querySelector(`[data-hotspot-id="${hotspotId}"]`);
         if (element) break;
@@ -5820,7 +6031,9 @@ class TemporalEchoController {
       }
     });
     if (cleanedCount > 0) {
-      console.log(`[TemporalEchoController] Cleaned ${cleanedCount} expired revealed states (iOS fix)`);
+      console.log(
+        `[TemporalEchoController] Cleaned ${cleanedCount} expired revealed states (iOS fix)`
+      );
     }
   }
   /**
@@ -5841,16 +6054,22 @@ class TemporalEchoController {
         const now = Date.now();
         const expirationTime = 2500;
         if (now - revealTime <= expirationTime) {
-          console.log(`[TemporalEcho] Hotspot ${hotspotId} is revealed in DOM (valid timestamp)`);
+          console.log(
+            `[TemporalEcho] Hotspot ${hotspotId} is revealed in DOM (valid timestamp)`
+          );
           return true;
         } else {
-          console.log(`[TemporalEcho] Hotspot ${hotspotId} has expired reveal state, cleaning up`);
+          console.log(
+            `[TemporalEcho] Hotspot ${hotspotId} has expired reveal state, cleaning up`
+          );
           element.removeAttribute("data-hotspot-revealed");
           element.removeAttribute("data-reveal-time");
           return false;
         }
       } else {
-        console.log(`[TemporalEcho] Hotspot ${hotspotId} has no timestamp, cleaning up stale state`);
+        console.log(
+          `[TemporalEcho] Hotspot ${hotspotId} has no timestamp, cleaning up stale state`
+        );
         element.removeAttribute("data-hotspot-revealed");
         return false;
       }
@@ -5901,7 +6120,10 @@ class TemporalEchoController {
       const handled = this.handleQuickTap(extendedTapData);
       console.log("[TemporalEchoController] handleQuickTap returned:", handled);
       tapData.wasHandledAsEcho = handled === true;
-      console.log("[TemporalEchoController] Set tapData.wasHandledAsEcho to:", tapData.wasHandledAsEcho);
+      console.log(
+        "[TemporalEchoController] Set tapData.wasHandledAsEcho to:",
+        tapData.wasHandledAsEcho
+      );
     };
     this.eventCoordinator.on(this.eventCoordinator.eventTypes.ECHO_TAP, this.fastPathListener);
     this.buildSpatialIndex();
@@ -5920,7 +6142,10 @@ class TemporalEchoController {
       this.cleanupTimeout = null;
     }
     if (this.fastPathListener) {
-      this.eventCoordinator.off(this.eventCoordinator.eventTypes.ECHO_TAP, this.fastPathListener);
+      this.eventCoordinator.off(
+        this.eventCoordinator.eventTypes.ECHO_TAP,
+        this.fastPathListener
+      );
       this.fastPathListener = null;
     }
     this.invalidateSpatialIndex();
@@ -5941,12 +6166,16 @@ class TemporalEchoController {
    */
   cleanupRevealedHotspots() {
     var _a, _b;
-    console.log(`[TemporalEchoController] Cleaning up revealed hotspots for Safari iOS (Reveal #${this.revealCount})`);
+    console.log(
+      `[TemporalEchoController] Cleaning up revealed hotspots for Safari iOS (Reveal #${this.revealCount})`
+    );
     this.activeTimeouts.forEach((timeoutId) => {
       clearTimeout(timeoutId);
     });
     this.activeTimeouts.clear();
-    const revealedElements = document.querySelectorAll(".hotspot-echo-reveal, .hotspot-echo-fade-out");
+    const revealedElements = document.querySelectorAll(
+      ".hotspot-echo-reveal, .hotspot-echo-fade-out"
+    );
     revealedElements.forEach((el) => {
       el.classList.remove("hotspot-echo-reveal", "hotspot-echo-fade-out", "black-mode");
       el.style.removeProperty("visibility");
@@ -5980,12 +6209,19 @@ class TemporalEchoController {
     this.echoAnimations.clear();
     const remainingRevealElements = document.querySelectorAll(".hotspot-echo-reveal");
     if (remainingRevealElements.length > 0) {
-      console.warn(`[TemporalEchoController] WARNING: ${remainingRevealElements.length} elements still have reveal class after cleanup!`);
+      console.warn(
+        `[TemporalEchoController] WARNING: ${remainingRevealElements.length} elements still have reveal class after cleanup!`
+      );
     }
     if ((_b = window.safariOverlayManager) == null ? void 0 : _b.overlayElement) {
-      const maskImage = window.getComputedStyle(window.safariOverlayManager.overlayElement).webkitMaskImage;
+      const maskImage = window.getComputedStyle(
+        window.safariOverlayManager.overlayElement
+      ).webkitMaskImage;
       if (maskImage && maskImage !== "none") {
-        console.warn("[TemporalEchoController] WARNING: Safari overlay still has mask after cleanup:", maskImage);
+        console.warn(
+          "[TemporalEchoController] WARNING: Safari overlay still has mask after cleanup:",
+          maskImage
+        );
       }
     }
     console.log(`[TemporalEchoController] Cleanup complete for Reveal #${this.revealCount}`);
@@ -5997,7 +6233,11 @@ class TemporalEchoController {
     this.activeEchoes.forEach((hotspotId) => {
       const stored = this.echoAnimations.get(hotspotId);
       if (stored && stored.element) {
-        stored.element.classList.remove("hotspot-echo-reveal", "hotspot-echo-fade-out", "black-mode");
+        stored.element.classList.remove(
+          "hotspot-echo-reveal",
+          "hotspot-echo-fade-out",
+          "black-mode"
+        );
         stored.element.style.animationDelay = "";
         stored.element.style.opacity = stored.originalOpacity;
         stored.element.style.visibility = stored.originalVisibility;
@@ -6192,7 +6432,9 @@ class TemporalEchoController {
       const animationCount = this.echoAnimations.size;
       const cleanupCount = this.hotspotCleanupTimeouts.size;
       if (activeCount > 0 || animationCount > 0 || cleanupCount > 0) {
-        console.log(`[PeriodicReset] Performing full reset - Active: ${activeCount}, Animations: ${animationCount}, Cleanups: ${cleanupCount}`);
+        console.log(
+          `[PeriodicReset] Performing full reset - Active: ${activeCount}, Animations: ${animationCount}, Cleanups: ${cleanupCount}`
+        );
         this.forceCleanupAllRevealed();
         this.hotspotCleanupTimeouts.forEach((timeout) => clearTimeout(timeout));
         this.hotspotCleanupTimeouts.clear();
@@ -6248,7 +6490,9 @@ class TemporalEchoController {
     this.clearActiveEchoes();
     this.hotspotCleanupTimeouts.forEach((timeout, hotspotId) => {
       clearTimeout(timeout);
-      console.log(`[TemporalEchoController] Cleared cleanup timeout for hotspot ${hotspotId}`);
+      console.log(
+        `[TemporalEchoController] Cleared cleanup timeout for hotspot ${hotspotId}`
+      );
     });
     this.hotspotCleanupTimeouts.clear();
     if (this.canvasRenderer) {

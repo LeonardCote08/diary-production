@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-GZqLfpDM.js","assets/main-D9N27JPU.js","assets/main-D2TKL3td.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-Ct21uPNv.js","assets/main-FjJU3P4V.js","assets/main-Cmo_Jyp4.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-D9N27JPU.js";
+import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-FjJU3P4V.js";
 class ImageOverlayManager {
   constructor() {
     this.overlays = /* @__PURE__ */ new Map();
@@ -168,9 +168,9 @@ class ImageOverlayManager {
     const overlay = this.overlays.get(hotspotId);
     if (!overlay) return false;
     const accessLevels = {
-      "free": 0,
-      "gated": 1,
-      "supporter": 2
+      free: 0,
+      gated: 1,
+      supporter: 2
     };
     const requiredLevel = accessLevels[overlay.access] || 0;
     const currentLevel = accessLevels[userLevel] || 0;
@@ -283,7 +283,9 @@ class LowZoomOptimizer {
     this.isZooming = true;
     this.zoomStartTime = performance.now();
     if (this.cinematicMode) {
-      console.log("LowZoomOptimizer: Skipping animation optimization - cinematic mode active");
+      console.log(
+        "LowZoomOptimizer: Skipping animation optimization - cinematic mode active"
+      );
       return;
     }
     if (!this.isActive) {
@@ -462,7 +464,9 @@ class LowZoomOptimizer {
     const isSafariDesktop = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) && !/iPad|iPhone|iPod/.test(navigator.userAgent);
     const threshold = isSafariDesktop ? 10 : this.isMobile ? 15 : 25;
     if (fps < threshold && fps > 0 && now - this._lastEmergencyTime > cooldownPeriod) {
-      console.warn(`LowZoomOptimizer: Low FPS detected (${fps}), applying emergency optimization`);
+      console.warn(
+        `LowZoomOptimizer: Low FPS detected (${fps}), applying emergency optimization`
+      );
       this._lastEmergencyTime = now;
       this.applyEmergencyOptimization();
     }
@@ -594,8 +598,14 @@ class MemoryManager {
     if (this.state.isActive) return;
     this.state.isActive = true;
     this.intervals.monitor = setInterval(() => this.checkMemory(), this.config.monitorInterval);
-    this.intervals.cleanup = setInterval(() => this.performScheduledCleanup(), this.config.cleanupInterval);
-    this.intervals.aggressive = setInterval(() => this.performAggressiveCleanup(), this.config.aggressiveCleanupDelay);
+    this.intervals.cleanup = setInterval(
+      () => this.performScheduledCleanup(),
+      this.config.cleanupInterval
+    );
+    this.intervals.aggressive = setInterval(
+      () => this.performAggressiveCleanup(),
+      this.config.aggressiveCleanupDelay
+    );
     document.addEventListener("visibilitychange", this.handleVisibilityChange);
     if ("onfreeze" in document) {
       document.addEventListener("freeze", this.handleFreeze);
@@ -626,7 +636,9 @@ class MemoryManager {
       this.state.memoryPressure = "normal";
     }
     if (this.state.memoryPressure !== previousPressure) {
-      console.log(`Memory pressure changed: ${previousPressure} → ${this.state.memoryPressure} (${usage.toFixed(0)}MB, ${percentage.toFixed(0)}%)`);
+      console.log(
+        `Memory pressure changed: ${previousPressure} → ${this.state.memoryPressure} (${usage.toFixed(0)}MB, ${percentage.toFixed(0)}%)`
+      );
       switch (this.state.memoryPressure) {
         case "critical":
           this.performEmergencyCleanup();
@@ -868,7 +880,9 @@ class OrganicVariations {
       this.easingVariation = 0.25;
       this.startPointVariation = 0.5;
       this.clearAllVariations();
-      console.log("[OrganicVariations] 🔥 EXTREME DEBUG MODE enabled - variations are now VERY obvious:");
+      console.log(
+        "[OrganicVariations] 🔥 EXTREME DEBUG MODE enabled - variations are now VERY obvious:"
+      );
       console.log("  - Duration: ±50% (1.1s to 3.3s instead of 2.2s)");
       console.log("  - Easing: ±25% control point variation");
       console.log("  - Start Point: 0-50% of path length");
@@ -948,7 +962,9 @@ class OrganicVariations {
    */
   applyEasingVariation(baseEasing, hotspotId) {
     const variations = this.getVariations(hotspotId);
-    const match = baseEasing.match(/cubic-bezier\(([\d.]+),\s*([\d.]+),\s*([\d.]+),\s*([\d.]+)\)/);
+    const match = baseEasing.match(
+      /cubic-bezier\(([\d.]+),\s*([\d.]+),\s*([\d.]+),\s*([\d.]+)\)/
+    );
     if (!match) return baseEasing;
     const x1 = parseFloat(match[1]) + variations.easingAdjustment.x1;
     const y1 = parseFloat(match[2]) + variations.easingAdjustment.y1;
@@ -1021,6 +1037,7 @@ class CentralizedEventManager {
     this.dragStartPoint = null;
     this.dragStartTime = 0;
     this.currentHoveredId = null;
+    this.lastValidPointerPosition = null;
     this.clickTimeThreshold = 300;
     this.clickDistThreshold = this.isMobile ? 15 : 8;
     this.lastMoveTime = 0;
@@ -1047,7 +1064,9 @@ class CentralizedEventManager {
     this.container.addEventListener("pointermove", this.handlePointerMove, { passive: true });
     this.container.addEventListener("pointerup", this.handlePointerUp, { passive: true });
     this.disableIndividualListeners();
-    console.log(`[CentralizedEventManager] Initialized - Replaced ${this.savedListeners} individual listeners with 1 delegated listener`);
+    console.log(
+      `[CentralizedEventManager] Initialized - Replaced ${this.savedListeners} individual listeners with 1 delegated listener`
+    );
   }
   /**
    * Disable all individual hotspot listeners
@@ -1101,6 +1120,13 @@ class CentralizedEventManager {
       return;
     }
     this.lastMoveTime = now;
+    if (typeof event.clientX === "number" && typeof event.clientY === "number") {
+      this.lastValidPointerPosition = {
+        x: event.clientX,
+        y: event.clientY,
+        timestamp: now
+      };
+    }
     if (this.activePointers.has(event.pointerId)) {
       this.activePointers.set(event.pointerId, {
         x: event.clientX,
@@ -1125,7 +1151,9 @@ class CentralizedEventManager {
     const hotspotId = hotspot ? hotspot.getAttribute("data-hotspot-id") : null;
     if (hotspotId !== this.currentHoveredId) {
       if (this.currentHoveredId) {
-        const prevElement = document.querySelector(`[data-hotspot-id="${this.currentHoveredId}"]`);
+        const prevElement = document.querySelector(
+          `[data-hotspot-id="${this.currentHoveredId}"]`
+        );
         if (prevElement) {
           prevElement.classList.remove("hotspot-hover");
         }
@@ -1144,10 +1172,36 @@ class CentralizedEventManager {
   handlePointerUp(event) {
     const pointer = this.activePointers.get(event.pointerId);
     if (!pointer) return;
+    let eventX = event.clientX;
+    let eventY = event.clientY;
+    if (typeof eventX !== "number" || typeof eventY !== "number") {
+      console.warn(
+        "[CentralizedEventManager] Invalid pointerup coordinates, using fallback",
+        {
+          eventX,
+          eventY,
+          hasPointer: !!pointer,
+          hasLastValid: !!this.lastValidPointerPosition
+        }
+      );
+      if (pointer && typeof pointer.x === "number" && typeof pointer.y === "number") {
+        eventX = pointer.x;
+        eventY = pointer.y;
+      } else if (this.lastValidPointerPosition) {
+        eventX = this.lastValidPointerPosition.x;
+        eventY = this.lastValidPointerPosition.y;
+      } else {
+        console.warn(
+          "[CentralizedEventManager] No valid coordinates available, ignoring click"
+        );
+        this.activePointers.delete(event.pointerId);
+        return;
+      }
+    }
     if (!this.isDragging && this.dragStartPoint) {
       const timeDiff = Date.now() - this.dragStartTime;
-      const dx = event.clientX - this.dragStartPoint.x;
-      const dy = event.clientY - this.dragStartPoint.y;
+      const dx = eventX - this.dragStartPoint.x;
+      const dy = eventY - this.dragStartPoint.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
       if (timeDiff < this.clickTimeThreshold && distance < this.clickDistThreshold) {
         const hotspot = this.findHotspotElement(event.target);
@@ -1285,7 +1339,7 @@ class NetworkAdaptiveManager {
         springStiffness: 15
         // INCREASED from 12
       },
-      "wifi": {
+      wifi: {
         imageLoaderLimit: 3,
         maxImageCacheCount: 150,
         maxTilesPerFrame: 3,
@@ -1326,12 +1380,22 @@ class NetworkAdaptiveManager {
     if (connection) {
       this.networkType = connection.effectiveType || "4g";
       this.saveDataMode = connection.saveData || false;
-      console.log("[NetworkAdaptive] Network detected:", this.networkType, "Save data:", this.saveDataMode);
+      console.log(
+        "[NetworkAdaptive] Network detected:",
+        this.networkType,
+        "Save data:",
+        this.saveDataMode
+      );
       connection.addEventListener("change", () => {
         const newType = connection.effectiveType || "4g";
         const newSaveData = connection.saveData || false;
         if (newType !== this.networkType || newSaveData !== this.saveDataMode) {
-          console.log("[NetworkAdaptive] Network changed from", this.networkType, "to", newType);
+          console.log(
+            "[NetworkAdaptive] Network changed from",
+            this.networkType,
+            "to",
+            newType
+          );
           this.networkType = newType;
           this.saveDataMode = newSaveData;
           this.applyNetworkSettings();
@@ -1396,7 +1460,13 @@ class NetworkAdaptiveManager {
         estimatedType = "wifi";
       }
       if (estimatedType !== this.networkType) {
-        console.log("[NetworkAdaptive] Safari: Network estimated as", estimatedType, "(avg load time:", avgTime.toFixed(2), "ms)");
+        console.log(
+          "[NetworkAdaptive] Safari: Network estimated as",
+          estimatedType,
+          "(avg load time:",
+          avgTime.toFixed(2),
+          "ms)"
+        );
         this.networkType = estimatedType;
         this.applyNetworkSettings();
       }
@@ -1427,7 +1497,13 @@ class NetworkAdaptiveManager {
         estimatedType = "4g";
       }
       if (estimatedType !== this.networkType) {
-        console.log("[NetworkAdaptive] Adjusting based on tile load times:", estimatedType, "(avg:", avgTime.toFixed(2), "ms)");
+        console.log(
+          "[NetworkAdaptive] Adjusting based on tile load times:",
+          estimatedType,
+          "(avg:",
+          avgTime.toFixed(2),
+          "ms)"
+        );
         this.networkType = estimatedType;
         this.applyNetworkSettings();
       }
@@ -1632,7 +1708,9 @@ class PerformanceMonitor {
     );
   }
   removeEventHandlers() {
-    ["tile-loaded", "tile-load-failed", "animation-start", "animation-finish"].forEach((event) => this.viewer.removeAllHandlers(event));
+    ["tile-loaded", "tile-load-failed", "animation-start", "animation-finish"].forEach(
+      (event) => this.viewer.removeAllHandlers(event)
+    );
   }
   measureFrame() {
     if (!this.isMonitoring || this.isPaused) return;
@@ -1711,10 +1789,18 @@ class PerformanceMonitor {
     const scores = {
       fps: Math.min(100, this.metrics.averageFPS / fps.target * 100) * 0.5,
       frameTime: Math.min(100, frameTime.target / parseFloat(this.metrics.frameTime) * 100) * 0.2,
-      memory: this.metrics.memoryLimit > 0 ? Math.max(0, Math.min(100, (1 - this.metrics.memoryUsage / this.metrics.memoryLimit) * 100)) * 0.2 : 20,
+      memory: this.metrics.memoryLimit > 0 ? Math.max(
+        0,
+        Math.min(
+          100,
+          (1 - this.metrics.memoryUsage / this.metrics.memoryLimit) * 100
+        )
+      ) * 0.2 : 20,
       droppedFrames: Math.max(0, 100 - Math.min(100, this.metrics.droppedFrames * 2)) * 0.1
     };
-    this.metrics.performanceScore = Math.round(Object.values(scores).reduce((a, b) => a + b, 0));
+    this.metrics.performanceScore = Math.round(
+      Object.values(scores).reduce((a, b) => a + b, 0)
+    );
   }
   trackPerformanceHistory() {
     this.performanceHistory.push({
@@ -1734,9 +1820,21 @@ class PerformanceMonitor {
     const score = this.metrics.performanceScore;
     const trend = this.getPerformanceTrend();
     const optimizations = [
-      { condition: avgFPS < fps.critical || score < 30, action: this.applyCriticalOptimizations, log: "CRITICAL" },
-      { condition: avgFPS < fps.poor || score < 50, action: this.applyAggressiveOptimizations, log: "Poor" },
-      { condition: avgFPS < fps.good || score < 80, action: this.applyModerateOptimizations, log: "Below target" },
+      {
+        condition: avgFPS < fps.critical || score < 30,
+        action: this.applyCriticalOptimizations,
+        log: "CRITICAL"
+      },
+      {
+        condition: avgFPS < fps.poor || score < 50,
+        action: this.applyAggressiveOptimizations,
+        log: "Poor"
+      },
+      {
+        condition: avgFPS < fps.good || score < 80,
+        action: this.applyModerateOptimizations,
+        log: "Below target"
+      },
       {
         condition: avgFPS > fps.target && score > 90 && (trend === "improving" || trend === "stable"),
         action: this.restoreQualitySettings,
@@ -1745,9 +1843,10 @@ class PerformanceMonitor {
     ];
     for (const opt of optimizations) {
       if (opt.condition) {
-        if (opt.log) console[opt.log === "CRITICAL" ? "error" : "warn"](
-          `${opt.log} performance: Score ${score}, FPS: ${avgFPS}`
-        );
+        if (opt.log)
+          console[opt.log === "CRITICAL" ? "error" : "warn"](
+            `${opt.log} performance: Score ${score}, FPS: ${avgFPS}`
+          );
         opt.action.call(this);
         this.lastOptimization = now;
         break;
@@ -1849,15 +1948,27 @@ class PerformanceMonitor {
     const m = this.metrics;
     const t = this.thresholds;
     const checks = [
-      { condition: m.averageFPS < t.fps.poor, message: `Low FPS: ${m.averageFPS} (target: ${t.fps.target})` },
+      {
+        condition: m.averageFPS < t.fps.poor,
+        message: `Low FPS: ${m.averageFPS} (target: ${t.fps.target})`
+      },
       // Only warn below 25 FPS
       { condition: m.droppedFrames > 200, message: `Dropped frames: ${m.droppedFrames}` },
       // More tolerance
-      { condition: parseFloat(m.frameTime) > t.frameTime.warning, message: `High frame time: ${m.frameTime}ms` },
-      { condition: m.memoryUsage > t.memory.critical, message: `High memory: ${m.memoryUsage}MB` },
+      {
+        condition: parseFloat(m.frameTime) > t.frameTime.warning,
+        message: `High frame time: ${m.frameTime}ms`
+      },
+      {
+        condition: m.memoryUsage > t.memory.critical,
+        message: `High memory: ${m.memoryUsage}MB`
+      },
       { condition: m.cachedTiles > 3e3, message: `Large cache: ${m.cachedTiles} tiles` },
       // Higher threshold
-      { condition: m.tileLoadTime > 500, message: `Slow tile loading: ${Math.round(m.tileLoadTime)}ms` }
+      {
+        condition: m.tileLoadTime > 500,
+        message: `Slow tile loading: ${Math.round(m.tileLoadTime)}ms`
+      }
       // More tolerance
     ];
     return checks.filter((c) => c.condition).map((c) => c.message);
@@ -1867,12 +1978,15 @@ class PerformanceMonitor {
     const m = this.metrics;
     const t = this.thresholds;
     if (m.averageFPS < t.fps.acceptable) {
-      if (m.renderMode === "animating") recs.push("Reduce animation time for smoother transitions");
+      if (m.renderMode === "animating")
+        recs.push("Reduce animation time for smoother transitions");
       if (m.cachedTiles > 1e3) recs.push("Clear tile cache to free memory");
       if (m.visibleTiles > 50) recs.push("Zoom in to reduce visible tiles");
     }
-    if (m.memoryUsage > t.memory.warning) recs.push("Consider reloading the page to clear memory");
-    if (m.tileLoadTime > 200) recs.push("Check network connection or reduce concurrent tile loads");
+    if (m.memoryUsage > t.memory.warning)
+      recs.push("Consider reloading the page to clear memory");
+    if (m.tileLoadTime > 200)
+      recs.push("Check network connection or reduce concurrent tile loads");
     return recs;
   }
   enableDebugOverlay() {
@@ -1886,7 +2000,10 @@ class PerformanceMonitor {
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         `;
     document.body.appendChild(this.debugOverlay);
-    this.intervals.debug = setInterval(() => this.updateDebugOverlay(), this.config.intervals.debug);
+    this.intervals.debug = setInterval(
+      () => this.updateDebugOverlay(),
+      this.config.intervals.debug
+    );
   }
   updateDebugOverlay() {
     if (!this.isMonitoring || !this.debugOverlay) return;
@@ -1997,7 +2114,7 @@ class RenderOptimizer {
     const handlers = {
       "animation-start": () => this.handleAnimationStart(),
       "animation-finish": () => this.handleAnimationFinish(),
-      "animation": () => this.handleAnimation(),
+      animation: () => this.handleAnimation(),
       "viewport-change": () => this.handleViewportChange(),
       "canvas-press": () => this.handleInteraction("press"),
       "canvas-drag": () => this.handleInteraction("drag"),
@@ -2161,8 +2278,8 @@ class RenderOptimizer {
     var _a;
     this.lastInteraction = Date.now();
     const actions = {
-      "press": () => this.setRenderMode("animation"),
-      "drag": () => {
+      press: () => this.setRenderMode("animation"),
+      drag: () => {
         this.state.isPanning = true;
         this.setRenderMode("animation");
       },
@@ -2170,11 +2287,11 @@ class RenderOptimizer {
         this.state.isPanning = false;
         this.scheduleStaticMode();
       },
-      "scroll": () => {
+      scroll: () => {
         this.state.isZooming = true;
         this.setRenderMode("animation");
       },
-      "pinch": () => {
+      pinch: () => {
         this.state.isZooming = true;
         this.setRenderMode("animation");
       }
@@ -2577,8 +2694,12 @@ class SafariPerformanceOptimizer {
           this.viewer.drawer.pixelRatio = newPixelRatio;
           if (this.viewer.drawer.canvas) {
             const viewportSize = this.viewer.viewport.getContainerSize();
-            this.viewer.drawer.canvas.width = Math.floor(viewportSize.x * newPixelRatio);
-            this.viewer.drawer.canvas.height = Math.floor(viewportSize.y * newPixelRatio);
+            this.viewer.drawer.canvas.width = Math.floor(
+              viewportSize.x * newPixelRatio
+            );
+            this.viewer.drawer.canvas.height = Math.floor(
+              viewportSize.y * newPixelRatio
+            );
           }
         }
       }
@@ -2593,17 +2714,23 @@ class SafariPerformanceOptimizer {
     if (this.averageFPS < 20 && this.scalingFactor > 0.4) {
       this.scalingFactor = 0.4;
       if (isInteracting) {
-        console.log(`Safari: EMERGENCY - Reduced scaling factor to ${this.scalingFactor} due to very low FPS`);
+        console.log(
+          `Safari: EMERGENCY - Reduced scaling factor to ${this.scalingFactor} due to very low FPS`
+        );
       }
     } else if (this.averageFPS < 30 && this.scalingFactor > 0.4) {
       this.scalingFactor = Math.max(0.4, this.scalingFactor - 0.1);
       if (isInteracting) {
-        console.log(`Safari: Reduced scaling factor to ${this.scalingFactor} due to low FPS`);
+        console.log(
+          `Safari: Reduced scaling factor to ${this.scalingFactor} due to low FPS`
+        );
       }
     } else if (this.averageFPS > 50 && this.scalingFactor < 0.75) {
       this.scalingFactor = Math.min(0.75, this.scalingFactor + 0.05);
       if (isInteracting) {
-        console.log(`Safari: Increased scaling factor to ${this.scalingFactor} due to good FPS`);
+        console.log(
+          `Safari: Increased scaling factor to ${this.scalingFactor} due to good FPS`
+        );
       }
     }
   }
@@ -3075,7 +3202,7 @@ class SpatialIndex {
     this.centerPoints = [];
     this.queryCache.clear();
     const numItems = hotspotData2.length;
-    this.index = new Flatbush(numItems);
+    this.index = new Flatbush(numItems, 16);
     hotspotData2.forEach((hotspot, idx) => {
       const bbox = this.calculateBoundingBox(hotspot.coordinates);
       const centerX = (bbox.minX + bbox.maxX) / 2;
@@ -3093,7 +3220,9 @@ class SpatialIndex {
     });
     this.index.finish();
     const loadTime = performance.now() - startTime;
-    console.log(`[Flatbush] Spatial index built in ${loadTime.toFixed(2)}ms for ${numItems} hotspots`);
+    console.log(
+      `[Flatbush] Spatial index built in ${loadTime.toFixed(2)}ms for ${numItems} hotspots`
+    );
   }
   /**
    * Query with caching for repeated viewport queries
@@ -3108,12 +3237,7 @@ class SpatialIndex {
       this.queryCache.clear();
       this.lastCacheClear = Date.now();
     }
-    const indices = this.index.search(
-      bounds.minX,
-      bounds.minY,
-      bounds.maxX,
-      bounds.maxY
-    );
+    const indices = this.index.search(bounds.minX, bounds.minY, bounds.maxX, bounds.maxY);
     const hotspots = indices.map((idx) => this.hotspots[idx]);
     if (this.queryCache.size < this.cacheSize) {
       this.queryCache.set(key, hotspots);
@@ -3141,12 +3265,7 @@ class SpatialIndex {
    */
   findNearbyHotspots(x, y, radius = 200, maxResults = 10) {
     const startTime = performance.now();
-    const indices = this.index.search(
-      x - radius,
-      y - radius,
-      x + radius,
-      y + radius
-    );
+    const indices = this.index.search(x - radius, y - radius, x + radius, y + radius);
     const hotspotsWithDistance = [];
     for (const idx of indices) {
       const hotspot = this.hotspots[idx];
@@ -3161,7 +3280,9 @@ class SpatialIndex {
     const results = hotspotsWithDistance.slice(0, maxResults).map((item) => item.hotspot);
     const searchTime = performance.now() - startTime;
     if (searchTime > 5) {
-      console.warn(`[Flatbush] Slow nearby search: ${searchTime.toFixed(2)}ms for ${results.length} results`);
+      console.warn(
+        `[Flatbush] Slow nearby search: ${searchTime.toFixed(2)}ms for ${results.length} results`
+      );
     }
     return results;
   }
@@ -3210,7 +3331,9 @@ class SpatialIndex {
       }
     }
     const searchTime = performance.now() - startTime;
-    console.log(`[SpatialIndex] Found ${result.length} adjacent hotspots in ${searchTime.toFixed(2)}ms`);
+    console.log(
+      `[SpatialIndex] Found ${result.length} adjacent hotspots in ${searchTime.toFixed(2)}ms`
+    );
     return result;
   }
   /**
@@ -3248,8 +3371,14 @@ class SpatialIndex {
    * Check if two bounding boxes are adjacent or close enough
    */
   areBoundingBoxesAdjacent(bbox1, bbox2, threshold) {
-    const xGap = Math.max(0, Math.max(bbox1.minX, bbox2.minX) - Math.min(bbox1.maxX, bbox2.maxX));
-    const yGap = Math.max(0, Math.max(bbox1.minY, bbox2.minY) - Math.min(bbox1.maxY, bbox2.maxY));
+    const xGap = Math.max(
+      0,
+      Math.max(bbox1.minX, bbox2.minX) - Math.min(bbox1.maxX, bbox2.maxX)
+    );
+    const yGap = Math.max(
+      0,
+      Math.max(bbox1.minY, bbox2.minY) - Math.min(bbox1.maxY, bbox2.maxY)
+    );
     return xGap < threshold && yGap < threshold;
   }
   /**
@@ -3284,9 +3413,7 @@ class SpatialIndex {
     if (hotspot.shape === "polygon") {
       return this.pointInPolygon(x, y, hotspot.coordinates);
     } else if (hotspot.shape === "multipolygon") {
-      return hotspot.coordinates.some(
-        (polygon) => this.pointInPolygon(x, y, polygon)
-      );
+      return hotspot.coordinates.some((polygon) => this.pointInPolygon(x, y, polygon));
     }
     return false;
   }
@@ -3418,7 +3545,10 @@ class TileCleanupManager {
     this.viewer.addHandler("tile-loaded", this.handleTileLoaded);
     this.viewer.addHandler("viewport-change", this.handleViewportChange);
     this.updateCleanupInterval();
-    this.intervals.deepCleanup = setInterval(() => this.performDeepCleanup(), this.config.deepCleanupInterval);
+    this.intervals.deepCleanup = setInterval(
+      () => this.performDeepCleanup(),
+      this.config.deepCleanupInterval
+    );
     this.intervals.monitor = setInterval(() => this.monitorPerformance(), 2e3);
     console.log("TileCleanupManager started");
   }
@@ -3476,7 +3606,9 @@ class TileCleanupManager {
       }
     }
     if (previousPressure !== this.state.currentPressure) {
-      console.log(`Tile cleanup pressure changed: ${previousPressure} → ${this.state.currentPressure} (FPS: ${fps})`);
+      console.log(
+        `Tile cleanup pressure changed: ${previousPressure} → ${this.state.currentPressure} (FPS: ${fps})`
+      );
       this.updateCleanupInterval();
       if (this.state.currentPressure === "critical") {
         this.performCleanup();
@@ -3591,7 +3723,9 @@ class TileCleanupManager {
       });
       this.state.tilesRemoved += tilesToRemove.length;
       this.metrics.totalCleaned += tilesToRemove.length;
-      console.log(`Cleaned ${tilesToRemove.length} tiles (pressure: ${pressure}, cache was: ${currentCacheSize}, kept ${visibleTiles.size} visible)`);
+      console.log(
+        `Cleaned ${tilesToRemove.length} tiles (pressure: ${pressure}, cache was: ${currentCacheSize}, kept ${visibleTiles.size} visible)`
+      );
     }
     const duration = performance.now() - startTime;
     this.metrics.lastCleanupDuration = duration;
@@ -3624,7 +3758,9 @@ class TileCleanupManager {
     }
     const duration = performance.now() - startTime;
     this.state.lastDeepCleanup = now;
-    console.log(`Deep cleanup completed in ${duration.toFixed(2)}ms, cleared ${keysToDelete.length} old tracking entries`);
+    console.log(
+      `Deep cleanup completed in ${duration.toFixed(2)}ms, cleared ${keysToDelete.length} old tracking entries`
+    );
   }
   forceCleanup() {
     console.log("Forcing immediate tile cleanup");
@@ -3713,7 +3849,10 @@ class TileWorkerManager {
         }
       });
       this.isInitialized = true;
-      console.log("TileWorkerManager initialized with capabilities:", this.state.capabilities);
+      console.log(
+        "TileWorkerManager initialized with capabilities:",
+        this.state.capabilities
+      );
     } catch (error) {
       console.error("Failed to initialize TileWorkerManager:", error);
       this.state.lastError = error;
@@ -4059,7 +4198,10 @@ class TileOptimizer {
       this.state.workerReady = true;
       console.log("TileOptimizer: Web Worker initialized successfully");
     } catch (error) {
-      console.warn("TileOptimizer: Failed to initialize Web Worker, falling back to main thread", error);
+      console.warn(
+        "TileOptimizer: Failed to initialize Web Worker, falling back to main thread",
+        error
+      );
       this.state.useWorker = false;
       this.state.workerReady = false;
     }
@@ -4070,7 +4212,10 @@ class TileOptimizer {
     setTimeout(() => {
       this.viewer.addHandler("viewport-change", this.handleViewportChange);
     }, 100);
-    this.intervals.cleanup = setInterval(() => this.performCleanup(), this.config.cleanupInterval);
+    this.intervals.cleanup = setInterval(
+      () => this.performCleanup(),
+      this.config.cleanupInterval
+    );
     this.intervals.queue = setInterval(() => this.processQueue(), 50);
     this.intervals.worker = setInterval(() => this.processWorkerBatch(), 100);
     console.log("TileOptimizer started with Web Worker support:", this.state.workerReady);
@@ -4096,11 +4241,14 @@ class TileOptimizer {
     this.predictiveLoad();
     if (this.state.workerReady && this.state.tileQueue.length > 0) {
       if ("requestIdleCallback" in window) {
-        requestIdleCallback(() => {
-          if (!this.viewer.isAnimating()) {
-            this.updateWorkerPriorities();
-          }
-        }, { timeout: 100 });
+        requestIdleCallback(
+          () => {
+            if (!this.viewer.isAnimating()) {
+              this.updateWorkerPriorities();
+            }
+          },
+          { timeout: 100 }
+        );
       } else {
         setTimeout(() => {
           if (!this.viewer.isAnimating()) {
@@ -4217,7 +4365,8 @@ class TileOptimizer {
     };
   }
   async processWorkerBatch() {
-    if (!this.state.isActive || !this.state.workerReady || this.state.tileQueue.length === 0) return;
+    if (!this.state.isActive || !this.state.workerReady || this.state.tileQueue.length === 0)
+      return;
     const highPriorityTiles = this.state.tileQueue.filter((tile) => tile.priority <= 1).slice(0, this.config.workerBatchSize);
     if (highPriorityTiles.length === 0) return;
     try {
@@ -4240,7 +4389,8 @@ class TileOptimizer {
   }
   processQueue() {
     var _a;
-    if (!this.state.isActive || this.state.tileQueue.length === 0 || this.state.loadingTiles.size >= this.config.maxConcurrentLoads) return;
+    if (!this.state.isActive || this.state.tileQueue.length === 0 || this.state.loadingTiles.size >= this.config.maxConcurrentLoads)
+      return;
     const tiledImage = (_a = this.viewer.world) == null ? void 0 : _a.getItemAt(0);
     if (!tiledImage) return;
     while (this.state.loadingTiles.size < this.config.maxConcurrentLoads && this.state.tileQueue.length > 0) {
@@ -4274,10 +4424,10 @@ class TileOptimizer {
       height: bounds.height * this.config.predictiveRadius
     };
     const zoom = viewport.getZoom();
-    const level = Math.max(0, Math.min(
-      Math.floor(Math.log2(zoom)),
-      this.viewer.source.maxLevel || 14
-    ));
+    const level = Math.max(
+      0,
+      Math.min(Math.floor(Math.log2(zoom)), this.viewer.source.maxLevel || 14)
+    );
     const tileWidth = this.viewer.source.getTileWidth(level);
     const tileHeight = this.viewer.source.getTileHeight ? this.viewer.source.getTileHeight(level) : tileWidth;
     const sourceWidth = this.viewer.source.width;
@@ -4322,10 +4472,14 @@ class TileOptimizer {
     const maxLoads = isMobile2 ? 4 : 8;
     if (avgTime > 500 && currentLoads > 2) {
       this.config.maxConcurrentLoads--;
-      console.log(`Reduced concurrent loads to ${this.config.maxConcurrentLoads} (avg: ${avgTime.toFixed(0)}ms)`);
+      console.log(
+        `Reduced concurrent loads to ${this.config.maxConcurrentLoads} (avg: ${avgTime.toFixed(0)}ms)`
+      );
     } else if (avgTime < 200 && currentLoads < maxLoads) {
       this.config.maxConcurrentLoads++;
-      console.log(`Increased concurrent loads to ${this.config.maxConcurrentLoads} (avg: ${avgTime.toFixed(0)}ms)`);
+      console.log(
+        `Increased concurrent loads to ${this.config.maxConcurrentLoads} (avg: ${avgTime.toFixed(0)}ms)`
+      );
     }
   }
   performCleanup() {
@@ -4475,7 +4629,9 @@ function applyIOSTileDisappearFix(viewer) {
     return;
   }
   if (isIPhone2) {
-    console.log("IOSTileDisappearFix: iPhone detected - SKIPPING ALL FIXES (causes disappearance)");
+    console.log(
+      "IOSTileDisappearFix: iPhone detected - SKIPPING ALL FIXES (causes disappearance)"
+    );
     return;
   }
   console.log("=== APPLYING iOS TILE DISAPPEAR FIX (iPad only) ===");
@@ -4571,7 +4727,9 @@ function createIOSHTMLConfig(baseConfig) {
     return baseConfig;
   }
   const device = isIPhone() ? "iPhone" : isIPad() ? "iPad" : "iOS";
-  console.log(`[iOS HTML Config] Configuring HTML drawer for ${device} - bypassing canvas limitations`);
+  console.log(
+    `[iOS HTML Config] Configuring HTML drawer for ${device} - bypassing canvas limitations`
+  );
   return {
     ...baseConfig,
     // CRITICAL: Bypass canvas entirely on iOS
@@ -4714,7 +4872,9 @@ function verifyHTMLDrawer(viewer) {
     hasContainer: !!viewer.container
   });
   if (drawerType === "CanvasDrawer" || viewer.useCanvas === true) {
-    console.error("[iOS HTML Config] WARNING: Canvas drawer detected on iOS! This will cause crashes.");
+    console.error(
+      "[iOS HTML Config] WARNING: Canvas drawer detected on iOS! This will cause crashes."
+    );
     console.error("[iOS HTML Config] Attempting to force HTML drawer...");
     if (viewer.drawer && viewer.drawer.destroy) {
       viewer.drawer.destroy();
@@ -4730,7 +4890,11 @@ function setupIOSHTMLMonitoring(viewer) {
   viewer.addHandler("tile-loaded", () => {
     tileCount++;
     if (tileCount > 100 && isIPhone()) {
-      console.warn("[iOS HTML Config] High tile count:", tileCount, "- may impact performance");
+      console.warn(
+        "[iOS HTML Config] High tile count:",
+        tileCount,
+        "- may impact performance"
+      );
     }
   });
   viewer.addHandler("canvas-press", () => {
@@ -4748,7 +4912,10 @@ function setupIOSHTMLMonitoring(viewer) {
       if (world && world.getItemAt(0)) {
         const tiledImage = world.getItemAt(0);
         if (tiledImage._tileCache) {
-          tiledImage._tileCache.numTilesLoaded = Math.min(30, tiledImage._tileCache.numTilesLoaded);
+          tiledImage._tileCache.numTilesLoaded = Math.min(
+            30,
+            tiledImage._tileCache.numTilesLoaded
+          );
         }
       }
       tileCount = 30;
@@ -4897,7 +5064,10 @@ class PredictiveTileLoader {
       this.updatePosition(currentPosition);
       this.lastUpdateTime = now;
     });
-    console.log("[PredictiveTileLoader] Initialized with prefetch radius:", this.prefetchRadius);
+    console.log(
+      "[PredictiveTileLoader] Initialized with prefetch radius:",
+      this.prefetchRadius
+    );
   }
   updatePosition(currentPosition) {
     if (this.lastPosition) {
@@ -4921,10 +5091,13 @@ class PredictiveTileLoader {
     if (this.velocityHistory.length === 0) {
       return { x: 0, y: 0 };
     }
-    const sum = this.velocityHistory.reduce((acc, vel) => ({
-      x: acc.x + vel.x,
-      y: acc.y + vel.y
-    }), { x: 0, y: 0 });
+    const sum = this.velocityHistory.reduce(
+      (acc, vel) => ({
+        x: acc.x + vel.x,
+        y: acc.y + vel.y
+      }),
+      { x: 0, y: 0 }
+    );
     return {
       x: sum.x / this.velocityHistory.length,
       y: sum.y / this.velocityHistory.length
@@ -5210,37 +5383,38 @@ class ImmediateZoomHandler {
   setupWheelHandler() {
     const canvas = this.viewer.canvas;
     this.viewer.removeAllHandlers("canvas-scroll");
-    canvas.addEventListener("wheel", (event) => {
-      event.preventDefault();
-      const device = this.detectInputDevice(event);
-      const currentZoom = this.viewer.viewport.getZoom();
-      const rect = canvas.getBoundingClientRect();
-      const viewportPoint = this.viewer.viewport.pointFromPixel(
-        new OpenSeadragon.Point(
-          event.clientX - rect.left,
-          event.clientY - rect.top
-        )
-      );
-      let zoomFactor;
-      if (device === "mouse") {
-        const { discreteSteps } = this.config;
-        let stepMultiplier = 1;
-        if (currentZoom > 20) {
-          stepMultiplier = 0.5;
-        }
-        if (event.deltaY < 0) {
-          zoomFactor = Math.pow(discreteSteps.zoomIn, stepMultiplier);
+    canvas.addEventListener(
+      "wheel",
+      (event) => {
+        event.preventDefault();
+        const device = this.detectInputDevice(event);
+        const currentZoom = this.viewer.viewport.getZoom();
+        const rect = canvas.getBoundingClientRect();
+        const viewportPoint = this.viewer.viewport.pointFromPixel(
+          new OpenSeadragon.Point(event.clientX - rect.left, event.clientY - rect.top)
+        );
+        let zoomFactor;
+        if (device === "mouse") {
+          const { discreteSteps } = this.config;
+          let stepMultiplier = 1;
+          if (currentZoom > 20) {
+            stepMultiplier = 0.5;
+          }
+          if (event.deltaY < 0) {
+            zoomFactor = Math.pow(discreteSteps.zoomIn, stepMultiplier);
+          } else {
+            zoomFactor = Math.pow(discreteSteps.zoomOut, stepMultiplier);
+          }
         } else {
-          zoomFactor = Math.pow(discreteSteps.zoomOut, stepMultiplier);
+          const normalizedDelta = this.normalizeWheelDelta(event);
+          const sensitivity = this.getAdaptiveSensitivity(currentZoom);
+          zoomFactor = Math.exp(-normalizedDelta * sensitivity);
+          zoomFactor = Math.max(0.9, Math.min(1.1, zoomFactor));
         }
-      } else {
-        const normalizedDelta = this.normalizeWheelDelta(event);
-        const sensitivity = this.getAdaptiveSensitivity(currentZoom);
-        zoomFactor = Math.exp(-normalizedDelta * sensitivity);
-        zoomFactor = Math.max(0.9, Math.min(1.1, zoomFactor));
-      }
-      this.applyZoom(zoomFactor, viewportPoint);
-    }, { passive: false });
+        this.applyZoom(zoomFactor, viewportPoint);
+      },
+      { passive: false }
+    );
   }
   /**
    * Apply zoom with constraints
@@ -6050,7 +6224,10 @@ const applyPlatformOptimizations = () => {
   if (platform2.isLowEndDevice) {
     performanceConfig.viewer.animationTime = 0.15;
     performanceConfig.viewer.springStiffness = 18;
-    performanceConfig.viewer.maxImageCacheCount = Math.min(100, performanceConfig.viewer.maxImageCacheCount);
+    performanceConfig.viewer.maxImageCacheCount = Math.min(
+      100,
+      performanceConfig.viewer.maxImageCacheCount
+    );
     performanceConfig.viewer.imageLoaderLimit = 1;
     performanceConfig.viewer.maxTilesPerFrame = 1;
     performanceConfig.memory.maxCachedImages = 100;
@@ -6070,7 +6247,10 @@ const applyPlatformOptimizations = () => {
     console.log("High-end device detected - applied STEP 4 balanced performance/quality");
   }
   if (platform2.isHighDPI && !platform2.isMobile) {
-    performanceConfig.viewer.minPixelRatio = Math.min(0.5, performanceConfig.viewer.minPixelRatio);
+    performanceConfig.viewer.minPixelRatio = Math.min(
+      0.5,
+      performanceConfig.viewer.minPixelRatio
+    );
     performanceConfig.viewer.maxZoomPixelRatio = Math.max(4, platform2.pixelRatio * 2);
   }
   if (platform2.connectionType === "slow-2g" || platform2.connectionType === "2g") {
@@ -6131,7 +6311,10 @@ function adjustSettingsForPerformance(currentFPS, memoryUsage) {
   if (currentFPS > 55) {
     const targetConfig = platform.isHighEndDevice ? 6 : platform.isMobile ? 1 : 4;
     if (config.viewer.imageLoaderLimit < targetConfig) {
-      config.viewer.imageLoaderLimit = Math.min(targetConfig, config.viewer.imageLoaderLimit + 1);
+      config.viewer.imageLoaderLimit = Math.min(
+        targetConfig,
+        config.viewer.imageLoaderLimit + 1
+      );
     }
     if (config.viewer.maxTilesPerFrame < 3) {
       config.viewer.maxTilesPerFrame = Math.min(3, config.viewer.maxTilesPerFrame + 1);
@@ -6142,8 +6325,14 @@ function adjustSettingsForPerformance(currentFPS, memoryUsage) {
     return "normal";
   }
   if (memoryUsage > config.memory.criticalMemoryThreshold) {
-    config.viewer.maxImageCacheCount = Math.max(25, Math.floor(config.viewer.maxImageCacheCount * 0.4));
-    config.hotspots.maxVisibleHotspots = Math.max(10, Math.floor(config.hotspots.maxVisibleHotspots * 0.5));
+    config.viewer.maxImageCacheCount = Math.max(
+      25,
+      Math.floor(config.viewer.maxImageCacheCount * 0.4)
+    );
+    config.hotspots.maxVisibleHotspots = Math.max(
+      10,
+      Math.floor(config.hotspots.maxVisibleHotspots * 0.5)
+    );
     console.warn(`STEP 4: High memory usage: ${memoryUsage}MB - Applied aggressive reduction`);
     return "memory-limited";
   }
@@ -6152,7 +6341,9 @@ function adjustSettingsForPerformance(currentFPS, memoryUsage) {
 const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourceConfig = null) => {
   const isIOS2 = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
   if (isIOS2 && isMobileDevice) {
-    console.log("[CRITICAL] iOS detected: Forcing canvas drawer to prevent tile array corruption at indices 12/13");
+    console.log(
+      "[CRITICAL] iOS detected: Forcing canvas drawer to prevent tile array corruption at indices 12/13"
+    );
   }
   if (isMobileDevice) {
     const isIPadPro = isIOS2 && window.screen.width >= 1024;
@@ -6165,18 +6356,27 @@ const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourc
     if (isIPadPro) {
       config.imageLoaderLimit = 4;
       config.maxImageCacheCount = 100;
-      console.log("[iPad Pro Detected] Using optimized settings: 4 concurrent loads, 100 tile cache");
+      console.log(
+        "[iPad Pro Detected] Using optimized settings: 4 concurrent loads, 100 tile cache"
+      );
     } else if (isIPadAir) {
       config.imageLoaderLimit = 2;
       config.maxImageCacheCount = 75;
-      console.log("[iPad Air Detected] Using balanced settings: 2 concurrent loads, 75 tile cache");
+      console.log(
+        "[iPad Air Detected] Using balanced settings: 2 concurrent loads, 75 tile cache"
+      );
     } else if (isStandardIPad) {
       config.imageLoaderLimit = 1;
       config.maxImageCacheCount = 30;
-      console.log("[Standard iPad Detected] Using conservative settings: 1 load, 30 tile cache");
+      console.log(
+        "[Standard iPad Detected] Using conservative settings: 1 load, 30 tile cache"
+      );
     } else {
-      config.imageLoaderLimit = 1;
+      config.imageLoaderLimit = 2;
       config.maxImageCacheCount = 100;
+      console.log(
+        "[Android/Mobile Detected] Using Phase 1 settings: 2 concurrent loads (1→2→4→6 progression)"
+      );
     }
     config.visibilityRatio = 1;
     config.maxTilesPerFrame = 2;
@@ -6258,7 +6458,7 @@ const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourc
       pinchRotate: false
       // Research: Disable for performance
     },
-    // Touch handling configuration 
+    // Touch handling configuration
     dblClickDistThreshold: 20,
     clickDistThreshold: 10,
     clickTimeThreshold: 300,
@@ -6473,7 +6673,10 @@ class AdaptiveQualityManager {
     this.rafId = null;
     this.onQualityChange = options.onQualityChange || (() => {
     });
-    console.log("[AdaptiveQualityManager] Initialized with device capabilities:", this.deviceCapabilities);
+    console.log(
+      "[AdaptiveQualityManager] Initialized with device capabilities:",
+      this.deviceCapabilities
+    );
   }
   /**
    * Detect device capabilities
@@ -6500,7 +6703,13 @@ class AdaptiveQualityManager {
       capabilities.isLowEnd = true;
     }
     const userAgent = navigator.userAgent.toLowerCase();
-    const lowEndDevices = ["samsung galaxy a", "samsung galaxy j", "xiaomi redmi", "oppo a", "vivo y"];
+    const lowEndDevices = [
+      "samsung galaxy a",
+      "samsung galaxy j",
+      "xiaomi redmi",
+      "oppo a",
+      "vivo y"
+    ];
     capabilities.isLowEnd = capabilities.isLowEnd || lowEndDevices.some((device) => userAgent.includes(device));
     return capabilities;
   }
@@ -6615,7 +6824,9 @@ class AdaptiveQualityManager {
     if (currentIndex < levels.length - 1) {
       const newQuality = levels[currentIndex + 1];
       this.setQuality(newQuality);
-      console.warn(`[AdaptiveQualityManager] Downgrading quality to ${newQuality} due to ${reason} performance`);
+      console.warn(
+        `[AdaptiveQualityManager] Downgrading quality to ${newQuality} due to ${reason} performance`
+      );
     }
   }
   /**
@@ -6627,7 +6838,9 @@ class AdaptiveQualityManager {
     if (currentIndex > 0) {
       const newQuality = levels[currentIndex - 1];
       this.setQuality(newQuality);
-      console.log(`[AdaptiveQualityManager] Upgrading quality to ${newQuality} due to good performance`);
+      console.log(
+        `[AdaptiveQualityManager] Upgrading quality to ${newQuality} due to good performance`
+      );
     }
   }
   /**
@@ -6940,7 +7153,10 @@ class ThermalManager {
       window.nativeHotspotRenderer.renderDelay = profile.renderDelay;
     }
     if (window.temporalEchoController) {
-      window.temporalEchoController.config.maxSimultaneous = Math.min(profile.maxConcurrent, 10);
+      window.temporalEchoController.config.maxSimultaneous = Math.min(
+        profile.maxConcurrent,
+        10
+      );
     }
   }
   /**
@@ -7594,7 +7810,9 @@ class IndexedDBTileCache {
           this.stats.evictions++;
         });
         this.currentSize -= bytesFreed;
-        console.log(`[IndexedDBTileCache] Evicted ${tilesToDelete.length} tiles, freed ${(bytesFreed / 1024).toFixed(2)}KB`);
+        console.log(
+          `[IndexedDBTileCache] Evicted ${tilesToDelete.length} tiles, freed ${(bytesFreed / 1024).toFixed(2)}KB`
+        );
       }
     };
   }
@@ -7607,10 +7825,14 @@ class IndexedDBTileCache {
         const estimate = await navigator.storage.estimate();
         const percentUsed = estimate.usage / estimate.quota * 100;
         if (percentUsed > 80) {
-          console.warn(`[IndexedDBTileCache] Storage usage high: ${percentUsed.toFixed(2)}%`);
+          console.warn(
+            `[IndexedDBTileCache] Storage usage high: ${percentUsed.toFixed(2)}%`
+          );
           await this.performCleanup();
         }
-        console.log(`[IndexedDBTileCache] Storage: ${(estimate.usage / 1024 / 1024).toFixed(2)}MB / ${(estimate.quota / 1024 / 1024).toFixed(2)}MB (${percentUsed.toFixed(2)}%)`);
+        console.log(
+          `[IndexedDBTileCache] Storage: ${(estimate.usage / 1024 / 1024).toFixed(2)}MB / ${(estimate.quota / 1024 / 1024).toFixed(2)}MB (${percentUsed.toFixed(2)}%)`
+        );
       } catch (error) {
         console.warn("[IndexedDBTileCache] Could not estimate storage:", error);
       }
@@ -7738,7 +7960,9 @@ class CanvasAlphaOptimizer {
           contextAttributes.alpha = false;
           contextAttributes.desynchronized = false;
           contextAttributes.willReadFrequently = false;
-          console.log("[CanvasAlphaOptimizer] Forcing alpha: false for OpenSeadragon canvas");
+          console.log(
+            "[CanvasAlphaOptimizer] Forcing alpha: false for OpenSeadragon canvas"
+          );
         }
       }
       return originalMethod.call(this, contextType, contextAttributes);
@@ -8070,7 +8294,12 @@ if (SimplifiedPerformanceMode.shouldEnable()) {
 }
 async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
-  console.log("initializeViewer called with:", { viewerRef, props, state: !!state, handleHotspotClick: !!handleHotspotClick });
+  console.log("initializeViewer called with:", {
+    viewerRef,
+    props,
+    state: !!state,
+    handleHotspotClick: !!handleHotspotClick
+  });
   const intervals = {};
   let homeViewport = null;
   if (isMobile()) {
@@ -8097,7 +8326,9 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   };
   const tileSize = getOptimalTileSize();
   const dziUrl = `/images/tiles/${props.artworkId}_${tileSize}/${props.artworkId}.dzi`;
-  console.log(`[Mobile Optimization] Using ${tileSize}px tiles for ${isMobileDevice ? "mobile" : "desktop"} device`);
+  console.log(
+    `[Mobile Optimization] Using ${tileSize}px tiles for ${isMobileDevice ? "mobile" : "desktop"} device`
+  );
   const numericTileSize = tileSize.includes("_") ? tileSize.split("_")[0] : tileSize;
   const isOptimizedTiles = tileSize.includes("_q");
   const tileSourceConfig = {
@@ -8140,7 +8371,9 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
     Object.assign(viewerConfigOptions, baseConfig);
     console.log("[PERF] Applied mobile-optimized settings to viewer");
   }
-  console.log("[viewerSetup] Creating viewer WITHOUT tileSources to ensure handlers attach first");
+  console.log(
+    "[viewerSetup] Creating viewer WITHOUT tileSources to ensure handlers attach first"
+  );
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   if (isIOS2) {
     viewerConfigOptions.useCanvas = false;
@@ -8187,7 +8420,9 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
     viewerConfigOptions.constrainDuringPan = true;
     viewerConfigOptions.minPixelRatio = 1;
     viewerConfigOptions.smoothTileEdgesMinZoom = Infinity;
-    console.log("MOBILE PERFORMANCE: Applied research-based optimizations (100 cache, 2 loaders, prefetch enabled)");
+    console.log(
+      "MOBILE PERFORMANCE: Applied research-based optimizations (100 cache, 2 loaders, prefetch enabled)"
+    );
   }
   console.log("RESEARCH VERIFICATION: Creating viewer with settings:", {
     drawer: viewerConfigOptions.drawer,
@@ -8240,10 +8475,16 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
       console.log("HTML Tiles found:", tiles.length);
       console.log("IMG elements in tiles:", imgTiles.length);
       if (drawerInfo.hasContext2D || drawerInfo.canvasElement === "CANVAS") {
-        console.error("❌ WARNING: iOS is using CANVAS drawer! This will cause memory issues!");
+        console.error(
+          "❌ WARNING: iOS is using CANVAS drawer! This will cause memory issues!"
+        );
         console.error("Expected HTML drawer but got:", drawerInfo.drawerType);
       } else if (imgTiles.length > 0 || tiles.length > 0) {
-        console.log("✅ SUCCESS: iOS is using HTML drawer with", imgTiles.length || tiles.length, "tile elements");
+        console.log(
+          "✅ SUCCESS: iOS is using HTML drawer with",
+          imgTiles.length || tiles.length,
+          "tile elements"
+        );
       } else {
         console.warn("⚠️ No tiles detected yet - viewer may still be loading");
       }
@@ -8292,7 +8533,9 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
         console.log("[viewerSetup] Home viewport stored:", homeViewport);
         console.log("[viewerSetup] About to set isLoading to false");
         if (tiledImage.getFullyLoaded()) {
-          console.log("[viewerSetup] Tiles fully loaded - hiding loading screen immediately");
+          console.log(
+            "[viewerSetup] Tiles fully loaded - hiding loading screen immediately"
+          );
           stateSetters.setIsLoading(false);
           stateSetters.setViewerReady(true);
         } else {
@@ -8316,7 +8559,9 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
           if (canvas) {
             canvas.addEventListener("click", () => {
               canvas.blur();
-              console.log("[iOS Performance] Canvas focus cleared to prevent performance degradation");
+              console.log(
+                "[iOS Performance] Canvas focus cleared to prevent performance degradation"
+              );
             });
             canvas.addEventListener("touchstart", () => {
               canvas.blur();
@@ -8361,12 +8606,16 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
     networkAdaptiveManager.initialize();
     console.log("[Mobile Performance] NetworkAdaptiveManager initialized and enabled");
   } else {
-    console.log("[Mobile Performance] NetworkAdaptiveManager DISABLED for 256px tiles - using optimized settings");
+    console.log(
+      "[Mobile Performance] NetworkAdaptiveManager DISABLED for 256px tiles - using optimized settings"
+    );
     if (isMobileDevice && numericTileSize === "256") {
       viewer.imageLoaderLimit = 6;
       viewer.maxImageCacheCount = 300;
       viewer.maxTilesPerFrame = 4;
-      console.log("[Mobile Performance] Restored 256px tile optimization settings after NetworkAdaptiveManager bypass");
+      console.log(
+        "[Mobile Performance] Restored 256px tile optimization settings after NetworkAdaptiveManager bypass"
+      );
     }
   }
   const componentsObj = {
@@ -8387,11 +8636,14 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
     frameSkipManager: new FrameSkipManager(viewer, isMobileDevice),
     // MOBILE: Frame skipping for 45+ FPS
     // DELAYED INITIALIZATION TO PREVENT STARTUP FREEZE
-    mouseWheelSmoothing: new MouseWheelSmoothing(viewer, ((_c = getTuningState().enableMouseWheelSmoothing) == null ? void 0 : _c.value) ? {
-      throttleMs: ((_d = getTuningState().wheelEventThrottleMs) == null ? void 0 : _d.value) || 16,
-      zoomStep: ((_e = getTuningState().wheelZoomStep) == null ? void 0 : _e.value) || 0.02,
-      enabled: ((_f = getTuningState().enableMouseWheelSmoothing) == null ? void 0 : _f.value) !== false
-    } : { enabled: false })
+    mouseWheelSmoothing: new MouseWheelSmoothing(
+      viewer,
+      ((_c = getTuningState().enableMouseWheelSmoothing) == null ? void 0 : _c.value) ? {
+        throttleMs: ((_d = getTuningState().wheelEventThrottleMs) == null ? void 0 : _d.value) || 16,
+        zoomStep: ((_e = getTuningState().wheelZoomStep) == null ? void 0 : _e.value) || 0.02,
+        enabled: ((_f = getTuningState().enableMouseWheelSmoothing) == null ? void 0 : _f.value) !== false
+      } : { enabled: false }
+    )
   };
   if (isMobileDevice) {
     performanceMonitor.viewer = viewer;
@@ -8511,7 +8763,10 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
       console.error("❌ Using CANVAS drawer - NOT optimal for iOS!");
     } else if (imgElements.length > 0) {
       console.log("✅ Using HTML drawer - Optimal for iOS!");
-      console.log("First few tile srcs:", Array.from(imgElements).slice(0, 3).map((img) => img.src));
+      console.log(
+        "First few tile srcs:",
+        Array.from(imgElements).slice(0, 3).map((img) => img.src)
+      );
     } else {
       console.warn("⚠️ No tiles loaded yet or drawer type unclear");
     }
@@ -8529,7 +8784,9 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   if (isMobileDevice) {
     const springTester = new SpringStiffnessTester(viewer);
     window.springTester = springTester;
-    console.log("[SpringTester] Initialized - use window.testSpring(value) or window.testSpringPresets()");
+    console.log(
+      "[SpringTester] Initialized - use window.testSpring(value) or window.testSpringPresets()"
+    );
     const isLowEnd = navigator.hardwareConcurrency <= 4 || navigator.deviceMemory && navigator.deviceMemory <= 4;
     if (isLowEnd) {
       console.log("[PERFORMANCE] Low-end mobile device detected, enabling simplified mode");
@@ -8537,7 +8794,9 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
       window.simplifiedMode = simplifiedMode;
     } else {
       window.simplifiedMode = simplifiedMode;
-      console.log("[PERFORMANCE] Simplified mode available: window.simplifiedMode.enable(viewer)");
+      console.log(
+        "[PERFORMANCE] Simplified mode available: window.simplifiedMode.enable(viewer)"
+      );
     }
   }
   window.lowZoomOptimizer = componentsObj.lowZoomOptimizer;
@@ -8573,7 +8832,9 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
     const actualDrawer = getDrawerType(viewer.drawer);
     console.log("RESEARCH VERIFICATION: Actual drawer in use:", actualDrawer);
     if ((isMobileDevice || isSafari || isIOS2) && actualDrawer !== "canvas" && !isIOS2) {
-      console.error("CRITICAL: Canvas drawer not applied on non-iOS mobile! Performance will be poor.");
+      console.error(
+        "CRITICAL: Canvas drawer not applied on non-iOS mobile! Performance will be poor."
+      );
     } else if (isIOS2 && viewer.useCanvas !== false) {
       console.error("CRITICAL: HTML drawer not applied on iOS! Memory issues will occur.");
     } else {
@@ -8595,7 +8856,9 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
     console.log("=====================================");
     window.addEventListener("tilecorruption:reload", (event) => {
       console.error("Tile corruption reload requested", event.detail);
-      if (window.confirm("The image viewer has encountered an error. Would you like to reload?")) {
+      if (window.confirm(
+        "The image viewer has encountered an error. Would you like to reload?"
+      )) {
         window.location.reload();
       }
     });
@@ -8649,7 +8912,10 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
         componentsObj.lowZoomOptimizer.monitorPerformance(metrics.averageFPS);
       }
       if (componentsObj.safariPerformanceOptimizer && metrics.averageFPS > 0) {
-        componentsObj.safariPerformanceOptimizer.updatePerformanceMetrics(metrics.averageFPS, isInteracting);
+        componentsObj.safariPerformanceOptimizer.updatePerformanceMetrics(
+          metrics.averageFPS,
+          isInteracting
+        );
       }
       if (isInteracting && metrics.averageFPS < 30 && isMobileDevice) ;
     }
@@ -8662,13 +8928,22 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-GZqLfpDM.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
-  eventHandlers.setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotClick, hotspots);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-Ct21uPNv.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  eventHandlers.setupViewerEventHandlers(
+    viewer,
+    state,
+    componentsObj,
+    handleHotspotClick,
+    hotspots
+  );
   eventHandlers.setupAdaptiveSprings(viewer, performanceConfig);
   const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);
   intervals.handleKeyPress = keyHandler;
   eventHandlers.setupResizeObserver(viewerRef, viewer, state);
-  console.log("[viewerSetup] All handlers attached, now opening viewer with tileSources:", dziUrl);
+  console.log(
+    "[viewerSetup] All handlers attached, now opening viewer with tileSources:",
+    dziUrl
+  );
   viewer.open(dziUrl);
   setTimeout(() => {
     console.log("[viewerSetup] Forcing initial redraw to ensure clean state");
@@ -8678,7 +8953,11 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
     viewer.viewport.zoomSpring.resetTo(viewer.viewport.zoomSpring.target.value);
     viewer.forceRedraw();
   }, 500);
-  console.log("Returning from initializeViewer:", { viewer: !!viewer, intervals: !!intervals, homeViewport: !!homeViewport });
+  console.log("Returning from initializeViewer:", {
+    viewer: !!viewer,
+    intervals: !!intervals,
+    homeViewport: !!homeViewport
+  });
   return {
     viewer,
     intervals,
@@ -8705,7 +8984,10 @@ function setupSmoothingUtilities(viewer) {
       viewer.forceRedraw();
       console.log("✅ Forced redraw with smoothing enabled");
       if (viewer.drawer.context) {
-        console.log("Current imageSmoothingEnabled:", viewer.drawer.context.imageSmoothingEnabled);
+        console.log(
+          "Current imageSmoothingEnabled:",
+          viewer.drawer.context.imageSmoothingEnabled
+        );
       }
     } else {
       console.error("❌ Viewer or drawer not available");
@@ -8718,10 +9000,22 @@ function setupSmoothingUtilities(viewer) {
       console.log("Drawer type:", ((_b = (_a = viewer.drawer) == null ? void 0 : _a.constructor) == null ? void 0 : _b.name) || "canvas");
       console.log("Drawer imageSmoothingEnabled:", viewer.drawer.imageSmoothingEnabled);
       if (viewer.drawer.context) {
-        console.log("Context imageSmoothingEnabled:", viewer.drawer.context.imageSmoothingEnabled);
-        console.log("Context webkitImageSmoothingEnabled:", viewer.drawer.context.webkitImageSmoothingEnabled);
-        console.log("Context mozImageSmoothingEnabled:", viewer.drawer.context.mozImageSmoothingEnabled);
-        console.log("Context msImageSmoothingEnabled:", viewer.drawer.context.msImageSmoothingEnabled);
+        console.log(
+          "Context imageSmoothingEnabled:",
+          viewer.drawer.context.imageSmoothingEnabled
+        );
+        console.log(
+          "Context webkitImageSmoothingEnabled:",
+          viewer.drawer.context.webkitImageSmoothingEnabled
+        );
+        console.log(
+          "Context mozImageSmoothingEnabled:",
+          viewer.drawer.context.mozImageSmoothingEnabled
+        );
+        console.log(
+          "Context msImageSmoothingEnabled:",
+          viewer.drawer.context.msImageSmoothingEnabled
+        );
       } else {
         console.warn("No context available");
       }

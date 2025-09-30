@@ -884,7 +884,9 @@ const getBrowserOptimalDrawer = () => {
   const isAndroid = /android/i.test(ua);
   const isMobile2 = /Android|iPhone|iPad|iPod/i.test(ua) || "ontouchstart" in window || navigator.maxTouchPoints > 0 || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
   if (isMobile2 || isSafari2 || isIOS || isAndroid) {
-    console.log("Mobile/Safari/iOS/Android detected - FORCING canvas drawer (Research: WebGL regression in 5.0.0+)");
+    console.log(
+      "Mobile/Safari/iOS/Android detected - FORCING canvas drawer (Research: WebGL regression in 5.0.0+)"
+    );
     return "canvas";
   }
   if (isSafari2 && !isMobile2) {
@@ -894,7 +896,9 @@ const getBrowserOptimalDrawer = () => {
   const isChrome = /chrome|crios/i.test(ua) && !/edge|edg/i.test(ua);
   const isFirefox = /firefox|fxios/i.test(ua);
   if (isChrome || isFirefox) {
-    console.log("Desktop Chrome/Firefox detected - using canvas drawer (Research: Better tile performance)");
+    console.log(
+      "Desktop Chrome/Firefox detected - using canvas drawer (Research: Better tile performance)"
+    );
     return "canvas";
   }
   console.log("Unknown browser detected - defaulting to canvas drawer");
@@ -914,7 +918,9 @@ const isMobile = () => {
   }
   const isDevToolsEmulation = window.navigator.userAgent.includes("Chrome") && window.navigator.userAgent.includes("Mobile") && window.innerWidth > 1024;
   if (isDevToolsEmulation) {
-    console.log("[Mobile Detection] Chrome DevTools mobile emulation detected - treating as DESKTOP");
+    console.log(
+      "[Mobile Detection] Chrome DevTools mobile emulation detected - treating as DESKTOP"
+    );
     return false;
   }
   if (mobileRegex.test(userAgent)) {
@@ -931,7 +937,9 @@ const isMobile = () => {
   }
   if (hasTouch && isMediumScreen && navigator.maxTouchPoints > 1) {
     if (window.innerHeight > 1200) {
-      console.log("[Mobile Detection] Large screen detected, treating as desktop despite touch");
+      console.log(
+        "[Mobile Detection] Large screen detected, treating as desktop despite touch"
+      );
       return false;
     }
     return true;
@@ -17315,9 +17323,9 @@ class CSSOverlayManager {
     return this.cachedViewportRect;
   }
   /**
-  * Calculate Zunic-Rosin convexity measure - more accurate than sign changes
-  * Returns value in (0,1] where 1 is perfectly convex
-  */
+   * Calculate Zunic-Rosin convexity measure - more accurate than sign changes
+   * Returns value in (0,1] where 1 is perfectly convex
+   */
   calculateZunicRosinConvexity(coords) {
     const hull = this.calculateConvexHull(coords);
     const hullPerimeter = this.calculatePolygonPerimeter(hull);
@@ -17528,10 +17536,7 @@ class CSSOverlayManager {
       );
     }
     const u = ((point[0] - lineStart[0]) * dx + (point[1] - lineStart[1]) * dy) / (mag * mag);
-    const closestPoint = [
-      lineStart[0] + u * dx,
-      lineStart[1] + u * dy
-    ];
+    const closestPoint = [lineStart[0] + u * dx, lineStart[1] + u * dy];
     return Math.sqrt(
       Math.pow(point[0] - closestPoint[0], 2) + Math.pow(point[1] - closestPoint[1], 2)
     );
@@ -17793,7 +17798,9 @@ class CSSOverlayManager {
         } else {
           const normalized = distanceInViewport / EDGE_FADE_END;
           distanceScore = 1 - Math.pow(normalized, 1.8);
-          console.log(`[CSS] Outside polygon - distance: ${(distanceInViewport * 100).toFixed(2)}%, opacity: ${(distanceScore * 100).toFixed(0)}%`);
+          console.log(
+            `[CSS] Outside polygon - distance: ${(distanceInViewport * 100).toFixed(2)}%, opacity: ${(distanceScore * 100).toFixed(0)}%`
+          );
         }
       }
     }
@@ -17873,8 +17880,8 @@ class CSSOverlayManager {
     }
   }
   /**
-  * Check if a point is inside a polygon using ray casting algorithm
-  */
+   * Check if a point is inside a polygon using ray casting algorithm
+   */
   isPointInPolygon(point, polygon) {
     const x2 = point.x;
     const y = point.y;
@@ -17921,9 +17928,7 @@ class CSSOverlayManager {
     t = Math.max(0, Math.min(1, t));
     const projectionX = lineStart.x + t * dx;
     const projectionY = lineStart.y + t * dy;
-    return Math.sqrt(
-      Math.pow(point.x - projectionX, 2) + Math.pow(point.y - projectionY, 2)
-    );
+    return Math.sqrt(Math.pow(point.x - projectionX, 2) + Math.pow(point.y - projectionY, 2));
   }
   autoDeselect() {
     var _a;
@@ -18055,8 +18060,8 @@ class CSSOverlayManager {
     };
   }
   /**
-  * Calculate intelligent polygon expansion based on shape characteristics
-  */
+   * Calculate intelligent polygon expansion based on shape characteristics
+   */
   calculateAdaptivePolygonExpansion(coords) {
     const metrics = this.calculatePolygonMetrics(coords);
     this.calculateZunicRosinConvexity(coords);
@@ -18089,10 +18094,7 @@ class CSSOverlayManager {
     return coords.map(([x2, y]) => {
       const dx = x2 - centerX;
       const dy = y - centerY;
-      return [
-        centerX + dx * factor,
-        centerY + dy * factor
-      ];
+      return [centerX + dx * factor, centerY + dy * factor];
     });
   }
   resetFocusTracking() {
@@ -18270,7 +18272,9 @@ class PerformanceDiagnostics {
     } else if (!active && this.metrics.cinematic.active) {
       const duration = performance.now() - this.metrics.cinematic.startTime;
       const avgFPS = (this.metrics.cinematic.framesDuring / (duration / 1e3)).toFixed(1);
-      console.log(`[Perf] Cinematic zoom END - ${avgFPS} FPS avg (${this.metrics.cinematic.framesDuring} frames in ${duration.toFixed(0)}ms)`);
+      console.log(
+        `[Perf] Cinematic zoom END - ${avgFPS} FPS avg (${this.metrics.cinematic.framesDuring} frames in ${duration.toFixed(0)}ms)`
+      );
       this.metrics.cinematic.active = false;
       this.metrics.cinematic.framesDuring = 0;
     }
@@ -18287,7 +18291,9 @@ class PerformanceDiagnostics {
         max: data.max
       })).filter((s) => s.avg > this.config.minReportableTime).sort((a, b) => b.avg - a.avg).slice(0, 3);
       const systemsReport = topSystems.map((s) => `${s.name}:${s.avg.toFixed(1)}ms(max:${s.max.toFixed(1)})`).join(" | ");
-      console.log(`[Perf Report] Frames:${totalFrames} Slow:${slowPercent}% VerySlow:${verySlowPercent}% | Top: ${systemsReport}`);
+      console.log(
+        `[Perf Report] Frames:${totalFrames} Slow:${slowPercent}% VerySlow:${verySlowPercent}% | Top: ${systemsReport}`
+      );
     }
   }
   resetMetrics() {
@@ -18329,7 +18335,9 @@ class RenderProfiler {
       }
     }
     if (totalTime > 5) {
-      console.log(`[Canvas2D Perf] Total: ${totalTime.toFixed(1)}ms | Transform: ${avgs.transform || 0}ms | Draw: ${avgs.polygonDraw || 0}ms`);
+      console.log(
+        `[Canvas2D Perf] Total: ${totalTime.toFixed(1)}ms | Transform: ${avgs.transform || 0}ms | Draw: ${avgs.polygonDraw || 0}ms`
+      );
     }
   }
 }
@@ -18469,7 +18477,9 @@ class Canvas2DOverlayManager {
       const currentZoom = this.viewer.viewport.getZoom();
       if (!isAnimating && this.state.cinematicZoomCompleted && this.state.selectionZoom) {
         if (currentZoom < this.state.selectionZoom) {
-          logger$1.debug(`Zooming out from ${this.state.selectionZoom.toFixed(2)} to ${currentZoom.toFixed(2)}`);
+          logger$1.debug(
+            `Zooming out from ${this.state.selectionZoom.toFixed(2)} to ${currentZoom.toFixed(2)}`
+          );
         }
       }
       let zoomOpacity = 1;
@@ -18484,7 +18494,9 @@ class Canvas2DOverlayManager {
         const referenceScale = this.state.selectionScale || this.state.startingScale;
         const scaleRatio = referenceScale ? currentScale / referenceScale : 1;
         if (Math.abs(this.state.lastLoggedScale - currentScale) > 1 || !this.state.debugInfo) {
-          logger$1.debug(`Bounds Debug: scale=${currentScale.toFixed(1)}, ref=${(referenceScale == null ? void 0 : referenceScale.toFixed(1)) || "null"}, ratio=${scaleRatio.toFixed(3)}, bounds.w=${viewportBounds.width.toFixed(3)}`);
+          logger$1.debug(
+            `Bounds Debug: scale=${currentScale.toFixed(1)}, ref=${(referenceScale == null ? void 0 : referenceScale.toFixed(1)) || "null"}, ratio=${scaleRatio.toFixed(3)}, bounds.w=${viewportBounds.width.toFixed(3)}`
+          );
           this.state.lastLoggedScale = currentScale;
         }
         this.state.debugInfo = {
@@ -18532,7 +18544,9 @@ class Canvas2DOverlayManager {
           } else {
             const normalized = distanceInViewport / EDGE_FADE_END;
             panOpacity = 1 - Math.pow(normalized, 1.8);
-            logger$1.debug(`Outside polygon - distance: ${(distanceInViewport * 100).toFixed(2)}%, opacity: ${(panOpacity * 100).toFixed(0)}%`);
+            logger$1.debug(
+              `Outside polygon - distance: ${(distanceInViewport * 100).toFixed(2)}%, opacity: ${(panOpacity * 100).toFixed(0)}%`
+            );
           }
         }
       }
@@ -18542,22 +18556,30 @@ class Canvas2DOverlayManager {
         const zoomRatio = referenceZoom ? currentZoom2 / referenceZoom : 1;
         const fadePhase = zoomRatio >= 0.95 ? " (full)" : zoomRatio <= 0.5 ? " (hidden)" : ` (fading ${((1 - zoomOpacity) * 100).toFixed(0)}%)`;
         const panStatus = panOpacity === 1 ? "" : panOpacity === 0 ? " PAN:hidden" : ` PAN:${(panOpacity * 100).toFixed(0)}%`;
-        logger$1.debug(`Fade: zoomRatio=${zoomRatio.toFixed(3)}${fadePhase}, zoom=${zoomOpacity.toFixed(3)}, pan=${panOpacity.toFixed(3)}${panStatus}, target=${targetOpacity.toFixed(3)}`);
+        logger$1.debug(
+          `Fade: zoomRatio=${zoomRatio.toFixed(3)}${fadePhase}, zoom=${zoomOpacity.toFixed(3)}, pan=${panOpacity.toFixed(3)}${panStatus}, target=${targetOpacity.toFixed(3)}`
+        );
       }
       if (Math.abs(this.state.targetOpacity - targetOpacity) > 1e-3) {
         this.state.targetOpacity = targetOpacity;
         this.startAnimation();
         const autoDeselectThreshold = 0.02;
         if (targetOpacity < autoDeselectThreshold && this.state.selectedHotspot && !this.state.isCinematicZooming) {
-          logger$1.debug(`Auto-deselecting - opacity ${targetOpacity.toFixed(3)} below threshold ${autoDeselectThreshold}`);
+          logger$1.debug(
+            `Auto-deselecting - opacity ${targetOpacity.toFixed(3)} below threshold ${autoDeselectThreshold}`
+          );
           this.forceCompleteRemoval();
           this.autoDeselect();
           return;
         }
         if (this.state.isCinematicZooming) {
-          logger$1.debug(`Cinematic zoom progress - currentZoom: ${this.viewer.viewport.getZoom().toFixed(2)}, targetOpacity: ${targetOpacity.toFixed(2)}`);
+          logger$1.debug(
+            `Cinematic zoom progress - currentZoom: ${this.viewer.viewport.getZoom().toFixed(2)}, targetOpacity: ${targetOpacity.toFixed(2)}`
+          );
         } else if (!this.state.previousInsideState !== isInsideHotspot) {
-          logger$1.debug(`Viewport ${isInsideHotspot ? "INSIDE" : "OUTSIDE"} hotspot, opacity: ${targetOpacity.toFixed(2)}`);
+          logger$1.debug(
+            `Viewport ${isInsideHotspot ? "INSIDE" : "OUTSIDE"} hotspot, opacity: ${targetOpacity.toFixed(2)}`
+          );
           this.state.previousInsideState = isInsideHotspot;
         }
       }
@@ -18698,7 +18720,9 @@ class Canvas2DOverlayManager {
       performanceDiagnostics.setCinematicActive(true);
       this.state.isPinching = false;
       this.state.lastPinchZoom = currentZoom;
-      logger$1.debug(`Starting cinematic zoom from zoom=${currentZoom.toFixed(2)}, scale=${currentScale.toFixed(1)}`);
+      logger$1.debug(
+        `Starting cinematic zoom from zoom=${currentZoom.toFixed(2)}, scale=${currentScale.toFixed(1)}`
+      );
       if (this.cinematicTimeout) {
         clearTimeout(this.cinematicTimeout);
       }
@@ -18829,7 +18853,9 @@ class Canvas2DOverlayManager {
       logger$1.debug(`  - Zoom: ${stableZoom.toFixed(2)}`);
       logger$1.debug(`  - Scale: ${stableScale.toFixed(1)}`);
       logger$1.debug(`  - Bounds width: ${stableBounds.width.toFixed(3)}`);
-      logger$1.debug(`  - Previous starting scale: ${((_a = this.state.startingScale) == null ? void 0 : _a.toFixed(1)) || "null"}`);
+      logger$1.debug(
+        `  - Previous starting scale: ${((_a = this.state.startingScale) == null ? void 0 : _a.toFixed(1)) || "null"}`
+      );
       logger$1.debug(`  - Delay: ${delay}ms`);
       logger$1.debug("Ready for fade on dezoom");
     }, delay);
@@ -18884,7 +18910,9 @@ class Canvas2DOverlayManager {
     let coords = hotspot.shape === "polygon" ? hotspot.coordinates : hotspot.coordinates[0];
     if (this.isMobile && coords.length > this.config.maxVerticesMobile) {
       coords = this.simplifyPolygon(coords, this.config.simplificationTolerance);
-      logger$1.debug(`Simplified polygon from ${hotspot.coordinates.length} to ${coords.length} vertices`);
+      logger$1.debug(
+        `Simplified polygon from ${hotspot.coordinates.length} to ${coords.length} vertices`
+      );
     }
     const bounds = this.getPolygonBounds(coords);
     const maskCanvas = document.createElement("canvas");
@@ -18971,9 +18999,7 @@ class Canvas2DOverlayManager {
     t = Math.max(0, Math.min(1, t));
     const projectionX = lineStart.x + t * dx;
     const projectionY = lineStart.y + t * dy;
-    return Math.sqrt(
-      Math.pow(point.x - projectionX, 2) + Math.pow(point.y - projectionY, 2)
-    );
+    return Math.sqrt(Math.pow(point.x - projectionX, 2) + Math.pow(point.y - projectionY, 2));
   }
   /**
    * Check if a point is inside a polygon using ray casting algorithm
@@ -19007,10 +19033,7 @@ class Canvas2DOverlayManager {
       );
     }
     const u = ((point[0] - lineStart[0]) * dx + (point[1] - lineStart[1]) * dy) / (mag * mag);
-    const closestPoint = [
-      lineStart[0] + u * dx,
-      lineStart[1] + u * dy
-    ];
+    const closestPoint = [lineStart[0] + u * dx, lineStart[1] + u * dy];
     return Math.sqrt(
       Math.pow(point[0] - closestPoint[0], 2) + Math.pow(point[1] - closestPoint[1], 2)
     );
@@ -19130,7 +19153,9 @@ class Canvas2DOverlayManager {
       if (start > 0) {
         const time = performance.now() - start;
         if (time > 5) {
-          console.log(`[Transform] ${coordCount} coords in ${time.toFixed(1)}ms (${(time / coordCount).toFixed(2)}ms per coord)`);
+          console.log(
+            `[Transform] ${coordCount} coords in ${time.toFixed(1)}ms (${(time / coordCount).toFixed(2)}ms per coord)`
+          );
         }
       }
       return result;
@@ -19395,7 +19420,9 @@ class OverlayManagerFactory {
       userAgent: navigator.userAgent
     });
     if (browserInfo.isSafari || browserInfo.isIOS || browserInfo.isMacOSSafari || browserInfo.isWebKit && !window.chrome) {
-      console.log("Using Canvas2DOverlayManager for Safari/WebKit browser (reliable sharp outline)");
+      console.log(
+        "Using Canvas2DOverlayManager for Safari/WebKit browser (reliable sharp outline)"
+      );
       return new Canvas2DOverlayManager(viewer);
     }
     if (!performanceInfo.isMobile) {
@@ -19439,7 +19466,9 @@ class OverlayManagerFactory {
   static detectPerformanceCapabilities() {
     var _a;
     const ua = navigator.userAgent.toLowerCase();
-    const hasMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(ua);
+    const hasMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+      ua
+    );
     const isIPadPro = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
     const screenWidth = window.screen.width;
     const screenHeight = window.screen.height;
@@ -19515,7 +19544,9 @@ class OverlayManagerFactory {
     if (!performanceInfo.isMobile && !browserInfo.isSafari && !browserInfo.isWebKit) {
       const currentPref = localStorage.getItem("overlayType");
       if (currentPref === "canvas2d") {
-        console.log("CLEANUP: Removing invalid canvas2d preference for desktop Chrome/Firefox");
+        console.log(
+          "CLEANUP: Removing invalid canvas2d preference for desktop Chrome/Firefox"
+        );
         localStorage.removeItem("overlayType");
       }
     }
@@ -19578,12 +19609,8 @@ function useViewerState() {
   const [gradientSpreadValue, setGradientSpreadValue] = createSignal(
     ((_d = window.safariTuning) == null ? void 0 : _d.gradientMultiplier) || (isMobile() ? 1 : 1.5)
   );
-  const [offsetXValue, setOffsetXValue] = createSignal(
-    ((_e = window.safariTuning) == null ? void 0 : _e.offsetX) || 0
-  );
-  const [offsetYValue, setOffsetYValue] = createSignal(
-    ((_f = window.safariTuning) == null ? void 0 : _f.offsetY) || 0
-  );
+  const [offsetXValue, setOffsetXValue] = createSignal(((_e = window.safariTuning) == null ? void 0 : _e.offsetX) || 0);
+  const [offsetYValue, setOffsetYValue] = createSignal(((_f = window.safariTuning) == null ? void 0 : _f.offsetY) || 0);
   const [smoothingFactorValue, setSmoothingFactorValue] = createSignal(0.8);
   const [interpolationEnabled, setInterpolationEnabled] = createSignal(true);
   const [autoDeselectThreshold, setAutoDeselectThreshold] = createSignal(0.5);
@@ -19603,7 +19630,9 @@ function useViewerState() {
       return stored;
     }
     if (stored) {
-      console.warn(`[useViewerState] Invalid ${key} value: "${stored}". Using default: ${defaultValue}`);
+      console.warn(
+        `[useViewerState] Invalid ${key} value: "${stored}". Using default: ${defaultValue}`
+      );
       localStorage.removeItem(key);
     }
     return defaultValue;
@@ -19615,21 +19644,25 @@ function useViewerState() {
     const hasSetRevealPreference = localStorage.getItem("hasSetRevealPreference");
     localStorage.getItem("revealType");
     if (!hasSetRevealPreference) {
-      console.log("[useViewerState] Mobile first visit or no preference set - defaulting to single");
+      console.log(
+        "[useViewerState] Mobile first visit or no preference set - defaulting to single"
+      );
       return "single";
     }
-    return getValidatedState("revealType", "single", ["single", "refined", "refined2", "border-radial"], false);
+    return getValidatedState(
+      "revealType",
+      "single",
+      ["single", "refined", "refined2", "border-radial"],
+      false
+    );
   };
   const [interactionMode, setInteractionModeSignal] = createSignal(
-    getValidatedState(
-      "interactionMode",
-      isMobile() ? "temporal" : "direct",
-      ["direct", "temporal"]
-    )
+    getValidatedState("interactionMode", isMobile() ? "temporal" : "direct", [
+      "direct",
+      "temporal"
+    ])
   );
-  const [revealType, setRevealTypeSignal] = createSignal(
-    getRevealTypeForMobile()
-  );
+  const [revealType, setRevealTypeSignal] = createSignal(getRevealTypeForMobile());
   const setInteractionMode = (mode) => {
     setInteractionModeSignal(mode);
     localStorage.setItem("interactionMode", mode);
@@ -19651,9 +19684,14 @@ function useViewerState() {
     if (window.temporalEchoController) {
       window.temporalEchoController.setRevealType(type);
       console.log(`[useViewerState] Updated TemporalEchoController reveal type: ${type}`);
-      console.log(`[useViewerState] Controller config now:`, window.temporalEchoController.config.revealType);
+      console.log(
+        `[useViewerState] Controller config now:`,
+        window.temporalEchoController.config.revealType
+      );
     } else {
-      console.log("[useViewerState] TemporalEchoController not found yet. Mode saved in localStorage and will be applied when controller initializes.");
+      console.log(
+        "[useViewerState] TemporalEchoController not found yet. Mode saved in localStorage and will be applied when controller initializes."
+      );
     }
   };
   const [revealStyle, setRevealStyle] = createSignal(
@@ -20052,7 +20090,9 @@ function useViewerAnimations(viewer, state, components) {
             components().renderer.resumeUpdates();
             components().renderer.updateVisibility();
             if (components().renderer.styleManager && components().renderer.styleManager.animationsPaused) {
-              console.log("[useViewerAnimations] 🚨 Force resuming stuck animations after zoom");
+              console.log(
+                "[useViewerAnimations] 🚨 Force resuming stuck animations after zoom"
+              );
               components().renderer.styleManager.resumeAllAnimations();
             }
           }, 100);
@@ -20095,7 +20135,9 @@ function useViewerAnimations(viewer, state, components) {
       components().renderer.deselectHotspot();
     }
     if (window.artworkViewerHandleHotspotClick) {
-      console.log("Clearing selected hotspot for full view expansion using handleHotspotClick");
+      console.log(
+        "Clearing selected hotspot for full view expansion using handleHotspotClick"
+      );
       window.artworkViewerHandleHotspotClick(null);
     }
     const tiledImage = viewer.world.getItemAt(0);
@@ -20127,7 +20169,9 @@ function useViewerAnimations(viewer, state, components) {
             components().renderer.resumeUpdates();
             components().renderer.updateVisibility();
             if (components().renderer.styleManager && components().renderer.styleManager.animationsPaused) {
-              console.log("[useViewerAnimations] 🚨 Force resuming stuck animations after zoom");
+              console.log(
+                "[useViewerAnimations] 🚨 Force resuming stuck animations after zoom"
+              );
               components().renderer.styleManager.resumeAllAnimations();
             }
           }, 100);
@@ -20214,7 +20258,9 @@ class CacheManager {
         localStorage.setItem("revealType", "single");
       }
       if (storedVersion !== CURRENT_VERSION) {
-        console.log(`[CacheManager] Version mismatch (stored: ${storedVersion}, current: ${CURRENT_VERSION}). Clearing cache...`);
+        console.log(
+          `[CacheManager] Version mismatch (stored: ${storedVersion}, current: ${CURRENT_VERSION}). Clearing cache...`
+        );
         this.clearAll();
         localStorage.setItem(CACHE_VERSION_KEY, CURRENT_VERSION);
       }
@@ -21653,7 +21699,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-BqsNY9uS.js").then((n) => n.v);
+      } = await import("./viewerSetup-CjJCz0R3.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };

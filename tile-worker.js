@@ -144,10 +144,12 @@ async function handleBatchProcess(data, requestId) {
     const { tiles, priorities } = data;
 
     // Sort tiles by priority
-    const sortedTiles = tiles.map((tile, index) => ({
-        tile,
-        priority: priorities[index] || 2
-    })).sort((a, b) => a.priority - b.priority);
+    const sortedTiles = tiles
+        .map((tile, index) => ({
+            tile,
+            priority: priorities[index] || 2
+        }))
+        .sort((a, b) => a.priority - b.priority);
 
     // Process in priority order
     for (const { tile, priority } of sortedTiles) {
@@ -272,8 +274,7 @@ function calculateTilePriority(tile, viewport) {
     const viewCenterY = (viewBounds.minY + viewBounds.maxY) / 2;
 
     const distance = Math.sqrt(
-        Math.pow(tileCenterX - viewCenterX, 2) +
-        Math.pow(tileCenterY - viewCenterY, 2)
+        Math.pow(tileCenterX - viewCenterX, 2) + Math.pow(tileCenterY - viewCenterY, 2)
     );
 
     // Calculate priority based on distance and level
@@ -292,12 +293,7 @@ function calculateTilePriority(tile, viewport) {
 
 // Check if bounds intersect
 function boundsIntersect(a, b) {
-    return !(
-        a.maxX < b.minX ||
-        a.minX > b.maxX ||
-        a.maxY < b.minY ||
-        a.minY > b.maxY
-    );
+    return !(a.maxX < b.minX || a.minX > b.maxX || a.maxY < b.minY || a.minY > b.maxY);
 }
 
 // Cancel processing
