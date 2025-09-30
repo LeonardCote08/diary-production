@@ -2079,9 +2079,9 @@ g.hotspot-echo-reveal.border-emboss path,
 svg.hotspot-echo-reveal.border-emboss path {
     stroke: rgba(0, 0, 0, 0.9) !important;
 
-    /* ADAPTIVE STROKE WIDTH - base 6.5px at normal zoom, increases only at very low zoom */
-    /* At zoom 1.5x+: 6.5px (base), at zoom 1.0x: 9.75px, at zoom 0.5x: 19.5px */
-    stroke-width: calc(6.5px * var(--zoom-factor, 1)) !important;
+    /* ADAPTIVE STROKE WIDTH - base 5px at normal zoom (reduced for iOS), increases only at very low zoom */
+    /* At zoom 1.5x+: 5px (base), at zoom 1.0x: 7.5px, at zoom 0.5x: 15px */
+    stroke-width: calc(5px * var(--zoom-factor, 1)) !important;
 
     /* Light semi-transparent fill */
     fill: rgba(255, 255, 255, 0.08) !important;
@@ -2103,8 +2103,8 @@ svg.hotspot-echo-reveal.border-emboss path {
     .hotspot-echo-reveal.border-emboss .main-path,
     g.hotspot-echo-reveal.border-emboss path,
     svg.hotspot-echo-reveal.border-emboss path {
-        /* Min 6.5px (base), max 19.5px at very low zoom */
-        stroke-width: clamp(6.5px, calc(6.5px * var(--zoom-factor, 1)), 19.5px) !important;
+        /* Min 5px (base, reduced for iOS), max 15px at very low zoom */
+        stroke-width: clamp(5px, calc(5px * var(--zoom-factor, 1)), 15px) !important;
     }
 }
 
