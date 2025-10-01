@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-CETNymJn.js","assets/main-CL3Ou0SE.js","assets/main-iSp7nxPb.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-Ddirc73F.js","assets/main-BgvFrQ6u.js","assets/main-iSp7nxPb.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-CL3Ou0SE.js";
+import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-BgvFrQ6u.js";
 class ImageOverlayManager {
   constructor() {
     this.overlays = /* @__PURE__ */ new Map();
@@ -6345,11 +6345,6 @@ function adjustSettingsForPerformance(currentFPS, memoryUsage) {
 }
 const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourceConfig = null) => {
   const isIOS2 = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
-  if (isIOS2 && isMobileDevice) {
-    console.log(
-      "[CRITICAL] iOS detected: Forcing canvas drawer to prevent tile array corruption at indices 12/13"
-    );
-  }
   if (isMobileDevice) {
     const isIPadPro = isIOS2 && window.screen.width >= 1024;
     const isIPadAir = isIOS2 && !isIPadPro && window.screen.width >= 820;
@@ -8607,13 +8602,12 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
     console.log("[Mobile Performance] Applied pixelated rendering for monochrome art");
   }
   const networkAdaptiveManager = new NetworkAdaptiveManager(viewer);
-  if (numericTileSize !== "256") {
+  if (numericTileSize !== "256" && !isIOS2) {
     networkAdaptiveManager.initialize();
     console.log("[Mobile Performance] NetworkAdaptiveManager initialized and enabled");
   } else {
-    console.log(
-      "[Mobile Performance] NetworkAdaptiveManager DISABLED for 256px tiles - using optimized settings"
-    );
+    const reason = isIOS2 ? "iOS (preserves Phase 1+2+3 optimizations)" : "256px tiles";
+    console.log(`[Mobile Performance] NetworkAdaptiveManager DISABLED for ${reason}`);
     if (isMobileDevice && numericTileSize === "256") {
       viewer.imageLoaderLimit = 6;
       viewer.maxImageCacheCount = 300;
@@ -8933,7 +8927,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-CETNymJn.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-Ddirc73F.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(
     viewer,
     state,
