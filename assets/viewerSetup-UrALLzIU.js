@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-Ddirc73F.js","assets/main-BgvFrQ6u.js","assets/main-iSp7nxPb.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-BZTsNGK5.js","assets/main-Dl4s6uBg.js","assets/main-iSp7nxPb.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-BgvFrQ6u.js";
+import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-Dl4s6uBg.js";
 class ImageOverlayManager {
   constructor() {
     this.overlays = /* @__PURE__ */ new Map();
@@ -651,6 +651,12 @@ class MemoryManager {
     this.updateCacheLimits();
   }
   updateCacheLimits() {
+    if (this.config.isMobile) {
+      console.log(
+        `[Mobile] Skipping cache reduction to prevent black tiles (pressure: ${this.state.memoryPressure})`
+      );
+      return;
+    }
     const limits = this.config.cacheLimits[this.state.memoryPressure];
     if (this.viewer.maxImageCacheCount !== limits.tiles) {
       this.viewer.maxImageCacheCount = limits.tiles;
@@ -673,6 +679,11 @@ class MemoryManager {
   performEmergencyCleanup() {
     var _a;
     console.warn("CRITICAL: Emergency memory cleanup");
+    if (this.config.isMobile) {
+      console.warn("[Mobile] Skipping emergency tile cleanup to prevent black tiles");
+      this.suggestGC();
+      return;
+    }
     const tiledImage = (_a = this.viewer.world) == null ? void 0 : _a.getItemAt(0);
     if (!tiledImage) return;
     if (tiledImage._tileCache) {
@@ -1863,9 +1874,11 @@ class PerformanceMonitor {
     return diff > 5 ? "improving" : diff < -5 ? "declining" : "stable";
   }
   applyCriticalOptimizations() {
+    const isMobile2 = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     Object.assign(this.viewer, {
       imageLoaderLimit: 2,
-      maxImageCacheCount: 100,
+      // Mobile: Keep existing cache, Desktop: Can reduce
+      maxImageCacheCount: isMobile2 ? this.viewer.maxImageCacheCount : 100,
       smoothTileEdgesMinZoom: Infinity,
       alwaysBlend: false,
       immediateRender: true,
@@ -1873,13 +1886,21 @@ class PerformanceMonitor {
       springStiffness: 10
     });
     if (window.gc) window.gc();
-    console.log("Applied critical performance optimizations");
+    console.log(
+      `Applied critical performance optimizations${isMobile2 ? " (mobile - cache preserved)" : ""}`
+    );
   }
   applyAggressiveOptimizations() {
-    this.viewer.imageLoaderLimit = Math.max(3, this.viewer.imageLoaderLimit - 1);
-    this.viewer.maxImageCacheCount = Math.max(200, this.viewer.maxImageCacheCount - 50);
-    this.viewer.animationTime = Math.max(0.8, this.viewer.animationTime - 0.1);
-    console.log("Applied aggressive performance optimizations");
+    const isMobile2 = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (!isMobile2) {
+      this.viewer.imageLoaderLimit = Math.max(3, this.viewer.imageLoaderLimit - 1);
+      this.viewer.maxImageCacheCount = Math.max(200, this.viewer.maxImageCacheCount - 50);
+      this.viewer.animationTime = Math.max(0.8, this.viewer.animationTime - 0.1);
+      console.log("Applied aggressive performance optimizations (desktop only)");
+    } else {
+      this.viewer.imageLoaderLimit = Math.max(1, this.viewer.imageLoaderLimit - 1);
+      console.log("Applied light performance optimizations (mobile - cache preserved)");
+    }
   }
   applyModerateOptimizations() {
     if (this.viewer.imageLoaderLimit > 4) {
@@ -2559,11 +2580,15 @@ class SafariPerformanceOptimizer {
       this.updateVelocity();
     }, 16);
     clearTimeout(this.highQualityTimeout);
+    if (this.isIOS) {
+      console.log("Safari: iOS detected - skipping quality reduction to prevent black tiles");
+      return;
+    }
     if (!this.originalPixelRatio && this.viewer.drawer) {
       this.originalPixelRatio = this.viewer.drawer.pixelRatio || this.basePixelRatio;
     }
     const reducedRatio = this.originalPixelRatio * this.scalingFactor;
-    console.log("Safari: Reducing render quality for interaction", {
+    console.log("Safari: Reducing render quality for interaction (desktop only)", {
       from: this.originalPixelRatio,
       to: reducedRatio,
       scalingFactor: this.scalingFactor
@@ -3585,11 +3610,11 @@ class TileCleanupManager {
     const previousPressure = this.state.currentPressure;
     const isMobile2 = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     if (isMobile2) {
-      if (fps < 10) {
+      if (fps < 8) {
         this.state.currentPressure = "critical";
-      } else if (fps < 15) {
+      } else if (fps < 12) {
         this.state.currentPressure = "high";
-      } else if (fps < 25) {
+      } else if (fps < 18) {
         this.state.currentPressure = "elevated";
       } else {
         this.state.currentPressure = "normal";
@@ -8927,7 +8952,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-Ddirc73F.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-BZTsNGK5.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(
     viewer,
     state,

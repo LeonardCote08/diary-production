@@ -1,9 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-BBQ3soNV.js","assets/main-BgvFrQ6u.js","assets/main-iSp7nxPb.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-Ncp-naWc.js","assets/main-Dl4s6uBg.js","assets/main-iSp7nxPb.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-BgvFrQ6u.js";
-import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-DMe_eOHB.js";
+import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-Dl4s6uBg.js";
+import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-UrALLzIU.js";
 class TemporalModeHandler {
   constructor(options = {}) {
     this.audioEngine = options.audioEngine || window.audioEngine;
@@ -9451,7 +9451,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
   }
   if (renderer.eventCoordinator) {
     const TemporalEchoController = (await __vitePreload(async () => {
-      const { default: __vite_default__ } = await import("./TemporalEchoController-BBQ3soNV.js");
+      const { default: __vite_default__ } = await import("./TemporalEchoController-Ncp-naWc.js");
       return { default: __vite_default__ };
     }, true ? __vite__mapDeps([0,1,2]) : void 0)).default;
     const echoController = new TemporalEchoController({
