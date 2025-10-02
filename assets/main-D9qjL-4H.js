@@ -18797,10 +18797,6 @@ class Canvas2DOverlayManager {
       logger$1.debug("🔚 [SPOTLIGHT] Notifying renderer that spotlight has been cleared");
       this.onSpotlightCleared();
     }
-    if (window.artworkViewerHandleHotspotClick) {
-      logger$1.debug("📱 [iOS FIX] Notifying parent to clear hotspot borders");
-      window.artworkViewerHandleHotspotClick(null);
-    }
   }
   /**
    * Adjust smoothing settings for fine-tuning
@@ -20077,7 +20073,7 @@ function useViewerAnimations(viewer, state, components) {
       useSpringPhysics: true,
       // Fallback option
       onComplete: () => {
-        var _a, _b;
+        var _a;
         console.log("✅ Cinematic zoom completed");
         setIsZoomingToHotspot(false);
         setShowExpandButton(true);
@@ -20089,24 +20085,6 @@ function useViewerAnimations(viewer, state, components) {
         if (components().renderer) {
           if (isMobile()) {
             components().renderer.showOverlay();
-            const selectedHotspot = (_b = components().renderer.stateManager) == null ? void 0 : _b.getSelectedHotspot();
-            if (selectedHotspot) {
-              console.log(
-                "🔧 [MOBILE FIX] Hiding border after zoom for:",
-                selectedHotspot.id
-              );
-              const selectedOverlay = components().renderer.stateManager.getOverlay(
-                selectedHotspot.id
-              );
-              if (selectedOverlay && selectedOverlay.element) {
-                const mainPath = selectedOverlay.element.querySelector(".main-path");
-                if (mainPath) {
-                  mainPath.style.stroke = "transparent";
-                  mainPath.style.strokeWidth = "0";
-                  console.log("✅ Border removed, spotlight active");
-                }
-              }
-            }
           }
           setTimeout(() => {
             components().renderer.resumeUpdates();
@@ -21721,7 +21699,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-Cz9KFN8o.js").then((n) => n.v);
+      } = await import("./viewerSetup-fX-mBlK9.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
