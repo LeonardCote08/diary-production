@@ -1,9 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-DQhMtXEV.js","assets/main-D9qjL-4H.js","assets/main-iSp7nxPb.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-DrzD_Jug.js","assets/main-MJGSJ8sN.js","assets/main-iSp7nxPb.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-D9qjL-4H.js";
-import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-fX-mBlK9.js";
+import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-MJGSJ8sN.js";
+import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-CcawbRog.js";
 class TemporalModeHandler {
   constructor(options = {}) {
     this.audioEngine = options.audioEngine || window.audioEngine;
@@ -6917,6 +6917,31 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
     const selectedOverlay = this.stateManager.getOverlay(hotspot.id);
     if (selectedOverlay) {
       console.log("🎯 Applying selected state BEFORE onHotspotClick for:", hotspot.id);
+      if (selectedOverlay.element.getAttribute("data-hotspot-revealed") === "true") {
+        console.log(
+          "🧹 [IOS FIX] Cleaning revealed state before applying selected:",
+          hotspot.id
+        );
+        selectedOverlay.element.removeAttribute("data-hotspot-revealed");
+        selectedOverlay.element.removeAttribute("data-reveal-time");
+        selectedOverlay.element.classList.remove(
+          "hotspot-echo-active",
+          "hotspot-echo-reveal"
+        );
+        if (window.temporalEchoController && window.temporalEchoController.hotspotCleanupTimeouts) {
+          const cleanupTimeout = window.temporalEchoController.hotspotCleanupTimeouts.get(
+            hotspot.id
+          );
+          if (cleanupTimeout) {
+            clearTimeout(cleanupTimeout);
+            window.temporalEchoController.hotspotCleanupTimeouts.delete(hotspot.id);
+            console.log(
+              "🧹 [IOS FIX] Cleared scheduled cleanup timeout for:",
+              hotspot.id
+            );
+          }
+        }
+      }
       this.applyStyle(selectedOverlay.element, hotspot.type, "selected");
     }
     this.onHotspotClick(hotspot);
@@ -9457,7 +9482,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
   }
   if (renderer.eventCoordinator) {
     const TemporalEchoController = (await __vitePreload(async () => {
-      const { default: __vite_default__ } = await import("./TemporalEchoController-DQhMtXEV.js");
+      const { default: __vite_default__ } = await import("./TemporalEchoController-DrzD_Jug.js");
       return { default: __vite_default__ };
     }, true ? __vite__mapDeps([0,1,2]) : void 0)).default;
     const echoController = new TemporalEchoController({
