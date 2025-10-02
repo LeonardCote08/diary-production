@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-BRK17MHc.js","assets/main-BtyEmWZa.js","assets/main-iSp7nxPb.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-DRSRN_MQ.js","assets/main-qTohvdNQ.js","assets/main-iSp7nxPb.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-BtyEmWZa.js";
+import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-qTohvdNQ.js";
 class ImageOverlayManager {
   constructor() {
     this.overlays = /* @__PURE__ */ new Map();
@@ -652,9 +652,12 @@ class MemoryManager {
   }
   updateCacheLimits() {
     if (this.config.isMobile) {
-      console.log(
-        `[Mobile] Skipping cache reduction to prevent black tiles (pressure: ${this.state.memoryPressure})`
-      );
+      if (!this._lastMobileCacheLog || Date.now() - this._lastMobileCacheLog > 6e4) {
+        console.log(
+          `[Mobile] Skipping cache reduction to prevent black tiles (pressure: ${this.state.memoryPressure})`
+        );
+        this._lastMobileCacheLog = Date.now();
+      }
       return;
     }
     const limits = this.config.cacheLimits[this.state.memoryPressure];
@@ -3660,7 +3663,10 @@ class TileCleanupManager {
     if (isMobile2) {
       const isStable = this.viewer.viewport.getZoom() === this.viewer.viewport.zoomSpring.target.value && this.viewer.viewport.getCenter().equals(this.viewer.viewport.centerSpringX.target.value);
       if (!isStable) {
-        console.log("Skipping tile cleanup on mobile - viewport changing");
+        if (!this._lastViewportLog || Date.now() - this._lastViewportLog > 1e4) {
+          console.log("Skipping tile cleanup on mobile - viewport changing");
+          this._lastViewportLog = Date.now();
+        }
         return;
       }
     }
@@ -8682,8 +8688,13 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
         });
       }
     };
+    let lastWarningTime = 0;
     performanceMonitor.onPerformanceWarning = (warnings) => {
-      console.warn("[Performance Warning]", warnings);
+      const now = Date.now();
+      if (now - lastWarningTime > 5e3) {
+        console.warn("[Performance Warning]", warnings);
+        lastWarningTime = now;
+      }
     };
     setTimeout(() => {
       performanceMonitor.start();
@@ -8954,7 +8965,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-BRK17MHc.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-DRSRN_MQ.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(
     viewer,
     state,

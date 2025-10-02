@@ -1,4 +1,4 @@
-import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-BtyEmWZa.js";
+import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-qTohvdNQ.js";
 const GestureStates = {
   IDLE: "idle",
   UNDETERMINED: "undetermined",
@@ -5736,60 +5736,18 @@ class TemporalEchoController {
         zoomFactor = Math.min(3, lowZoomThreshold / currentZoom);
       }
       element.style.setProperty("--zoom-factor", zoomFactor);
-      console.log("[TemporalEchoController] Zoom-adaptive stroke:", {
-        currentZoom: currentZoom.toFixed(2),
-        lowZoomThreshold,
-        zoomFactor: zoomFactor.toFixed(3),
-        effectiveStrokePigment: (6 * zoomFactor).toFixed(2) + "px",
-        effectiveStrokeEmboss: (6.5 * zoomFactor).toFixed(2) + "px"
-      });
       let borderStyle = localStorage.getItem("borderStyle") || "default";
-      console.log(
-        "[TemporalEchoController] Initial borderStyle from localStorage:",
-        borderStyle
-      );
-      console.log("[TemporalEchoController] isMobile:", this.isMobile);
-      console.log("[TemporalEchoController] isBlackMode:", isBlackMode);
       const isAndroid = /Android/i.test(navigator.userAgent);
-      console.log("[TemporalEchoController] isAndroid:", isAndroid);
       if (isAndroid && this.isMobile) {
         borderStyle = "pigment";
-        console.log(
-          "[TemporalEchoController] Forcing pigment style (black borders) for Android mobile"
-        );
       } else if (this.isMobile && borderStyle === "default") {
         borderStyle = "emboss";
-        console.log("[TemporalEchoController] Overriding to emboss for mobile");
       }
       if (!isAndroid && isBlackMode && (borderStyle === "default" || borderStyle === "pigment")) {
         borderStyle = "emboss";
-        console.log(
-          "[TemporalEchoController] Forcing emboss style for dark palette visibility"
-        );
       }
-      console.log("[TemporalEchoController] Final borderStyle to apply:", borderStyle);
       if (borderStyle !== "default") {
         element.classList.add(`border-${borderStyle}`);
-        console.log("[TemporalEchoController] Applied border style:", borderStyle);
-        console.log("[TemporalEchoController] Element classes:", element.className);
-        const debugTimeout = setTimeout(() => {
-          var _a2;
-          if (!element || !element.isConnected) {
-            this.activeTimeouts.delete(debugTimeout);
-            return;
-          }
-          const paths = element.querySelectorAll("path");
-          if (paths.length > 0 && paths.length <= 2) {
-            const path = paths[0];
-            const computedStyle = window.getComputedStyle(path);
-            console.log(
-              `[TemporalEchoController] Path style check - filter:`,
-              ((_a2 = computedStyle.filter) == null ? void 0 : _a2.substring(0, 50)) + "..."
-            );
-          }
-          this.activeTimeouts.delete(debugTimeout);
-        }, 100);
-        this.activeTimeouts.add(debugTimeout);
         if (borderStyle === "gradient" && !document.getElementById("adaptive-gradient")) {
           this.injectGradientDef();
         }

@@ -1,9 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-Xr8oMVPX.js","assets/main-BtyEmWZa.js","assets/main-iSp7nxPb.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-3Ksh4KmJ.js","assets/main-qTohvdNQ.js","assets/main-iSp7nxPb.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-BtyEmWZa.js";
-import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-BORr7R4-.js";
+import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-qTohvdNQ.js";
+import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-07EqCWSR.js";
 class TemporalModeHandler {
   constructor(options = {}) {
     this.audioEngine = options.audioEngine || window.audioEngine;
@@ -4901,6 +4901,9 @@ class StyleManager {
     this.getAnimationDuration = options.getAnimationDuration;
     this.animationsPaused = false;
     this.allowHoverDuringSpotlight = true;
+    this.resetQueue = /* @__PURE__ */ new Set();
+    this.resetScheduled = false;
+    this.resetDebounceTimer = null;
     logger$1.debug("Initialized");
   }
   /**
@@ -4946,67 +4949,73 @@ class StyleManager {
   }
   /**
    * Reset hotspot to normal state - complete visual cleanup
+   * OPTIMIZED: Batched DOM operations to prevent layout thrashing
+   * FIX #3: Queue-based batching - prevents 15 individual RAF calls
    */
   resetToNormalState(group) {
     if (!group) return;
-    const hotspotId = group.getAttribute("data-hotspot-id");
-    const allPaths = group.querySelectorAll("path");
-    allPaths.forEach((path) => {
-      if (path.getAnimations) {
-        path.getAnimations().forEach((animation) => animation.cancel());
+    this.resetQueue.add(group);
+    if (this.resetDebounceTimer) {
+      clearTimeout(this.resetDebounceTimer);
+    }
+    this.resetDebounceTimer = setTimeout(() => {
+      if (!this.resetScheduled) {
+        this.resetScheduled = true;
+        requestAnimationFrame(() => {
+          this._processBatchedResets();
+        });
       }
-      if (path.currentAnimation) {
-        path.currentAnimation.cancel();
-        path.currentAnimation.onfinish = null;
-        path.currentAnimation = null;
+    }, 16);
+  }
+  /**
+   * Process all queued resets in a single RAF
+   * CRITICAL: This prevents 15 individual RAF calls (15 × 26ms = 390ms overhead!)
+   */
+  _processBatchedResets() {
+    var _a;
+    const startTime = performance.now();
+    const count = this.resetQueue.size;
+    this.resetQueue.forEach((group) => {
+      const hotspotId = group.getAttribute("data-hotspot-id");
+      const allPaths = group.querySelectorAll("path");
+      allPaths.forEach((path) => {
+        if (path.currentAnimation) {
+          path.currentAnimation.cancel();
+          path.currentAnimation = null;
+        }
+        if (path.getAnimations) {
+          path.getAnimations().forEach((anim) => anim.cancel());
+        }
+      });
+      const hotspotType = group.getAttribute("data-hotspot-type") || "area";
+      group.setAttribute("class", `hotspot-${hotspotType} hotspot-normal`);
+      group.setAttribute("data-current-state", "normal");
+      group.setAttribute("data-animation-active", "false");
+      group.setAttribute("data-animation-completed", "false");
+      const attrsToRemove = [
+        "data-maintain-visual",
+        "data-hover-maintained",
+        "data-hover-preserved",
+        "data-was-selected"
+      ];
+      attrsToRemove.forEach((attr) => group.removeAttribute(attr));
+      if (this.memoryManager && hotspotId) {
+        this.memoryManager.clearAnimationEntry(`${hotspotId}_hover`);
+        this.memoryManager.clearAnimationEntry(`${hotspotId}_selected`);
       }
     });
-    const mainPath = group.querySelector(".main-path");
-    const glowLayers = group.querySelectorAll(
-      ".glow-layer-1, .glow-layer-2, .glow-layer-3, .glow-layer-4, .glow-layer-5"
-    );
-    if (mainPath) {
-      if (mainPath.currentAnimation) {
-        mainPath.currentAnimation.cancel();
-        mainPath.currentAnimation.onfinish = null;
-        mainPath.currentAnimation = null;
-      }
-      mainPath.style.removeProperty("opacity");
-      mainPath.style.removeProperty("stroke");
-      mainPath.style.removeProperty("strokeWidth");
-      mainPath.style.strokeDasharray = "none";
-      mainPath.style.strokeDashoffset = "0";
-      mainPath.style.filter = "none";
-      mainPath.style.transition = "none";
-      mainPath.style.animation = "none";
-      mainPath.style.visibility = "visible";
-      mainPath.style.boxShadow = "none";
+    this.resetQueue.clear();
+    this.resetScheduled = false;
+    this.resetDebounceTimer = null;
+    const batchTime = performance.now() - startTime;
+    if (count > 5) {
+      const caller = ((_a = new Error().stack.split("\n")[3]) == null ? void 0 : _a.trim()) || "unknown";
+      console.log(
+        `[StyleManager] Batched ${count} resets in ${batchTime.toFixed(2)}ms (${(batchTime / count).toFixed(2)}ms avg per hotspot)`,
+        `
+  Called from: ${caller}`
+      );
     }
-    glowLayers.forEach((layer) => {
-      layer.style.removeProperty("opacity");
-      layer.style.strokeDasharray = "none";
-      layer.style.strokeDashoffset = "0";
-      layer.style.filter = "none";
-      layer.style.transition = "none";
-      layer.style.animation = "none";
-      layer.style.visibility = "visible";
-    });
-    group.setAttribute(
-      "class",
-      `hotspot-${group.getAttribute("data-hotspot-type") || "area"} hotspot-normal`
-    );
-    group.setAttribute("data-current-state", "normal");
-    group.setAttribute("data-animation-active", "false");
-    group.setAttribute("data-animation-completed", "false");
-    group.removeAttribute("data-maintain-visual");
-    group.removeAttribute("data-hover-maintained");
-    group.removeAttribute("data-hover-preserved");
-    group.removeAttribute("data-was-selected");
-    if (this.memoryManager && hotspotId) {
-      this.memoryManager.clearAnimationEntry(`${hotspotId}_hover`);
-      this.memoryManager.clearAnimationEntry(`${hotspotId}_selected`);
-    }
-    void group.offsetWidth;
   }
   /**
    * Ensure hotspot visibility after Canvas2D spotlight
@@ -5273,7 +5282,6 @@ class StyleManager {
           logger$1.debug(`Initial style config for selected:`, strokeConfig);
         }
         Object.assign(mainPath.style, strokeConfig);
-        void mainPath.offsetWidth;
         if (!isCanvas2D2) {
           const haloIntensity = state === "selected" ? 0.5 : 0.4;
           const haloSize = state === "selected" ? "20px" : "15px";
@@ -5370,7 +5378,6 @@ class StyleManager {
             mainPath.style.strokeDasharray = "0 100";
             mainPath.style.strokeDashoffset = "0";
             group.removeAttribute("data-animation-completed");
-            void mainPath.offsetWidth;
             if (isOrganicAnimation2 && hotspotId) {
               if (window.DEBUG_ANIMATIONS) {
                 logger$1.perf(
@@ -5468,7 +5475,6 @@ class StyleManager {
             mainPath.style.strokeDasharray = `0 ${pathLength}`;
             mainPath.style.strokeDashoffset = "0";
             mainPath.style.opacity = finalOpacity;
-            void mainPath.offsetWidth;
             mainPath.currentAnimation = mainPath.animate(
               [
                 {
@@ -9451,7 +9457,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
   }
   if (renderer.eventCoordinator) {
     const TemporalEchoController = (await __vitePreload(async () => {
-      const { default: __vite_default__ } = await import("./TemporalEchoController-Xr8oMVPX.js");
+      const { default: __vite_default__ } = await import("./TemporalEchoController-3Ksh4KmJ.js");
       return { default: __vite_default__ };
     }, true ? __vite__mapDeps([0,1,2]) : void 0)).default;
     const echoController = new TemporalEchoController({
