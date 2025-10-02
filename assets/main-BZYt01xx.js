@@ -20110,8 +20110,14 @@ function useViewerAnimations(viewer, state, components) {
           components().renderer.hideOverlay();
         }
       }
-      if (components().overlayManager && components().overlayManager.startZoomAnimation) {
-        components().overlayManager.startZoomAnimation();
+      if (components().overlayManager) {
+        console.log("🔧 [iOS FIX] Clearing overlay manager selection before zoom");
+        if (components().overlayManager.clearSelection) {
+          components().overlayManager.clearSelection();
+        }
+        if (components().overlayManager.startZoomAnimation) {
+          components().overlayManager.startZoomAnimation();
+        }
       }
       await cinematicManager.performZoom(bounds, zoomOptions);
     } catch (error) {
@@ -21703,7 +21709,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-DqT8tZ9I.js").then((n) => n.v);
+      } = await import("./viewerSetup-DB9BEK62.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
