@@ -18797,6 +18797,10 @@ class Canvas2DOverlayManager {
       logger$1.debug("🔚 [SPOTLIGHT] Notifying renderer that spotlight has been cleared");
       this.onSpotlightCleared();
     }
+    if (window.artworkViewerHandleHotspotClick) {
+      logger$1.debug("📱 [iOS FIX] Notifying parent to clear hotspot borders");
+      window.artworkViewerHandleHotspotClick(null);
+    }
   }
   /**
    * Adjust smoothing settings for fine-tuning
@@ -21699,7 +21703,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-fX-mBlK9.js").then((n) => n.v);
+      } = await import("./viewerSetup-DqT8tZ9I.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };

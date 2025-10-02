@@ -1,4 +1,4 @@
-import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-D9qjL-4H.js";
+import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-2mtTeEh1.js";
 const GestureStates = {
   IDLE: "idle",
   UNDETERMINED: "undetermined",
@@ -4500,8 +4500,8 @@ class TemporalEchoController {
     });
     const tapImagePoint = this.viewer.viewport.viewportToImageCoordinates(viewportPoint);
     let nearbyHotspots = [];
-    if (this.config.tapMode === "direct" && this.isMobile) {
-      console.log("[TemporalEchoController] Direct tap mode active (mobile)");
+    if (this.isMobile) {
+      console.log("[TemporalEchoController] Mobile tap - revealing ONLY 1 hotspot");
       let directHotspot = this.spatialIndex.getHotspotAtPoint(
         tapImagePoint.x,
         tapImagePoint.y
@@ -4527,7 +4527,7 @@ class TemporalEchoController {
         }
       }
       if (directHotspot) {
-        console.log("[TemporalEchoController] Direct tap on hotspot:", directHotspot.id);
+        console.log("[TemporalEchoController] Revealing single hotspot:", directHotspot.id);
         nearbyHotspots = [
           {
             id: directHotspot.id,
@@ -4541,7 +4541,7 @@ class TemporalEchoController {
         return true;
       }
     } else {
-      console.log("[TemporalEchoController] Nearby tap mode active (original behavior)");
+      console.log("[TemporalEchoController] Desktop tap mode (multiple hotspots possible)");
       nearbyHotspots = this.findHotspotsInRadius(tapData, this.config.echoRadius);
       if (this.config.revealType === "focus" && nearbyHotspots.length > 0) {
         nearbyHotspots.sort((a, b) => a.distance - b.distance);
@@ -4554,7 +4554,7 @@ class TemporalEchoController {
           "hotspots"
         );
       }
-      if (nearbyHotspots.length === 0 && this.isMobile) {
+      if (nearbyHotspots.length === 0) {
         console.log("[TemporalEchoController] No hotspots found nearby");
         this.showMissedTapFeedback(tapData);
         return true;
