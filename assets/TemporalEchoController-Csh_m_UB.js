@@ -1,4 +1,4 @@
-import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-iG_Kx0N2.js";
+import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-nnzplTK9.js";
 const GestureStates = {
   IDLE: "idle",
   UNDETERMINED: "undetermined",
@@ -4438,28 +4438,6 @@ class TemporalEchoController {
           "[TemporalEchoController] Tapped on/near revealed hotspot, triggering zoom (TEMPO 2):",
           targetHotspot.id
         );
-        const element = this.getHotspotElement(targetHotspot.id);
-        if (element) {
-          console.log(
-            "[TemporalEchoController] iOS FIX: Applying cleanup override for TEMPO 2"
-          );
-          element.classList.remove(
-            "hotspot-echo-reveal",
-            "hotspot-echo-fade-out",
-            "black-mode",
-            "border-emboss"
-          );
-          element.classList.add("hotspot-tempo-2-cleanup");
-          element.style.removeProperty("--zoom-factor");
-          element.style.removeProperty("animation-delay");
-          void element.offsetHeight;
-          this.activeEchoes.delete(targetHotspot.id);
-          this.echoAnimations.delete(targetHotspot.id);
-          console.log(
-            "[TemporalEchoController] iOS FIX: Cleanup override applied, classes:",
-            element.className
-          );
-        }
         if (window.multimodalSyncEngine) {
           window.multimodalSyncEngine.triggerSynchronizedFeedback({
             ...tapData,
@@ -6185,16 +6163,10 @@ class TemporalEchoController {
     });
     this.activeTimeouts.clear();
     const revealedElements = document.querySelectorAll(
-      ".hotspot-echo-reveal, .hotspot-echo-fade-out, .hotspot-tempo-2-cleanup"
+      ".hotspot-echo-reveal, .hotspot-echo-fade-out"
     );
     revealedElements.forEach((el) => {
-      el.classList.remove(
-        "hotspot-echo-reveal",
-        "hotspot-echo-fade-out",
-        "black-mode",
-        "border-emboss",
-        "hotspot-tempo-2-cleanup"
-      );
+      el.classList.remove("hotspot-echo-reveal", "hotspot-echo-fade-out", "black-mode");
       el.style.removeProperty("visibility");
       el.style.removeProperty("display");
       el.style.removeProperty("z-index");
@@ -6203,7 +6175,6 @@ class TemporalEchoController {
       el.style.removeProperty("opacity");
       el.style.removeProperty("transform");
       el.style.removeProperty("-webkit-transform");
-      el.style.removeProperty("--zoom-factor");
       if (el.getAnimations) {
         el.getAnimations().forEach((animation) => {
           animation.cancel();
