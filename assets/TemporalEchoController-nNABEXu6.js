@@ -1,4 +1,4 @@
-import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-DtUnHOF-.js";
+import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-CnZEJUvy.js";
 const GestureStates = {
   IDLE: "idle",
   UNDETERMINED: "undetermined",
@@ -6150,6 +6150,60 @@ class TemporalEchoController {
     if (this.spatialIndex) {
       this.spatialIndex.clear();
     }
+  }
+  /**
+   * Clean ALL reveal styles on startup (prevents desktop cache persistence)
+   * Called during constructor to ensure clean state between sessions
+   */
+  cleanupAllRevealStylesOnStartup() {
+    console.log("[TemporalEchoController] Cleaning all reveal styles on startup (cache fix)");
+    requestAnimationFrame(() => {
+      const allHotspots = document.querySelectorAll("[data-hotspot-id]");
+      let cleanedCount = 0;
+      allHotspots.forEach((element) => {
+        const hadClasses = element.classList.contains("hotspot-echo-reveal") || element.classList.contains("border-emboss") || element.classList.contains("border-gradient") || element.classList.contains("border-double") || element.classList.contains("border-pulse") || element.classList.contains("border-pigment");
+        if (hadClasses) {
+          cleanedCount++;
+          element.classList.remove(
+            "hotspot-echo-reveal",
+            "hotspot-echo-fade-out",
+            "black-mode",
+            "border-gradient",
+            "border-double",
+            "border-emboss",
+            "border-pulse",
+            "border-pigment",
+            "contrast-adaptive-dark",
+            "contrast-adaptive-light",
+            "contrast-adaptive-medium",
+            "contrast-adaptive-complex",
+            "reveal-complete"
+          );
+          const paths = element.querySelectorAll("path, polygon, polyline");
+          paths.forEach((path) => {
+            path.style.stroke = "";
+            path.style.strokeWidth = "";
+            path.style.fill = "";
+            path.style.fillOpacity = "";
+            path.style.filter = "";
+            path.style.animationDelay = "";
+          });
+          element.style.animationDelay = "";
+          element.style.removeProperty("--zoom-factor");
+        }
+        element.removeAttribute("data-hotspot-revealed");
+        element.removeAttribute("data-reveal-time");
+      });
+      if (cleanedCount > 0) {
+        console.log(
+          `[TemporalEchoController] Cleaned ${cleanedCount} hotspots with persisted reveal styles`
+        );
+      } else {
+        console.log(
+          "[TemporalEchoController] No persisted reveal styles found (clean startup)"
+        );
+      }
+    });
   }
   /**
    * Clean reveal styles from a specific hotspot (for iOS TEMPO 2)
