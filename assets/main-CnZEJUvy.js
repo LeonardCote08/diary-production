@@ -20945,22 +20945,22 @@ function DebugPanel(props) {
           maxWidth: ((_b = props.style) == null ? void 0 : _b.maxWidth) || "320px",
           zIndex: ((_c = props.style) == null ? void 0 : _c.zIndex) || 1e3
         } : !isMinimized() ? {
-          // When not dragging and expanded, position at top-left with iOS safe area support
+          // When not dragging and expanded, position at top-left
           position: "fixed",
-          top: "max(20px, env(safe-area-inset-top))",
-          left: "max(20px, env(safe-area-inset-left))",
+          top: "20px",
+          left: "20px",
           transform: "none",
           width: "320px",
           maxWidth: "320px",
-          maxHeight: "calc(100vh - 100px - env(safe-area-inset-top) - env(safe-area-inset-bottom))",
-          // Dynamic height with safe areas
+          maxHeight: "calc(100vh - 100px)",
+          // Dynamic height based on viewport
           zIndex: 1e3,
           ...props.style || {}
         } : {
-          // When minimized - iOS safe area support
+          // When minimized
           position: "fixed",
-          bottom: "max(20px, env(safe-area-inset-bottom))",
-          left: "max(20px, env(safe-area-inset-left))",
+          bottom: "20px",
+          left: "20px",
           zIndex: 1e3,
           width: "44px",
           minWidth: "44px",
@@ -21699,7 +21699,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-BOqGQ8co.js").then((n) => n.v);
+      } = await import("./viewerSetup-C6cylXEq.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };

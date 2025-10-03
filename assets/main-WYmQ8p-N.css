@@ -17,9 +17,9 @@ a {
     text-decoration: inherit;
 }
 
-a:hover {
-    color: #535bf2;
-}
+    a:hover {
+        color: #535bf2;
+    }
 
 body {
     margin: 0;
@@ -46,14 +46,14 @@ button {
     transition: border-color 0.25s;
 }
 
-button:hover {
-    border-color: #646cff;
-}
+    button:hover {
+        border-color: #646cff;
+    }
 
-button:focus,
-button:focus-visible {
-    outline: 4px auto -webkit-focus-ring-color;
-}
+    button:focus,
+    button:focus-visible {
+        outline: 4px auto -webkit-focus-ring-color;
+    }
 
 @media (prefers-color-scheme: light) {
     :root {
@@ -73,21 +73,8 @@ button:focus-visible {
 /* Styles spécifiques pour l'Interactive Art Diary */
 #root {
     width: 100vw;
-    /* iOS Safari fix: Use -webkit-fill-available for proper viewport height */
     height: 100vh;
-    height: -webkit-fill-available;
     display: block;
-}
-
-/* iOS Safe Area Support - Critical for iPhone notch and bottom bar */
-@supports (padding: env(safe-area-inset-bottom)) {
-    #root {
-        /* Ensure content respects safe areas */
-        padding-top: env(safe-area-inset-top);
-        padding-right: env(safe-area-inset-right);
-        padding-bottom: env(safe-area-inset-bottom);
-        padding-left: env(safe-area-inset-left);
-    }
 }
 
 /* Container pour OpenSeadragon */
@@ -127,9 +114,9 @@ button:focus-visible {
     transition: transform 0.3s ease;
 }
 
-.audio-player.active {
-    transform: translateY(0);
-}
+    .audio-player.active {
+        transform: translateY(0);
+    }
 /* MediaButton.css - Styled to match AudioPlayer aesthetic */
 
 .media-button-container {
@@ -2541,10 +2528,7 @@ g.hotspot-echo-reveal {
     color: #fff;
     margin: 0;
     padding: 0;
-    font-family:
-        system-ui,
-        -apple-system,
-        sans-serif;
+    font-family: system-ui, -apple-system, sans-serif;
     overflow: hidden;
     position: relative;
     /* GPU optimization for mobile */
@@ -2560,13 +2544,9 @@ g.hotspot-echo-reveal {
         /* Force hardware acceleration */
         will-change: transform;
     }
-
+    
     /* Optimize all interactive elements */
-    button,
-    a,
-    [role='button'],
-    .hotspot,
-    .hotspot-overlay {
+    button, a, [role="button"], .hotspot, .hotspot-overlay {
         -webkit-transform: translateZ(0);
         transform: translateZ(0);
         -webkit-backface-visibility: hidden;
@@ -2584,15 +2564,14 @@ g.hotspot-echo-reveal {
     background: #1a1a1a;
 }
 
-.loading-screen p {
-    color: #888;
-    font-size: 1.2rem;
-    animation: pulse 1.5s ease-in-out infinite;
-}
+    .loading-screen p {
+        color: #888;
+        font-size: 1.2rem;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
 
 @keyframes pulse {
-    0%,
-    100% {
+    0%, 100% {
         opacity: 0.4;
     }
 
@@ -2643,17 +2622,17 @@ g.hotspot-echo-reveal {
     -webkit-touch-callout: none;
 }
 
-/* Smooth tile loading transitions */
-.openseadragon-viewer .openseadragon-tile {
-    /* Fade in animation for new tiles */
-    opacity: 0;
-    animation: tileFadeIn 0.15s ease-out forwards;
-    /* GPU acceleration */
-    transform: translateZ(0);
-    will-change: opacity, transform;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-}
+    /* Smooth tile loading transitions */
+    .openseadragon-viewer .openseadragon-tile {
+        /* Fade in animation for new tiles */
+        opacity: 0;
+        animation: tileFadeIn 0.15s ease-out forwards;
+        /* GPU acceleration */
+        transform: translateZ(0);
+        will-change: opacity, transform;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
 
 @keyframes tileFadeIn {
     from {
@@ -2672,14 +2651,14 @@ g.hotspot-echo-reveal {
     transform-style: preserve-3d;
 }
 
-/* Canvas element */
-.openseadragon-canvas canvas {
-    /* Smooth rendering during animations */
-    transition: none;
-    /* GPU acceleration */
-    transform: translateZ(0);
-    will-change: transform;
-}
+    /* Canvas element */
+    .openseadragon-canvas canvas {
+        /* Smooth rendering during animations */
+        transition: none;
+        /* GPU acceleration */
+        transform: translateZ(0);
+        will-change: transform;
+    }
 
 /* Override OpenSeadragon tile styles for smooth loading */
 .openseadragon-tile-loading {
@@ -2711,16 +2690,16 @@ g.hotspot-echo-reveal {
     z-index: 10;
 }
 
-.hotspot-svg-overlay g {
-    cursor: pointer;
-    pointer-events: auto;
-    transform-origin: center;
-    transition: transform 0.2s ease-out;
-}
+    .hotspot-svg-overlay g {
+        cursor: pointer;
+        pointer-events: auto;
+        transform-origin: center;
+        transition: transform 0.2s ease-out;
+    }
 
-.hotspot-svg-overlay g:hover {
-    transform: scale(1.02);
-}
+        .hotspot-svg-overlay g:hover {
+            transform: scale(1.02);
+        }
 
 /* Éliminer le tap highlight sur les hotspots */
 .openseadragon-viewer svg * {
@@ -2748,11 +2727,11 @@ g.hotspot-echo-reveal {
     -webkit-backdrop-filter: blur(10px);
 }
 
-.viewer-loading p {
-    color: #fff;
-    font-size: 1rem;
-    margin: 0;
-}
+    .viewer-loading p {
+        color: #fff;
+        font-size: 1rem;
+        margin: 0;
+    }
 
 /* Debug info panel */
 .debug-info {
@@ -2776,52 +2755,52 @@ g.hotspot-echo-reveal {
     overflow: hidden; /* Hide overflow */
 }
 
-.debug-info div {
-    margin: 2px 0;
-    white-space: nowrap; /* Prevent text wrapping */
-    overflow: hidden; /* Hide overflow */
-    text-overflow: ellipsis; /* Add ... for long text */
-}
+    .debug-info div {
+        margin: 2px 0;
+        white-space: nowrap; /* Prevent text wrapping */
+        overflow: hidden; /* Hide overflow */
+        text-overflow: ellipsis; /* Add ... for long text */
+    }
 
-.debug-info .zoom-speed-control {
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-}
+    .debug-info .zoom-speed-control {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
 
-.debug-info .zoom-speed-control label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 3px;
-}
+        .debug-info .zoom-speed-control label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
 
-.debug-info .zoom-speed-control input[type='range'] {
-    -webkit-appearance: none;
-    appearance: none;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.2);
-    outline: none;
-    border-radius: 2px;
-}
+        .debug-info .zoom-speed-control input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            border-radius: 2px;
+        }
 
-.debug-info .zoom-speed-control input[type='range']::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 12px;
-    height: 12px;
-    background: #fff;
-    cursor: pointer;
-    border-radius: 50%;
-}
+            .debug-info .zoom-speed-control input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 12px;
+                height: 12px;
+                background: #fff;
+                cursor: pointer;
+                border-radius: 50%;
+            }
 
-.debug-info .zoom-speed-control input[type='range']::-moz-range-thumb {
-    width: 12px;
-    height: 12px;
-    background: #fff;
-    cursor: pointer;
-    border-radius: 50%;
-    border: none;
-}
+            .debug-info .zoom-speed-control input[type="range"]::-moz-range-thumb {
+                width: 12px;
+                height: 12px;
+                background: #fff;
+                cursor: pointer;
+                border-radius: 50%;
+                border: none;
+            }
 
 /* Hotspot type legend */
 .hotspot-legend {
@@ -2838,12 +2817,12 @@ g.hotspot-echo-reveal {
     pointer-events: none;
 }
 
-.hotspot-legend h3 {
-    margin: 0 0 10px 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: #fff;
-}
+    .hotspot-legend h3 {
+        margin: 0 0 10px 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #fff;
+    }
 
 .legend-item {
     display: flex;
@@ -2860,71 +2839,71 @@ g.hotspot-echo-reveal {
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-/* Color codes for hotspot types */
-.legend-color.audio-only {
-    background: rgba(0, 203, 244, 0.5);
-    border-color: #00cbf4;
-}
+    /* Color codes for hotspot types */
+    .legend-color.audio-only {
+        background: rgba(0, 203, 244, 0.5);
+        border-color: #00cbf4;
+    }
 
-.legend-color.audio-link {
-    background: rgba(73, 243, 0, 0.5);
-    border-color: #49f300;
-}
+    .legend-color.audio-link {
+        background: rgba(73, 243, 0, 0.5);
+        border-color: #49f300;
+    }
 
-.legend-color.audio-image {
-    background: rgba(255, 5, 247, 0.5);
-    border-color: #ff05f7;
-}
+    .legend-color.audio-image {
+        background: rgba(255, 5, 247, 0.5);
+        border-color: #ff05f7;
+    }
 
-.legend-color.audio-image-link {
-    background: rgba(255, 93, 0, 0.5);
-    border-color: #ff5d00;
-}
+    .legend-color.audio-image-link {
+        background: rgba(255, 93, 0, 0.5);
+        border-color: #ff5d00;
+    }
 
-.legend-color.audio-sound {
-    background: rgba(255, 176, 0, 0.5);
-    border-color: #ffb000;
-}
+    .legend-color.audio-sound {
+        background: rgba(255, 176, 0, 0.5);
+        border-color: #ffb000;
+    }
 
 /* OpenSeadragon controls customization */
 .openseadragon-container {
     background: transparent !important;
 }
 
-.openseadragon-container .openseadragon-controls {
-    margin: 20px !important;
-}
+    .openseadragon-container .openseadragon-controls {
+        margin: 20px !important;
+    }
 
-.openseadragon-container button {
-    background: rgba(0, 0, 0, 0.7) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    color: white !important;
-    transition: all 0.2s ease;
-    width: 40px !important;
-    height: 40px !important;
-    border-radius: 50% !important;
-    margin: 5px !important;
-    font-size: 18px !important;
-    cursor: pointer;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
+    .openseadragon-container button {
+        background: rgba(0, 0, 0, 0.7) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        color: white !important;
+        transition: all 0.2s ease;
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 50% !important;
+        margin: 5px !important;
+        font-size: 18px !important;
+        cursor: pointer;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
 
-.openseadragon-container button:hover {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border-color: rgba(255, 255, 255, 0.4) !important;
-    transform: scale(1.1);
-}
+        .openseadragon-container button:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+            border-color: rgba(255, 255, 255, 0.4) !important;
+            transform: scale(1.1);
+        }
 
-.openseadragon-container button:active {
-    transform: scale(0.95);
-}
+        .openseadragon-container button:active {
+            transform: scale(0.95);
+        }
 
-/* Hide rotation control */
-.openseadragon-container .openseadragon-rotate-left,
-.openseadragon-container .openseadragon-rotate-right {
-    display: none !important;
-}
+    /* Hide rotation control */
+    .openseadragon-container .openseadragon-rotate-left,
+    .openseadragon-container .openseadragon-rotate-right {
+        display: none !important;
+    }
 
 /* Mobile controls */
 .mobile-controls {
@@ -2965,15 +2944,15 @@ g.hotspot-echo-reveal {
     }
 }
 
-.zoom-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.5);
-    transform: scale(1.1);
-}
+    .zoom-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: scale(1.1);
+    }
 
-.zoom-btn:active {
-    transform: scale(0.95);
-}
+    .zoom-btn:active {
+        transform: scale(0.95);
+    }
 
 .zoom-home {
     font-size: 20px;
@@ -2986,22 +2965,20 @@ g.hotspot-echo-reveal {
         opacity: 0;
         transform: scale(0);
     }
-
+    
     50% {
         opacity: 1;
         transform: scale(1.1);
-        box-shadow:
-            0 4px 15px rgba(0, 0, 0, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.3),
-            0 0 20px rgba(255, 255, 255, 0.8);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                    0 0 20px rgba(255, 255, 255, 0.8);
     }
-
+    
     100% {
         opacity: 1;
         transform: scale(1);
-        box-shadow:
-            0 4px 15px rgba(0, 0, 0, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
     }
 }
 
@@ -3020,11 +2997,8 @@ g.hotspot-echo-reveal {
 .expand-button {
     /* Specific expand button styles - matching fullscreen button */
     position: fixed !important;
-    /* iOS safe area support - adjust based on fullscreen button presence */
-    top: calc(
-        max(20px, env(safe-area-inset-top)) + 54px
-    ) !important; /* fullscreen top + 44px (height) + 10px (gap) */
-    right: max(20px, env(safe-area-inset-right)) !important;
+    top: 74px !important; /* 20px (fullscreen top) + 44px (fullscreen height) + 10px (gap) */
+    right: 20px !important;
     left: auto !important;
     z-index: 1000;
     width: 44px;
@@ -3046,38 +3020,39 @@ g.hotspot-echo-reveal {
 
 /* Glossy shine overlay for expand button */
 .expand-button::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.2) 50%,
-        transparent 100%
-    );
+    background: linear-gradient( 90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100% );
     transition: left 0.5s ease;
     border-radius: 12px;
 }
 
-.expand-button span {
-    vertical-align: middle;
-}
+    .expand-button span {
+        vertical-align: middle;
+    }
 
-.expand-button svg {
-    width: 24px;
-    height: 24px;
-    flex-shrink: 0;
-    /* White with subtle multi-layer shadows */
-    color: white;
-    /* Safari compatibility with -webkit prefix */
-    -webkit-filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 2px rgba(0, 0, 0, 0.6))
-        drop-shadow(0 0 4px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
-    filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 2px rgba(0, 0, 0, 0.6))
-        drop-shadow(0 0 4px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
-}
+    .expand-button svg {
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
+        /* White with subtle multi-layer shadows */
+        color: white;
+        /* Safari compatibility with -webkit prefix */
+        -webkit-filter: 
+            drop-shadow(0 0 1px rgba(0, 0, 0, 0.8))
+            drop-shadow(0 0 2px rgba(0, 0, 0, 0.6))
+            drop-shadow(0 0 4px rgba(0, 0, 0, 0.4))
+            drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
+        filter: 
+            drop-shadow(0 0 1px rgba(0, 0, 0, 0.8))
+            drop-shadow(0 0 2px rgba(0, 0, 0, 0.6))
+            drop-shadow(0 0 4px rgba(0, 0, 0, 0.4))
+            drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
+    }
 
 /* Mobile specific */
 @media (max-width: 768px) {
@@ -3093,12 +3068,10 @@ g.hotspot-echo-reveal {
     }
 }
 
-.expand-button:hover {
-    transform: translateY(-2px) translateZ(0);
-    box-shadow:
-        0 6px 20px rgba(0, 0, 0, 0.25),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
+    .expand-button:hover {
+        transform: translateY(-2px) translateZ(0);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
 
 /* Shine effect on hover for expand button */
 @media (hover: hover) {
@@ -3107,10 +3080,11 @@ g.hotspot-echo-reveal {
     }
 }
 
-.expand-button:active {
-    transform: translateY(0) scale(0.98);
-    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
-}
+    .expand-button:active {
+        transform: translateY(0) scale(0.98);
+        box-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+    }
+
 
 /* Keyboard shortcuts info */
 .shortcuts-info {
@@ -3127,30 +3101,30 @@ g.hotspot-echo-reveal {
     font-size: 12px;
 }
 
-.shortcuts-info summary {
-    cursor: pointer;
-    font-weight: 600;
-    color: #fff;
-    outline: none;
-    user-select: none;
-    list-style: none;
-}
+    .shortcuts-info summary {
+        cursor: pointer;
+        font-weight: 600;
+        color: #fff;
+        outline: none;
+        user-select: none;
+        list-style: none;
+    }
 
-.shortcuts-info summary::-webkit-details-marker {
-    display: none;
-}
+        .shortcuts-info summary::-webkit-details-marker {
+            display: none;
+        }
 
-.shortcuts-info summary::before {
-    content: '⌨️ ';
-    display: inline-block;
-    margin-right: 5px;
-}
+        .shortcuts-info summary::before {
+            content: '⌨️ ';
+            display: inline-block;
+            margin-right: 5px;
+        }
 
-.shortcuts-info[open] summary::after {
-    content: ' ✕';
-    float: right;
-    opacity: 0.5;
-}
+    .shortcuts-info[open] summary::after {
+        content: ' ✕';
+        float: right;
+        opacity: 0.5;
+    }
 
 .shortcuts-list {
     margin-top: 10px;
@@ -3159,23 +3133,23 @@ g.hotspot-echo-reveal {
     gap: 5px;
 }
 
-.shortcuts-list div {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+    .shortcuts-list div {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
 
-.shortcuts-list kbd {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-family: 'SF Mono', Monaco, monospace;
-    font-size: 11px;
-    min-width: 20px;
-    text-align: center;
-    display: inline-block;
-}
+    .shortcuts-list kbd {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: 'SF Mono', Monaco, monospace;
+        font-size: 11px;
+        min-width: 20px;
+        text-align: center;
+        display: inline-block;
+    }
 
 /* Navigator (minimap) styling */
 .openseadragon-container .navigator {
@@ -3209,9 +3183,9 @@ g.hotspot-echo-reveal {
         max-width: 150px;
     }
 
-    .hotspot-legend h3 {
-        font-size: 12px;
-    }
+        .hotspot-legend h3 {
+            font-size: 12px;
+        }
 
     .legend-item {
         font-size: 11px;
@@ -3239,6 +3213,8 @@ g.hotspot-echo-reveal {
         margin: 3px !important;
     }
 
+
+
     .expand-button {
         /* Icon-only button styling for mobile */
         animation: fadeIn 0.3s ease-out;
@@ -3249,17 +3225,6 @@ g.hotspot-echo-reveal {
 @media (min-width: 769px) {
     .expand-button {
         /* Icon-only button styling for desktop - position already set in base style */
-    }
-}
-
-/* iPhone specific - No fullscreen button available, move expand to top position */
-@supports (-webkit-touch-callout: none) {
-    /* Target iPhone specifically (narrow aspect ratio) */
-    @media (max-width: 768px) and (max-aspect-ratio: 1/1) {
-        .expand-button {
-            /* When fullscreen button is hidden on iPhone, use top position */
-            top: max(20px, env(safe-area-inset-top)) !important;
-        }
     }
 }
 
@@ -3358,6 +3323,8 @@ g.hotspot-echo-reveal {
     animation: hotspotHoverGlow 1s ease-in-out infinite;
 }
 
+
+
 /* Touch feedback animation */
 @keyframes touchPulse {
     0% {
@@ -3392,12 +3359,12 @@ g.hotspot-echo-reveal {
     touch-action: pan-x pan-y;
 }
 
-/* Improve touch responsiveness */
-.openseadragon-viewer svg g {
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-    will-change: opacity, transform;
-}
+    /* Improve touch responsiveness */
+    .openseadragon-viewer svg g {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        will-change: opacity, transform;
+    }
 
 /* Pinch gesture indicator (optional) */
 .pinch-indicator {
@@ -3416,9 +3383,9 @@ g.hotspot-echo-reveal {
     z-index: 50;
 }
 
-.pinch-indicator.active {
-    opacity: 1;
-}
+    .pinch-indicator.active {
+        opacity: 1;
+    }
 
 /* Hold progress indicator */
 .hold-progress {
@@ -3433,28 +3400,26 @@ g.hotspot-echo-reveal {
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.8);
     transform: translate(-50%, -50%) scale(0.8);
-    transition:
-        opacity 0.2s ease-out,
-        transform 0.2s ease-out;
+    transition: opacity 0.2s ease-out, transform 0.2s ease-out;
 }
 
-.hold-progress.active {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-}
+    .hold-progress.active {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
 
-.hold-progress::after {
-    content: '';
-    position: absolute;
-    top: -3px;
-    left: -3px;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 3px solid rgba(255, 255, 255, 0.8);
-    border-top-color: transparent;
-    animation: holdRotate 0.5s linear infinite;
-}
+    .hold-progress::after {
+        content: '';
+        position: absolute;
+        top: -3px;
+        left: -3px;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 3px solid rgba(255, 255, 255, 0.8);
+        border-top-color: transparent;
+        animation: holdRotate 0.5s linear infinite;
+    }
 
 @keyframes holdRotate {
     0% {
@@ -3469,9 +3434,8 @@ g.hotspot-echo-reveal {
 /* Fullscreen button with glassmorphism effect */
 .fullscreen-button-container {
     position: fixed;
-    /* iOS safe area support */
-    top: max(20px, env(safe-area-inset-top));
-    right: max(20px, env(safe-area-inset-right));
+    top: 20px;
+    right: 20px;
     z-index: 1000;
 }
 
@@ -3495,9 +3459,7 @@ g.hotspot-echo-reveal {
     align-items: center;
     justify-content: center;
     /* Visual polish */
-    box-shadow:
-        0 4px 15px rgba(0, 0, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
     position: relative;
     overflow: hidden;
     cursor: pointer;
@@ -3507,22 +3469,17 @@ g.hotspot-echo-reveal {
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Glossy shine overlay */
-.fullscreen-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.2) 50%,
-        transparent 100%
-    );
-    transition: left 0.5s ease;
-}
+    /* Glossy shine overlay */
+    .fullscreen-button::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient( 90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100% );
+        transition: left 0.5s ease;
+    }
 
 /* Shine effect on hover (desktop) */
 @media (hover: hover) {
@@ -3532,9 +3489,7 @@ g.hotspot-echo-reveal {
 
     .fullscreen-button:hover {
         transform: translateY(-2px) translateZ(0);
-        box-shadow:
-            0 6px 20px rgba(0, 0, 0, 0.25),
-            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
     }
 }
 
@@ -3551,10 +3506,16 @@ g.hotspot-echo-reveal {
     /* White with subtle multi-layer shadows */
     color: white;
     /* Safari compatibility with -webkit prefix */
-    -webkit-filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 2px rgba(0, 0, 0, 0.6))
-        drop-shadow(0 0 4px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
-    filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 2px rgba(0, 0, 0, 0.6))
-        drop-shadow(0 0 4px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
+    -webkit-filter: 
+        drop-shadow(0 0 1px rgba(0, 0, 0, 0.8))
+        drop-shadow(0 0 2px rgba(0, 0, 0, 0.6))
+        drop-shadow(0 0 4px rgba(0, 0, 0, 0.4))
+        drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
+    filter: 
+        drop-shadow(0 0 1px rgba(0, 0, 0, 0.8))
+        drop-shadow(0 0 2px rgba(0, 0, 0, 0.6))
+        drop-shadow(0 0 4px rgba(0, 0, 0, 0.4))
+        drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
 }
 
 /* Remove focus outline but keep accessibility */
@@ -3610,9 +3571,7 @@ g.hotspot-echo-reveal {
     user-select: none;
     touch-action: manipulation;
     /* Visual polish */
-    box-shadow:
-        0 4px 15px rgba(0, 0, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
     position: relative;
     overflow: hidden;
     cursor: pointer;
@@ -3622,59 +3581,66 @@ g.hotspot-echo-reveal {
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Glossy shine overlay for all glass buttons */
-.glass-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.2) 50%,
-        transparent 100%
-    );
-    transition: left 0.5s ease;
-}
+    /* Glossy shine overlay for all glass buttons */
+    .glass-button::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient( 90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100% );
+        transition: left 0.5s ease;
+    }
 
-/* Spring physics tap animation */
-.glass-button:active {
-    transform: scale(0.92) translateZ(0);
-    transition: transform 0.1s ease;
-}
+    /* Spring physics tap animation */
+    .glass-button:active {
+        transform: scale(0.92) translateZ(0);
+        transition: transform 0.1s ease;
+    }
 
-/* Remove focus outline but keep accessibility */
-.glass-button:focus {
-    outline: none;
-}
+    /* Remove focus outline but keep accessibility */
+    .glass-button:focus {
+        outline: none;
+    }
 
-.glass-button:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.8);
-    outline-offset: 2px;
-}
+    .glass-button:focus-visible {
+        outline: 2px solid rgba(255, 255, 255, 0.8);
+        outline-offset: 2px;
+    }
 
-/* Icon styling inside glass buttons - Subtle but visible */
-.glass-button svg {
-    /* Pure white with subtle multi-layer shadows */
-    color: white;
-    /* Safari compatibility with -webkit prefix */
-    -webkit-filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 2px rgba(0, 0, 0, 0.6))
-        drop-shadow(0 0 4px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
-    filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 2px rgba(0, 0, 0, 0.6))
-        drop-shadow(0 0 4px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
-}
-
-/* Slightly enhanced on hover */
-.glass-button:hover svg {
-    color: white;
-    /* Safari compatibility with -webkit prefix */
-    -webkit-filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 3px rgba(0, 0, 0, 0.7))
-        drop-shadow(0 0 5px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
-    filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 3px rgba(0, 0, 0, 0.7))
-        drop-shadow(0 0 5px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
-}
+    /* Icon styling inside glass buttons - Subtle but visible */
+    .glass-button svg {
+        /* Pure white with subtle multi-layer shadows */
+        color: white;
+        /* Safari compatibility with -webkit prefix */
+        -webkit-filter: 
+            drop-shadow(0 0 1px rgba(0, 0, 0, 0.8))
+            drop-shadow(0 0 2px rgba(0, 0, 0, 0.6))
+            drop-shadow(0 0 4px rgba(0, 0, 0, 0.4))
+            drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
+        filter: 
+            drop-shadow(0 0 1px rgba(0, 0, 0, 0.8))
+            drop-shadow(0 0 2px rgba(0, 0, 0, 0.6))
+            drop-shadow(0 0 4px rgba(0, 0, 0, 0.4))
+            drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
+    }
+    
+    /* Slightly enhanced on hover */
+    .glass-button:hover svg {
+        color: white;
+        /* Safari compatibility with -webkit prefix */
+        -webkit-filter: 
+            drop-shadow(0 0 1px rgba(0, 0, 0, 0.9))
+            drop-shadow(0 0 3px rgba(0, 0, 0, 0.7))
+            drop-shadow(0 0 5px rgba(0, 0, 0, 0.5))
+            drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+        filter: 
+            drop-shadow(0 0 1px rgba(0, 0, 0, 0.9))
+            drop-shadow(0 0 3px rgba(0, 0, 0, 0.7))
+            drop-shadow(0 0 5px rgba(0, 0, 0, 0.5))
+            drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+    }
 
 /* Hover effect (desktop only) */
 @media (hover: hover) {
@@ -3684,9 +3650,7 @@ g.hotspot-echo-reveal {
 
     .glass-button:hover {
         transform: translateY(-2px) translateZ(0);
-        box-shadow:
-            0 6px 20px rgba(0, 0, 0, 0.25),
-            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
         border-color: rgba(100, 150, 255, 0.5);
     }
 }
@@ -3719,13 +3683,12 @@ g.hotspot-echo-reveal {
     border-radius: 12px;
     padding: 0;
     max-width: 90vw;
-    /* iOS safe area support - account for notch and bottom bar */
-    max-height: calc(80vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: 80vh;
     width: 600px;
     z-index: 10000;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(20px);
-    overflow-y: auto;
+    overflow-y: auto; 
     overflow-x: hidden;
     animation: messageSlideIn 0.3s ease-out;
 }
@@ -3751,12 +3714,12 @@ g.hotspot-echo-reveal {
     align-items: center;
 }
 
-.message-header h3 {
-    margin: 0;
-    font-size: 18px;
-    color: rgba(255, 255, 255, 0.95);
-    font-weight: 600;
-}
+    .message-header h3 {
+        margin: 0;
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.95);
+        font-weight: 600;
+    }
 
 .close-btn {
     background: transparent;
@@ -3765,7 +3728,7 @@ g.hotspot-echo-reveal {
     font-size: 28px;
     cursor: pointer;
     padding: 0;
-    width: 44px; /* iOS minimum touch target size */
+    width: 44px;  /* iOS minimum touch target size */
     height: 44px; /* iOS minimum touch target size */
     display: flex;
     align-items: center;
@@ -3779,50 +3742,50 @@ g.hotspot-echo-reveal {
     z-index: 10; /* Above other content */
 }
 
-.close-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.9);
-}
-
-/* iOS-specific touch improvements */
-@supports (-webkit-touch-callout: none) {
-    .close-btn {
-        /* Increase touch area for iOS */
-        width: 48px;
-        height: 48px;
-        -webkit-user-select: none;
-        -webkit-touch-callout: none;
+    .close-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.9);
     }
 
-    .close-btn:active {
-        background: rgba(255, 255, 255, 0.15);
-        transform: scale(0.95);
+    /* iOS-specific touch improvements */
+    @supports (-webkit-touch-callout: none) {
+        .close-btn {
+            /* Increase touch area for iOS */
+            width: 48px;
+            height: 48px;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        .close-btn:active {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(0.95);
+        }
     }
-}
 
 .message-content {
     padding: 24px;
     line-height: 1.6;
 }
 
-.message-content p {
-    margin: 0 0 16px 0;
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 15px;
-}
+    .message-content p {
+        margin: 0 0 16px 0;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 15px;
+    }
 
-.message-content p:last-child {
-    margin-bottom: 0;
-}
+        .message-content p:last-child {
+            margin-bottom: 0;
+        }
 
-.message-content a {
-    color: #4a9eff;
-    text-decoration: none;
-}
+    .message-content a {
+        color: #4a9eff;
+        text-decoration: none;
+    }
 
-.message-content a:hover {
-    text-decoration: underline;
-}
+        .message-content a:hover {
+            text-decoration: underline;
+        }
 /* Message toggle button */
 .message-toggle {
     padding: 0 24px 16px 24px;
@@ -3840,11 +3803,11 @@ g.hotspot-echo-reveal {
     transition: all 0.2s ease;
 }
 
-.toggle-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.3);
-    color: rgba(255, 255, 255, 0.9);
-}
+    .toggle-btn:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.3);
+        color: rgba(255, 255, 255, 0.9);
+    }
 
 @media (max-width: 768px) {
     .message-toggle {
@@ -3852,19 +3815,20 @@ g.hotspot-echo-reveal {
     }
 }
 
+
 /* Image joke styles */
 .image-joke {
     margin: 0 0 20px 0;
     text-align: center;
 }
 
-.image-joke img {
-    max-width: 100%;
-    height: auto;
-    max-height: 200px; /* Taille maximale pour l'image */
-    border-radius: 8px;
-    margin-bottom: 8px;
-}
+    .image-joke img {
+        max-width: 100%;
+        height: auto;
+        max-height: 200px; /* Taille maximale pour l'image */
+        border-radius: 8px;
+        margin-bottom: 8px;
+    }
 
 .image-caption {
     font-size: 14px !important;
@@ -3885,15 +3849,14 @@ g.hotspot-echo-reveal {
     .developer-message {
         width: calc(100vw - 32px);
         margin: 16px;
-        /* iOS safe area support - more space on mobile */
-        max-height: calc(90vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-        top: 50%;
-        transform: translate(-50%, -50%);
+        max-height: 90vh; 
+        top: 50%; 
+        transform: translate(-50%, -50%); 
     }
 
     .message-content {
         font-size: 14px;
-        padding: 16px;
+        padding: 16px; 
     }
 }
 
@@ -3906,47 +3869,47 @@ g.hotspot-echo-reveal {
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.update-section h4 {
-    margin: 0 0 12px 0;
-    font-size: 16px;
-    color: rgba(255, 255, 255, 0.95);
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
+    .update-section h4 {
+        margin: 0 0 12px 0;
+        font-size: 16px;
+        color: rgba(255, 255, 255, 0.95);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
 
-.update-section p {
-    margin: 0 0 12px 0;
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 14px;
-    line-height: 1.5;
-    text-align: left;
-}
+    .update-section p {
+        margin: 0 0 12px 0;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 14px;
+        line-height: 1.5;
+        text-align: left;
+    }
 
-.update-section ul {
-    margin: 0;
-    padding: 0 0 0 20px;
-    list-style: none;
-}
+    .update-section ul {
+        margin: 0;
+        padding: 0 0 0 20px;
+        list-style: none;
+    }
 
-.update-section li {
-    margin: 6px 0;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 14px;
-    line-height: 1.4;
-    text-align: left;
-    position: relative;
-    padding-left: 8px;
-}
+    .update-section li {
+        margin: 6px 0;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 14px;
+        line-height: 1.4;
+        text-align: left;
+        position: relative;
+        padding-left: 8px;
+    }
 
-.update-section li::before {
-    content: '';
-    position: absolute;
-    left: -12px;
-    top: 50%;
-    transform: translateY(-50%);
-}
+        .update-section li::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
 
 /* Mobile adjustments for update section */
 @media (max-width: 768px) {
@@ -3955,15 +3918,16 @@ g.hotspot-echo-reveal {
         padding: 16px;
     }
 
-    .update-section h4 {
-        font-size: 15px;
-    }
+        .update-section h4 {
+            font-size: 15px;
+        }
 
-    .update-section p,
-    .update-section li {
-        font-size: 13px;
-    }
+        .update-section p,
+        .update-section li {
+            font-size: 13px;
+        }
 }
+
 
 /* Accessibility support for reduced motion */
 @media (prefers-reduced-motion: reduce) {
@@ -4044,23 +4008,14 @@ g.hotspot-echo-reveal {
     }
     /* Smooth transitions for modern browsers */
     .css-spotlight-overlay {
-        transition:
-            --spotlight-x 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-            --spotlight-y 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-            --inner-radius 0.3s ease-out,
-            --outer-radius 0.3s ease-out,
-            opacity 0.3s ease-out;
+        transition: --spotlight-x 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), --spotlight-y 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), --inner-radius 0.3s ease-out, --outer-radius 0.3s ease-out, opacity 0.3s ease-out;
     }
 }
 
 /* Fallback styles for blend mode approach */
 .css-spotlight-overlay-blend {
     mix-blend-mode: multiply;
-    background: radial-gradient(
-        circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%),
-        transparent var(--inner-radius, 100px),
-        rgba(0, 0, 0, 0.7) var(--outer-radius, 200px)
-    );
+    background: radial-gradient( circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), transparent var(--inner-radius, 100px), rgba(0, 0, 0, 0.7) var(--outer-radius, 200px) );
 }
 
 /* iOS Safari specific fixes */
@@ -4212,6 +4167,6 @@ svg#spotlight-svg {
     border-radius: 3px;
 }
 
-.floating-panel-scrollable::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
+    .floating-panel-scrollable::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
