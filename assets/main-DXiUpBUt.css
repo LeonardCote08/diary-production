@@ -1910,10 +1910,30 @@ button.debug-toggle-option {
     transform: translate(-50%, -50%);
 }/**
  * Adaptive Contrast Styles for Hotspot Visibility
- * 
+ *
  * Different styles based on background luminance analysis
  * Optimized for Deji's monochrome artwork
  */
+
+/* CRITICAL: iOS Fix - Force cleanup of border-emboss styles on TEMPO 2
+ * This class has higher specificity to override border-emboss !important styles
+ * Applied immediately when transitioning from revealed (TEMPO 1) to selected (TEMPO 2)
+ */
+.hotspot-tempo-2-cleanup path,
+.hotspot-tempo-2-cleanup polygon,
+.hotspot-tempo-2-cleanup polyline,
+g.hotspot-tempo-2-cleanup path,
+g.hotspot-tempo-2-cleanup polygon,
+g.hotspot-tempo-2-cleanup polyline {
+    stroke: none !important;
+    stroke-width: 0 !important;
+    fill: none !important;
+    fill-opacity: 0 !important;
+    filter: none !important;
+    animation: none !important;
+    /* Force iOS to recalculate */
+    transform: translateZ(0) !important;
+}
 
 /* Base adaptive contrast styles */
 .hotspot-echo-reveal.contrast-adaptive-dark path {
