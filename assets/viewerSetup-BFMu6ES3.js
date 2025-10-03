@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-BcYiPhsi.js","assets/main-BDgIeq6_.js","assets/main-iSp7nxPb.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-BebMpp6t.js","assets/main-DAPVGN6p.js","assets/main-iSp7nxPb.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-BDgIeq6_.js";
+import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-DAPVGN6p.js";
 class ImageOverlayManager {
   constructor() {
     this.overlays = /* @__PURE__ */ new Map();
@@ -4969,10 +4969,10 @@ class CinematicZoomManager {
     this.reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     this.SPRING_CONFIG = {
       desktop: {
-        springStiffness: this.reducedMotion ? 100 : 180
+        springStiffness: this.reducedMotion ? 150 : 325
       },
       mobile: {
-        springStiffness: this.reducedMotion ? 80 : 120
+        springStiffness: this.reducedMotion ? 120 : 200
       }
     };
     this.setupAccessibility();
@@ -4991,11 +4991,11 @@ class CinematicZoomManager {
    */
   updateSpringConfig() {
     if (this.reducedMotion) {
-      this.SPRING_CONFIG.desktop.springStiffness = 100;
-      this.SPRING_CONFIG.mobile.springStiffness = 80;
-    } else {
-      this.SPRING_CONFIG.desktop.springStiffness = 180;
+      this.SPRING_CONFIG.desktop.springStiffness = 150;
       this.SPRING_CONFIG.mobile.springStiffness = 120;
+    } else {
+      this.SPRING_CONFIG.desktop.springStiffness = 325;
+      this.SPRING_CONFIG.mobile.springStiffness = 200;
     }
   }
   /**
@@ -6380,8 +6380,8 @@ const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourc
     const isIPadPro = isIOS2 && window.screen.width >= 1024;
     const isIPadAir = isIOS2 && !isIPadPro && window.screen.width >= 820;
     const isStandardIPad = isIOS2 && !isIPadPro && !isIPadAir;
-    config.animationTime = isIOS2 ? 0.4 : 0.5;
-    config.springStiffness = 15;
+    config.animationTime = isIOS2 ? 0.15 : 0.2;
+    config.springStiffness = 20;
     config.blendTime = 0;
     config.immediateRender = true;
     if (isIPadPro) {
@@ -6479,11 +6479,11 @@ const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourc
       // Research: Prevent scroll conflicts
       clickToZoom: false,
       dblClickToZoom: false,
-      flickEnabled: true,
-      // MOBILE UX FIX: Re-enabled on iOS for native feel (testing if corruption issue resolved)
+      flickEnabled: isIOS2 ? false : config.flickEnabled,
+      // CRITICAL: Disable on iOS to prevent corruption triggers
       flickMinSpeed: config.flickMinSpeed,
-      flickMomentum: isIOS2 ? 0.5 : 0.8,
-      // MOBILE UX FIX: Moderate momentum on iOS, standard on Android
+      flickMomentum: isIOS2 ? 0 : config.flickMomentum,
+      // CRITICAL: No momentum on iOS
       pinchToZoom: true,
       dragToPan: true,
       pinchRotate: false
@@ -6491,8 +6491,7 @@ const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourc
     },
     // Touch handling configuration
     dblClickDistThreshold: 20,
-    clickDistThreshold: isMobileDevice ? 30 : 10,
-    // MOBILE UX FIX: Larger tolerance for touch
+    clickDistThreshold: 10,
     clickTimeThreshold: 300,
     // Performance
     debugMode: config.debugMode,
@@ -8966,7 +8965,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-BcYiPhsi.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-BebMpp6t.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(
     viewer,
     state,

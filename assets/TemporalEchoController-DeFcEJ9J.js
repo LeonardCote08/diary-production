@@ -1,4 +1,4 @@
-import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-BDgIeq6_.js";
+import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-DAPVGN6p.js";
 const GestureStates = {
   IDLE: "idle",
   UNDETERMINED: "undetermined",
@@ -4086,21 +4086,21 @@ class TemporalEchoController {
       localStorage.removeItem("revealType");
     }
     this.config = {
-      echoRadius: options.echoRadius || 150,
-      // Reduced for focused reveal
+      echoRadius: options.echoRadius || 250,
+      // Augmenté pour couvrir les zones denses
       echoDelay: options.echoDelay || 0,
       // Immediate feedback
       echoDuration: options.echoDuration || 800,
       // Animation duration ms
-      maxSimultaneous: options.maxSimultaneous || 8,
-      // Reduced for clarity
-      staggerDelay: options.staggerDelay || 20,
-      // Slightly slower for visual tracking
+      maxSimultaneous: options.maxSimultaneous || 20,
+      // Beaucoup plus pour les zones denses
+      staggerDelay: options.staggerDelay || 12,
+      // Reduced from 30ms for snappier response
       revealDuration: options.revealDuration || 2e3,
       // Shorter duration for performance
       enabled: options.enabled !== false,
-      mobileMaxHotspots: options.mobileMaxHotspots || 5,
-      // Reduced for focused discovery
+      mobileMaxHotspots: options.mobileMaxHotspots || 15,
+      // Augmenté pour meilleur effet visuel
       useAquaticEffect: false,
       // Disabled - no animation
       useCanvasAnimation: false,
@@ -4113,8 +4113,8 @@ class TemporalEchoController {
       // Validated reveal type
       tapMode: options.tapMode || "direct",
       // 'direct' (new) or 'nearby' (old) - controls tap behavior
-      tapTolerance: options.tapTolerance || (this.isMobile ? 40 : 15)
-      // Larger tolerance for mobile taps
+      tapTolerance: options.tapTolerance || (this.isMobile ? 20 : 10)
+      // Tolerance zone in pixels
     };
     this.activeEchoes = /* @__PURE__ */ new Set();
     this.echoAnimations = /* @__PURE__ */ new Map();
