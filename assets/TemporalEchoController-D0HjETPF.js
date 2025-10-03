@@ -1,4 +1,4 @@
-import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-nnzplTK9.js";
+import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-DtUnHOF-.js";
 const GestureStates = {
   IDLE: "idle",
   UNDETERMINED: "undetermined",
@@ -4142,6 +4142,7 @@ class TemporalEchoController {
     this.initializeContrastDetection();
     this.borderRadialAnimator = new BorderRadialAnimator(this.viewer, this.stateManager, this);
     console.log("[TemporalEchoController] BorderRadialAnimator initialized for ripple mode");
+    this.cleanupAllRevealStylesOnStartup();
     this.frameCount = 0;
     this.lastFPSCheck = performance.now();
     this.currentFPS = 60;
@@ -4438,6 +4439,7 @@ class TemporalEchoController {
           "[TemporalEchoController] Tapped on/near revealed hotspot, triggering zoom (TEMPO 2):",
           targetHotspot.id
         );
+        this.cleanupRevealStyles(targetHotspot.id);
         if (window.multimodalSyncEngine) {
           window.multimodalSyncEngine.triggerSynchronizedFeedback({
             ...tapData,
@@ -6150,6 +6152,55 @@ class TemporalEchoController {
     }
   }
   /**
+   * Clean reveal styles from a specific hotspot (for iOS TEMPO 2)
+   * Called BEFORE activateHotspot() to prevent border persistence
+   */
+  cleanupRevealStyles(hotspotId) {
+    const element = this.getHotspotElement(hotspotId);
+    if (!element) {
+      console.warn("[TemporalEchoController] No element found for cleanup:", hotspotId);
+      return;
+    }
+    console.log("[TemporalEchoController] iOS: Cleaning reveal styles before zoom:", hotspotId);
+    element.classList.remove(
+      "hotspot-echo-reveal",
+      "hotspot-echo-fade-out",
+      "black-mode",
+      "border-gradient",
+      "border-double",
+      "border-emboss",
+      "border-pulse",
+      "border-pigment",
+      "contrast-adaptive-dark",
+      "contrast-adaptive-light",
+      "contrast-adaptive-medium",
+      "contrast-adaptive-complex",
+      "reveal-complete"
+    );
+    const paths = element.querySelectorAll("path, polygon, polyline");
+    paths.forEach((path) => {
+      path.style.stroke = "";
+      path.style.strokeWidth = "";
+      path.style.fill = "";
+      path.style.fillOpacity = "";
+      path.style.filter = "";
+      path.style.animationDelay = "";
+    });
+    element.style.animationDelay = "";
+    element.style.removeProperty("--zoom-factor");
+    if (element.getAnimations) {
+      element.getAnimations().forEach((animation) => {
+        animation.cancel();
+      });
+    }
+    requestAnimationFrame(() => {
+      void element.offsetHeight;
+      requestAnimationFrame(() => {
+        console.log("[TemporalEchoController] iOS: Styles cleaned and reflow forced");
+      });
+    });
+  }
+  /**
    * Clean up revealed hotspots after animation - Critical for Safari iOS
    * Prevents black screen on subsequent reveals
    */
@@ -6166,7 +6217,21 @@ class TemporalEchoController {
       ".hotspot-echo-reveal, .hotspot-echo-fade-out"
     );
     revealedElements.forEach((el) => {
-      el.classList.remove("hotspot-echo-reveal", "hotspot-echo-fade-out", "black-mode");
+      el.classList.remove(
+        "hotspot-echo-reveal",
+        "hotspot-echo-fade-out",
+        "black-mode",
+        "border-gradient",
+        "border-double",
+        "border-emboss",
+        "border-pulse",
+        "border-pigment",
+        "contrast-adaptive-dark",
+        "contrast-adaptive-light",
+        "contrast-adaptive-medium",
+        "contrast-adaptive-complex",
+        "reveal-complete"
+      );
       el.style.removeProperty("visibility");
       el.style.removeProperty("display");
       el.style.removeProperty("z-index");
@@ -6175,6 +6240,16 @@ class TemporalEchoController {
       el.style.removeProperty("opacity");
       el.style.removeProperty("transform");
       el.style.removeProperty("-webkit-transform");
+      el.style.removeProperty("--zoom-factor");
+      const paths = el.querySelectorAll("path, polygon, polyline");
+      paths.forEach((path) => {
+        path.style.stroke = "";
+        path.style.strokeWidth = "";
+        path.style.fill = "";
+        path.style.fillOpacity = "";
+        path.style.filter = "";
+        path.style.animationDelay = "";
+      });
       if (el.getAnimations) {
         el.getAnimations().forEach((animation) => {
           animation.cancel();
