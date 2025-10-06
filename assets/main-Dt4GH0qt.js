@@ -18689,6 +18689,49 @@ class Canvas2DOverlayManager {
       timestamp: Date.now()
     });
     if (((_d = this.state.selectedHotspot) == null ? void 0 : _d.id) === (hotspot == null ? void 0 : hotspot.id)) {
+      const hotspotGroup = document.querySelector(`g[data-hotspot-id="${hotspot.id}"]`);
+      if (hotspotGroup) {
+        hotspotGroup.classList.remove("hotspot-echo-reveal");
+        hotspotGroup.classList.remove(
+          "border-gradient",
+          "border-double",
+          "border-emboss",
+          "border-pulse",
+          "border-neumorphic",
+          "border-recessed",
+          "border-pigment"
+        );
+        const paths = hotspotGroup.querySelectorAll("path, polygon, polyline");
+        paths.forEach((path) => {
+          path.style.stroke = "";
+          path.style.strokeWidth = "";
+          path.style.strokeOpacity = "";
+          path.style.strokeDasharray = "";
+          path.style.strokeDashoffset = "";
+          path.style.filter = "";
+          path.style.animation = "";
+          path.style.animationDelay = "";
+          path.removeAttribute("stroke");
+          path.removeAttribute("stroke-width");
+          path.removeAttribute("stroke-opacity");
+          path.removeAttribute("stroke-dasharray");
+          path.removeAttribute("stroke-dashoffset");
+          path.removeAttribute("filter");
+        });
+        hotspotGroup.style.removeProperty("--zoom-factor");
+        hotspotGroup.style.animation = "";
+        hotspotGroup.style.animationDelay = "";
+        requestAnimationFrame(() => {
+          void hotspotGroup.offsetHeight;
+          requestAnimationFrame(() => {
+            logger$1.debug(
+              `✅ [iOS FIX] Border classes + inline styles removed for hotspot ${hotspot.id}`
+            );
+          });
+        });
+      } else {
+        logger$1.warn(`⚠️ [iOS FIX] Could not find SVG group for hotspot ${hotspot.id}`);
+      }
       if (this.canvas && this.canvas.style.display === "none") {
         logger$1.warn("Same hotspot but canvas is hidden, reinitializing spotlight");
       } else {
@@ -21699,7 +21742,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-C6cylXEq.js").then((n) => n.v);
+      } = await import("./viewerSetup-SiioU1CK.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
