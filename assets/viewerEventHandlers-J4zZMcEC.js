@@ -1,9 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-Bx41IGoF.js","assets/main-BRjz9eWT.js","assets/main-WYmQ8p-N.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-BuuO_uhf.js","assets/main-DcsfYbkd.js","assets/main-WYmQ8p-N.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-BRjz9eWT.js";
-import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-BGzqO7h1.js";
+import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-DcsfYbkd.js";
+import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-tCv7rcsX.js";
 class TemporalModeHandler {
   constructor(options = {}) {
     this.audioEngine = options.audioEngine || window.audioEngine;
@@ -5029,7 +5029,7 @@ class StyleManager {
       data.group.style.cssText = "";
     });
     batchData.forEach((data) => {
-      data.group.setAttribute("class", `hotspot-${data.hotspotType} hotspot-normal`);
+      data.group.className = `hotspot-${data.hotspotType} hotspot-normal`;
       data.group.dataset.currentState = "normal";
       data.group.dataset.animationActive = "false";
       data.group.dataset.animationCompleted = "false";
@@ -6158,15 +6158,6 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
       viewer: this.viewer,
       onHotspotClick: this.handleClick.bind(this),
       onHotspotHover: (hotspot) => {
-        if (hotspot === null && !this.isMobile) {
-          const currentHovered = this.stateManager.getHoveredHotspot();
-          if (currentHovered) {
-            const overlay = this.stateManager.getOverlay(currentHovered.id);
-            if (overlay) {
-              this.applyStyle(overlay.element, currentHovered.type, "normal");
-            }
-          }
-        }
         if (this.onHotspotHover) {
           this.onHotspotHover(hotspot);
         }
@@ -9509,7 +9500,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
   }
   if (renderer.eventCoordinator) {
     const TemporalEchoController = (await __vitePreload(async () => {
-      const { default: __vite_default__ } = await import("./TemporalEchoController-Bx41IGoF.js");
+      const { default: __vite_default__ } = await import("./TemporalEchoController-BuuO_uhf.js");
       return { default: __vite_default__ };
     }, true ? __vite__mapDeps([0,1,2]) : void 0)).default;
     const echoController = new TemporalEchoController({
