@@ -1,9 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-B6Ua8pRE.js","assets/main-DoQl1A7M.js","assets/main-WYmQ8p-N.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-BuuO_uhf.js","assets/main-DcsfYbkd.js","assets/main-WYmQ8p-N.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-DoQl1A7M.js";
-import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-oif4bbdT.js";
+import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-DcsfYbkd.js";
+import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-tCv7rcsX.js";
 class TemporalModeHandler {
   constructor(options = {}) {
     this.audioEngine = options.audioEngine || window.audioEngine;
@@ -1443,9 +1443,6 @@ class LevelOfDetailManager {
    */
   selectVisibleHotspots(allHotspots, viewport, currentZoom, selectedHotspot, hoveredHotspot) {
     const startTime = performance.now();
-    if (window.cinematicZoomAnimating && this.cachedVisibleHotspots) {
-      return this.cachedVisibleHotspots;
-    }
     const now = performance.now();
     if (now - this.lastUpdateTime < this.MIN_UPDATE_INTERVAL) {
       if (this.cachedVisibleHotspots) {
@@ -5737,9 +5734,6 @@ class ActiveHotspotManager {
       console.log("[ActiveHotspotManager] Skipped - temporal echo active");
       return;
     }
-    if (window.cinematicZoomAnimating) {
-      return;
-    }
     const startTime = performance.now();
     const newVisibleIds = new Set(selectedHotspotIds);
     const toShow = [];
@@ -6789,9 +6783,19 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
             this.activateHotspot(clickedHotspot);
           } else {
             console.log(
-              "Non-revealed hotspot clicked (already handled by ECHO_TAP):",
+              "Non-revealed hotspot clicked, triggering echo reveal:",
               clickedHotspot.id
             );
+            this.viewer.element.getBoundingClientRect();
+            const tapData = {
+              x: data.event.clientX,
+              y: data.event.clientY,
+              viewportX: data.x,
+              viewportY: data.y
+            };
+            if (window.temporalEchoController && window.temporalEchoController.handleQuickTap) {
+              window.temporalEchoController.handleQuickTap(tapData);
+            }
           }
         } else {
           this.activateHotspot(clickedHotspot);
@@ -9026,7 +9030,7 @@ function setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotCli
     }
   });
   let isPanning = false;
-  let lastPanEndTime = null;
+  let lastPanEndTime = 0;
   viewer.addHandler("pan", () => {
     isPanning = true;
     if (componentsObj.tileCleanupManager) {
@@ -9039,9 +9043,8 @@ function setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotCli
     console.log("[ViewerEventHandlers] Pan ended at:", lastPanEndTime);
   });
   viewer.addHandler("canvas-click", (event) => {
-    if (!lastPanEndTime) return;
     const timeSincePan = Date.now() - lastPanEndTime;
-    const panBlockThreshold = isMobile() ? 200 : 300;
+    const panBlockThreshold = isMobile() ? 100 : 300;
     if (isPanning || timeSincePan < panBlockThreshold) {
       console.log(
         `[ViewerEventHandlers] Blocking canvas-click during/after pan (${timeSincePan}ms since pan, threshold: ${panBlockThreshold}ms)`
@@ -9497,7 +9500,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
   }
   if (renderer.eventCoordinator) {
     const TemporalEchoController = (await __vitePreload(async () => {
-      const { default: __vite_default__ } = await import("./TemporalEchoController-B6Ua8pRE.js");
+      const { default: __vite_default__ } = await import("./TemporalEchoController-BuuO_uhf.js");
       return { default: __vite_default__ };
     }, true ? __vite__mapDeps([0,1,2]) : void 0)).default;
     const echoController = new TemporalEchoController({

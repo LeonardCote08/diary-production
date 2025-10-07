@@ -1,4 +1,4 @@
-import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-DoQl1A7M.js";
+import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-DcsfYbkd.js";
 const GestureStates = {
   IDLE: "idle",
   UNDETERMINED: "undetermined",
@@ -4118,7 +4118,6 @@ class TemporalEchoController {
     };
     this.activeEchoes = /* @__PURE__ */ new Set();
     this.echoAnimations = /* @__PURE__ */ new Map();
-    this.recentTaps = /* @__PURE__ */ new Map();
     this.activeTimeouts = /* @__PURE__ */ new Set();
     this.hotspotCleanupTimeouts = /* @__PURE__ */ new Map();
     this.safetyCleanupInterval = null;
@@ -4392,21 +4391,6 @@ class TemporalEchoController {
       "[TemporalEchoController] handleQuickTap called, enabled:",
       this.config.enabled
     );
-    const tapKey = `${Math.round(tapData.x / 10)},${Math.round(tapData.y / 10)}`;
-    const now = performance.now();
-    const lastTapTime = this.recentTaps.get(tapKey);
-    if (lastTapTime && now - lastTapTime < 200) {
-      console.log(
-        `[TemporalEchoController] Ignoring duplicate tap at ${tapKey} (${Math.round(now - lastTapTime)}ms since last)`
-      );
-      return false;
-    }
-    this.recentTaps.set(tapKey, now);
-    for (const [key, time] of this.recentTaps.entries()) {
-      if (now - time > 1e3) {
-        this.recentTaps.delete(key);
-      }
-    }
     if (!this.revealCount) this.revealCount = 0;
     this.revealCount++;
     console.log(`[TemporalEchoController] Reveal #${this.revealCount} starting`);

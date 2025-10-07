@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-BRbiBLNz.js","assets/main-DoQl1A7M.js","assets/main-WYmQ8p-N.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-J4zZMcEC.js","assets/main-DcsfYbkd.js","assets/main-WYmQ8p-N.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-DoQl1A7M.js";
+import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-DcsfYbkd.js";
 class ImageOverlayManager {
   constructor() {
     this.overlays = /* @__PURE__ */ new Map();
@@ -2508,9 +2508,6 @@ class SafariPerformanceOptimizer {
     this.velocityCheckInterval = null;
     this.scalingFactor = this.isIOS ? 0.5 : 0.35;
     this.restoreDelay = this.isIOS ? 300 : 300;
-    this.lastScalingChange = 0;
-    this.scalingChangeCount = 0;
-    this.scalingChangeWindow = 0;
     console.log("SafariPerformanceOptimizer initialized:", {
       isSafari: this.isSafari,
       isIOS: this.isIOS,
@@ -2741,49 +2738,28 @@ class SafariPerformanceOptimizer {
    * Dynamically adjust scaling factor based on performance
    */
   updatePerformanceMetrics(currentFPS, isInteracting = false) {
-    if (this.isIOS) {
-      return;
-    }
     this.averageFPS = this.averageFPS * 0.9 + currentFPS * 0.1;
-    const now = Date.now();
-    const MIN_CHANGE_INTERVAL = 2e3;
-    if (now - this.lastScalingChange < MIN_CHANGE_INTERVAL) {
-      return;
-    }
-    if (now - this.scalingChangeWindow > 5e3) {
-      this.scalingChangeCount = 0;
-      this.scalingChangeWindow = now;
-    }
-    if (this.scalingChangeCount >= 2) {
-      console.log("[SafariOptimizer] Rate limit: too many scaling changes, pausing");
-      return;
-    }
-    const oldScalingFactor = this.scalingFactor;
-    if (this.averageFPS < 15 && this.scalingFactor > 0.4) {
+    if (this.averageFPS < 20 && this.scalingFactor > 0.4) {
       this.scalingFactor = 0.4;
       if (isInteracting) {
         console.log(
-          `Safari: EMERGENCY - Reduced scaling factor to ${this.scalingFactor} due to very low FPS (<15)`
+          `Safari: EMERGENCY - Reduced scaling factor to ${this.scalingFactor} due to very low FPS`
         );
       }
-    } else if (this.averageFPS < 25 && this.scalingFactor > 0.4) {
+    } else if (this.averageFPS < 30 && this.scalingFactor > 0.4) {
       this.scalingFactor = Math.max(0.4, this.scalingFactor - 0.1);
       if (isInteracting) {
         console.log(
-          `Safari: Reduced scaling factor to ${this.scalingFactor} due to low FPS (<25)`
+          `Safari: Reduced scaling factor to ${this.scalingFactor} due to low FPS`
         );
       }
-    } else if (this.averageFPS > 55 && this.scalingFactor < 0.75) {
+    } else if (this.averageFPS > 50 && this.scalingFactor < 0.75) {
       this.scalingFactor = Math.min(0.75, this.scalingFactor + 0.05);
       if (isInteracting) {
         console.log(
-          `Safari: Increased scaling factor to ${this.scalingFactor} due to good FPS (>55)`
+          `Safari: Increased scaling factor to ${this.scalingFactor} due to good FPS`
         );
       }
-    }
-    if (oldScalingFactor !== this.scalingFactor) {
-      this.lastScalingChange = now;
-      this.scalingChangeCount++;
     }
   }
   /**
@@ -4996,7 +4972,7 @@ class CinematicZoomManager {
         springStiffness: this.reducedMotion ? 150 : 325
       },
       mobile: {
-        springStiffness: this.reducedMotion ? 60 : 80
+        springStiffness: this.reducedMotion ? 120 : 200
       }
     };
     this.setupAccessibility();
@@ -5016,10 +4992,10 @@ class CinematicZoomManager {
   updateSpringConfig() {
     if (this.reducedMotion) {
       this.SPRING_CONFIG.desktop.springStiffness = 150;
-      this.SPRING_CONFIG.mobile.springStiffness = 60;
+      this.SPRING_CONFIG.mobile.springStiffness = 120;
     } else {
       this.SPRING_CONFIG.desktop.springStiffness = 325;
-      this.SPRING_CONFIG.mobile.springStiffness = 80;
+      this.SPRING_CONFIG.mobile.springStiffness = 200;
     }
   }
   /**
@@ -5031,7 +5007,6 @@ class CinematicZoomManager {
       return;
     }
     this.isAnimating = true;
-    window.cinematicZoomAnimating = true;
     const isMobile2 = /Android|iPhone|iPad/i.test(navigator.userAgent);
     const config = isMobile2 ? this.SPRING_CONFIG.mobile : this.SPRING_CONFIG.desktop;
     const originalSettings = {
@@ -5051,7 +5026,6 @@ class CinematicZoomManager {
     this.viewer.viewport.fitBounds(targetBounds, false);
     const animationFinishHandler = () => {
       this.isAnimating = false;
-      window.cinematicZoomAnimating = false;
       this.viewer.viewport.centerSpringX.springStiffness = originalSettings.centerXStiffness;
       this.viewer.viewport.centerSpringY.springStiffness = originalSettings.centerYStiffness;
       this.viewer.viewport.zoomSpring.springStiffness = originalSettings.zoomStiffness;
@@ -8991,7 +8965,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-BRbiBLNz.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-J4zZMcEC.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(
     viewer,
     state,
