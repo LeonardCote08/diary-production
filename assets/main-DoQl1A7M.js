@@ -19106,6 +19106,9 @@ class Canvas2DOverlayManager {
    * Redraw synchronized with OpenSeadragon's viewport
    */
   redrawSynchronized() {
+    if (window.cinematicZoomAnimating) {
+      return;
+    }
     performanceDiagnostics.startFrame();
     performance.now();
     this.diagnostics.totalFrames++;
@@ -21742,7 +21745,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-SiioU1CK.js").then((n) => n.v);
+      } = await import("./viewerSetup-oif4bbdT.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
