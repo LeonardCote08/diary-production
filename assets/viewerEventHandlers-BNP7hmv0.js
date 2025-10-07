@@ -1,9 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-iLK9iYLN.js","assets/main-Ud0VJT6U.js","assets/main-WYmQ8p-N.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-Bu3OdW_X.js","assets/main-BKmdXlOK.js","assets/main-WYmQ8p-N.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-Ud0VJT6U.js";
-import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-BxB4LqKk.js";
+import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-BKmdXlOK.js";
+import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-vHpX9ZaV.js";
 class TemporalModeHandler {
   constructor(options = {}) {
     this.audioEngine = options.audioEngine || window.audioEngine;
@@ -2031,14 +2031,22 @@ class SafariCompatibility {
     svg.addEventListener(
       "click",
       (event) => {
-        var _a, _b, _c;
+        var _a, _b, _c, _d, _e;
         if (event.target.tagName === "path" || event.target.tagName === "g" || event.target.closest("g[data-hotspot-id]")) {
           return;
         }
         const modeStateManager = (_a = window.nativeHotspotRenderer) == null ? void 0 : _a.modeStateManager;
         const echoController = (_b = window.nativeHotspotRenderer) == null ? void 0 : _b.echoController;
-        if (modeStateManager && echoController && modeStateManager.getCurrentMode() === "direct" && ((_c = echoController.config) == null ? void 0 : _c.enabled)) {
-          console.log("iOS/Safari: Skipping click - echo mode active");
+        if (modeStateManager && echoController) {
+          const currentMode = modeStateManager.getCurrentMode();
+          console.log("[SafariCompat] Mobile tap check:", {
+            currentMode,
+            echoEnabled: (_c = echoController.config) == null ? void 0 : _c.enabled,
+            willBypass: currentMode === "temporal" && ((_d = echoController.config) == null ? void 0 : _d.enabled)
+          });
+        }
+        if (modeStateManager && echoController && modeStateManager.getCurrentMode() === "temporal" && ((_e = echoController.config) == null ? void 0 : _e.enabled)) {
+          console.log("✅ iOS/Safari: Skipping click - echo mode active (temporal mode)");
           return;
         }
         const clickedHotspot = findHotspotCallback(event);
@@ -9500,7 +9508,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
   }
   if (renderer.eventCoordinator) {
     const TemporalEchoController = (await __vitePreload(async () => {
-      const { default: __vite_default__ } = await import("./TemporalEchoController-iLK9iYLN.js");
+      const { default: __vite_default__ } = await import("./TemporalEchoController-Bu3OdW_X.js");
       return { default: __vite_default__ };
     }, true ? __vite__mapDeps([0,1,2]) : void 0)).default;
     const echoController = new TemporalEchoController({

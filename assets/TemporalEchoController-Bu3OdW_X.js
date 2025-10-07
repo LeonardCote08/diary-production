@@ -1,4 +1,4 @@
-import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-Ud0VJT6U.js";
+import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-BKmdXlOK.js";
 const GestureStates = {
   IDLE: "idle",
   UNDETERMINED: "undetermined",
