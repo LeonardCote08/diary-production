@@ -18666,6 +18666,13 @@ class Canvas2DOverlayManager {
       totalFrames: 0
     };
     console.log("[Canvas2D] User Agent:", navigator.userAgent);
+    console.log("[Canvas2D] Platform Detection:", {
+      isMobile: /Android|iPhone|iPad|iPod/i.test(navigator.userAgent),
+      isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent),
+      isAndroid: /Android/.test(navigator.userAgent),
+      isMac: /Macintosh/.test(navigator.userAgent),
+      platform: navigator.platform
+    });
     const isAutomation = navigator.webdriver || // Playwright sets this
     window.__playwright || // Playwright internal
     /HeadlessChrome/.test(navigator.userAgent);
@@ -18699,12 +18706,11 @@ class Canvas2DOverlayManager {
       willChange: "opacity"
     });
     this.context = this.canvas.getContext("2d", {
-      alpha: false,
-      // ✅ Eliminates alpha blending overhead (+15% performance)
-      desynchronized: true,
-      // ✅ Bypasses compositor queue (-16-50ms latency)
+      alpha: true,
+      // ✅ REQUIRED for rgba() semi-transparency
+      desynchronized: false,
+      // Keep synchronized for now (testing stability)
       willReadFrequently: false
-      // ✅ Prefer GPU path when available
     });
     this.resize();
     const container = this.viewer.container;
@@ -22020,7 +22026,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-CaDglCBG.js").then((n) => n.v);
+      } = await import("./viewerSetup-CtH7xMK3.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
