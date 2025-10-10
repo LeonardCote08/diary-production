@@ -18677,14 +18677,28 @@ class Canvas2DOverlayManager {
     window.__playwright || // Playwright internal
     /HeadlessChrome/.test(navigator.userAgent);
     const isMobileWebKit = /iPhone|iPad|iPod/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
+    const isRealSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+    const isMac = /Macintosh/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
+    console.log("[Canvas2D] Fix Decision:", {
+      isMobileWebKit,
+      isRealSafari,
+      isMac,
+      isAndroid,
+      isAutomation
+    });
     if (isMobileWebKit && !isAutomation) {
       this.canvasFix = new iPhoneCanvasUltimateFix(viewer);
-      logger$1.debug("✅ WebKit canvas fix ENABLED (Mobile Safari/iOS)");
-    } else if (!isAutomation) {
+      console.log("✅ WebKit canvas fix ENABLED (iOS Safari)");
+    } else if (isMac && isRealSafari && !isAutomation) {
       this.canvasFix = new iPhoneCanvasUltimateFix(viewer);
-      logger$1.debug("✅ WebKit canvas fix ENABLED (Desktop Safari)");
+      console.log("✅ WebKit canvas fix ENABLED (Mac Safari)");
+    } else if (isAndroid) {
+      console.log("⏭️ WebKit canvas fix DISABLED (Android detected - not Safari)");
+    } else if (!isRealSafari && !isAutomation) {
+      console.log("⏭️ WebKit canvas fix DISABLED (Not Safari - Chrome/other detected)");
     } else {
-      logger$1.debug("⏭️ WebKit canvas fix DISABLED (Playwright automation detected)");
+      console.log("⏭️ WebKit canvas fix DISABLED (Playwright automation detected)");
     }
   }
   initialize() {
@@ -18955,6 +18969,7 @@ class Canvas2DOverlayManager {
       timestamp: Date.now()
     });
     if (((_d = this.state.selectedHotspot) == null ? void 0 : _d.id) === (hotspot == null ? void 0 : hotspot.id)) {
+      logger$1.debug(`🔄 Re-selecting same hotspot ${hotspot.id} to ensure darkening appears`);
       const hotspotGroup = document.querySelector(`g[data-hotspot-id="${hotspot.id}"]`);
       if (hotspotGroup) {
         hotspotGroup.classList.remove("hotspot-echo-reveal");
@@ -18997,12 +19012,6 @@ class Canvas2DOverlayManager {
         });
       } else {
         logger$1.warn(`⚠️ [iOS FIX] Could not find SVG group for hotspot ${hotspot.id}`);
-      }
-      if (this.canvas && this.canvas.style.display === "none") {
-        logger$1.warn("Same hotspot but canvas is hidden, reinitializing spotlight");
-      } else {
-        logger$1.warn("Same hotspot already selected and visible, skipping");
-        return;
       }
     }
     if (!this.isInitialized) {
@@ -19434,6 +19443,17 @@ class Canvas2DOverlayManager {
       ];
     });
     const fillOpacity = this.state.currentOpacity * this.config.maxOpacity;
+    if (this.frameCount % 60 === 0) {
+      console.log("[Canvas2D Render Debug]", {
+        currentOpacity: this.state.currentOpacity,
+        maxOpacity: this.config.maxOpacity,
+        fillOpacity,
+        canvasDisplay: this.canvas.style.display,
+        canvasOpacity: this.canvas.style.opacity,
+        contextGlobalAlpha: this.context.globalAlpha,
+        fillStyle: `rgba(0, 0, 0, ${fillOpacity})`
+      });
+    }
     performanceDiagnostics.measureSystem("Canvas2D.draw", () => {
       this.context.save();
       this.context.beginPath();
@@ -22026,7 +22046,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-CtH7xMK3.js").then((n) => n.v);
+      } = await import("./viewerSetup-D-1jRKKx.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
