@@ -18302,250 +18302,6 @@ class PerformanceDiagnostics {
   }
 }
 const performanceDiagnostics = new PerformanceDiagnostics();
-class iPhoneCanvasUltimateFix {
-  constructor(viewer) {
-    var _a;
-    this.viewer = viewer;
-    this.isWebKit = /WebKit/.test(navigator.userAgent) && !window.chrome;
-    this.isIPhone = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
-    if (!this.isWebKit) {
-      console.log("iPhoneCanvasUltimateFix: Not WebKit, skipping initialization");
-      return;
-    }
-    console.log("iPhoneCanvasUltimateFix: WebKit detected, applying canvas preservation fix");
-    console.log(`  - User Agent: ${navigator.userAgent}`);
-    console.log(`  - iPhone: ${this.isIPhone}`);
-    console.log(`  - WebKit: ${this.isWebKit}`);
-    this.initialized = false;
-    this.healthCheckInterval = null;
-    this.originalUseCanvas = (_a = viewer.drawer) == null ? void 0 : _a.useCanvas;
-    this.initialize();
-  }
-  initialize() {
-    if (this.initialized) return;
-    console.log("iPhoneCanvasUltimateFix: Initializing ULTIMATE fix for iPhone canvas issues");
-    this.checkAndHandleImageSize();
-    this.applyiPhoneConfiguration();
-    this.setupTouchEventDelegation();
-    this.setupCanvasPreservation();
-    this.setupContextLossRecovery();
-    this.startHealthMonitoring();
-    this.initialized = true;
-    console.log("iPhoneCanvasUltimateFix: All systems initialized successfully");
-  }
-  checkAndHandleImageSize() {
-    const world = this.viewer.world;
-    if (world && world.getItemCount() > 0) {
-      const item = world.getItemAt(0);
-      if (item && item.source) {
-        const totalPixels = item.source.width * item.source.height;
-        const iOS_LIMIT = 5242880;
-        if (totalPixels > iOS_LIMIT) {
-          console.warn(
-            `Image size (${totalPixels} pixels) exceeds iPhone limit (${iOS_LIMIT} pixels)`
-          );
-          console.log("CRITICAL: Disabling canvas mode to avoid iPhone resource limits");
-          if (this.viewer.drawer) {
-            this.viewer.drawer.useCanvas = false;
-            console.log("Switched to non-canvas (DOM) rendering mode");
-          }
-          if (this.viewer.source) {
-            this.viewer.source.tileSize = 256;
-            this.viewer.source.tileOverlap = 1;
-          }
-          if (this.viewer.tileCache) {
-            this.viewer.tileCache.maxImageCacheCount = 30;
-          }
-          this.viewer.imageLoaderLimit = 1;
-        } else {
-          console.log("Image size within iPhone limits, canvas mode can be used");
-        }
-      }
-    }
-  }
-  applyiPhoneConfiguration() {
-    console.log("iPhoneCanvasUltimateFix: Applying critical iPhone configuration");
-    if (this.viewer.gestureSettingsTouch) {
-      this.viewer.gestureSettingsTouch.flickEnabled = false;
-      this.viewer.gestureSettingsTouch.flickMomentum = 0;
-      this.viewer.gestureSettingsTouch.scrollToZoom = false;
-      this.viewer.gestureSettingsTouch.pinchRotate = false;
-      console.log("Disabled flick and momentum to prevent touch event blocking");
-    }
-    this.viewer.immediateRender = true;
-    this.viewer.preserveViewport = true;
-    this.viewer.imageSmoothingEnabled = false;
-    this.viewer.maxZoomPixelRatio = 2;
-    console.log("iPhone configuration applied");
-  }
-  setupTouchEventDelegation() {
-    console.log("iPhoneCanvasUltimateFix: Setting up touch event delegation to document.body");
-    const canvas = this.viewer.canvas;
-    if (!canvas) return;
-    ["touchstart", "touchmove", "touchend", "touchcancel"].forEach((eventType) => {
-      canvas.removeEventListener(eventType, null, false);
-      canvas.removeEventListener(eventType, null, true);
-    });
-    document.body.addEventListener("touchstart", (e) => this.handleTouchEvent(e), {
-      passive: false
-    });
-    document.body.addEventListener("touchmove", (e) => this.handleTouchEvent(e), {
-      passive: false
-    });
-    document.body.addEventListener("touchend", (e) => this.handleTouchEndFix(e), {
-      passive: false
-    });
-    document.body.addEventListener("touchcancel", (e) => this.handleTouchEndFix(e), {
-      passive: false
-    });
-    console.log("Touch events delegated to document.body");
-  }
-  handleTouchEvent(event) {
-    const canvas = this.viewer.canvas;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const touch = event.touches[0] || event.changedTouches[0];
-    if (touch && touch.clientX >= rect.left && touch.clientX <= rect.right && touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
-      event.preventDefault();
-      if (this.viewer.innerTracker && this.viewer.innerTracker.captureHandler) {
-        this.viewer.innerTracker.captureHandler(event);
-      }
-    }
-  }
-  handleTouchEndFix(event) {
-    this.handleTouchEvent(event);
-    console.log("TouchEnd detected - applying preservation");
-    this.forceCanvasPreservation();
-    setTimeout(() => {
-      this.forceCanvasPreservation();
-    }, 16);
-    setTimeout(() => this.forceCanvasPreservation(), 33);
-    setTimeout(() => this.forceCanvasPreservation(), 50);
-  }
-  setupCanvasPreservation() {
-    console.log("iPhoneCanvasUltimateFix: Setting up canvas preservation system");
-    this.viewer.addHandler("animation-finish", () => {
-      console.log("Animation finished - preserving canvas");
-      this.forceCanvasPreservation();
-    });
-    this.viewer.addHandler("canvas-drag-end", () => {
-      console.log("Drag ended - preserving canvas");
-      setTimeout(() => this.forceCanvasPreservation(), 10);
-    });
-    this.viewer.addHandler("zoom", () => {
-      this.forceCanvasPreservation();
-    });
-  }
-  forceCanvasPreservation() {
-    if (!this.viewer.drawer) return;
-    const canvas = this.viewer.drawer.canvas;
-    const context = this.viewer.drawer.context;
-    if (!canvas) return;
-    try {
-      const originalDisplay = canvas.style.display;
-      canvas.style.display = "none";
-      canvas.offsetHeight;
-      canvas.style.display = originalDisplay || "block";
-      canvas.style.transform = "translateZ(0)";
-      canvas.style.webkitTransform = "translateZ(0)";
-      canvas.style.willChange = "transform";
-      if (context) {
-        try {
-          context.save();
-          context.restore();
-        } catch (e) {
-          console.warn("Context needs recovery");
-          this.recoverContext();
-        }
-      }
-      if (this.viewer.forceRedraw) {
-        this.viewer.forceRedraw();
-      }
-      canvas.style.visibility = "visible";
-      canvas.style.opacity = "1";
-    } catch (error) {
-      console.error("Error during canvas preservation:", error);
-    }
-  }
-  setupContextLossRecovery() {
-    var _a;
-    const canvas = (_a = this.viewer.drawer) == null ? void 0 : _a.canvas;
-    if (!canvas) return;
-    console.log("iPhoneCanvasUltimateFix: Setting up context loss recovery");
-    canvas.addEventListener(
-      "webglcontextlost",
-      (event) => {
-        event.preventDefault();
-        console.warn("WebGL context lost - recovering...");
-        this.recoverContext();
-      },
-      false
-    );
-    canvas.addEventListener(
-      "contextlost",
-      (event) => {
-        event.preventDefault();
-        console.warn("Canvas context lost - recovering...");
-        this.recoverContext();
-      },
-      false
-    );
-  }
-  recoverContext() {
-    console.log("Attempting context recovery...");
-    if (!this.viewer.drawer) return;
-    const wasUsingCanvas = this.viewer.drawer.useCanvas;
-    this.viewer.drawer.useCanvas = false;
-    this.viewer.forceRedraw();
-    setTimeout(() => {
-      if (wasUsingCanvas) {
-        this.viewer.drawer.useCanvas = true;
-        this.viewer.forceRedraw();
-        console.log("Context recovery completed");
-      }
-    }, 500);
-  }
-  startHealthMonitoring() {
-    console.log("iPhoneCanvasUltimateFix: Starting health monitoring");
-    this.healthCheckInterval = setInterval(() => {
-      if (!this.viewer.drawer || !this.viewer.drawer.canvas) {
-        this.stopHealthMonitoring();
-        return;
-      }
-      const canvas = this.viewer.drawer.canvas;
-      const context = this.viewer.drawer.context;
-      try {
-        if (context) {
-          context.save();
-          context.restore();
-        }
-      } catch (e) {
-        console.warn("Canvas unhealthy - triggering preservation");
-        this.forceCanvasPreservation();
-      }
-      const rect = canvas.getBoundingClientRect();
-      if (rect.width === 0 || rect.height === 0) {
-        console.warn("Canvas invisible - forcing preservation");
-        this.forceCanvasPreservation();
-      }
-    }, 1e3);
-  }
-  stopHealthMonitoring() {
-    if (this.healthCheckInterval) {
-      clearInterval(this.healthCheckInterval);
-      this.healthCheckInterval = null;
-    }
-  }
-  destroy() {
-    console.log("iPhoneCanvasUltimateFix: Cleaning up");
-    this.stopHealthMonitoring();
-    if (this.viewer.drawer && this.originalUseCanvas !== void 0) {
-      this.viewer.drawer.useCanvas = this.originalUseCanvas;
-    }
-    this.viewer = null;
-    this.initialized = false;
-  }
-}
 const logger$1 = createLogger("Canvas2DOverlay");
 class RenderProfiler {
   constructor() {
@@ -18665,41 +18421,6 @@ class Canvas2DOverlayManager {
       slowFrames: 0,
       totalFrames: 0
     };
-    console.log("[Canvas2D] User Agent:", navigator.userAgent);
-    console.log("[Canvas2D] Platform Detection:", {
-      isMobile: /Android|iPhone|iPad|iPod/i.test(navigator.userAgent),
-      isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent),
-      isAndroid: /Android/.test(navigator.userAgent),
-      isMac: /Macintosh/.test(navigator.userAgent),
-      platform: navigator.platform
-    });
-    const isAutomation = navigator.webdriver || // Playwright sets this
-    window.__playwright || // Playwright internal
-    /HeadlessChrome/.test(navigator.userAgent);
-    const isMobileWebKit = /iPhone|iPad|iPod/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent);
-    const isRealSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
-    const isMac = /Macintosh/.test(navigator.userAgent);
-    const isAndroid = /Android/.test(navigator.userAgent);
-    console.log("[Canvas2D] Fix Decision:", {
-      isMobileWebKit,
-      isRealSafari,
-      isMac,
-      isAndroid,
-      isAutomation
-    });
-    if (isMobileWebKit && !isAutomation) {
-      this.canvasFix = new iPhoneCanvasUltimateFix(viewer);
-      console.log("✅ WebKit canvas fix ENABLED (iOS Safari)");
-    } else if (isMac && isRealSafari && !isAutomation) {
-      this.canvasFix = new iPhoneCanvasUltimateFix(viewer);
-      console.log("✅ WebKit canvas fix ENABLED (Mac Safari)");
-    } else if (isAndroid) {
-      console.log("⏭️ WebKit canvas fix DISABLED (Android detected - not Safari)");
-    } else if (!isRealSafari && !isAutomation) {
-      console.log("⏭️ WebKit canvas fix DISABLED (Not Safari - Chrome/other detected)");
-    } else {
-      console.log("⏭️ WebKit canvas fix DISABLED (Playwright automation detected)");
-    }
   }
   initialize() {
     if (this.isInitialized) return;
@@ -18721,9 +18442,8 @@ class Canvas2DOverlayManager {
     });
     this.context = this.canvas.getContext("2d", {
       alpha: true,
-      // ✅ REQUIRED for rgba() semi-transparency
       desynchronized: false,
-      // Keep synchronized for now (testing stability)
+      // Keep synchronized
       willReadFrequently: false
     });
     this.resize();
@@ -18969,7 +18689,6 @@ class Canvas2DOverlayManager {
       timestamp: Date.now()
     });
     if (((_d = this.state.selectedHotspot) == null ? void 0 : _d.id) === (hotspot == null ? void 0 : hotspot.id)) {
-      logger$1.debug(`🔄 Re-selecting same hotspot ${hotspot.id} to ensure darkening appears`);
       const hotspotGroup = document.querySelector(`g[data-hotspot-id="${hotspot.id}"]`);
       if (hotspotGroup) {
         hotspotGroup.classList.remove("hotspot-echo-reveal");
@@ -19012,6 +18731,12 @@ class Canvas2DOverlayManager {
         });
       } else {
         logger$1.warn(`⚠️ [iOS FIX] Could not find SVG group for hotspot ${hotspot.id}`);
+      }
+      if (this.canvas && this.canvas.style.display === "none") {
+        logger$1.warn("Same hotspot but canvas is hidden, reinitializing spotlight");
+      } else {
+        logger$1.warn("Same hotspot already selected and visible, skipping");
+        return;
       }
     }
     if (!this.isInitialized) {
@@ -19378,20 +19103,6 @@ class Canvas2DOverlayManager {
     };
   }
   /**
-   * Check if polygon is visible in current viewport (Phase 2: Viewport Culling)
-   * Skips expensive rendering when polygon is offscreen
-   * @returns {boolean} True if polygon intersects viewport
-   */
-  isPolygonVisible() {
-    if (!this.state.selectedHotspot) return false;
-    const maskData = this.maskCache.get(this.state.selectedHotspot.id);
-    if (!maskData || !maskData.bounds) return true;
-    const viewportBounds = this.viewer.viewport.getBounds();
-    const polygonBounds = maskData.bounds;
-    const isVisible = !(polygonBounds.x + polygonBounds.width < viewportBounds.x || viewportBounds.x + viewportBounds.width < polygonBounds.x || polygonBounds.y + polygonBounds.height < viewportBounds.y || viewportBounds.y + viewportBounds.height < polygonBounds.y);
-    return isVisible;
-  }
-  /**
    * Redraw synchronized with OpenSeadragon's viewport
    */
   redrawSynchronized() {
@@ -19414,10 +19125,6 @@ class Canvas2DOverlayManager {
     if (!maskData) {
       logger$1.error("No mask data cached for hotspot:", this.state.selectedHotspot.id);
       this.preRenderMask(this.state.selectedHotspot);
-      return;
-    }
-    if (!this.isPolygonVisible()) {
-      performanceDiagnostics.endFrame();
       return;
     }
     const rect = this.viewer.container.getBoundingClientRect();
@@ -19443,17 +19150,6 @@ class Canvas2DOverlayManager {
       ];
     });
     const fillOpacity = this.state.currentOpacity * this.config.maxOpacity;
-    if (this.frameCount % 60 === 0) {
-      console.log("[Canvas2D Render Debug]", {
-        currentOpacity: this.state.currentOpacity,
-        maxOpacity: this.config.maxOpacity,
-        fillOpacity,
-        canvasDisplay: this.canvas.style.display,
-        canvasOpacity: this.canvas.style.opacity,
-        contextGlobalAlpha: this.context.globalAlpha,
-        fillStyle: `rgba(0, 0, 0, ${fillOpacity})`
-      });
-    }
     performanceDiagnostics.measureSystem("Canvas2D.draw", () => {
       this.context.save();
       this.context.beginPath();
@@ -22046,7 +21742,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-D-1jRKKx.js").then((n) => n.v);
+      } = await import("./viewerSetup-BWc1iyVx.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
