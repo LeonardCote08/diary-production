@@ -1,4 +1,4 @@
-import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-C4S1lzcn.js";
+import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-C4PPkpY3.js";
 const GestureStates = {
   IDLE: "idle",
   UNDETERMINED: "undetermined",
@@ -4155,6 +4155,16 @@ class TemporalEchoController {
       "px"
     );
     window.temporalEchoController = this;
+    this.lastHandledTapTime = 0;
+    this.viewer.addHandler("canvas-click", (event) => {
+      const timeSinceHandledTap = performance.now() - this.lastHandledTapTime;
+      if (timeSinceHandledTap < 100 && event.quick) {
+        console.log(
+          "[TemporalEchoController] Blocking canvas-click after revelation tap (TEMPO 1)"
+        );
+        event.preventDefaultAction = true;
+      }
+    });
     this.viewer.addHandler("zoom", () => {
       requestAnimationFrame(() => {
         const currentZoom = this.viewer.viewport.getZoom();
@@ -4597,6 +4607,7 @@ class TemporalEchoController {
       }
     }
     this.updateFPS();
+    this.lastHandledTapTime = performance.now();
     return true;
   }
   /**
