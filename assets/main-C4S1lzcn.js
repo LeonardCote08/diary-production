@@ -19500,10 +19500,17 @@ class OverlayManagerFactory {
       isSafari: browserInfo.isSafari,
       isIOS: browserInfo.isIOS,
       isWebKit: browserInfo.isWebKit,
+      isPlaywrightWebKit: browserInfo.isPlaywrightWebKit,
       isMobile: performanceInfo.isMobile,
       isLowEnd: performanceInfo.isLowEnd,
       userAgent: navigator.userAgent
     });
+    if (browserInfo.isPlaywrightWebKit) {
+      console.log(
+        "Using CSSOverlayManager for Playwright WebKit (avoids Canvas2D masking bug)"
+      );
+      return new CSSOverlayManager(viewer);
+    }
     if (browserInfo.isSafari || browserInfo.isIOS || browserInfo.isMacOSSafari || browserInfo.isWebKit && !window.chrome) {
       console.log(
         "Using Canvas2DOverlayManager for Safari/WebKit browser (reliable sharp outline)"
@@ -19532,6 +19539,9 @@ class OverlayManagerFactory {
     const isSafari2 = /^((?!chrome|chromium|crios|android).)*safari/i.test(ua);
     const isMacOSSafari = isSafari2 && !isIOS && /Mac/.test(platform);
     const isWebKit = "WebkitAppearance" in document.documentElement.style && !window.chrome;
+    const isPlaywrightWebKit = isWebKit && // Method 1: Platform mismatch (Mac UA but Win32 platform)
+    (/Macintosh/.test(ua) && platform === "Win32" || // Method 2: Missing Safari-specific features
+    isSafari2 && typeof window.safari === "undefined");
     const isIOSChrome = /CriOS/.test(ua);
     return {
       isSafari: isSafari2,
@@ -19539,7 +19549,8 @@ class OverlayManagerFactory {
       isWebKit,
       isIOSChrome,
       isMacOSSafari,
-      // ADD THIS
+      isPlaywrightWebKit,
+      // NEW: Detect Playwright specifically
       // Helper flag for any WebKit-based browser
       isWebKitBased: isSafari2 || isIOS || isIOSChrome
     };
@@ -21784,7 +21795,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-CyRMdDwY.js").then((n) => n.v);
+      } = await import("./viewerSetup-COTuUxN8.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
