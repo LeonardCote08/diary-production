@@ -17313,6 +17313,7 @@ class CSSOverlayManager {
     this.viewportRectCacheDuration = 50;
     this.animate = this.animate.bind(this);
     this.updateSpotlightPosition = this.updateSpotlightPosition.bind(this);
+    this.renderingPaused = false;
   }
   getCachedViewportRect() {
     const now = performance.now();
@@ -17642,7 +17643,27 @@ class CSSOverlayManager {
       this.state.isManualSelection = false;
     }
   }
+  /**
+   * Pause rendering for performance optimization (e.g., during animations)
+   */
+  pauseRendering() {
+    this.renderingPaused = true;
+    console.log("⏸️  CSS Rendering paused for animation");
+  }
+  /**
+   * Resume rendering after animation completes
+   */
+  resumeRendering() {
+    this.renderingPaused = false;
+    console.log("▶️  CSS Rendering resumed after animation");
+    if (this.state.selectedHotspot) {
+      this.updateSpotlightPosition();
+    }
+  }
   updateSpotlightPosition() {
+    if (this.renderingPaused) {
+      return;
+    }
     if (!this.state.selectedHotspot || !this.overlayElement) return;
     const hotspot = this.state.selectedHotspot;
     const viewportRect = this.getCachedViewportRect();
@@ -18421,6 +18442,7 @@ class Canvas2DOverlayManager {
       slowFrames: 0,
       totalFrames: 0
     };
+    this.renderingPaused = false;
   }
   initialize() {
     if (this.isInitialized) return;
@@ -19103,9 +19125,29 @@ class Canvas2DOverlayManager {
     };
   }
   /**
+   * Pause rendering for performance optimization (e.g., during animations)
+   */
+  pauseRendering() {
+    this.renderingPaused = true;
+    logger$1.debug("⏸️  Rendering paused for animation");
+  }
+  /**
+   * Resume rendering after animation completes
+   */
+  resumeRendering() {
+    this.renderingPaused = false;
+    logger$1.debug("▶️  Rendering resumed after animation");
+    if (this.state.selectedHotspot) {
+      this.redrawSynchronized();
+    }
+  }
+  /**
    * Redraw synchronized with OpenSeadragon's viewport
    */
   redrawSynchronized() {
+    if (this.renderingPaused) {
+      return;
+    }
     performanceDiagnostics.startFrame();
     performance.now();
     this.diagnostics.totalFrames++;
@@ -20372,7 +20414,7 @@ class CacheManager {
 }
 const cacheManager = new CacheManager();
 cacheManager.initDevelopmentMode();
-var _tmpl$$4 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Hovered</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Selected</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Type</span><span class=debug-stat-value>`), _tmpl$2$4 = /* @__PURE__ */ template(`<div class=debug-stat-row style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.1);"><span class=debug-stat-label style=color:#00ffff;>Safari Hybrid</span><span class=debug-stat-value style=color:#00ffff;>Active`), _tmpl$3$3 = /* @__PURE__ */ template(`<div class=debug-stat-row><span class=debug-stat-label>Render Time</span><span class=debug-stat-value>ms`), _tmpl$4$3 = /* @__PURE__ */ template(`<div class=debug-stat-row><span class=debug-stat-label>Visible/Total</span><span class=debug-stat-value>/`), _tmpl$5$3 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>FPS</span><span class=debug-stat-value><span style=opacity:0.7;font-size:10px> (avg: <!>)</span></span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Memory</span><span class=debug-stat-value>MB</span></div><div class=debug-stat-row><span class=debug-stat-label>Frame Time</span><span class=debug-stat-value>ms</span></div><div class=debug-stat-row><span class=debug-stat-label>Zoom</span><span class=debug-stat-value>x`), _tmpl$6$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Zoom Animation Speed<span class=debug-control-value>x</span></label><input type=range class=debug-slider min=0.5 max=2.5 step=0.1><p class=debug-control-description>How fast the artwork zooms when you click on elements`), _tmpl$7$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Color Theme<span class=debug-help-icon title="Changes the highlight colors">?</span></label><div class=debug-toggle-group><button type=button>Cyan Tech</button><button type=button>Golden Magic</button><button type=button>Blue Moon</button></div><div class=debug-toggle-group style=margin-top:8px;><button type=button>Pure White</button><button type=button>Soft White</button><button type=button>Dark Mode`), _tmpl$8$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Stroke Animation Speed</label><div style=display:flex;align-items:center;gap:12px;><span style=font-size:11px;color:#888;min-width:30px;>Fast</span><input type=range min=0.3 max=4.0 step=0.1 style=flex:1;cursor:pointer;><span style=font-size:11px;color:#888;min-width:30px;text-align:right;>Slow</span></div><p class=debug-control-description style=margin-top:8px;text-align:center;><span style=color:#666;font-size:10px;>`), _tmpl$9$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Hotspot Reveal Mode</label><div class=debug-toggle-group><button type=button>Focus</button><button type=button>Ripple (experimental)</button></div><p class=debug-control-description>`), _tmpl$0$3 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Cache Version</span><span class=debug-stat-value>1.0.2</span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value>Active</span></div><div class=debug-stat-row><span class=debug-stat-label>localStorage Size</span><span class=debug-stat-value>`), _tmpl$1$2 = /* @__PURE__ */ template(`<div class=debug-control style=margin-top:16px;><button class=debug-toggle-option>🗑️ Clear Cache & Reload</button><p class=debug-control-description>Fixes stuck animations and broken hover states`), _tmpl$10$2 = /* @__PURE__ */ template(`<span class=debug-mobile-compact-fps> FPS`), _tmpl$11$1 = /* @__PURE__ */ template(`<div class="debug-mobile-compact glass-button"><div class=debug-mobile-compact-content><span class=debug-mobile-compact-icon><svg width=16 height=16 viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round></path></svg></span><span class=debug-mobile-compact-label>Debug`), _tmpl$12$1 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Cache Version</span><span class=debug-stat-value>1.0.2</span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value style=color:#4CAF50>Active</span></div><div style=margin-top:20px;><button class=glass-button>🗑️ Clear Cache & Reload</button><p style=margin-top:10px;font-size:11px;opacity:0.6;text-align:center;>Clears localStorage, sessionStorage and reloads the app`), _tmpl$13$1 = /* @__PURE__ */ template(`<div><div><div class=debug-mobile-sheet-handle><div class=debug-mobile-sheet-handle-bar></div></div><div class=debug-mobile-sheet-header><h3 class=debug-mobile-sheet-title><svg width=18 height=18 viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round></path></svg>Artwork Controls</h3></div><div class=debug-mobile-tabs></div><div class=debug-mobile-content>`), _tmpl$14$1 = /* @__PURE__ */ template(`<button><span class=debug-mobile-tab-icon></span><span class=debug-mobile-tab-label>`), _tmpl$15$1 = /* @__PURE__ */ template(`<span style=margin-left:8px;>Artwork Controls`), _tmpl$16$1 = /* @__PURE__ */ template(`<button title="Minimize panel"><svg viewBox="0 0 20 20"><rect x=11 y=15 width=14 height=2>`), _tmpl$17$1 = /* @__PURE__ */ template(`<div><div class=debug-panel-header><h3 class=debug-panel-title style="margin:0;display:'flex';alignItems:'center';"><svg viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round>`), _tmpl$18$1 = /* @__PURE__ */ template(`<div><div class=debug-section-header><div class=debug-section-title><span class=debug-section-icon></span><span></span></div><span class=debug-section-chevron>▼</span></div><div class=debug-section-content><div class=debug-section-body>`);
+var _tmpl$$5 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Hovered</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Selected</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Type</span><span class=debug-stat-value>`), _tmpl$2$4 = /* @__PURE__ */ template(`<div class=debug-stat-row style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.1);"><span class=debug-stat-label style=color:#00ffff;>Safari Hybrid</span><span class=debug-stat-value style=color:#00ffff;>Active`), _tmpl$3$3 = /* @__PURE__ */ template(`<div class=debug-stat-row><span class=debug-stat-label>Render Time</span><span class=debug-stat-value>ms`), _tmpl$4$3 = /* @__PURE__ */ template(`<div class=debug-stat-row><span class=debug-stat-label>Visible/Total</span><span class=debug-stat-value>/`), _tmpl$5$3 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>FPS</span><span class=debug-stat-value><span style=opacity:0.7;font-size:10px> (avg: <!>)</span></span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value></span></div><div class=debug-stat-row><span class=debug-stat-label>Memory</span><span class=debug-stat-value>MB</span></div><div class=debug-stat-row><span class=debug-stat-label>Frame Time</span><span class=debug-stat-value>ms</span></div><div class=debug-stat-row><span class=debug-stat-label>Zoom</span><span class=debug-stat-value>x`), _tmpl$6$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Zoom Animation Speed<span class=debug-control-value>x</span></label><input type=range class=debug-slider min=0.5 max=2.5 step=0.1><p class=debug-control-description>How fast the artwork zooms when you click on elements`), _tmpl$7$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Color Theme<span class=debug-help-icon title="Changes the highlight colors">?</span></label><div class=debug-toggle-group><button type=button>Cyan Tech</button><button type=button>Golden Magic</button><button type=button>Blue Moon</button></div><div class=debug-toggle-group style=margin-top:8px;><button type=button>Pure White</button><button type=button>Soft White</button><button type=button>Dark Mode`), _tmpl$8$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Stroke Animation Speed</label><div style=display:flex;align-items:center;gap:12px;><span style=font-size:11px;color:#888;min-width:30px;>Fast</span><input type=range min=0.3 max=4.0 step=0.1 style=flex:1;cursor:pointer;><span style=font-size:11px;color:#888;min-width:30px;text-align:right;>Slow</span></div><p class=debug-control-description style=margin-top:8px;text-align:center;><span style=color:#666;font-size:10px;>`), _tmpl$9$3 = /* @__PURE__ */ template(`<div class=debug-control><label class=debug-control-label>Hotspot Reveal Mode</label><div class=debug-toggle-group><button type=button>Focus</button><button type=button>Ripple (experimental)</button></div><p class=debug-control-description>`), _tmpl$0$3 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Cache Version</span><span class=debug-stat-value>1.0.2</span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value>Active</span></div><div class=debug-stat-row><span class=debug-stat-label>localStorage Size</span><span class=debug-stat-value>`), _tmpl$1$2 = /* @__PURE__ */ template(`<div class=debug-control style=margin-top:16px;><button class=debug-toggle-option>🗑️ Clear Cache & Reload</button><p class=debug-control-description>Fixes stuck animations and broken hover states`), _tmpl$10$2 = /* @__PURE__ */ template(`<span class=debug-mobile-compact-fps> FPS`), _tmpl$11$1 = /* @__PURE__ */ template(`<div class="debug-mobile-compact glass-button"><div class=debug-mobile-compact-content><span class=debug-mobile-compact-icon><svg width=16 height=16 viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round></path></svg></span><span class=debug-mobile-compact-label>Debug`), _tmpl$12$1 = /* @__PURE__ */ template(`<div class=debug-stats-classic><div class=debug-stat-row><span class=debug-stat-label>Cache Version</span><span class=debug-stat-value>1.0.2</span></div><div class=debug-stat-row><span class=debug-stat-label>Status</span><span class=debug-stat-value style=color:#4CAF50>Active</span></div><div style=margin-top:20px;><button class=glass-button>🗑️ Clear Cache & Reload</button><p style=margin-top:10px;font-size:11px;opacity:0.6;text-align:center;>Clears localStorage, sessionStorage and reloads the app`), _tmpl$13$1 = /* @__PURE__ */ template(`<div><div><div class=debug-mobile-sheet-handle><div class=debug-mobile-sheet-handle-bar></div></div><div class=debug-mobile-sheet-header><h3 class=debug-mobile-sheet-title><svg width=18 height=18 viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round></path></svg>Artwork Controls</h3></div><div class=debug-mobile-tabs></div><div class=debug-mobile-content>`), _tmpl$14$1 = /* @__PURE__ */ template(`<button><span class=debug-mobile-tab-icon></span><span class=debug-mobile-tab-label>`), _tmpl$15$1 = /* @__PURE__ */ template(`<span style=margin-left:8px;>Artwork Controls`), _tmpl$16$1 = /* @__PURE__ */ template(`<button title="Minimize panel"><svg viewBox="0 0 20 20"><rect x=11 y=15 width=14 height=2>`), _tmpl$17$1 = /* @__PURE__ */ template(`<div><div class=debug-panel-header><h3 class=debug-panel-title style="margin:0;display:'flex';alignItems:'center';"><svg viewBox="0 0 20 20"fill=none><path d="M4 4v12M10 2v4M10 14v4M16 8v8M10 8.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 14.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round>`), _tmpl$18$1 = /* @__PURE__ */ template(`<div><div class=debug-section-header><div class=debug-section-title><span class=debug-section-icon></span><span></span></div><span class=debug-section-chevron>▼</span></div><div class=debug-section-content><div class=debug-section-body>`);
 function DebugPanel(props) {
   const [isMinimized, setIsMinimized] = createSignal(true);
   const [expandedSections, setExpandedSections] = createSignal({
@@ -20442,7 +20484,7 @@ function DebugPanel(props) {
       icon: "🔍",
       title: "Active Element",
       content: () => (() => {
-        var _el$ = _tmpl$$4(), _el$2 = _el$.firstChild, _el$3 = _el$2.firstChild, _el$4 = _el$3.nextSibling, _el$5 = _el$2.nextSibling, _el$6 = _el$5.firstChild, _el$7 = _el$6.nextSibling, _el$8 = _el$5.nextSibling, _el$9 = _el$8.firstChild, _el$0 = _el$9.nextSibling;
+        var _el$ = _tmpl$$5(), _el$2 = _el$.firstChild, _el$3 = _el$2.firstChild, _el$4 = _el$3.nextSibling, _el$5 = _el$2.nextSibling, _el$6 = _el$5.firstChild, _el$7 = _el$6.nextSibling, _el$8 = _el$5.nextSibling, _el$9 = _el$8.firstChild, _el$0 = _el$9.nextSibling;
         insert(_el$4, () => {
           var _a;
           return ((_a = props.hoveredHotspot()) == null ? void 0 : _a.id) || "none";
@@ -21041,7 +21083,7 @@ function DebugPanel(props) {
   })();
 }
 delegateEvents(["input", "click", "touchstart", "touchmove", "touchend", "pointerdown", "mousedown"]);
-var _tmpl$$3 = /* @__PURE__ */ template(`<span class=thermal-icon>`), _tmpl$2$3 = /* @__PURE__ */ template(`<div class=performance-indicator><span class=fps-value> FPS</span><span class=quality-icon>`);
+var _tmpl$$4 = /* @__PURE__ */ template(`<span class=thermal-icon>`), _tmpl$2$3 = /* @__PURE__ */ template(`<div class=performance-indicator><span class=fps-value> FPS</span><span class=quality-icon>`);
 function PerformanceIndicator(props) {
   const getStatusColor = () => {
     if (!props.status) return "#666";
@@ -21092,7 +21134,7 @@ function PerformanceIndicator(props) {
           return props.status.thermal !== "normal";
         },
         get children() {
-          var _el$5 = _tmpl$$3();
+          var _el$5 = _tmpl$$4();
           insert(_el$5, () => getThermalIcon(props.status.thermal));
           return _el$5;
         }
@@ -21517,7 +21559,7 @@ class FullscreenManager {
   }
 }
 const fullscreenManager = new FullscreenManager();
-var _tmpl$$2 = /* @__PURE__ */ template(`<img class=preview-image alt="Loading preview">`), _tmpl$2$2 = /* @__PURE__ */ template(`<div class=viewer-loading><p>Loading high-resolution artwork...</p><p style=font-size:12px;margin-top:10px;opacity:0.7;>Debug: isLoading=<!>, viewerReady=`), _tmpl$3$2 = /* @__PURE__ */ template(`<div style=margin-bottom:16px;><div style=display:flex;align-items:center;justify-content:space-between;><label style=font-size:11px;color:rgba(255,255,255,0.8);>Smooth Interpolation</label><button></button></div><div style=font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px;>OFF = Perfect sync, ON = Smooth movement`), _tmpl$4$2 = /* @__PURE__ */ template(`<div style=margin-bottom:12px;><label style=font-size:11px;color:rgba(255,255,255,0.8);display:block;margin-bottom:6px;>Smoothing: </label><input type=range min=0.1 max=1.0 step=0.05><div style=font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px;>Lower = smoother, Higher = more responsive`), _tmpl$5$2 = /* @__PURE__ */ template(`<div style=margin-bottom:12px;><label style=font-size:11px;color:rgba(255,255,255,0.8);display:block;margin-bottom:6px;>Zoom fade distance: <!>%</label><input type=range min=0.1 max=1.0 step=0.05><div style=font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px;>Darkness gradually fades when zooming below this level`), _tmpl$6$2 = /* @__PURE__ */ template(`<div style=margin-bottom:12px;><label style=font-size:11px;color:rgba(255,255,255,0.8);display:block;margin-bottom:6px;>Pan fade distance: <!>%</label><input type=range min=0.1 max=1.0 step=0.05><div style=font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px;>Darkness gradually fades as you pan away this distance`), _tmpl$7$2 = /* @__PURE__ */ template(`<div><div><div style=font-size:12px;color:#FFFFFF;font-weight:600;letter-spacing:0.5px;text-align:center;>SPOTLIGHT FINE-TUNING</div><button>✕</button></div><div class=floating-panel-scrollable><div style=margin-bottom:12px;><label style=font-size:11px;color:rgba(255,255,255,0.8);display:block;margin-bottom:6px;>Circle Size: </label><input type=range max=3.0 step=0.05>`), _tmpl$8$2 = /* @__PURE__ */ template(`<button aria-label="Expand to Full View"><svg width=24 height=24 viewBox="0 0 24 24"fill=none><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round>`), _tmpl$9$2 = /* @__PURE__ */ template(`<div class=fullscreen-button-container><button class="fullscreen-button glass-button">`), _tmpl$0$2 = /* @__PURE__ */ template(`<div class=viewer-container><div class=openseadragon-viewer>`), _tmpl$1$1 = /* @__PURE__ */ template(`<svg width=20 height=20 viewBox="0 0 20 20"fill=none><path d="M5 1v4H1M15 1v4h4M5 19v-4H1M15 19v-4h4"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round>`), _tmpl$10$1 = /* @__PURE__ */ template(`<svg width=20 height=20 viewBox="0 0 20 20"fill=none><path d="M1 5V1h4M19 5V1h-4M1 15v4h4M19 15v4h-4"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round>`);
+var _tmpl$$3 = /* @__PURE__ */ template(`<img class=preview-image alt="Loading preview">`), _tmpl$2$2 = /* @__PURE__ */ template(`<div class=viewer-loading><p>Loading high-resolution artwork...</p><p style=font-size:12px;margin-top:10px;opacity:0.7;>Debug: isLoading=<!>, viewerReady=`), _tmpl$3$2 = /* @__PURE__ */ template(`<div style=margin-bottom:16px;><div style=display:flex;align-items:center;justify-content:space-between;><label style=font-size:11px;color:rgba(255,255,255,0.8);>Smooth Interpolation</label><button></button></div><div style=font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px;>OFF = Perfect sync, ON = Smooth movement`), _tmpl$4$2 = /* @__PURE__ */ template(`<div style=margin-bottom:12px;><label style=font-size:11px;color:rgba(255,255,255,0.8);display:block;margin-bottom:6px;>Smoothing: </label><input type=range min=0.1 max=1.0 step=0.05><div style=font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px;>Lower = smoother, Higher = more responsive`), _tmpl$5$2 = /* @__PURE__ */ template(`<div style=margin-bottom:12px;><label style=font-size:11px;color:rgba(255,255,255,0.8);display:block;margin-bottom:6px;>Zoom fade distance: <!>%</label><input type=range min=0.1 max=1.0 step=0.05><div style=font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px;>Darkness gradually fades when zooming below this level`), _tmpl$6$2 = /* @__PURE__ */ template(`<div style=margin-bottom:12px;><label style=font-size:11px;color:rgba(255,255,255,0.8);display:block;margin-bottom:6px;>Pan fade distance: <!>%</label><input type=range min=0.1 max=1.0 step=0.05><div style=font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px;>Darkness gradually fades as you pan away this distance`), _tmpl$7$2 = /* @__PURE__ */ template(`<div><div><div style=font-size:12px;color:#FFFFFF;font-weight:600;letter-spacing:0.5px;text-align:center;>SPOTLIGHT FINE-TUNING</div><button>✕</button></div><div class=floating-panel-scrollable><div style=margin-bottom:12px;><label style=font-size:11px;color:rgba(255,255,255,0.8);display:block;margin-bottom:6px;>Circle Size: </label><input type=range max=3.0 step=0.05>`), _tmpl$8$2 = /* @__PURE__ */ template(`<button aria-label="Expand to Full View"><svg width=24 height=24 viewBox="0 0 24 24"fill=none><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round>`), _tmpl$9$2 = /* @__PURE__ */ template(`<div class=fullscreen-button-container><button class="fullscreen-button glass-button">`), _tmpl$0$2 = /* @__PURE__ */ template(`<div class=viewer-container><div class=openseadragon-viewer>`), _tmpl$1$1 = /* @__PURE__ */ template(`<svg width=20 height=20 viewBox="0 0 20 20"fill=none><path d="M5 1v4H1M15 1v4h4M5 19v-4H1M15 19v-4h4"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round>`), _tmpl$10$1 = /* @__PURE__ */ template(`<svg width=20 height=20 viewBox="0 0 20 20"fill=none><path d="M1 5V1h4M19 5V1h-4M1 15v4h4M19 15v4h-4"stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round>`);
 let hotspotData = [];
 function ArtworkViewer(props) {
   let viewerRef;
@@ -21742,7 +21784,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-BWc1iyVx.js").then((n) => n.v);
+      } = await import("./viewerSetup-CyRMdDwY.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
@@ -21841,7 +21883,7 @@ function ArtworkViewer(props) {
         return memo(() => !!state.previewLoaded())() && !state.viewerReady();
       },
       get children() {
-        var _el$2 = _tmpl$$2();
+        var _el$2 = _tmpl$$3();
         createRenderEffect(() => setAttribute(_el$2, "src", `/images/tiles/${props.artworkId}_1024/preview.jpg`));
         return _el$2;
       }
@@ -38608,7 +38650,7 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-var _tmpl$$1 = /* @__PURE__ */ template(`<button style="background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer;font-size:11px;padding:4px 0;width:100%;text-align:center;">`), _tmpl$2$1 = /* @__PURE__ */ template(`<div style=margin-bottom:12px;>`), _tmpl$3$1 = /* @__PURE__ */ template(`<button style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.2);padding:6px 16px;border-radius:4px;cursor:pointer;font-size:12px;width:100%;">💬 Add feedback`), _tmpl$4$1 = /* @__PURE__ */ template(`<div style=margin-top:16px;>`), _tmpl$5$1 = /* @__PURE__ */ template(`<div><textarea style="width:100%;padding:6px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;border-radius:4px;font-size:13px;resize:vertical;min-height:50px;"></textarea><div style=margin-top:6px;><button style="background:#0088cc;color:white;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:11px;margin-right:6px;">Save</button><button style="background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);padding:4px 12px;border-radius:4px;cursor:pointer;font-size:11px;">Cancel`), _tmpl$6$1 = /* @__PURE__ */ template(`<div style="background:rgba(0,0,0,0.2);padding:10px;border-radius:6px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.1);">`), _tmpl$7$1 = /* @__PURE__ */ template(`<p style="margin:0 0 6px 0;color:rgba(255,255,255,0.9);font-size:13px;">`), _tmpl$8$1 = /* @__PURE__ */ template(`<div style=display:flex;justify-content:space-between;align-items:center;><span style=color:rgba(255,255,255,0.5);font-size:11px;> • </span><div><button style=background:none;border:none;color:#0088cc;cursor:pointer;font-size:11px;margin-right:8px;>Edit</button><button style=background:none;border:none;color:#ff4444;cursor:pointer;font-size:11px;>Delete`), _tmpl$9$1 = /* @__PURE__ */ template(`<div style=background:rgba(0,0,0,0.3);padding:8px;border-radius:4px;margin-bottom:8px;><div style=display:flex;gap:6px;><button>Leonard</button><button>Deji`), _tmpl$0$1 = /* @__PURE__ */ template(`<div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:12px;"><div style=margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;><span style=color:rgba(255,255,255,0.7);font-size:11px;>Posting as: <strong></strong></span><button style="background:none;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);padding:2px 6px;border-radius:3px;cursor:pointer;font-size:10px;">Change</button></div><form><textarea placeholder="Add your feedback here..."style="width:100%;padding:6px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;border-radius:4px;font-size:13px;resize:vertical;min-height:50px;"autofocus></textarea><div style=display:flex;gap:6px;margin-top:6px;><button type=submit></button><button type=button style="background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);padding:6px 16px;border-radius:4px;cursor:pointer;font-size:12px;">Cancel`);
+var _tmpl$$2 = /* @__PURE__ */ template(`<button style="background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer;font-size:11px;padding:4px 0;width:100%;text-align:center;">`), _tmpl$2$1 = /* @__PURE__ */ template(`<div style=margin-bottom:12px;>`), _tmpl$3$1 = /* @__PURE__ */ template(`<button style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.2);padding:6px 16px;border-radius:4px;cursor:pointer;font-size:12px;width:100%;">💬 Add feedback`), _tmpl$4$1 = /* @__PURE__ */ template(`<div style=margin-top:16px;>`), _tmpl$5$1 = /* @__PURE__ */ template(`<div><textarea style="width:100%;padding:6px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;border-radius:4px;font-size:13px;resize:vertical;min-height:50px;"></textarea><div style=margin-top:6px;><button style="background:#0088cc;color:white;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:11px;margin-right:6px;">Save</button><button style="background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);padding:4px 12px;border-radius:4px;cursor:pointer;font-size:11px;">Cancel`), _tmpl$6$1 = /* @__PURE__ */ template(`<div style="background:rgba(0,0,0,0.2);padding:10px;border-radius:6px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.1);">`), _tmpl$7$1 = /* @__PURE__ */ template(`<p style="margin:0 0 6px 0;color:rgba(255,255,255,0.9);font-size:13px;">`), _tmpl$8$1 = /* @__PURE__ */ template(`<div style=display:flex;justify-content:space-between;align-items:center;><span style=color:rgba(255,255,255,0.5);font-size:11px;> • </span><div><button style=background:none;border:none;color:#0088cc;cursor:pointer;font-size:11px;margin-right:8px;>Edit</button><button style=background:none;border:none;color:#ff4444;cursor:pointer;font-size:11px;>Delete`), _tmpl$9$1 = /* @__PURE__ */ template(`<div style=background:rgba(0,0,0,0.3);padding:8px;border-radius:4px;margin-bottom:8px;><div style=display:flex;gap:6px;><button>Leonard</button><button>Deji`), _tmpl$0$1 = /* @__PURE__ */ template(`<div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:12px;"><div style=margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;><span style=color:rgba(255,255,255,0.7);font-size:11px;>Posting as: <strong></strong></span><button style="background:none;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);padding:2px 6px;border-radius:3px;cursor:pointer;font-size:10px;">Change</button></div><form><textarea placeholder="Add your feedback here..."style="width:100%;padding:6px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;border-radius:4px;font-size:13px;resize:vertical;min-height:50px;"autofocus></textarea><div style=display:flex;gap:6px;margin-top:6px;><button type=submit></button><button type=button style="background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);padding:6px 16px;border-radius:4px;cursor:pointer;font-size:12px;">Cancel`);
 function FeedbackSection({
   updateId,
   updateTitle
@@ -38746,7 +38788,7 @@ function FeedbackSection({
             return feedbacks().length > 2;
           },
           get children() {
-            var _el$3 = _tmpl$$1();
+            var _el$3 = _tmpl$$2();
             _el$3.$$click = () => setShowAllFeedbacks(!showAllFeedbacks());
             insert(_el$3, (() => {
               var _c$ = memo(() => !!showAllFeedbacks());
@@ -38827,6 +38869,169 @@ function FeedbackSection({
   })();
 }
 delegateEvents(["click", "input"]);
+var _tmpl$$1 = /* @__PURE__ */ template(`<div><div> FPS</div><div> </div><div><div>AVG: <!> FPS</div><div>MIN: <!> FPS</div><div>MAX: <!> FPS</div></div><div>Target: 60 FPS (Desktop) | 40 FPS (Mobile)`);
+function FPSMonitor() {
+  const [fps, setFps] = createSignal(0);
+  const [avgFps, setAvgFps] = createSignal(0);
+  const [minFps, setMinFps] = createSignal(999);
+  const [maxFps, setMaxFps] = createSignal(0);
+  const [interactionType, setInteractionType] = createSignal("idle");
+  const [isVisible, setIsVisible] = createSignal(false);
+  onMount(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const fpsParam = urlParams.get("fps");
+    const fpsStorage = localStorage.getItem("showFPS");
+    if (fpsParam === "1" || fpsStorage === "true") {
+      setIsVisible(true);
+    }
+    if (!isVisible()) return;
+    let frameCount = 0;
+    let lastTime = performance.now();
+    let fpsHistory = [];
+    const MAX_HISTORY = 60;
+    const measureFPS = (timestamp) => {
+      frameCount++;
+      const delta = timestamp - lastTime;
+      if (delta >= 1e3) {
+        const currentFPS = Math.round(frameCount * 1e3 / delta);
+        setFps(currentFPS);
+        fpsHistory.push(currentFPS);
+        if (fpsHistory.length > MAX_HISTORY) {
+          fpsHistory.shift();
+        }
+        const avg = Math.round(fpsHistory.reduce((a, b) => a + b, 0) / fpsHistory.length);
+        const min = Math.min(...fpsHistory);
+        const max = Math.max(...fpsHistory);
+        setAvgFps(avg);
+        setMinFps(min);
+        setMaxFps(max);
+        frameCount = 0;
+        lastTime = timestamp;
+      }
+      requestAnimationFrame(measureFPS);
+    };
+    const rafId = requestAnimationFrame(measureFPS);
+    let isAnimating = false;
+    let isPanning = false;
+    const viewer = window.viewer;
+    if (viewer) {
+      viewer.addHandler("animation-start", () => {
+        isAnimating = true;
+        setInteractionType("zooming");
+      });
+      viewer.addHandler("animation-finish", () => {
+        isAnimating = false;
+        if (!isPanning) {
+          setInteractionType("idle");
+        }
+      });
+      viewer.addHandler("pan", () => {
+        isPanning = true;
+        setInteractionType("panning");
+      });
+      let panTimeout;
+      viewer.addHandler("pan", () => {
+        clearTimeout(panTimeout);
+        panTimeout = setTimeout(() => {
+          isPanning = false;
+          if (!isAnimating) {
+            setInteractionType("idle");
+          }
+        }, 500);
+      });
+    }
+    const handleHotspotReveal = () => {
+      setInteractionType("hotspot-reveal");
+      setTimeout(() => {
+        if (!isAnimating && !isPanning) {
+          setInteractionType("idle");
+        }
+      }, 2e3);
+    };
+    document.addEventListener("hotspot-reveal", handleHotspotReveal);
+    onCleanup(() => {
+      cancelAnimationFrame(rafId);
+      document.removeEventListener("hotspot-reveal", handleHotspotReveal);
+    });
+  });
+  if (!isVisible()) return null;
+  const getFpsColor = () => {
+    const currentFps = fps();
+    if (currentFps >= 55) return "#00ff00";
+    if (currentFps >= 40) return "#ffff00";
+    if (currentFps >= 25) return "#ff9900";
+    return "#ff0000";
+  };
+  const getInteractionIcon = () => {
+    switch (interactionType()) {
+      case "zooming":
+        return "🔍";
+      case "panning":
+        return "👆";
+      case "hotspot-reveal":
+        return "✨";
+      default:
+        return "💤";
+    }
+  };
+  return (() => {
+    var _el$ = _tmpl$$1(), _el$2 = _el$.firstChild, _el$3 = _el$2.firstChild, _el$4 = _el$2.nextSibling, _el$5 = _el$4.firstChild, _el$6 = _el$4.nextSibling, _el$7 = _el$6.firstChild, _el$8 = _el$7.firstChild, _el$0 = _el$8.nextSibling;
+    _el$0.nextSibling;
+    var _el$1 = _el$7.nextSibling, _el$10 = _el$1.firstChild, _el$12 = _el$10.nextSibling;
+    _el$12.nextSibling;
+    var _el$13 = _el$1.nextSibling, _el$14 = _el$13.firstChild, _el$16 = _el$14.nextSibling;
+    _el$16.nextSibling;
+    var _el$17 = _el$6.nextSibling;
+    _el$.style.setProperty("position", "fixed");
+    _el$.style.setProperty("top", "10px");
+    _el$.style.setProperty("right", "10px");
+    _el$.style.setProperty("background-color", "rgba(0, 0, 0, 0.8)");
+    _el$.style.setProperty("padding", "12px 16px");
+    _el$.style.setProperty("border-radius", "8px");
+    _el$.style.setProperty("font-family", "monospace");
+    _el$.style.setProperty("font-size", "14px");
+    _el$.style.setProperty("z-index", "999999");
+    _el$.style.setProperty("pointer-events", "none");
+    _el$.style.setProperty("user-select", "none");
+    _el$.style.setProperty("box-shadow", "0 4px 12px rgba(0,0,0,0.5)");
+    _el$.style.setProperty("min-width", "180px");
+    _el$2.style.setProperty("font-size", "32px");
+    _el$2.style.setProperty("font-weight", "bold");
+    _el$2.style.setProperty("text-align", "center");
+    _el$2.style.setProperty("margin-bottom", "8px");
+    _el$2.style.setProperty("text-shadow", "0 0 10px currentColor");
+    insert(_el$2, fps, _el$3);
+    _el$4.style.setProperty("text-align", "center");
+    _el$4.style.setProperty("font-size", "12px");
+    _el$4.style.setProperty("color", "#cccccc");
+    _el$4.style.setProperty("margin-bottom", "8px");
+    insert(_el$4, getInteractionIcon, _el$5);
+    insert(_el$4, () => interactionType().toUpperCase(), null);
+    _el$6.style.setProperty("font-size", "11px");
+    _el$6.style.setProperty("color", "#999999");
+    _el$6.style.setProperty("border-top", "1px solid #444");
+    _el$6.style.setProperty("padding-top", "8px");
+    insert(_el$7, avgFps, _el$0);
+    insert(_el$1, minFps, _el$12);
+    insert(_el$13, maxFps, _el$16);
+    _el$17.style.setProperty("margin-top", "8px");
+    _el$17.style.setProperty("padding-top", "8px");
+    _el$17.style.setProperty("border-top", "1px solid #444");
+    _el$17.style.setProperty("font-size", "10px");
+    _el$17.style.setProperty("color", "#666");
+    _el$17.style.setProperty("text-align", "center");
+    createRenderEffect((_p$) => {
+      var _v$ = getFpsColor(), _v$2 = `2px solid ${getFpsColor()}`;
+      _v$ !== _p$.e && ((_p$.e = _v$) != null ? _el$.style.setProperty("color", _v$) : _el$.style.removeProperty("color"));
+      _v$2 !== _p$.t && ((_p$.t = _v$2) != null ? _el$.style.setProperty("border", _v$2) : _el$.style.removeProperty("border"));
+      return _p$;
+    }, {
+      e: void 0,
+      t: void 0
+    });
+    return _el$;
+  })();
+}
 const tableauHaptic = "/assets/tableau-haptic-B_9CTT5E.png";
 function initializePassiveEventOptimization() {
   let supportsPassive = false;
@@ -39269,6 +39474,7 @@ function App() {
   });
   return (() => {
     var _el$278 = _tmpl$204();
+    insert(_el$278, createComponent(FPSMonitor, {}), null);
     insert(_el$278, (() => {
       var _c$ = memo(() => !!showMessage());
       return () => _c$() && createComponent(DeveloperMessage, {

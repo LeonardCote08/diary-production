@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-ChpHWFlI.js","assets/main-Cr3iNaYW.js","assets/main-WYmQ8p-N.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-Dxw8HxcJ.js","assets/main-BVlqE_Xq.js","assets/main-WYmQ8p-N.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-Cr3iNaYW.js";
+import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-BVlqE_Xq.js";
 class ImageOverlayManager {
   constructor() {
     this.overlays = /* @__PURE__ */ new Map();
@@ -5007,25 +5007,46 @@ class CinematicZoomManager {
       return;
     }
     this.isAnimating = true;
+    if (this.components.overlayManager && this.components.overlayManager.pauseRendering) {
+      this.components.overlayManager.pauseRendering();
+      if (this.debugMode) {
+        console.log("⏸️  Paused overlay rendering for smooth zoom animation");
+      }
+    }
     const isMobile2 = /Android|iPhone|iPad/i.test(navigator.userAgent);
-    const config = isMobile2 ? this.SPRING_CONFIG.mobile : this.SPRING_CONFIG.desktop;
+    const currentZoom = this.viewer.viewport.getZoom();
+    const targetZoom = this.viewer.viewport.getBounds().width / targetBounds.width;
+    const adaptiveStiffness = this.calculateAdaptiveStiffness(
+      currentZoom,
+      targetZoom,
+      isMobile2
+    );
     const originalSettings = {
       centerXStiffness: this.viewer.viewport.centerSpringX.springStiffness,
       centerYStiffness: this.viewer.viewport.centerSpringY.springStiffness,
       zoomStiffness: this.viewer.viewport.zoomSpring.springStiffness
     };
-    this.viewer.viewport.centerSpringX.springStiffness = config.springStiffness;
-    this.viewer.viewport.centerSpringY.springStiffness = config.springStiffness;
-    this.viewer.viewport.zoomSpring.springStiffness = config.springStiffness;
+    this.viewer.viewport.centerSpringX.springStiffness = adaptiveStiffness;
+    this.viewer.viewport.centerSpringY.springStiffness = adaptiveStiffness;
+    this.viewer.viewport.zoomSpring.springStiffness = adaptiveStiffness;
     if (this.debugMode) {
-      console.log("🎯 Starting simple zoom:", {
-        springStiffness: config.springStiffness,
+      console.log("🎯 Starting adaptive zoom:", {
+        springStiffness: adaptiveStiffness,
+        currentZoom: currentZoom.toFixed(2),
+        targetZoom: targetZoom.toFixed(2),
+        zoomRatio: (targetZoom / currentZoom).toFixed(2),
         targetBounds
       });
     }
     this.viewer.viewport.fitBounds(targetBounds, false);
     const animationFinishHandler = () => {
       this.isAnimating = false;
+      if (this.components.overlayManager && this.components.overlayManager.resumeRendering) {
+        this.components.overlayManager.resumeRendering();
+        if (this.debugMode) {
+          console.log("▶️  Resumed overlay rendering after zoom");
+        }
+      }
       this.viewer.viewport.centerSpringX.springStiffness = originalSettings.centerXStiffness;
       this.viewer.viewport.centerSpringY.springStiffness = originalSettings.centerYStiffness;
       this.viewer.viewport.zoomSpring.springStiffness = originalSettings.zoomStiffness;
@@ -5043,6 +5064,21 @@ class CinematicZoomManager {
     return new Promise((resolve) => {
       this.animationEndHandlers.push(resolve);
     });
+  }
+  /**
+   * Calculate adaptive spring stiffness based on zoom distance
+   * Shorter zooms = faster/snappier, longer zooms = slower/elegant
+   */
+  calculateAdaptiveStiffness(currentZoom, targetZoom, isMobile2) {
+    const zoomRatio = targetZoom / currentZoom;
+    const baseConfig = isMobile2 ? this.SPRING_CONFIG.mobile : this.SPRING_CONFIG.desktop;
+    if (zoomRatio < 2) {
+      return isMobile2 ? 250 : 400;
+    } else if (zoomRatio < 5) {
+      return baseConfig.springStiffness;
+    } else {
+      return isMobile2 ? 150 : 250;
+    }
   }
   /**
    * Backward compatibility alias
@@ -8965,7 +9001,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-ChpHWFlI.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-Dxw8HxcJ.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(
     viewer,
     state,
