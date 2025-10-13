@@ -21795,7 +21795,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-Cs-0MmH1.js").then((n) => n.v);
+      } = await import("./viewerSetup-DELAFhCG.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };

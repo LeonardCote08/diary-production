@@ -1,4 +1,4 @@
-import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-Cba4oM1r.js";
+import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-De9NuGQh.js";
 const GestureStates = {
   IDLE: "idle",
   UNDETERMINED: "undetermined",
@@ -4113,8 +4113,12 @@ class TemporalEchoController {
       // Validated reveal type
       tapMode: options.tapMode || "direct",
       // 'direct' (new) or 'nearby' (old) - controls tap behavior
-      tapTolerance: options.tapTolerance || (this.isMobile ? 20 : 10)
+      tapTolerance: options.tapTolerance || (this.isMobile ? 20 : 10),
       // Tolerance zone in pixels
+      fallbackTolerance: options.fallbackTolerance || (this.isMobile ? 70 : 60),
+      // Fallback tolerance for missed taps (conservative: 60-80px optimal)
+      maxFallbackCandidates: options.maxFallbackCandidates || 2
+      // Max candidates to consider in fallback search (reduced for precision)
     };
     this.activeEchoes = /* @__PURE__ */ new Set();
     this.echoAnimations = /* @__PURE__ */ new Map();
@@ -4549,9 +4553,49 @@ class TemporalEchoController {
           }
         ];
       } else {
-        console.log("[TemporalEchoController] No hotspot at tap location");
-        this.showMissedTapFeedback(tapData);
-        return true;
+        console.log(
+          "[TemporalEchoController] No hotspot in strict tolerance, trying expanded fallback:",
+          this.config.fallbackTolerance + "px"
+        );
+        const fallbackCandidates = this.spatialIndex.findNearbyHotspots(
+          tapImagePoint.x,
+          tapImagePoint.y,
+          this.config.fallbackTolerance,
+          this.config.maxFallbackCandidates
+        );
+        if (fallbackCandidates.length > 0) {
+          const closest = fallbackCandidates[0];
+          const dx = closest.center.x - tapImagePoint.x;
+          const dy = closest.center.y - tapImagePoint.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          console.log(
+            `[TemporalEchoController] ✓ Fallback success: Found hotspot ${closest.id} at ${distance.toFixed(0)}px distance`
+          );
+          if (window.analytics) {
+            window.analytics.logEvent("tempo1_fallback_used", {
+              distance: distance.toFixed(0),
+              hotspotId: closest.id,
+              screenWidth: window.innerWidth,
+              fallbackRadius: this.config.fallbackTolerance
+            });
+          }
+          nearbyHotspots = [
+            {
+              id: closest.id,
+              distance,
+              hotspot: closest,
+              usedFallback: true
+              // Flag for potential visual feedback
+            }
+          ];
+        } else {
+          console.log(
+            "[TemporalEchoController] ✗ No hotspot found even in fallback radius:",
+            this.config.fallbackTolerance + "px"
+          );
+          this.showMissedTapFeedback(tapData);
+          return true;
+        }
       }
     } else {
       console.log("[TemporalEchoController] Nearby tap mode active (original behavior)");
