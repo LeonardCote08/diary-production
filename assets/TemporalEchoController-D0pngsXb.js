@@ -1,4 +1,4 @@
-import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-K6NP-CG8.js";
+import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-Au7B0_lX.js";
 const GestureStates = {
   IDLE: "idle",
   UNDETERMINED: "undetermined",
@@ -4120,6 +4120,13 @@ class TemporalEchoController {
       maxFallbackCandidates: options.maxFallbackCandidates || 2
       // Max candidates to consider in fallback search (reduced for precision)
     };
+    console.log("[TemporalEchoController] TEMPO 1 Detection Config:", {
+      tapMode: this.config.tapMode,
+      tapTolerance: this.config.tapTolerance + "px",
+      fallbackTolerance: this.config.fallbackTolerance + "px",
+      maxFallbackCandidates: this.config.maxFallbackCandidates,
+      isMobile: this.isMobile
+    });
     this.activeEchoes = /* @__PURE__ */ new Set();
     this.echoAnimations = /* @__PURE__ */ new Map();
     this.activeTimeouts = /* @__PURE__ */ new Set();
