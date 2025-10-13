@@ -1,4 +1,4 @@
-import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-De9NuGQh.js";
+import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-K6NP-CG8.js";
 const GestureStates = {
   IDLE: "idle",
   UNDETERMINED: "undetermined",
@@ -4115,8 +4115,8 @@ class TemporalEchoController {
       // 'direct' (new) or 'nearby' (old) - controls tap behavior
       tapTolerance: options.tapTolerance || (this.isMobile ? 20 : 10),
       // Tolerance zone in pixels
-      fallbackTolerance: options.fallbackTolerance || (this.isMobile ? 70 : 60),
-      // Fallback tolerance for missed taps (conservative: 60-80px optimal)
+      fallbackTolerance: options.fallbackTolerance || (this.isMobile ? 120 : 100),
+      // Fallback tolerance for missed taps (conservative: 100-120px optimal)
       maxFallbackCandidates: options.maxFallbackCandidates || 2
       // Max candidates to consider in fallback search (reduced for precision)
     };
