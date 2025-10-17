@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-DvHNOtUi.js","assets/main-Au7B0_lX.js","assets/main-WYmQ8p-N.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-y3BAnnFk.js","assets/main-BhZEq9Np.js","assets/main-WYmQ8p-N.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-Au7B0_lX.js";
+import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-BhZEq9Np.js";
 class ImageOverlayManager {
   constructor() {
     this.overlays = /* @__PURE__ */ new Map();
@@ -8857,6 +8857,57 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   window.performanceMonitor = componentsObj.performanceMonitor;
   window.tileOptimizer = componentsObj.tileOptimizer;
   window.tileCleanupManager = componentsObj.tileCleanupManager;
+  window.osdZoomBy = function(factor) {
+    if (viewer && viewer.viewport) {
+      viewer.viewport.zoomBy(factor || 1.5);
+      return viewer.viewport.getZoom();
+    }
+    return null;
+  };
+  window.osdZoomTo = function(level) {
+    if (viewer && viewer.viewport) {
+      viewer.viewport.zoomTo(level);
+      return viewer.viewport.getZoom();
+    }
+    return null;
+  };
+  window.osdGetZoom = function() {
+    if (viewer && viewer.viewport) {
+      return viewer.viewport.getZoom();
+    }
+    return null;
+  };
+  window.osdGoHome = function() {
+    if (viewer && viewer.viewport) {
+      viewer.viewport.goHome(false);
+    }
+  };
+  window.testTempo1 = function(viewportX, viewportY) {
+    if (!window.temporalEchoController) {
+      console.error("TemporalEchoController not initialized yet");
+      return { success: false, error: "Controller not ready" };
+    }
+    const tapData = {
+      x: viewportX || 0.5,
+      y: viewportY || 0.5,
+      duration: 100,
+      // Fast tap
+      movement: 0,
+      timestamp: Date.now()
+    };
+    console.log("[testTempo1] Simulating TEMPO 1 tap at:", tapData);
+    try {
+      window.temporalEchoController.handleQuickTap(tapData);
+      return {
+        success: true,
+        tapData,
+        message: "TEMPO 1 triggered - border should reveal for 2s"
+      };
+    } catch (error) {
+      console.error("[testTempo1] Error:", error);
+      return { success: false, error: error.message };
+    }
+  };
   if (isMobileDevice) {
     const springTester = new SpringStiffnessTester(viewer);
     window.springTester = springTester;
@@ -9004,7 +9055,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-DvHNOtUi.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-y3BAnnFk.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(
     viewer,
     state,
