@@ -1,9 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-BzPm4eFq.js","assets/main-BhZEq9Np.js","assets/main-WYmQ8p-N.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-YoXvXYus.js","assets/main-BrWc49qQ.js","assets/main-WYmQ8p-N.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-BhZEq9Np.js";
-import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-mmX_D8GD.js";
+import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-BrWc49qQ.js";
+import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-BdigS6FA.js";
 class TemporalModeHandler {
   constructor(options = {}) {
     this.audioEngine = options.audioEngine || window.audioEngine;
@@ -4244,10 +4244,14 @@ class RendererEngine {
     this.hitDetectionCanvas = null;
     this.useHitDetectionCanvas = true;
     this.lodManager = null;
+    this.lazyMode = options.lazyMode || false;
+    this.pathCache = /* @__PURE__ */ new Map();
+    this.activePaths = /* @__PURE__ */ new Set();
     this.debugMode = options.debugMode || false;
     this.colorScheme = options.colorScheme;
     this.isMobile = options.isMobile || false;
     this.isSafari = options.isSafari || false;
+    console.log("[RendererEngine] Lazy loading mode:", this.lazyMode ? "ENABLED" : "DISABLED");
     this.onHotspotClick = options.onHotspotClick || (() => {
     });
     this.onHotspotHover = options.onHotspotHover || (() => {
@@ -4900,6 +4904,73 @@ class RendererEngine {
     this.clipDefs = null;
     this.lodManager = null;
     console.log("[RendererEngine] Destroyed");
+  }
+  // === LAZY LOADING METHODS ===
+  /**
+   * Create hotspot overlay on-demand (lazy mode)
+   * Returns cached overlay if exists, creates new if needed
+   * Does NOT add to DOM - use addHotspotToDOM() for that
+   */
+  createHotspotOnDemand(hotspot) {
+    if (this.pathCache.has(hotspot.id)) {
+      console.log(`[RendererEngine] Using cached overlay: ${hotspot.id}`);
+      return this.pathCache.get(hotspot.id);
+    }
+    const overlay = this.createHotspotOverlay(hotspot, (g, type, state) => {
+      if (this.styleCallback) {
+        this.styleCallback(g, type, state);
+      }
+    });
+    this.pathCache.set(hotspot.id, overlay);
+    console.log(`[RendererEngine] Created overlay on-demand: ${hotspot.id}`);
+    return overlay;
+  }
+  /**
+   * Add hotspot to DOM (lazy mode)
+   * Creates overlay if not in cache, then adds to DOM
+   */
+  addHotspotToDOM(hotspot) {
+    const overlay = this.createHotspotOnDemand(hotspot);
+    if (!overlay.parentNode) {
+      this.svg.appendChild(overlay);
+      this.activePaths.add(hotspot.id);
+      this.stateManager.addOverlay(hotspot.id, {
+        element: overlay,
+        hotspot,
+        bounds: calculateBounds(hotspot.coordinates),
+        area: calculateArea(hotspot.coordinates),
+        isVisible: false
+      });
+      console.log(
+        `[RendererEngine] Added to DOM: ${hotspot.id} (active: ${this.activePaths.size})`
+      );
+    }
+    return overlay;
+  }
+  /**
+   * Remove hotspot from DOM (lazy mode)
+   * Keeps overlay in cache for reuse
+   */
+  removeHotspotFromDOM(hotspotId) {
+    const overlay = this.pathCache.get(hotspotId);
+    if (overlay && overlay.parentNode) {
+      overlay.parentNode.removeChild(overlay);
+      this.activePaths.delete(hotspotId);
+      console.log(
+        `[RendererEngine] Removed from DOM: ${hotspotId} (active: ${this.activePaths.size})`
+      );
+    }
+  }
+  /**
+   * Get lazy loading stats
+   */
+  getLazyLoadingStats() {
+    return {
+      lazyMode: this.lazyMode,
+      cachedPaths: this.pathCache.size,
+      activePaths: this.activePaths.size,
+      cacheHitRate: this.pathCache.size > 0 ? ((this.pathCache.size - this.activePaths.size) / this.pathCache.size * 100).toFixed(1) + "%" : "0%"
+    };
   }
 }
 const logger$1 = createLogger("StyleManager");
@@ -6120,6 +6191,11 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
     this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     this.isWebKit = "WebkitAppearance" in document.documentElement.style && !window.chrome;
     this.isSafariOrWebKit = this.isSafari || this.isWebKit;
+    this.optimizedStateManagement = true;
+    console.log(
+      "[NativeHotspotRenderer] 🚀 Optimized state management:",
+      this.optimizedStateManagement ? "ENABLED" : "DISABLED"
+    );
     Object.assign(this, {
       viewer: options.viewer,
       spatialIndex: options.spatialIndex,
@@ -6972,21 +7048,34 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
       this.applyStyle(selectedOverlay.element, hotspot.type, "selected");
     }
     this.onHotspotClick(hotspot);
-    this.stateManager.getAllOverlays().forEach((overlay, id) => {
-      var _a;
-      if (id === hotspot.id) return;
-      const state = id === ((_a = this.stateManager.getHoveredHotspot()) == null ? void 0 : _a.id) ? "hover" : "normal";
-      if (id === hotspot.id) {
-        const currentZoom = this.viewer.viewport.getZoom();
-        console.log("🎯 iOS DEBUG: Applying selected style to:", id);
-        console.log("🎯 Current zoom level:", currentZoom.toFixed(2));
-        console.log("🎯 Is in static mode (>8.0)?", currentZoom > 8);
-        const currentState = overlay.element.getAttribute("data-current-state");
-        const animationCompleted = overlay.element.getAttribute("data-animation-completed") === "true";
-        console.log("🎯 Transition to selected:", { currentState, animationCompleted });
+    if (this.optimizedStateManagement) {
+      const currentHovered = this.stateManager.getHoveredHotspot();
+      if (currentHovered && currentHovered.id !== hotspot.id) {
+        const hoveredOverlay = this.stateManager.getOverlay(currentHovered.id);
+        if (hoveredOverlay) {
+          console.log("🔄 [OPTIMIZED] Updating hover state for:", currentHovered.id);
+          this.applyStyle(hoveredOverlay.element, currentHovered.type, "hover");
+        }
       }
-      this.applyStyle(overlay.element, overlay.hotspot.type, state);
-    });
+      console.log("✅ [OPTIMIZED] Modified only 2-3 hotspots instead of 647");
+    } else {
+      console.warn("⚠️ [LEGACY] Using non-optimized path (647 hotspot updates)");
+      this.stateManager.getAllOverlays().forEach((overlay, id) => {
+        var _a;
+        if (id === hotspot.id) return;
+        const state = id === ((_a = this.stateManager.getHoveredHotspot()) == null ? void 0 : _a.id) ? "hover" : "normal";
+        if (id === hotspot.id) {
+          const currentZoom = this.viewer.viewport.getZoom();
+          console.log("🎯 iOS DEBUG: Applying selected style to:", id);
+          console.log("🎯 Current zoom level:", currentZoom.toFixed(2));
+          console.log("🎯 Is in static mode (>8.0)?", currentZoom > 8);
+          const currentState = overlay.element.getAttribute("data-current-state");
+          const animationCompleted = overlay.element.getAttribute("data-animation-completed") === "true";
+          console.log("🎯 Transition to selected:", { currentState, animationCompleted });
+        }
+        this.applyStyle(overlay.element, overlay.hotspot.type, state);
+      });
+    }
   }
   /**
    * Deselect current hotspot
@@ -7011,11 +7100,34 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
         }
       }
     });
-    this.stateManager.getAllOverlays().forEach((overlay, id) => {
-      var _a2;
-      const state = id === ((_a2 = this.stateManager.getHoveredHotspot()) == null ? void 0 : _a2.id) ? "hover" : "normal";
-      this.applyStyle(overlay.element, overlay.hotspot.type, state);
-    });
+    if (this.optimizedStateManagement) {
+      const currentHovered = this.stateManager.getHoveredHotspot();
+      if (previousSelected) {
+        const previousOverlay = this.stateManager.getOverlay(previousSelected.id);
+        if (previousOverlay) {
+          const newState = currentHovered && currentHovered.id === previousSelected.id ? "hover" : "normal";
+          console.log(
+            `🔄 [OPTIMIZED] Resetting previously selected hotspot ${previousSelected.id} to ${newState}`
+          );
+          this.applyStyle(previousOverlay.element, previousSelected.type, newState);
+        }
+      }
+      if (currentHovered && (!previousSelected || currentHovered.id !== previousSelected.id)) {
+        const hoveredOverlay = this.stateManager.getOverlay(currentHovered.id);
+        if (hoveredOverlay) {
+          console.log(`🔄 [OPTIMIZED] Ensuring hover state for: ${currentHovered.id}`);
+          this.applyStyle(hoveredOverlay.element, currentHovered.type, "hover");
+        }
+      }
+      console.log("✅ [OPTIMIZED] Modified only 1-2 hotspots instead of 647");
+    } else {
+      console.warn("⚠️ [LEGACY] Using non-optimized path (647 hotspot updates)");
+      this.stateManager.getAllOverlays().forEach((overlay, id) => {
+        var _a2;
+        const state = id === ((_a2 = this.stateManager.getHoveredHotspot()) == null ? void 0 : _a2.id) ? "hover" : "normal";
+        this.applyStyle(overlay.element, overlay.hotspot.type, state);
+      });
+    }
     console.log("✅ [DESELECT] deselectHotspot complete", {
       selectedAfter: ((_a = this.stateManager.getSelectedHotspot()) == null ? void 0 : _a.id) || "none",
       hoveredAfter: ((_b = this.stateManager.getHoveredHotspot()) == null ? void 0 : _b.id) || "none"
@@ -9352,24 +9464,31 @@ function setupKeyboardHandler(viewer, state, componentsObj) {
   return handleKeyPress;
 }
 function setupResizeObserver(viewerRef, viewer, state) {
+  let resizeTimeout;
   const resizeObserver = new ResizeObserver((entries) => {
     if (!(viewer == null ? void 0 : viewer.viewport) || !viewer.isOpen()) return;
     for (let entry of entries) {
       const { width, height } = entry.contentRect;
       if (width > 0 && height > 0) {
-        requestAnimationFrame(() => {
-          try {
-            if (viewer && viewer.viewport && viewer.isOpen()) {
-              viewer.viewport.resize();
-              viewer.viewport.applyConstraints();
-              viewer.forceRedraw();
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+          requestAnimationFrame(() => {
+            try {
+              if (viewer && viewer.viewport && viewer.isOpen()) {
+                if (!viewer.viewport.update()) {
+                  viewer.viewport.resize();
+                  viewer.viewport.applyConstraints();
+                  viewer.forceRedraw();
+                  console.log("Manual resize triggered (not animating)");
+                }
+              }
+            } catch (error) {
+              if (error.message && !error.message.includes("undefined")) {
+                console.warn("Resize error:", error);
+              }
             }
-          } catch (error) {
-            if (error.message && !error.message.includes("undefined")) {
-              console.warn("Resize error:", error);
-            }
-          }
-        });
+          });
+        }, 250);
       }
     }
   });
@@ -9509,7 +9628,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
   }
   if (renderer.eventCoordinator) {
     const TemporalEchoController = (await __vitePreload(async () => {
-      const { default: __vite_default__ } = await import("./TemporalEchoController-BzPm4eFq.js");
+      const { default: __vite_default__ } = await import("./TemporalEchoController-YoXvXYus.js");
       return { default: __vite_default__ };
     }, true ? __vite__mapDeps([0,1,2]) : void 0)).default;
     const echoController = new TemporalEchoController({

@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-y3BAnnFk.js","assets/main-BhZEq9Np.js","assets/main-WYmQ8p-N.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-CuhMzJpt.js","assets/main-BrWc49qQ.js","assets/main-WYmQ8p-N.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-BhZEq9Np.js";
+import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-BrWc49qQ.js";
 class ImageOverlayManager {
   constructor() {
     this.overlays = /* @__PURE__ */ new Map();
@@ -4966,41 +4966,25 @@ class CinematicZoomManager {
     this.components = components;
     this.isAnimating = false;
     this.animationEndHandlers = [];
-    this.debugMode = true;
+    this.debugMode = false;
     this.reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    this.SPRING_CONFIG = {
-      desktop: {
-        springStiffness: this.reducedMotion ? 150 : 325
-      },
-      mobile: {
-        springStiffness: this.reducedMotion ? 120 : 200
-      }
-    };
     this.setupAccessibility();
   }
   /**
    * Setup accessibility features
+   * Monitors for changes in user's reduced motion preference
    */
   setupAccessibility() {
     window.matchMedia("(prefers-reduced-motion: reduce)").addEventListener("change", (e) => {
       this.reducedMotion = e.matches;
-      this.updateSpringConfig();
+      if (this.debugMode) {
+        console.log("🎯 Reduced motion preference changed:", this.reducedMotion);
+      }
     });
   }
   /**
-   * Update spring configuration based on reduced motion preference
-   */
-  updateSpringConfig() {
-    if (this.reducedMotion) {
-      this.SPRING_CONFIG.desktop.springStiffness = 150;
-      this.SPRING_CONFIG.mobile.springStiffness = 120;
-    } else {
-      this.SPRING_CONFIG.desktop.springStiffness = 325;
-      this.SPRING_CONFIG.mobile.springStiffness = 200;
-    }
-  }
-  /**
-   * Simple zoom to target bounds using fitBounds
+   * Smooth cinematic zoom using spring wrap/unwrap pattern
+   * Prevents OpenSeadragon 4.1.0 exponential springs oscillation bug
    */
   async performZoom(targetBounds, options = {}) {
     if (this.isAnimating) {
@@ -5017,29 +5001,34 @@ class CinematicZoomManager {
     const isMobile2 = /Android|iPhone|iPad/i.test(navigator.userAgent);
     const currentZoom = this.viewer.viewport.getZoom();
     const targetZoom = this.viewer.viewport.getBounds().width / targetBounds.width;
-    const adaptiveStiffness = this.calculateAdaptiveStiffness(
-      currentZoom,
-      targetZoom,
-      isMobile2
-    );
+    const adaptiveParams = this.calculateAdaptiveStiffness(currentZoom, targetZoom, isMobile2);
     const originalSettings = {
       centerXStiffness: this.viewer.viewport.centerSpringX.springStiffness,
+      centerXAnimTime: this.viewer.viewport.centerSpringX.animationTime,
       centerYStiffness: this.viewer.viewport.centerSpringY.springStiffness,
-      zoomStiffness: this.viewer.viewport.zoomSpring.springStiffness
+      centerYAnimTime: this.viewer.viewport.centerSpringY.animationTime,
+      zoomStiffness: this.viewer.viewport.zoomSpring.springStiffness,
+      zoomAnimTime: this.viewer.viewport.zoomSpring.animationTime
     };
-    this.viewer.viewport.centerSpringX.springStiffness = adaptiveStiffness;
-    this.viewer.viewport.centerSpringY.springStiffness = adaptiveStiffness;
-    this.viewer.viewport.zoomSpring.springStiffness = adaptiveStiffness;
+    this.viewer.viewport.centerSpringX.springStiffness = adaptiveParams.springStiffness;
+    this.viewer.viewport.centerSpringX.animationTime = adaptiveParams.animationTime;
+    this.viewer.viewport.centerSpringY.springStiffness = adaptiveParams.springStiffness;
+    this.viewer.viewport.centerSpringY.animationTime = adaptiveParams.animationTime;
+    this.viewer.viewport.zoomSpring.springStiffness = adaptiveParams.springStiffness;
+    this.viewer.viewport.zoomSpring.animationTime = adaptiveParams.animationTime;
     if (this.debugMode) {
-      console.log("🎯 Starting adaptive zoom:", {
-        springStiffness: adaptiveStiffness,
+      console.log("🎯 Starting cinematic zoom:", {
+        springStiffness: adaptiveParams.springStiffness,
+        animationTime: adaptiveParams.animationTime + "s",
         currentZoom: currentZoom.toFixed(2),
         targetZoom: targetZoom.toFixed(2),
         zoomRatio: (targetZoom / currentZoom).toFixed(2),
+        device: isMobile2 ? "Mobile" : "Desktop",
+        reducedMotion: this.reducedMotion,
         targetBounds
       });
     }
-    this.viewer.viewport.fitBounds(targetBounds, false);
+    this.viewer.viewport.fitBoundsWithConstraints(targetBounds, false);
     const animationFinishHandler = () => {
       this.isAnimating = false;
       if (this.components.overlayManager && this.components.overlayManager.resumeRendering) {
@@ -5049,15 +5038,18 @@ class CinematicZoomManager {
         }
       }
       this.viewer.viewport.centerSpringX.springStiffness = originalSettings.centerXStiffness;
+      this.viewer.viewport.centerSpringX.animationTime = originalSettings.centerXAnimTime;
       this.viewer.viewport.centerSpringY.springStiffness = originalSettings.centerYStiffness;
+      this.viewer.viewport.centerSpringY.animationTime = originalSettings.centerYAnimTime;
       this.viewer.viewport.zoomSpring.springStiffness = originalSettings.zoomStiffness;
+      this.viewer.viewport.zoomSpring.animationTime = originalSettings.zoomAnimTime;
       if (options.onComplete) {
         options.onComplete();
       }
       this.animationEndHandlers.forEach((handler) => handler());
       this.animationEndHandlers = [];
       if (this.debugMode) {
-        console.log("✅ Simple zoom completed");
+        console.log("✅ Cinematic zoom completed smoothly");
       }
       this.viewer.removeHandler("animation-finish", animationFinishHandler);
     };
@@ -5067,19 +5059,42 @@ class CinematicZoomManager {
     });
   }
   /**
-   * Calculate adaptive spring stiffness based on zoom distance
-   * Shorter zooms = faster/snappier, longer zooms = slower/elegant
+   * Calculate adaptive spring parameters based on zoom distance
+   * Returns both springStiffness and animationTime for cinematic effect
+   *
+   * Research-based values:
+   * - Lower stiffness (4.5 vs default 6.5) reduces oscillation amplitude
+   * - Longer animationTime (2.5s vs default 1.2s) creates smoother motion
+   * - OpenSeadragon default: 6.5, cinematic implementations use 3-7
+   *
+   * Sources: Leiden Collection, Met Museum, Chris Jordan gallery implementations
    */
   calculateAdaptiveStiffness(currentZoom, targetZoom, isMobile2) {
     const zoomRatio = targetZoom / currentZoom;
-    const baseConfig = isMobile2 ? this.SPRING_CONFIG.mobile : this.SPRING_CONFIG.desktop;
-    if (zoomRatio < 2) {
-      return isMobile2 ? 250 : 400;
-    } else if (zoomRatio < 5) {
-      return baseConfig.springStiffness;
-    } else {
-      return isMobile2 ? 150 : 250;
+    if (this.reducedMotion) {
+      return {
+        springStiffness: 200,
+        animationTime: 0.2
+      };
     }
+    let stiffness, animationTime;
+    if (zoomRatio < 1.5) {
+      stiffness = isMobile2 ? 8 : 7;
+      animationTime = isMobile2 ? 1.2 : 1.5;
+    } else if (zoomRatio < 2) {
+      stiffness = isMobile2 ? 5 : 4.5;
+      animationTime = isMobile2 ? 1.8 : 2.5;
+    } else if (zoomRatio < 5) {
+      stiffness = isMobile2 ? 4.5 : 4.5;
+      animationTime = isMobile2 ? 2.2 : 3;
+    } else {
+      stiffness = isMobile2 ? 4.5 : 4.5;
+      animationTime = isMobile2 ? 3 : 4.5;
+    }
+    return {
+      springStiffness: stiffness,
+      animationTime
+    };
   }
   /**
    * Backward compatibility alias
@@ -5103,6 +5118,517 @@ class CinematicZoomManager {
       currentZoom: this.viewer.viewport.getZoom(),
       springStiffness: this.viewer.springStiffness
     };
+  }
+}
+class SpotlightSynchronizer {
+  constructor(viewer, overlayManager) {
+    this.viewer = viewer;
+    this.overlayManager = overlayManager;
+    this.isActive = false;
+    this.animationStartTime = null;
+    this.animationDuration = 1800;
+    this.startZoom = null;
+    this.targetZoom = null;
+    this.startCenter = null;
+    this.targetCenter = null;
+    this.targetHotspot = null;
+    this.targetGeometry = null;
+    this.lastValidPosition = null;
+    this.positionHistory = [];
+    this.maxHistorySize = 10;
+    this.frameCount = 0;
+    this.updateCount = 0;
+    console.log("SpotlightSynchronizer: Initialized with event-driven coordination");
+    this.setupEventHandlers();
+  }
+  /**
+   * Calculate current spotlight position based on real-time viewport state
+   * FIXED: Added missing method that was being called in onAnimationFrame
+   */
+  calculateCurrentSpotlightPosition(currentZoom, currentCenter) {
+    if (!this.targetHotspot) return null;
+    try {
+      const hotspotBounds = this.getHotspotBounds(this.targetHotspot);
+      const hotspotCenter = {
+        x: hotspotBounds.centerX,
+        y: hotspotBounds.centerY
+      };
+      const viewportPoint = this.viewer.viewport.imageToViewportCoordinates(
+        hotspotCenter.x,
+        hotspotCenter.y
+      );
+      const viewportRect = this.viewer.container.getBoundingClientRect();
+      const windowPoint = this.viewer.viewport.viewportToWindowCoordinates(viewportPoint);
+      const xPercent = windowPoint.x / viewportRect.width * 100;
+      const yPercent = windowPoint.y / viewportRect.height * 100;
+      const geometry = this.calculateSpotlightGeometry(this.targetHotspot, currentZoom);
+      return {
+        x: xPercent,
+        y: yPercent,
+        radius: geometry.radius,
+        ellipseData: geometry.ellipseData,
+        zoom: currentZoom
+      };
+    } catch (error) {
+      console.error("🔄 SYNC: Current position calculation failed:", error);
+      return null;
+    }
+  }
+  /**
+   * Setup event handlers for perfect synchronization
+   * FIXED: Use different approach since OpenSeadragon events are already captured
+   */
+  setupEventHandlers() {
+    console.log("SpotlightSynchronizer: Using polling-based coordination instead of events");
+  }
+  /**
+   * Start synchronized spotlight animation with target hotspot
+   * FIXED: Use direct polling instead of events
+   */
+  startSynchronization(hotspot, expectedDuration = 1800) {
+    console.log(
+      "🔄 SPOTLIGHT SYNC: Starting direct polling coordination for hotspot:",
+      hotspot.id
+    );
+    this.isActive = true;
+    this.targetHotspot = hotspot;
+    this.animationDuration = expectedDuration;
+    this.frameCount = 0;
+    this.updateCount = 0;
+    this.animationStartTime = performance.now();
+    this.startZoom = this.viewer.viewport.getZoom();
+    this.startCenter = this.viewer.viewport.getCenter();
+    if (this.viewer.viewport.zoomSpring && this.viewer.viewport.zoomSpring.target) {
+      this.targetZoom = this.viewer.viewport.zoomSpring.target.value;
+    } else {
+      const bounds = this.getHotspotBounds(hotspot);
+      const viewportRect = this.viewer.container.getBoundingClientRect();
+      this.targetZoom = Math.min(
+        viewportRect.width * 0.8 / bounds.width,
+        viewportRect.height * 0.8 / bounds.height
+      );
+    }
+    if (this.viewer.viewport.centerSpringX && this.viewer.viewport.centerSpringX.target) {
+      this.targetCenter = new OpenSeadragon.Point(
+        this.viewer.viewport.centerSpringX.target.value,
+        this.viewer.viewport.centerSpringY.target.value
+      );
+    } else {
+      const bounds = this.getHotspotBounds(hotspot);
+      this.targetCenter = new OpenSeadragon.Point(bounds.centerX, bounds.centerY);
+    }
+    console.log("🔄 SYNC: Direct polling started", {
+      startZoom: this.startZoom.toFixed(2),
+      targetZoom: this.targetZoom.toFixed(2),
+      duration: this.animationDuration
+    });
+    this.startPollingLoop();
+  }
+  /**
+   * Start polling loop for real-time synchronization
+   * FIXED: Direct polling approach instead of events
+   */
+  startPollingLoop() {
+    const pollAnimation = () => {
+      if (!this.isActive || !this.animationStartTime) {
+        return;
+      }
+      try {
+        const elapsed = performance.now() - this.animationStartTime;
+        const progress = Math.min(elapsed / this.animationDuration, 1);
+        if (progress >= 1 || elapsed > this.animationDuration + 500) {
+          console.log("🔄 SYNC: Animation completed via polling");
+          this.onAnimationFinish();
+          return;
+        }
+        const currentZoom = this.viewer.viewport.getZoom();
+        const currentCenter = this.viewer.viewport.getCenter();
+        const zoomDiff = Math.abs(currentZoom - this.startZoom);
+        const centerDiff = Math.sqrt(
+          Math.pow(currentCenter.x - this.startCenter.x, 2) + Math.pow(currentCenter.y - this.startCenter.y, 2)
+        );
+        if (zoomDiff > 0.01 || centerDiff > 1e-3) {
+          this.onAnimationFrame(progress);
+        }
+        requestAnimationFrame(pollAnimation);
+      } catch (error) {
+        console.error("🔄 SYNC: Polling error:", error);
+        this.stop();
+      }
+    };
+    requestAnimationFrame(pollAnimation);
+  }
+  calculateTargetGeometry() {
+    if (!this.targetHotspot) return;
+    try {
+      let targetBounds, targetZoom;
+      if (window._cinematicZoomTarget) {
+        const target = window._cinematicZoomTarget;
+        targetZoom = target.zoom;
+        targetBounds = target.bounds;
+        console.log("🎯 SYNC: Using cached zoom target", {
+          zoom: targetZoom.toFixed(2),
+          center: target.center,
+          timestamp: Date.now() - target.timestamp
+        });
+      } else {
+        const bounds = this.getHotspotBounds(this.targetHotspot);
+        const viewportRect = this.viewer.container.getBoundingClientRect();
+        targetZoom = Math.min(
+          viewportRect.width * 0.8 / bounds.width,
+          viewportRect.height * 0.8 / bounds.height
+        );
+        targetBounds = new OpenSeadragon.Rect(
+          bounds.centerX - bounds.width / 2,
+          bounds.centerY - bounds.height / 2,
+          bounds.width,
+          bounds.height
+        );
+      }
+      this.targetGeometry = this.calculateSpotlightGeometry(this.targetHotspot, targetZoom);
+      console.log("🎯 SYNC: Target geometry calculated", {
+        targetZoom: targetZoom.toFixed(2),
+        geometry: this.targetGeometry
+      });
+    } catch (error) {
+      console.error("🔄 SYNC ERROR: Failed to calculate target geometry:", error);
+    }
+  }
+  /**
+   * Pre-calculate final position to eliminate drift
+   */
+  precalculateFinalPosition() {
+    if (!this.targetGeometry) return;
+    const finalPosition = {
+      x: 50,
+      // Hotspot center = viewport center
+      y: 50
+    };
+    this.targetPosition = finalPosition;
+    console.log("🎯 SYNC: Final position pre-calculated:", finalPosition);
+  }
+  /**
+   * Handle animation start event
+   */
+  onAnimationStart() {
+    this.animationStartTime = performance.now();
+    this.startZoom = this.viewer.viewport.getZoom();
+    this.startCenter = this.viewer.viewport.getCenter();
+    this.targetZoom = this.viewer.viewport.zoomSpring.target.value;
+    this.targetCenter = new OpenSeadragon.Point(
+      this.viewer.viewport.centerSpringX.target.value,
+      this.viewer.viewport.centerSpringY.target.value
+    );
+    console.log("🔄 SYNC: Animation started", {
+      startZoom: this.startZoom.toFixed(2),
+      targetZoom: this.targetZoom.toFixed(2),
+      duration: this.animationDuration
+    });
+  }
+  /**
+   * Handle each animation frame with predictive positioning
+   * FIXED: Use real-time viewport data instead of prediction
+   */
+  onAnimationFrame(progress) {
+    if (!this.isActive || !this.targetHotspot) return;
+    this.frameCount++;
+    try {
+      const currentZoom = this.viewer.viewport.getZoom();
+      const currentCenter = this.viewer.viewport.getCenter();
+      const position = this.calculateCurrentSpotlightPosition(currentZoom, currentCenter);
+      if (position && this.validateCoordinates(position)) {
+        this.applyPositionWithValidation(position);
+        this.updateCount++;
+        if (this.frameCount % 30 === 0) {
+          console.log("🔄 SYNC: Real-time update", {
+            progress: (progress * 100).toFixed(1) + "%",
+            zoom: currentZoom.toFixed(2),
+            position: { x: position.x.toFixed(1), y: position.y.toFixed(1) },
+            frameCount: this.frameCount
+          });
+        }
+      } else {
+        console.warn("🔄 SYNC: Invalid position, skipping update");
+      }
+    } catch (error) {
+      console.error("🔄 SYNC: Animation frame error:", error);
+    }
+  }
+  /**
+   * Calculate predicted spotlight position based on animation progress
+   */
+  getPredictedSpotlightPosition(progress) {
+    if (!this.targetGeometry || !this.startZoom || !this.targetZoom) {
+      return null;
+    }
+    try {
+      const predictedZoom = this.startZoom + (this.targetZoom - this.startZoom) * progress;
+      const predictedCenter = new OpenSeadragon.Point(
+        this.startCenter.x + (this.targetCenter.x - this.startCenter.x) * progress,
+        this.startCenter.y + (this.targetCenter.y - this.startCenter.y) * progress
+      );
+      const position = this.calculatePositionAtPredictedState(
+        predictedCenter,
+        predictedZoom,
+        progress
+      );
+      return position;
+    } catch (error) {
+      console.error("🔄 SYNC: Prediction calculation failed:", error);
+      return null;
+    }
+  }
+  /**
+   * Calculate position at predicted viewport state
+   */
+  calculatePositionAtPredictedState(center, zoom, progress) {
+    if (!this.targetHotspot || !this.targetGeometry) return null;
+    try {
+      const hotspotBounds = this.getHotspotBounds(this.targetHotspot);
+      const hotspotCenter = {
+        x: hotspotBounds.centerX,
+        y: hotspotBounds.centerY
+      };
+      const viewportRect = this.viewer.container.getBoundingClientRect();
+      const viewportPoint = this.viewer.viewport.imageToViewportCoordinates(
+        hotspotCenter.x,
+        hotspotCenter.y
+      );
+      const windowPoint = this.viewer.viewport.viewportToWindowCoordinates(viewportPoint);
+      const xPercent = windowPoint.x / viewportRect.width * 100;
+      const yPercent = windowPoint.y / viewportRect.height * 100;
+      const geometry = this.calculateSpotlightGeometry(this.targetHotspot, zoom);
+      return {
+        x: xPercent,
+        y: yPercent,
+        radius: geometry.radius,
+        ellipseData: geometry.ellipseData,
+        zoom,
+        progress
+      };
+    } catch (error) {
+      console.error("🔄 SYNC: Position calculation failed:", error);
+      return null;
+    }
+  }
+  /**
+   * Validate coordinates to prevent undefined errors
+   */
+  validateCoordinates(position) {
+    if (!position) return false;
+    const isValid = typeof position.x === "number" && typeof position.y === "number" && typeof position.radius === "number" && isFinite(position.x) && isFinite(position.y) && isFinite(position.radius) && position.x >= -100 && position.x <= 200 && // Allow some margin
+    position.y >= -100 && position.y <= 200 && position.radius > 0 && position.radius < 2e3;
+    if (!isValid) {
+      console.warn("🔄 SYNC: Invalid coordinates detected:", position);
+    }
+    return isValid;
+  }
+  /**
+   * Apply position with validation and drift prevention
+   */
+  applyPositionWithValidation(position) {
+    try {
+      this.positionHistory.push({
+        ...position,
+        timestamp: performance.now()
+      });
+      if (this.positionHistory.length > this.maxHistorySize) {
+        this.positionHistory.shift();
+      }
+      if (this.overlayManager) {
+        if (this.overlayManager.updateSpotlightPosition) {
+          this.overlayManager.updateSpotlightPosition(true);
+        } else if (this.overlayManager.redrawSynchronized) {
+          this.overlayManager.redrawSynchronized(true);
+        } else {
+          console.warn("🔄 SYNC: No update method available on overlayManager");
+        }
+      }
+      this.lastValidPosition = position;
+    } catch (error) {
+      console.error("🔄 SYNC: Failed to apply position:", error);
+    }
+  }
+  /**
+   * Correct drift by detecting sudden position jumps
+   */
+  correctDrift(position) {
+    if (!this.lastValidPosition || this.positionHistory.length < 2) {
+      return position;
+    }
+    const distance = Math.sqrt(
+      Math.pow(position.x - this.lastValidPosition.x, 2) + Math.pow(position.y - this.lastValidPosition.y, 2)
+    );
+    const maxJump = 20;
+    if (distance > maxJump) {
+      console.log("🔄 SYNC: Drift detected, correcting position");
+      const factor = 0.3;
+      return {
+        x: this.lastValidPosition.x + (position.x - this.lastValidPosition.x) * factor,
+        y: this.lastValidPosition.y + (position.y - this.lastValidPosition.y) * factor,
+        radius: this.lastValidPosition.radius + (position.radius - this.lastValidPosition.radius) * factor,
+        ellipseData: position.ellipseData
+      };
+    }
+    return position;
+  }
+  /**
+   * Use fallback position when calculations fail
+   */
+  useFallbackPosition() {
+    if (this.lastValidPosition) {
+      console.log("🔄 SYNC: Using last valid position as fallback");
+      this.applyPositionWithValidation(this.lastValidPosition);
+    } else if (this.targetPosition) {
+      console.log("🔄 SYNC: Using pre-calculated target position as fallback");
+      this.applyPositionWithValidation({
+        ...this.targetPosition,
+        radius: 200
+        // Safe default radius
+      });
+    }
+  }
+  /**
+   * Handle animation finish event
+   */
+  onAnimationFinish() {
+    console.log("🔄 SYNC: Animation finished", {
+      frameCount: this.frameCount,
+      updateCount: this.updateCount,
+      success: this.updateCount > 0
+    });
+    if (this.targetPosition && this.targetGeometry) {
+      const finalPosition = {
+        x: this.targetPosition.x,
+        y: this.targetPosition.y,
+        radius: this.targetGeometry.radius,
+        ellipseData: this.targetGeometry.ellipseData
+      };
+      this.applyPositionWithValidation(finalPosition);
+      console.log("🔄 SYNC: Final position applied");
+    }
+    setTimeout(() => {
+      this.stop();
+    }, 200);
+  }
+  /**
+   * Stop synchronization
+   */
+  stop() {
+    if (!this.isActive) return;
+    console.log("🔄 SYNC: Stopping synchronization");
+    this.isActive = false;
+    this.animationStartTime = null;
+    this.targetHotspot = null;
+    this.targetGeometry = null;
+    this.positionHistory = [];
+    if (this.overlayManager && this.overlayManager.endCinematicFreeze) {
+      this.overlayManager.endCinematicFreeze();
+    }
+  }
+  /**
+   * Easing function matching OpenSeadragon's spring
+   */
+  easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 + 4 * (t - 1) * (t - 1) * (t - 1);
+  }
+  /**
+   * Get hotspot bounds
+   */
+  getHotspotBounds(hotspot) {
+    if (!hotspot.coordinates) return null;
+    let minX = Infinity, minY = Infinity;
+    let maxX = -Infinity, maxY = -Infinity;
+    const processPoints = (points) => {
+      points.forEach(([x, y]) => {
+        minX = Math.min(minX, x);
+        minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x);
+        maxY = Math.max(maxY, y);
+      });
+    };
+    if (hotspot.shape === "polygon") {
+      processPoints(hotspot.coordinates);
+    } else if (hotspot.shape === "multipolygon") {
+      hotspot.coordinates.forEach((polygon) => processPoints(polygon));
+    }
+    return {
+      x: minX,
+      y: minY,
+      width: maxX - minX,
+      height: maxY - minY,
+      centerX: (minX + maxX) / 2,
+      centerY: (minY + maxY) / 2
+    };
+  }
+  /**
+   * Calculate spotlight geometry
+   */
+  calculateSpotlightGeometry(hotspot, zoom) {
+    const bounds = this.getHotspotBounds(hotspot);
+    if (!bounds) return null;
+    const radius = Math.max(bounds.width, bounds.height) / 2;
+    const imageSize = this.viewer.world.getItemAt(0).getContentSize();
+    const viewportRect = this.viewer.container.getBoundingClientRect();
+    const radiusInViewport = radius / imageSize.x;
+    const radiusPixels = radiusInViewport * viewportRect.width * zoom;
+    return {
+      center: { x: bounds.centerX, y: bounds.centerY },
+      radius: Math.max(80, Math.min(400, radiusPixels * 1.2)),
+      ellipseData: null
+      // Simplified for prediction
+    };
+  }
+  /**
+   * Update overlay position directly (fallback method)
+   */
+  updateOverlayPosition(position) {
+    if (!this.overlayManager.overlayElement) return;
+    try {
+      const gradient = this.overlayManager.createGradientMask(
+        position.x,
+        position.y,
+        position.radius,
+        1,
+        // scale
+        false,
+        // useEllipse
+        position.ellipseData
+      );
+      const element = this.overlayManager.overlayElement;
+      element.style.webkitMaskImage = gradient;
+      element.style.maskImage = gradient;
+    } catch (error) {
+      console.error("🔄 SYNC: Direct position update failed:", error);
+    }
+  }
+  /**
+   * Get current status for debugging
+   */
+  getStatus() {
+    var _a;
+    return {
+      isActive: this.isActive,
+      targetHotspot: (_a = this.targetHotspot) == null ? void 0 : _a.id,
+      animationProgress: this.animationStartTime ? Math.min(
+        (performance.now() - this.animationStartTime) / this.animationDuration,
+        1
+      ) : 0,
+      frameCount: this.frameCount,
+      updateCount: this.updateCount,
+      hasTargetGeometry: !!this.targetGeometry,
+      hasLastValidPosition: !!this.lastValidPosition,
+      positionHistorySize: this.positionHistory.length
+    };
+  }
+  /**
+   * Cleanup when destroying
+   */
+  destroy() {
+    this.stop();
+    this.viewer = null;
+    this.overlayManager = null;
+    console.log("SpotlightSynchronizer destroyed");
   }
 }
 class PredictiveTileLoader {
@@ -6501,6 +7027,12 @@ const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourc
     showHomeControl: false,
     showFullPageControl: false,
     showRotationControl: false,
+    // CRITICAL FIX: Disable auto-resize to prevent post-animation oscillation
+    // OpenSeadragon 4.1.0 bug: viewport.resize() triggers fitBounds() during animations
+    // causing exponential springs to never settle (fixed in 5.0.0 PR #2469)
+    // MOBILE FIX: Keep autoResize ON for mobile to prevent hotspot misalignment
+    // Mobile browsers change container height when UI bars appear/disappear
+    autoResize: isMobileDevice ? true : false,
     // Input - DISABLED double-click zoom
     gestureSettingsMouse: {
       scrollToZoom: true,
@@ -8747,6 +9279,9 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   }, 1e3);
   const cinematicZoomManager = new CinematicZoomManager(viewer, componentsObj);
   componentsObj.cinematicZoomManager = cinematicZoomManager;
+  const spotlightSynchronizer = new SpotlightSynchronizer(viewer, componentsObj.overlayManager);
+  componentsObj.spotlightSynchronizer = spotlightSynchronizer;
+  console.log("[SpotlightSync] Initialized - spotlight will track polygonal shape during zoom");
   const predictiveTileLoader = new PredictiveTileLoader(viewer);
   componentsObj.predictiveTileLoader = predictiveTileLoader;
   const vignetteOverlay = new VignetteOverlay(viewer);
@@ -8880,32 +9415,6 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   window.osdGoHome = function() {
     if (viewer && viewer.viewport) {
       viewer.viewport.goHome(false);
-    }
-  };
-  window.testTempo1 = function(viewportX, viewportY) {
-    if (!window.temporalEchoController) {
-      console.error("TemporalEchoController not initialized yet");
-      return { success: false, error: "Controller not ready" };
-    }
-    const tapData = {
-      x: viewportX || 0.5,
-      y: viewportY || 0.5,
-      duration: 100,
-      // Fast tap
-      movement: 0,
-      timestamp: Date.now()
-    };
-    console.log("[testTempo1] Simulating TEMPO 1 tap at:", tapData);
-    try {
-      window.temporalEchoController.handleQuickTap(tapData);
-      return {
-        success: true,
-        tapData,
-        message: "TEMPO 1 triggered - border should reveal for 2s"
-      };
-    } catch (error) {
-      console.error("[testTempo1] Error:", error);
-      return { success: false, error: error.message };
     }
   };
   if (isMobileDevice) {
@@ -9055,7 +9564,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-y3BAnnFk.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-CuhMzJpt.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(
     viewer,
     state,

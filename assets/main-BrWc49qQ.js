@@ -17660,8 +17660,8 @@ class CSSOverlayManager {
       this.updateSpotlightPosition();
     }
   }
-  updateSpotlightPosition() {
-    if (this.renderingPaused) {
+  updateSpotlightPosition(force = false) {
+    if (this.renderingPaused && !force) {
       return;
     }
     if (!this.state.selectedHotspot || !this.overlayElement) return;
@@ -19144,8 +19144,8 @@ class Canvas2DOverlayManager {
   /**
    * Redraw synchronized with OpenSeadragon's viewport
    */
-  redrawSynchronized() {
-    if (this.renderingPaused) {
+  redrawSynchronized(force = false) {
+    if (this.renderingPaused && !force) {
       return;
     }
     performanceDiagnostics.startFrame();
@@ -20204,6 +20204,24 @@ function useViewerAnimations(viewer, state, components) {
       }
       if (components().overlayManager && components().overlayManager.startZoomAnimation) {
         components().overlayManager.startZoomAnimation();
+      }
+      if (components().spotlightSynchronizer && hotspot) {
+        const currentZoom = viewer.viewport.getZoom();
+        const targetZoom = viewer.viewport.getBounds().width / bounds.width;
+        const zoomRatio = targetZoom / currentZoom;
+        const isMobileDevice = /Android|iPhone|iPad/i.test(navigator.userAgent);
+        let expectedDuration;
+        if (zoomRatio < 2) {
+          expectedDuration = (isMobileDevice ? 1.5 : 2) * 1e3;
+        } else if (zoomRatio < 5) {
+          expectedDuration = (isMobileDevice ? 2 : 3) * 1e3;
+        } else {
+          expectedDuration = (isMobileDevice ? 2.8 : 4.5) * 1e3;
+        }
+        components().spotlightSynchronizer.startSynchronization(hotspot, expectedDuration);
+        console.log(
+          `[SpotlightSync] Started for hotspot ${hotspot.id}, duration: ${expectedDuration}ms`
+        );
       }
       await cinematicManager.performZoom(bounds, zoomOptions);
     } catch (error) {
@@ -21795,7 +21813,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-mmX_D8GD.js").then((n) => n.v);
+      } = await import("./viewerSetup-BdigS6FA.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
@@ -39079,21 +39097,21 @@ function initializePassiveEventOptimization() {
   }
   return supportsPassive;
 }
-var _tmpl$ = /* @__PURE__ */ template(`<p>Fixed some <span>subtle but important interaction issues</span> across all devices. On desktop, hotspot borders were sometimes getting stuck after hovering or clicking - they now disappear cleanly as intended.`), _tmpl$2 = /* @__PURE__ */ template(`<p>For mobile users, the <span>two-tap reveal system</span> is working correctly now. The first tap reveals the hidden hotspot boundary, the second tap zooms in - exactly as designed. This was accidentally sometimes bypassing straight to zoom on both Android and iOS.`), _tmpl$3 = /* @__PURE__ */ template(`<p><em>These are quality-of-life fixes that make the experience feel more polished and predictable.`), _tmpl$4 = /* @__PURE__ */ template(`<p>Zooming and panning should be <span>significantly smoother</span> on mobile. Fixed how the gallery processes hotspots - it was redrawing hundreds of them individually during each zoom, now they're batched together in a single pass`), _tmpl$5 = /* @__PURE__ */ template(`<p><em>The changes should be noticeable during navigation and zooming.`), _tmpl$6 = /* @__PURE__ */ template(`<p>The artwork now responds <span>noticeably faster to your touch</span> on mobile, with smoother zooming that better preserves the flow of the piece details. I improved how the gallery handles the interactive hotspots - it now processes them quicker while using less battery.`), _tmpl$7 = /* @__PURE__ */ template(`<p>The occasional <span>black tiles</span> are still showing up sometimes on iPad, though it should be much less frequent now. I've been chasing this one for a while - it's related to how Safari manages memory during fast panning.`), _tmpl$8 = /* @__PURE__ */ template(`<p><em>Things should feel <span>more responsive</span> on your iPhone and iPad now. Step by step, it should be improving overall quite well.`), _tmpl$9 = /* @__PURE__ */ template(`<p>The <span>black tile flashing</span> issue should be much better now. Found that OpenSeadragon's fade animations were clashing with mobile browsers - disabling them seems to help the overall smoothness quite a bit.`), _tmpl$0 = /* @__PURE__ */ template(`<p>For iPhone and iPad users, I removed some transparency processing that wasn't needed for the monochrome art. This should give you <span>noticeably better performance</span>.`), _tmpl$1 = /* @__PURE__ */ template(`<p><em>You should progressively feel the difference as these optimizations accumulate. `), _tmpl$10 = /* @__PURE__ */ template(`<p>The artwork loads <span>40-60% faster</span> on Android (improvements should be felt on iPhone/iPad too). Simplified code - switched from doing multiple drawing steps to just one clean pass. The details of the artwork should stay crisp.`), _tmpl$11 = /* @__PURE__ */ template(`<p>Touch feels more responsive than before on my Android test device. Can't verify <span>iOS improvements</span> yet since I don't have an iPhone, but the changes should help there too. Black tiles still flash occasionally when panning quickly - that's next on my list.`), _tmpl$12 = /* @__PURE__ */ template(`<p><em>The mobile experience keeps <span>improving bit by bit</span>. Not where I want it to be, but getting closer.`), _tmpl$13 = /* @__PURE__ */ template(`<p>The artwork now responds <span>instantly to touch</span> on Android devices, with smoother panning that better matches the flow of Deji's intricate linework. Deleted 2,000+ lines of code that were trying too hard - sometimes less really is more!`), _tmpl$14 = /* @__PURE__ */ template(`<p>This simplification means <span>less memory usage</span> and more predictable behavior across all browsers. Without iOS devices to test on, I'm curious to hear if iPhone users feel the difference too.`), _tmpl$15 = /* @__PURE__ */ template(`<p><em>Each day brings incremental gains as we approach that <span>fluid gallery experience</span> where the technology disappears and only the art remains. Getting closer!`), _tmpl$16 = /* @__PURE__ */ template(`<p><strong>The fix:</strong> Resolved the issue where the entire artwork would disappear on iOS devices after panning or zooming.`), _tmpl$17 = /* @__PURE__ */ template(`<p><strong>What was happening:</strong> iOS canvas memory limitations were causing the entire display to fail and show a blank screen after interactions.`), _tmpl$18 = /* @__PURE__ */ template(`<p><strong>Still working on:</strong> Some tiles may appear black temporarily during fast panning or zooming. This is the next issue to address on iOS devices.`), _tmpl$19 = /* @__PURE__ */ template(`<p>Made some under-the-hood optimizations that should improve performance on mobile devices. The app should feel a bit smoother when zooming and panning.`), _tmpl$20 = /* @__PURE__ */ template(`<h4>What's improved`), _tmpl$21 = /* @__PURE__ */ template(`<p>Rewrote parts of the rendering system to be more efficient. You should notice slightly better frame rates and more responsive touch interactions on iPhone and iPad. These are incremental improvements while I work on bigger optimizations.`), _tmpl$22 = /* @__PURE__ */ template(`<p><em>This is ongoing work - more performance improvements are coming as I continue refining the mobile experience.`), _tmpl$23 = /* @__PURE__ */ template(`<p><strong>Good news:</strong> Haptic feedback now works on a wider range of devices when you tap to reveal hotspots. The vibration provides tactile confirmation that your interaction was registered.`), _tmpl$24 = /* @__PURE__ */ template(`<h4>Device Support Status`), _tmpl$25 = /* @__PURE__ */ template(`<div><img alt="Haptic Support Table">`), _tmpl$26 = /* @__PURE__ */ template(`<p><strong>Technical limitation:</strong> Apple deliberately blocks web-based vibration access on older iOS versions and all iPads for security reasons. Only iOS 17.4+ allows limited haptic feedback through a workaround. Android has always supported the standard Vibration API.`), _tmpl$27 = /* @__PURE__ */ template(`<p><strong>Note on iOS vibrations:</strong> The ios-haptics library uses the checkbox switch trick which produces a fixed, non-configurable feedback. I cannot test this myself on iOS 17.4+ devices, so the actual feel may differ from Android.`), _tmpl$28 = /* @__PURE__ */ template(`<p><em>The app automatically detects device capabilities and enables vibration where possible. No configuration needed. Also removed tap sounds on mobile to reduce sensory overload.`), _tmpl$29 = /* @__PURE__ */ template(`<h4>Next priority`), _tmpl$30 = /* @__PURE__ */ template(`<p>Rather than spending more time on iOS vibration alternatives (like pseudo-haptic effects for older devices), I'm shifting focus to <strong>mobile performance improvements</strong>. Getting the app running smoothly on all devices takes precedence over vibration fallbacks.`), _tmpl$31 = /* @__PURE__ */ template(`<p>Fixed a bug that was breaking the tap-to-reveal feature on mobile after a few uses. The app was essentially forgetting to clean up after itself, causing it to stop working entirely.`), _tmpl$32 = /* @__PURE__ */ template(`<h4>What was happening`), _tmpl$33 = /* @__PURE__ */ template(`<p><strong>The problem:</strong> After tapping 3-4 times to reveal hotspots, nothing would appear anymore. You had to reload the page to get it working again.<br><strong>Why it happened:</strong> The app was creating invisible timers that never got cleared, like setting multiple alarms but forgetting which ones you set. These orphaned timers would interfere with new reveals.`), _tmpl$34 = /* @__PURE__ */ template(`<h4>The fix`), _tmpl$35 = /* @__PURE__ */ template(`<p>Now the app properly tracks and cleans up all timers. You can tap and reveal hotspots indefinitely without any degradation. Mobile exploration is finally stable for extended sessions.`), _tmpl$36 = /* @__PURE__ */ template(`<p>Added an experimental "Ripple" exploration mode for mobile that reveals hotspots in an expanding pattern from where you tap. Just a weekend side project I wanted to try out.`), _tmpl$37 = /* @__PURE__ */ template(`<h4>What's new`), _tmpl$38 = /* @__PURE__ */ template(`<p>Tap anywhere and hotspots appear in a ripple effect around your touch point - like sonar discovering what's hidden nearby. You can switch between "Focus" (one hotspot) and "Ripple" exploration modes using the debug button (bottom left corner).`), _tmpl$39 = /* @__PURE__ */ template(`<h4>Known issues`), _tmpl$40 = /* @__PURE__ */ template(`<p>This is very experimental. Currently reveals way too many hotspots (sometimes 30+) and the visual effect is chaotic rather than elegant. The animations need refinement.`), _tmpl$41 = /* @__PURE__ */ template(`<h4>Why test this`), _tmpl$42 = /* @__PURE__ */ template(`<p>Testing if can we show 3-5 hotspots per tap in an elegant way without overwhelming users. Experimenting with finding the balance between helpful context and visual clarity for those tiny hotspots that single-tap might miss.`), _tmpl$43 = /* @__PURE__ */ template(`<h4>Four critical improvements today`), _tmpl$44 = /* @__PURE__ */ template(`<p><strong>1. Mobile fade finally works:</strong> Fixed the spotlight darkening that was stuck on mobile devices. The black overlay around hotspots now fades progressively when you pinch to zoom out on iPad, iPhone, and Android. I discovered that mobile browsers handle touch gestures differently than desktop, so I rewrote the entire fade system to work with how mobile devices actually track your finger movements.`), _tmpl$45 = /* @__PURE__ */ template(`<p><strong>2. Instant fade response:</strong> The fade now begins immediately when you start zooming out. Previously, you had to pinch excessively before seeing any change - this delay is now completely eliminated.`), _tmpl$46 = /* @__PURE__ */ template(`<p><strong>3. Clean transitions:</strong> Fixed the lingering white borders that would sometimes remain visible after the spotlight effect ended. All visual elements now synchronize properly for seamless transitions.`), _tmpl$47 = /* @__PURE__ */ template(`<p><strong>4. iPad clarity restored:</strong> Resolved the severe pixelation that was occurring during zoom and pan on iPad. The artwork now maintains crisp quality during all interactions while preserving smooth 30+ FPS performance.`), _tmpl$48 = /* @__PURE__ */ template(`<p><em>These fixes resolve all known mobile spotlight issues. The experience is now consistent and polished across every device.`), _tmpl$49 = /* @__PURE__ */ template(`<h4>1. Fixed a stability issue`), _tmpl$50 = /* @__PURE__ */ template(`<p>Discovered and fixed a bug where hotspot animations could stop working after multiple page refreshes. The issue was that old animation code was accumulating in the browser's memory. The app now properly cleans itself up between page loads, preventing any animation glitches.`), _tmpl$51 = /* @__PURE__ */ template(`<h4>2. Google Sheets pipeline is ready`), _tmpl$52 = /* @__PURE__ */ template(`<p>I've completed the pipeline to sync your Excel data. All 5 sheets (hotspots, journeys, gallery, overrides, settings) are mapped correctly with the 93 fields you defined. The app currently uses about 15% of these fields, but the pipeline preserves all of them for future features. Once you send me the Google Sheets credentials, you'll be able to update content directly in your spreadsheet, and I'll handle syncing the changes to the app when needed.`), _tmpl$53 = /* @__PURE__ */ template(`<p><em>The app is running smoothly and ready for the next phase with Google Sheets integration.`), _tmpl$54 = /* @__PURE__ */ template(`<p>Added a new "single" reveal mode for mobile that shows only the closest hotspot when tapping, addressing feedback about multiple hotspots being confusing.`), _tmpl$55 = /* @__PURE__ */ template(`<p><strong>Single mode (default on mobile)</strong><br>When you tap the screen, only the single closest hotspot is revealed instead of multiple hotspots in a radius. This makes the experience less overwhelming and more focused.`), _tmpl$56 = /* @__PURE__ */ template(`<p><strong>Multiple mode (optional)</strong><br>The original behavior of revealing multiple hotspots is still available for users who prefer seeing more context at once.`), _tmpl$57 = /* @__PURE__ */ template(`<p><strong>Debug panel toggle</strong><br>Added a new "Reveal" section to the mobile debug panel where users can switch between different reveal modes. The preference is saved and persists between sessions.`), _tmpl$58 = /* @__PURE__ */ template(`<p><em>Note: The visual styling hasn't been refined yet - this is a functional implementation to test the concept. The animations and visual feedback will be polished based on user feedback.`), _tmpl$59 = /* @__PURE__ */ template(`<p><strong>iPhone black line:</strong> Fixed! The horizontal black line at the bottom is gone. Issue was with canvas sizing calculations on iOS.`), _tmpl$60 = /* @__PURE__ */ template(`<p><strong>iPad performance:</strong> Improved significantly. Now auto-detects iPad model and adjusts performance settings accordingly. Resolution catches up faster when zooming.`), _tmpl$61 = /* @__PURE__ */ template(`<p><strong>Known issue:</strong> Tiles sometimes flicker on iPad (reload too often). Working on this next.`), _tmpl$62 = /* @__PURE__ */ template(`<p>Focused on making the viewer faster and more responsive, especially on phones. You should notice smoother panning and zooming now.`), _tmpl$63 = /* @__PURE__ */ template(`<h4>What's better`), _tmpl$64 = /* @__PURE__ */ template(`<p><strong>Mobile performance:</strong> Significantly improved how the viewer handles touch navigation.<br><strong>Smooth transitions:</strong> Added subtle fade effects that make exploring feel more fluid.<br><strong>Safari fixes:</strong> Resolved the visual issues that were happening on Apple devices.`), _tmpl$65 = /* @__PURE__ */ template(`<p><em>A week of under-the-hood improvements. Nothing flashy, but everything should feel more solid.`), _tmpl$66 = /* @__PURE__ */ template(`<p>Made significant progress on mobile performance, particularly for panning and zooming. The viewer now feels noticeably more responsive when navigating the artwork on phones and tablets.`), _tmpl$67 = /* @__PURE__ */ template(`<p><strong>Smoother panning:</strong> Dragging to explore the artwork now maintains better frame rates and feels more fluid.<br><strong>Responsive zoom:</strong> Pinch-to-zoom and double-tap zoom are more responsive with less lag.<br><strong>Smarter tile loading:</strong> The viewer now loads the right image tiles at the right time, reducing stuttering during navigation.<br><strong>Network adaptation:</strong> On slower connections, the viewer automatically adjusts quality to maintain smooth performance.`), _tmpl$68 = /* @__PURE__ */ template(`<h4>Technical improvements`), _tmpl$69 = /* @__PURE__ */ template(`<p>We've implemented several optimizations including spatial indexing for faster hotspot detection, intelligent caching for better memory usage, and GPU-accelerated rendering for smoother animations. These changes lay the groundwork for future improvements.`), _tmpl$70 = /* @__PURE__ */ template(`<h4>Work in progress`), _tmpl$71 = /* @__PURE__ */ template(`<p>While navigation is much improved, there's still work to be done. The cinematic zoom animations need refinement, and overall performance can be pushed further. We're continuing to optimize for that perfect, buttery-smooth experience across all devices.`), _tmpl$72 = /* @__PURE__ */ template(`<p><em>Performance optimization is an ongoing journey. Each improvement gets us closer to the ideal experience, and your feedback helps identify what to prioritize next.`), _tmpl$73 = /* @__PURE__ */ template(`<p>Added a ripple effect when tapping on mobile devices. Now when you tap anywhere on the screen, you'll see a subtle expanding circle that helps confirm your touch was registered.`), _tmpl$74 = /* @__PURE__ */ template(`<p><strong>Visual feedback:</strong> A gentle white ripple emanates from your tap location, making the interface feel more responsive.<br><strong>Hotspot revealing:</strong> The ripple helps you discover hidden hotspots - up to 10 nearby hotspots briefly appear with a staggered animation.<br><strong>Touch confirmation:</strong> Especially helpful on dense areas of the artwork where you might wonder if your tap registered.`), _tmpl$75 = /* @__PURE__ */ template(`<h4>Technical details`), _tmpl$76 = /* @__PURE__ */ template(`<p>The ripple expands to 200 pixels and reveals hotspots within that radius. Each hotspot appears with a 30ms delay, creating a smooth cascade effect. The entire sequence lasts 2 seconds before fading away.`), _tmpl$77 = /* @__PURE__ */ template(`<p><em>This makes exploring the artwork on phones and tablets feel more intuitive and satisfying.`), _tmpl$78 = /* @__PURE__ */ template(`<p>Enhanced the hotspot stroke animation with authentic pigment liner characteristics inspired by your original artwork. The hover effects now better match the organic, hand-drawn quality of your pen work.`), _tmpl$79 = /* @__PURE__ */ template(`<p><strong>Authentic pigment colors:</strong> Three color variants (neutral, warm, cool) that mirror real BlackPigment liner pens used in traditional ink work.<br><strong>Organic texture effects:</strong> Subtle micro-blur and grain that recreate the natural imperfections of physical ink on paper.<br><strong>Enhanced visibility:</strong> Improved contrast and brightness while maintaining the authentic look of hand-drawn lines.`), _tmpl$80 = /* @__PURE__ */ template(`<p><strong>Adaptive animation system:</strong> Three-speed animation levels that respond to zoom depth that brings the strokes to life.`), _tmpl$81 = /* @__PURE__ */ template(`<p>The stroke animation now starts from a different point each time you hover over a hotspot. Small detail, but it adds to the organic feel we've been building.`), _tmpl$82 = /* @__PURE__ */ template(`<h4>What changed`), _tmpl$83 = /* @__PURE__ */ template(`<p><strong>Random starting points:</strong> Each hover animation begins from a different position on the shape's outline.<br><strong>Safari compatibility:</strong> Fixed the implementation to work properly on Safari and iOS devices.`), _tmpl$84 = /* @__PURE__ */ template(`<p>Together with yesterday's timing variations, each hotspot interaction now feels more natural and less repetitive.`), _tmpl$85 = /* @__PURE__ */ template(`<p>Added subtle variations to animations to make them feel more organic and hand-drawn. Each hotspot now reveals with its own unique character, preventing the repetitive feel of identical animations.`), _tmpl$86 = /* @__PURE__ */ template(`<p><strong>Timing variations:</strong> Each animation has a slightly different speed (±10% variation), making the reveals feel more natural.<br><strong>Curve adjustments:</strong> The animation curves are subtly varied for each hotspot, creating unique motion personalities.<br><strong>Organic feel:</strong> As you explore and hover over different hotspots, each one feels hand-drawn and unique rather than computer-generated.`), _tmpl$87 = /* @__PURE__ */ template(`<h4>Why it matters`), _tmpl$88 = /* @__PURE__ */ template(`<p>When you hover over different hotspots throughout your exploration, each one now feels unique rather than repetitive. Every animation has its own rhythm and flow, creating a more artistic and engaging experience. It's a small detail that makes a big difference in how alive the artwork feels.`), _tmpl$89 = /* @__PURE__ */ template(`<p>These micro-variations are subtle enough to feel natural but significant enough to eliminate the "robot" feeling from animations.`), _tmpl$90 = /* @__PURE__ */ template(`<p>Refined the button controls and zoom behavior based on user feedback. The viewing experience is now more intuitive and responsive across all devices.`), _tmpl$91 = /* @__PURE__ */ template(`<h4>Button improvements`), _tmpl$92 = /* @__PURE__ */ template(`<p><strong>Better positioning:</strong> Buttons are now optimally placed on both landscape and portrait orientations.<br><strong>Visual refinements:</strong> Updated button styles for better visibility and a more modern look.<br><strong>Touch targets:</strong> Improved button sizes and spacing for easier interaction on mobile devices.`), _tmpl$93 = /* @__PURE__ */ template(`<h4>Zoom enhancements`), _tmpl$94 = /* @__PURE__ */ template(`<p><strong>Cinematic zoom:</strong> Smoother, more natural zoom animations when clicking on hotspots.<br><strong>Mouse wheel support:</strong> You can now zoom in and out using your mouse wheel or trackpad for precise control.<br><strong>Improved performance:</strong> Zoom operations are now more fluid, especially on mobile devices.`), _tmpl$95 = /* @__PURE__ */ template(`<p>These improvements make navigation feel more natural and give you better control over your viewing experience. The combination of refined buttons and enhanced zoom creates a more professional and polished interface.`), _tmpl$96 = /* @__PURE__ */ template(`<p>Completed a significant restructuring of the hotspot rendering system. The code is now much more organized and maintainable, which means faster improvements and easier bug fixes going forward.`), _tmpl$97 = /* @__PURE__ */ template(`<h4>What changed under the hood`), _tmpl$98 = /* @__PURE__ */ template(`<p>Split the renderer file into smaller, focused modules. Each piece now handles one specific job - animations, Safari compatibility, performance optimization, etc. It's like organizing a cluttered workshop where every tool now has its proper place.`), _tmpl$99 = /* @__PURE__ */ template(`<h4>What this means for you`), _tmpl$100 = /* @__PURE__ */ template(`<p><strong>More reliable performance:</strong> The rendering system is now more efficient and predictable.<br><strong>Easier updates:</strong> Adding new features or fixing issues is now much simpler.<br><strong>Better stability:</strong> Less chance of one change breaking something else.`), _tmpl$101 = /* @__PURE__ */ template(`<p>Everything should work exactly as before - this was purely about making the code cleaner and more professional. If you notice any differences in behavior, please let me know!`), _tmpl$102 = /* @__PURE__ */ template(`<p>Fixed the annoying flickering issue that occurred at the end of cinematic zoom animations. The zoom transitions are now smooth and stable across all platforms.`), _tmpl$103 = /* @__PURE__ */ template(`<p>When zooming to a hotspot or expanding to full view, the animation would flicker between two zoom levels during the final moments. This was caused by conflicting optimization systems fighting for control.`), _tmpl$104 = /* @__PURE__ */ template(`<h4>The complete solution`), _tmpl$105 = /* @__PURE__ */ template(`<p>The flickering issue is now mostly resolved, but a complete fix still requires switching renderers once. This is a known initialization issue that we're investigating.`), _tmpl$106 = /* @__PURE__ */ template(`<p><strong>Temporary workaround:</strong> If you still see flickering, press 'C' to open debug menu, click "Soft Glow" then "Sharp Outline" to fully eliminate the issue.`), _tmpl$107 = /* @__PURE__ */ template(`<p><strong>Alternative:</strong> Type <code>fixFlickering()</code> in the browser console.`), _tmpl$108 = /* @__PURE__ */ template(`<ol><li><strong>Applied TileCascadeFix at startup</strong> - Prevents tile cascade issues</li><li><strong>Implemented CinematicZoomManager</strong> - Coordinates all zoom animations with proper damping</li><li><strong>Added forceRedraw() calls</strong> - Ensures the viewer refreshes properly after animations</li><li><strong>State reset after initialization</strong> - Attempts to clean up any initialization issues`), _tmpl$109 = /* @__PURE__ */ template(`<p><strong>Desktop:</strong> 1.0s animation with 6.5 spring stiffness<br><strong>Mobile:</strong> 1.2s animation with 8.0 spring stiffness<br><strong>Cinematic mode:</strong> Temporarily disables tile optimizations during zoom`), _tmpl$110 = /* @__PURE__ */ template(`<p><em>The difference is immediately noticeable - zoom animations now feel professional and polished, matching the quality of the rest of the viewer.`), _tmpl$111 = /* @__PURE__ */ template(`<p>Removed the complex "Zoom Performance" section from the debug menu to simplify the interface.`), _tmpl$112 = /* @__PURE__ */ template(`<p>The debug menu now focuses on essential controls for visual customization, interaction behavior, and hotspot discovery. Advanced zoom tuning parameters have been removed as they were rarely used and added unnecessary complexity.`), _tmpl$113 = /* @__PURE__ */ template(`<p><em>The artwork already performs at 60 FPS with the default settings, making manual tuning unnecessary for most users.`), _tmpl$114 = /* @__PURE__ */ template(`<p>Fixed the issue where Playwright manual tests weren't opening a visible browser window. The tests were running in headless mode by default.`), _tmpl$115 = /* @__PURE__ */ template(`<p>Added the <code>--headed</code> option to all manual test scripts. Now when you run tests for Safari or mobile debugging, an actual browser window will open for visual inspection.`), _tmpl$116 = /* @__PURE__ */ template(`<h4>Available test commands`), _tmpl$117 = /* @__PURE__ */ template(`<p><strong>Safari Desktop Manual Test:</strong><br><code>npm run test:safari-desktop</code><br>Opens webkit browser for desktop Safari testing with debug overlays.`), _tmpl$118 = /* @__PURE__ */ template(`<p><strong>iOS Safari Manual Test:</strong><br><code>npm run test:ios-safari</code><br>Opens webkit browser for mobile Safari testing.`), _tmpl$119 = /* @__PURE__ */ template(`<p><strong>Direct command with options:</strong><br><code>npx playwright test tests/safari-desktop-manual-test.spec.js --project=webkit --headed`), _tmpl$120 = /* @__PURE__ */ template(`<p><em>The test window stays open for 10 minutes to allow thorough manual testing. Press Ctrl+C to stop the test when done.`), _tmpl$121 = /* @__PURE__ */ template(`<p>Fixed a visual issue where the artwork was displaying grainy artifacts. The monochrome drawings now render cleanly at all zoom levels.`), _tmpl$122 = /* @__PURE__ */ template(`<p>The image had a noisy, pixelated appearance that was distracting. Adjusted the rendering settings to better handle black and white artwork - the difference is quite striking.`), _tmpl$123 = /* @__PURE__ */ template(`<p>Fixed several mobile-specific issues that were affecting the zoom experience and made the debug controls more reliable across all devices.`), _tmpl$124 = /* @__PURE__ */ template(`<h4>Mobile zoom improvements`), _tmpl$125 = /* @__PURE__ */ template(`<p><strong>Smoother zooming</strong><br>The cinematic zoom when tapping hotspots now performs better on phones and tablets. Reduced stuttering during the animation and improved frame rates on lower-end devices.`), _tmpl$126 = /* @__PURE__ */ template(`<p><strong>Touch responsiveness</strong><br>Fixed an issue where hotspots would sometimes become unresponsive after zooming. Touch interactions now reset properly after each zoom animation completes.`), _tmpl$127 = /* @__PURE__ */ template(`<h4>Debug panel refinements`), _tmpl$128 = /* @__PURE__ */ template(`<p>Made the mobile debug controls more stable - the slide-up panel now opens and closes more reliably, and the FPS counter updates consistently. Also improved the visual spacing on smaller screens.`), _tmpl$129 = /* @__PURE__ */ template(`<p><em>Small but important fixes that should make the mobile experience feel more polished and responsive.`), _tmpl$130 = /* @__PURE__ */ template(`<p>The debug controls (press 'C' to open) now work on phones and tablets.`), _tmpl$131 = /* @__PURE__ */ template(`<p><strong>Mobile devices</strong><br>A compact bar at the bottom shows FPS and a settings icon. Tap it to reveal controls that slide up. Swipe down or tap outside to dismiss.`), _tmpl$132 = /* @__PURE__ */ template(`<p><strong>Desktop</strong><br>The panel can now be minimized to a small floating button instead of closing completely.`), _tmpl$133 = /* @__PURE__ */ template(`<p><em>Small quality-of-life improvement, but it makes testing on different devices much more pleasant!`), _tmpl$134 = /* @__PURE__ */ template(`<p>The experimental touch-hold system I mentioned yesterday is now more reliable. After testing, I found and fixed an issue where hotspots would sometimes stop responding after being activated once.`), _tmpl$135 = /* @__PURE__ */ template(`<p>If you enable "Temporal" mode in the debug menu (press 'C'), the hold-to-interact system now works consistently. Hotspots stay visible while you hold them, and each interaction resets cleanly for the next one.`), _tmpl$136 = /* @__PURE__ */ template(`<h4>Also tweaked`), _tmpl$137 = /* @__PURE__ */ template(`<p>Added white color options to the border palette since you're working with black ink artwork. More importantly, <strong>temporal mode is now the default on mobile devices</strong> - meaning visitors will use the hold-to-interact system instead of direct taps. You can always switch back to standard tap-to-zoom in the debug menu if needed.`), _tmpl$138 = /* @__PURE__ */ template(`<p>With ~600 interactive zones hidden throughout your artwork, I've added a way to briefly reveal what's clickable without disrupting the visual experience.`), _tmpl$139 = /* @__PURE__ */ template(`<h4>How it works`), _tmpl$140 = /* @__PURE__ */ template(`<p>Press 'H' (desktop) or triple-tap anywhere (mobile) to make all nearby hotspots gently pulse for 6 seconds. The effect uses contrast inversion to ensure visibility on your black ink artwork while staying subtle enough not to break immersion.`), _tmpl$141 = /* @__PURE__ */ template(`<h4>Also included: Alternative touch controls`), _tmpl$142 = /* @__PURE__ */ template(`<p>For mobile users, I've prepared an experimental hold-to-interact system that's currently tucked away in the debug menu. If you're curious, press 'C' to open debug options and switch from "Direct" to "Temporal" interaction. This changes how taps work - but the standard tap-to-zoom remains the default for now.`), _tmpl$143 = /* @__PURE__ */ template(`<p>The reveal helper should make exploration feel less like guesswork and more like discovery. Let me know if the visibility needs adjusting - it's easy to make it bolder or more subtle based on your preference.`), _tmpl$144 = /* @__PURE__ */ template(`<p><strong>Safari animations:</strong> Now working! Chrome/Firefox/Edge still have the edge visually, but Safari's functional. Requires Safari 13.1+ (2020 or newer).`), _tmpl$145 = /* @__PURE__ */ template(`<p><strong>Smart zoom behavior:</strong> Following Google Arts & Culture's approach, animations now adapt to zoom level. Below 8x zoom = full animations. Above 8x = quick 150ms transitions only. When you're examining details up close, decorative animations would just distract.`), _tmpl$146 = /* @__PURE__ */ template(`<p><strong>Next:</strong> Making the cinematic zoom buttery smooth when clicking hotspots. Also thinking the stroke animation makes sense for desktop, but mobile needs something snappier.`), _tmpl$147 = /* @__PURE__ */ template(`<p><em>Personal note: Getting really excited - it's starting to take shape! :D`), _tmpl$148 = /* @__PURE__ */ template(`<p><strong>Current status:</strong> While the hover animations now work on Safari, the visual effect isn't as pronounced as on Chrome/Firefox. I'm quite proud of the result on chrome at the moment. I think it's quite satisfying.`), _tmpl$149 = /* @__PURE__ */ template(`<p><strong>Recommendation:</strong> Use Chrome for now to see the intended visual impact. The difference is noticeable - Chrome displays richer glows and better depth.`), _tmpl$150 = /* @__PURE__ */ template(`<p><strong>What's next:</strong> Working on Safari-specific optimizations to improve the visual quality without compromising performance.`), _tmpl$151 = /* @__PURE__ */ template(`<p><strong>Following up on July 7th:</strong> The Safari issue is fixed! The stroke reveal animation now works properly on Safari desktop where you can actually hover.`), _tmpl$152 = /* @__PURE__ */ template(`<p><strong>Next up</strong>: Making the animation more visible and impactful for desktop users, plus exploring touch-friendly animations for mobile devices.`), _tmpl$153 = /* @__PURE__ */ template(`<p><strong>Responding to your feedback:</strong> You mentioned the hover effect felt static with just the white border appearing. I've implemented a first animation to bring more life to the interactions.`), _tmpl$154 = /* @__PURE__ */ template(`<p><strong>What's new:</strong> A stroke reveal animation that progressively traces the hotspot outline when you hover. Instead of the border just "popping" into view, it now draws itself smoothly around the shape - like watching someone trace the contour with a pen.`), _tmpl$155 = /* @__PURE__ */ template(`<p><strong>Current settings:</strong><br>• White stroke with subtle shadow for visibility<br>• 1.2 second drawing animation<br>• Works on Chrome, Firefox, and Edge`), _tmpl$156 = /* @__PURE__ */ template(`<p><strong>Needs refinement:</strong> The animation is quite subtle right now - you might have to look closely to see the progressive drawing effect. I'll be adjusting the timing and visibility to make it more noticeable and satisfying.`), _tmpl$157 = /* @__PURE__ */ template(`<p><strong>Safari issue discovered:</strong> Just noticed the animation isn't working properly on Safari (There's always something with Safari 🙃). Will fix this tomorrow along with the other refinements.`), _tmpl$158 = /* @__PURE__ */ template(`<p><strong>Note:</strong> This is one hover effect I wanted to try first. I'm planning to experiment with additional animations to find what feels best for your artwork. Let me know your thoughts!`), _tmpl$159 = /* @__PURE__ */ template(`<p><strong>What's improved:</strong> The circular spotlight effect in Apple Mode (Safari/iOS) now adapts much better to different hotspot shapes.`), _tmpl$160 = /* @__PURE__ */ template(`<p><strong>What changed:</strong><br>• Spotlights are now tighter and more focused around each hotspot (both mobile and desktop)<br>• Better detection of when to use circles vs ellipses based on hotspot shape`), _tmpl$161 = /* @__PURE__ */ template(`<p><strong>The result:</strong> Whether a hotspot is round, tall, wide, or irregular, the spotlight should now feel more natural and better frame the content the user is exploring.`), _tmpl$162 = /* @__PURE__ */ template(`<p>Try clicking on different shaped hotspots - the spotlight should feel more consistent and purposeful now!`), _tmpl$163 = /* @__PURE__ */ template(`<p><strong>The issue:</strong> Some complex hotspots still extend outside the spotlight area after yesterday's improvements.`), _tmpl$164 = /* @__PURE__ */ template(`<p><strong>Today's attempt:</strong> Since a single circular spotlight can't perfectly cover irregular shapes, I tried combining multiple circles at different positions to fill in the gaps. Unfortunately, Safari doesn't support this technique - it only displays one spotlight instead of blending them together like other browsers do.`), _tmpl$165 = /* @__PURE__ */ template(`<p><strong>Next:</strong> Fine-tuning the spotlight sizing parameters to better fit each hotspot's unique shape.`), _tmpl$166 = /* @__PURE__ */ template(`<p><strong>What's improved:</strong> The spotlight effect on Safari and iOS devices now much better matches the actual hotspot shapes, especially on desktop Safari!`), _tmpl$167 = /* @__PURE__ */ template(`<p><strong>Key changes:</strong><br>• Spotlights now use elliptical shapes for elongated hotspots<br>• Tighter, more precise spotlight coverage that follows the hotspot boundaries closely<br>• Better visual consistency between the outline of the hotspot and the darkened area<br>• Desktop Safari shows the most dramatic improvements, mobile iOS continues to be refined`), _tmpl$168 = /* @__PURE__ */ template(`<p><strong>Still fine-tuning:</strong> Some complex hotspots have small areas that peek slightly outside the spotlight. Mobile Safari needs additional optimization for the same precision as desktop.`), _tmpl$169 = /* @__PURE__ */ template(`<p><strong>What's new:</strong> You can now leave feedback directly on each update! No need to switch to Telegram for quick comments.`), _tmpl$170 = /* @__PURE__ */ template(`<p><strong>How it works:</strong><br>• Type your feedback in the text box below any update<br>• Click "Post Feedback" to send<br>• Edit or delete your comments anytime<br>• Everything syncs in real-time between us`), _tmpl$171 = /* @__PURE__ */ template(`<p><strong>Quick tip:</strong> The system remembers who you are. If it shows the wrong name, just click "Change" above the feedback box to switch between Deji and Leonard.`), _tmpl$172 = /* @__PURE__ */ template(`<p>Feel free to test it out below! This makes it much easier to discuss specific features without jumping between apps.`), _tmpl$173 = /* @__PURE__ */ template(`<p><strong>The Problem:</strong> In Apple Mode, the circular gradient spotlight doesn't show the exact boundaries of the clickable area. Users might not know where the hotspot actually ends.`), _tmpl$174 = /* @__PURE__ */ template(`<p><strong>Context:</strong> Since Apple/Safari doesn't support the precise polygon cutouts we have in Standard Mode (that's their technical limitation), we need to work within these constraints.`), _tmpl$175 = /* @__PURE__ */ template(`<p><strong>Today's Experiment:</strong> Added a subtle outline that follows the exact hotspot shape. The gradient spotlight stays circular, but now the actual boundaries are visible.`), _tmpl$176 = /* @__PURE__ */ template(`<p><strong>Note:</strong> This is very much a work in progress. The current implementation might be too distracting, not visible enough, or just not the right approach entirely.`), _tmpl$177 = /* @__PURE__ */ template(`<p><strong>Try it yourself:</strong> In debug mode (press 'C'), there's now a button to cycle through different border styles - from subtle to bold. Your feedback will help determine if we should refine this solution or try something completely different.`), _tmpl$178 = /* @__PURE__ */ template(`<p><strong>Following up on July 1st:</strong> The Safari compatibility issue has been resolved with a custom implementation.`), _tmpl$179 = /* @__PURE__ */ template(`<p><strong>The Solution:</strong> Created a Safari-specific spotlight system that works within WebKit's limitations:<br>• Uses radial gradient masks instead of polygon cutouts<br>• Provides a circular/elliptical spotlight effect around hotspots<br>• Maintains smooth 60 FPS performance on all iOS devices`), _tmpl$180 = /* @__PURE__ */ template(`<p><strong>What's Different:</strong><br>• <strong>Chrome/Firefox:</strong> Precise polygon cutout matching exact hotspot shape<br>• <strong>Safari/iOS:</strong> Smooth gradient spotlight that adapts to hotspot size`), _tmpl$181 = /* @__PURE__ */ template(`<p><strong>Added Intelligence:</strong> While implementing the Safari solution, the system now analyzes each hotspot's complexity to determine optimal spotlight sizing. Complex shapes get more breathing room, simple shapes stay tight and focused.`), _tmpl$182 = /* @__PURE__ */ template(`<p><strong>Current Status:</strong> The spotlight effect now works on ALL devices and browsers, with each platform getting an optimized implementation.`), _tmpl$183 = /* @__PURE__ */ template(`<p><strong>Good news:</strong> The spotlight effect works great on the vast majority of devices and browsers. It works on Mac computers except when using Safari.`), _tmpl$184 = /* @__PURE__ */ template(`<p><strong>The only exception:</strong> Apple devices with Safari/WebKit. This includes:<br>• iPhone (Safari & Chrome)<br>• iPad (Safari & Chrome)<br>• Mac (Safari only - Chrome works fine!)`), _tmpl$185 = /* @__PURE__ */ template(`<p><strong>Why it can't work on these devices:</strong> Safari has a long-standing bug with creating transparent cutouts in overlays. On iOS, Apple forces all browsers (including Chrome) to use Safari's engine internally, so they inherit the same limitation.`), _tmpl$186 = /* @__PURE__ */ template(`<p><strong>What happens instead:</strong> The darkening works, but the hotspot shape doesn't get cut out - so everything stays dark instead of creating a spotlight effect.`), _tmpl$187 = /* @__PURE__ */ template(`<p><strong>To see the full effect:</strong> Use any non-Apple device, or use Chrome/Firefox on your Mac. The effect is smooth, precise, and quite satisfying to interact with!`), _tmpl$188 = /* @__PURE__ */ template(`<p><strong>Next steps:</strong> Creating a fallback specifically for Safari/iOS that will still provide visual focus, just using a different method.`), _tmpl$189 = /* @__PURE__ */ template(`<p><strong>New Feature - Zoom Speed Slider:</strong> Added a debug panel slider (desktop only) so you can test different cinematic zoom speeds when clicking hotspots. Press 'C' to toggle the debug panel and adjust the speed from 0.5x to 2.5x. Once you find your preferred speed, let me know and I'll make it permanent.`), _tmpl$190 = /* @__PURE__ */ template(`<p><strong>Zoom Behavior:</strong> The current zoom animation is really basic right now and will be improved.`), _tmpl$191 = /* @__PURE__ */ template(`<p><strong>Known Issues:</strong> There are some bugs with the zoom system - sometimes hotspots don't respond properly to clicks, and the zoom can behave unpredictably. These will be fixed along with the performance improvements. Oh and the "Full View" button does not appear on mobile right now 🤷 `), _tmpl$192 = /* @__PURE__ */ template(`<p><strong>Performance Status:</strong> While the spotlight effect is now perfect at 60 FPS, I'm still working on zoom performance. Currently experiencing significant lag on mobile when zooming to distant hotspots, and occasional frame drops on desktop during the zoom animation. This is my top priority to fix.`), _tmpl$193 = /* @__PURE__ */ template(`<p><strong>Flawless Synchronization:</strong> Fixed the "elastic lag" where spotlight would trail behind during zoom/pan (was using DOM positioning, now uses OpenSeadragon's native overlay system for perfect sync). Added intelligent progressive fade: as you pan/zoom away, the darkening smoothly fades before releasing focus. Creates a natural, cinematic experience that guides viewer attention. <em>(Fade transitions still being refined)`), _tmpl$194 = /* @__PURE__ */ template(`<p><strong>Focus Mode (Darkening Overlay):</strong> Implemented the spotlight effect you requested! When clicking a hotspot, surrounding areas darken to help viewers focus. This first version is basic but functional - ready for your feedback and refinement.`), _tmpl$195 = /* @__PURE__ */ template(`<p>Hey Deji! 👋`), _tmpl$196 = /* @__PURE__ */ template(`<p>I've been visiting friends and family in my hometown for the past 3 days, so I haven't been able to work as intensively on the project during that time.`), _tmpl$197 = /* @__PURE__ */ template(`<p>I totally relate to your potato mode confession 😅 We all have those moments where we just need to disconnect and recharge. Though honestly, your project is so motivating that it's been the perfect antidote to my own potato tendencies - I find myself constantly drawn back to it.`), _tmpl$198 = /* @__PURE__ */ template(`<p>I'm back home today and excited to dedicate my full attention to the project again. Your feedback was incredibly valuable – I'll be implementing all the adjustments you mentioned progressively. Right now, I'm focusing hard on eliminating FPS drops on mobile as I now understand how critical the mobile experience is.`), _tmpl$199 = /* @__PURE__ */ template(`<p><strong>P.S.</strong> I've temporarily been locked out of Upwork (they flagged some "unusual activity" on my account). They said it should be resolved by Monday, but if you need to reach me before then, I'm available on Telegram: <a href=https://t.me/LeonardCote target=_blank>@LeonardCote`), _tmpl$200 = /* @__PURE__ */ template(`<p>Looking forward to showing you the improvements!<br>- Leonard`), _tmpl$201 = /* @__PURE__ */ template(`<div class=message-content><h3 style="margin-top:30px;margin-bottom:20px;font-size:18px;color:rgba(255, 255, 255, 0.95);">Previous Updates`), _tmpl$202 = /* @__PURE__ */ template(`<div class=developer-message><div class=message-header><h3>Project Updates</h3><button class=close-btn aria-label="Close updates"role=button tabindex=0>×</button></div><style>
+var _tmpl$ = /* @__PURE__ */ template(`<p>Completely rebuilt the zoom animation system from the ground up. Zooms now adapt their speed based on distance - quick hops for nearby hotspots, slower contemplative motion for dramatic long zooms. The goal is to make every transition feel <span>smooth and cinematic</span>. Long-distance zooms still need refinement, but the foundation is solid.`), _tmpl$2 = /* @__PURE__ */ template(`<p>Behind the scenes, I also rebuilt how the gallery handles interactions. Every click used to update all 647 hotspots even when only 2-3 changed. Now the system is <span>over 200× faster</span> and updates only what's necessary. This should make panning and zooming noticeably smoother on mobile devices.`), _tmpl$3 = /* @__PURE__ */ template(`<p><span>💬</span>When you pan and zoom around on your iPhone/iPad, does it feel more fluid than before? Even small improvements would be great to know about!`), _tmpl$4 = /* @__PURE__ */ template(`<p>Fixed some <span>subtle but important interaction issues</span> across all devices. On desktop, hotspot borders were sometimes getting stuck after hovering or clicking - they now disappear cleanly as intended.`), _tmpl$5 = /* @__PURE__ */ template(`<p>For mobile users, the <span>two-tap reveal system</span> is working correctly now. The first tap reveals the hidden hotspot boundary, the second tap zooms in - exactly as designed. This was accidentally sometimes bypassing straight to zoom on both Android and iOS.`), _tmpl$6 = /* @__PURE__ */ template(`<p><em>These are quality-of-life fixes that make the experience feel more polished and predictable.`), _tmpl$7 = /* @__PURE__ */ template(`<p>Zooming and panning should be <span>significantly smoother</span> on mobile. Fixed how the gallery processes hotspots - it was redrawing hundreds of them individually during each zoom, now they're batched together in a single pass`), _tmpl$8 = /* @__PURE__ */ template(`<p><em>The changes should be noticeable during navigation and zooming.`), _tmpl$9 = /* @__PURE__ */ template(`<p>The artwork now responds <span>noticeably faster to your touch</span> on mobile, with smoother zooming that better preserves the flow of the piece details. I improved how the gallery handles the interactive hotspots - it now processes them quicker while using less battery.`), _tmpl$0 = /* @__PURE__ */ template(`<p>The occasional <span>black tiles</span> are still showing up sometimes on iPad, though it should be much less frequent now. I've been chasing this one for a while - it's related to how Safari manages memory during fast panning.`), _tmpl$1 = /* @__PURE__ */ template(`<p><em>Things should feel <span>more responsive</span> on your iPhone and iPad now. Step by step, it should be improving overall quite well.`), _tmpl$10 = /* @__PURE__ */ template(`<p>The <span>black tile flashing</span> issue should be much better now. Found that OpenSeadragon's fade animations were clashing with mobile browsers - disabling them seems to help the overall smoothness quite a bit.`), _tmpl$11 = /* @__PURE__ */ template(`<p>For iPhone and iPad users, I removed some transparency processing that wasn't needed for the monochrome art. This should give you <span>noticeably better performance</span>.`), _tmpl$12 = /* @__PURE__ */ template(`<p><em>You should progressively feel the difference as these optimizations accumulate. `), _tmpl$13 = /* @__PURE__ */ template(`<p>The artwork loads <span>40-60% faster</span> on Android (improvements should be felt on iPhone/iPad too). Simplified code - switched from doing multiple drawing steps to just one clean pass. The details of the artwork should stay crisp.`), _tmpl$14 = /* @__PURE__ */ template(`<p>Touch feels more responsive than before on my Android test device. Can't verify <span>iOS improvements</span> yet since I don't have an iPhone, but the changes should help there too. Black tiles still flash occasionally when panning quickly - that's next on my list.`), _tmpl$15 = /* @__PURE__ */ template(`<p><em>The mobile experience keeps <span>improving bit by bit</span>. Not where I want it to be, but getting closer.`), _tmpl$16 = /* @__PURE__ */ template(`<p>The artwork now responds <span>instantly to touch</span> on Android devices, with smoother panning that better matches the flow of Deji's intricate linework. Deleted 2,000+ lines of code that were trying too hard - sometimes less really is more!`), _tmpl$17 = /* @__PURE__ */ template(`<p>This simplification means <span>less memory usage</span> and more predictable behavior across all browsers. Without iOS devices to test on, I'm curious to hear if iPhone users feel the difference too.`), _tmpl$18 = /* @__PURE__ */ template(`<p><em>Each day brings incremental gains as we approach that <span>fluid gallery experience</span> where the technology disappears and only the art remains. Getting closer!`), _tmpl$19 = /* @__PURE__ */ template(`<p><strong>The fix:</strong> Resolved the issue where the entire artwork would disappear on iOS devices after panning or zooming.`), _tmpl$20 = /* @__PURE__ */ template(`<p><strong>What was happening:</strong> iOS canvas memory limitations were causing the entire display to fail and show a blank screen after interactions.`), _tmpl$21 = /* @__PURE__ */ template(`<p><strong>Still working on:</strong> Some tiles may appear black temporarily during fast panning or zooming. This is the next issue to address on iOS devices.`), _tmpl$22 = /* @__PURE__ */ template(`<p>Made some under-the-hood optimizations that should improve performance on mobile devices. The app should feel a bit smoother when zooming and panning.`), _tmpl$23 = /* @__PURE__ */ template(`<h4>What's improved`), _tmpl$24 = /* @__PURE__ */ template(`<p>Rewrote parts of the rendering system to be more efficient. You should notice slightly better frame rates and more responsive touch interactions on iPhone and iPad. These are incremental improvements while I work on bigger optimizations.`), _tmpl$25 = /* @__PURE__ */ template(`<p><em>This is ongoing work - more performance improvements are coming as I continue refining the mobile experience.`), _tmpl$26 = /* @__PURE__ */ template(`<p><strong>Good news:</strong> Haptic feedback now works on a wider range of devices when you tap to reveal hotspots. The vibration provides tactile confirmation that your interaction was registered.`), _tmpl$27 = /* @__PURE__ */ template(`<h4>Device Support Status`), _tmpl$28 = /* @__PURE__ */ template(`<div><img alt="Haptic Support Table">`), _tmpl$29 = /* @__PURE__ */ template(`<p><strong>Technical limitation:</strong> Apple deliberately blocks web-based vibration access on older iOS versions and all iPads for security reasons. Only iOS 17.4+ allows limited haptic feedback through a workaround. Android has always supported the standard Vibration API.`), _tmpl$30 = /* @__PURE__ */ template(`<p><strong>Note on iOS vibrations:</strong> The ios-haptics library uses the checkbox switch trick which produces a fixed, non-configurable feedback. I cannot test this myself on iOS 17.4+ devices, so the actual feel may differ from Android.`), _tmpl$31 = /* @__PURE__ */ template(`<p><em>The app automatically detects device capabilities and enables vibration where possible. No configuration needed. Also removed tap sounds on mobile to reduce sensory overload.`), _tmpl$32 = /* @__PURE__ */ template(`<h4>Next priority`), _tmpl$33 = /* @__PURE__ */ template(`<p>Rather than spending more time on iOS vibration alternatives (like pseudo-haptic effects for older devices), I'm shifting focus to <strong>mobile performance improvements</strong>. Getting the app running smoothly on all devices takes precedence over vibration fallbacks.`), _tmpl$34 = /* @__PURE__ */ template(`<p>Fixed a bug that was breaking the tap-to-reveal feature on mobile after a few uses. The app was essentially forgetting to clean up after itself, causing it to stop working entirely.`), _tmpl$35 = /* @__PURE__ */ template(`<h4>What was happening`), _tmpl$36 = /* @__PURE__ */ template(`<p><strong>The problem:</strong> After tapping 3-4 times to reveal hotspots, nothing would appear anymore. You had to reload the page to get it working again.<br><strong>Why it happened:</strong> The app was creating invisible timers that never got cleared, like setting multiple alarms but forgetting which ones you set. These orphaned timers would interfere with new reveals.`), _tmpl$37 = /* @__PURE__ */ template(`<h4>The fix`), _tmpl$38 = /* @__PURE__ */ template(`<p>Now the app properly tracks and cleans up all timers. You can tap and reveal hotspots indefinitely without any degradation. Mobile exploration is finally stable for extended sessions.`), _tmpl$39 = /* @__PURE__ */ template(`<p>Added an experimental "Ripple" exploration mode for mobile that reveals hotspots in an expanding pattern from where you tap. Just a weekend side project I wanted to try out.`), _tmpl$40 = /* @__PURE__ */ template(`<h4>What's new`), _tmpl$41 = /* @__PURE__ */ template(`<p>Tap anywhere and hotspots appear in a ripple effect around your touch point - like sonar discovering what's hidden nearby. You can switch between "Focus" (one hotspot) and "Ripple" exploration modes using the debug button (bottom left corner).`), _tmpl$42 = /* @__PURE__ */ template(`<h4>Known issues`), _tmpl$43 = /* @__PURE__ */ template(`<p>This is very experimental. Currently reveals way too many hotspots (sometimes 30+) and the visual effect is chaotic rather than elegant. The animations need refinement.`), _tmpl$44 = /* @__PURE__ */ template(`<h4>Why test this`), _tmpl$45 = /* @__PURE__ */ template(`<p>Testing if can we show 3-5 hotspots per tap in an elegant way without overwhelming users. Experimenting with finding the balance between helpful context and visual clarity for those tiny hotspots that single-tap might miss.`), _tmpl$46 = /* @__PURE__ */ template(`<h4>Four critical improvements today`), _tmpl$47 = /* @__PURE__ */ template(`<p><strong>1. Mobile fade finally works:</strong> Fixed the spotlight darkening that was stuck on mobile devices. The black overlay around hotspots now fades progressively when you pinch to zoom out on iPad, iPhone, and Android. I discovered that mobile browsers handle touch gestures differently than desktop, so I rewrote the entire fade system to work with how mobile devices actually track your finger movements.`), _tmpl$48 = /* @__PURE__ */ template(`<p><strong>2. Instant fade response:</strong> The fade now begins immediately when you start zooming out. Previously, you had to pinch excessively before seeing any change - this delay is now completely eliminated.`), _tmpl$49 = /* @__PURE__ */ template(`<p><strong>3. Clean transitions:</strong> Fixed the lingering white borders that would sometimes remain visible after the spotlight effect ended. All visual elements now synchronize properly for seamless transitions.`), _tmpl$50 = /* @__PURE__ */ template(`<p><strong>4. iPad clarity restored:</strong> Resolved the severe pixelation that was occurring during zoom and pan on iPad. The artwork now maintains crisp quality during all interactions while preserving smooth 30+ FPS performance.`), _tmpl$51 = /* @__PURE__ */ template(`<p><em>These fixes resolve all known mobile spotlight issues. The experience is now consistent and polished across every device.`), _tmpl$52 = /* @__PURE__ */ template(`<h4>1. Fixed a stability issue`), _tmpl$53 = /* @__PURE__ */ template(`<p>Discovered and fixed a bug where hotspot animations could stop working after multiple page refreshes. The issue was that old animation code was accumulating in the browser's memory. The app now properly cleans itself up between page loads, preventing any animation glitches.`), _tmpl$54 = /* @__PURE__ */ template(`<h4>2. Google Sheets pipeline is ready`), _tmpl$55 = /* @__PURE__ */ template(`<p>I've completed the pipeline to sync your Excel data. All 5 sheets (hotspots, journeys, gallery, overrides, settings) are mapped correctly with the 93 fields you defined. The app currently uses about 15% of these fields, but the pipeline preserves all of them for future features. Once you send me the Google Sheets credentials, you'll be able to update content directly in your spreadsheet, and I'll handle syncing the changes to the app when needed.`), _tmpl$56 = /* @__PURE__ */ template(`<p><em>The app is running smoothly and ready for the next phase with Google Sheets integration.`), _tmpl$57 = /* @__PURE__ */ template(`<p>Added a new "single" reveal mode for mobile that shows only the closest hotspot when tapping, addressing feedback about multiple hotspots being confusing.`), _tmpl$58 = /* @__PURE__ */ template(`<p><strong>Single mode (default on mobile)</strong><br>When you tap the screen, only the single closest hotspot is revealed instead of multiple hotspots in a radius. This makes the experience less overwhelming and more focused.`), _tmpl$59 = /* @__PURE__ */ template(`<p><strong>Multiple mode (optional)</strong><br>The original behavior of revealing multiple hotspots is still available for users who prefer seeing more context at once.`), _tmpl$60 = /* @__PURE__ */ template(`<p><strong>Debug panel toggle</strong><br>Added a new "Reveal" section to the mobile debug panel where users can switch between different reveal modes. The preference is saved and persists between sessions.`), _tmpl$61 = /* @__PURE__ */ template(`<p><em>Note: The visual styling hasn't been refined yet - this is a functional implementation to test the concept. The animations and visual feedback will be polished based on user feedback.`), _tmpl$62 = /* @__PURE__ */ template(`<p><strong>iPhone black line:</strong> Fixed! The horizontal black line at the bottom is gone. Issue was with canvas sizing calculations on iOS.`), _tmpl$63 = /* @__PURE__ */ template(`<p><strong>iPad performance:</strong> Improved significantly. Now auto-detects iPad model and adjusts performance settings accordingly. Resolution catches up faster when zooming.`), _tmpl$64 = /* @__PURE__ */ template(`<p><strong>Known issue:</strong> Tiles sometimes flicker on iPad (reload too often). Working on this next.`), _tmpl$65 = /* @__PURE__ */ template(`<p>Focused on making the viewer faster and more responsive, especially on phones. You should notice smoother panning and zooming now.`), _tmpl$66 = /* @__PURE__ */ template(`<h4>What's better`), _tmpl$67 = /* @__PURE__ */ template(`<p><strong>Mobile performance:</strong> Significantly improved how the viewer handles touch navigation.<br><strong>Smooth transitions:</strong> Added subtle fade effects that make exploring feel more fluid.<br><strong>Safari fixes:</strong> Resolved the visual issues that were happening on Apple devices.`), _tmpl$68 = /* @__PURE__ */ template(`<p><em>A week of under-the-hood improvements. Nothing flashy, but everything should feel more solid.`), _tmpl$69 = /* @__PURE__ */ template(`<p>Made significant progress on mobile performance, particularly for panning and zooming. The viewer now feels noticeably more responsive when navigating the artwork on phones and tablets.`), _tmpl$70 = /* @__PURE__ */ template(`<p><strong>Smoother panning:</strong> Dragging to explore the artwork now maintains better frame rates and feels more fluid.<br><strong>Responsive zoom:</strong> Pinch-to-zoom and double-tap zoom are more responsive with less lag.<br><strong>Smarter tile loading:</strong> The viewer now loads the right image tiles at the right time, reducing stuttering during navigation.<br><strong>Network adaptation:</strong> On slower connections, the viewer automatically adjusts quality to maintain smooth performance.`), _tmpl$71 = /* @__PURE__ */ template(`<h4>Technical improvements`), _tmpl$72 = /* @__PURE__ */ template(`<p>We've implemented several optimizations including spatial indexing for faster hotspot detection, intelligent caching for better memory usage, and GPU-accelerated rendering for smoother animations. These changes lay the groundwork for future improvements.`), _tmpl$73 = /* @__PURE__ */ template(`<h4>Work in progress`), _tmpl$74 = /* @__PURE__ */ template(`<p>While navigation is much improved, there's still work to be done. The cinematic zoom animations need refinement, and overall performance can be pushed further. We're continuing to optimize for that perfect, buttery-smooth experience across all devices.`), _tmpl$75 = /* @__PURE__ */ template(`<p><em>Performance optimization is an ongoing journey. Each improvement gets us closer to the ideal experience, and your feedback helps identify what to prioritize next.`), _tmpl$76 = /* @__PURE__ */ template(`<p>Added a ripple effect when tapping on mobile devices. Now when you tap anywhere on the screen, you'll see a subtle expanding circle that helps confirm your touch was registered.`), _tmpl$77 = /* @__PURE__ */ template(`<p><strong>Visual feedback:</strong> A gentle white ripple emanates from your tap location, making the interface feel more responsive.<br><strong>Hotspot revealing:</strong> The ripple helps you discover hidden hotspots - up to 10 nearby hotspots briefly appear with a staggered animation.<br><strong>Touch confirmation:</strong> Especially helpful on dense areas of the artwork where you might wonder if your tap registered.`), _tmpl$78 = /* @__PURE__ */ template(`<h4>Technical details`), _tmpl$79 = /* @__PURE__ */ template(`<p>The ripple expands to 200 pixels and reveals hotspots within that radius. Each hotspot appears with a 30ms delay, creating a smooth cascade effect. The entire sequence lasts 2 seconds before fading away.`), _tmpl$80 = /* @__PURE__ */ template(`<p><em>This makes exploring the artwork on phones and tablets feel more intuitive and satisfying.`), _tmpl$81 = /* @__PURE__ */ template(`<p>Enhanced the hotspot stroke animation with authentic pigment liner characteristics inspired by your original artwork. The hover effects now better match the organic, hand-drawn quality of your pen work.`), _tmpl$82 = /* @__PURE__ */ template(`<p><strong>Authentic pigment colors:</strong> Three color variants (neutral, warm, cool) that mirror real BlackPigment liner pens used in traditional ink work.<br><strong>Organic texture effects:</strong> Subtle micro-blur and grain that recreate the natural imperfections of physical ink on paper.<br><strong>Enhanced visibility:</strong> Improved contrast and brightness while maintaining the authentic look of hand-drawn lines.`), _tmpl$83 = /* @__PURE__ */ template(`<p><strong>Adaptive animation system:</strong> Three-speed animation levels that respond to zoom depth that brings the strokes to life.`), _tmpl$84 = /* @__PURE__ */ template(`<p>The stroke animation now starts from a different point each time you hover over a hotspot. Small detail, but it adds to the organic feel we've been building.`), _tmpl$85 = /* @__PURE__ */ template(`<h4>What changed`), _tmpl$86 = /* @__PURE__ */ template(`<p><strong>Random starting points:</strong> Each hover animation begins from a different position on the shape's outline.<br><strong>Safari compatibility:</strong> Fixed the implementation to work properly on Safari and iOS devices.`), _tmpl$87 = /* @__PURE__ */ template(`<p>Together with yesterday's timing variations, each hotspot interaction now feels more natural and less repetitive.`), _tmpl$88 = /* @__PURE__ */ template(`<p>Added subtle variations to animations to make them feel more organic and hand-drawn. Each hotspot now reveals with its own unique character, preventing the repetitive feel of identical animations.`), _tmpl$89 = /* @__PURE__ */ template(`<p><strong>Timing variations:</strong> Each animation has a slightly different speed (±10% variation), making the reveals feel more natural.<br><strong>Curve adjustments:</strong> The animation curves are subtly varied for each hotspot, creating unique motion personalities.<br><strong>Organic feel:</strong> As you explore and hover over different hotspots, each one feels hand-drawn and unique rather than computer-generated.`), _tmpl$90 = /* @__PURE__ */ template(`<h4>Why it matters`), _tmpl$91 = /* @__PURE__ */ template(`<p>When you hover over different hotspots throughout your exploration, each one now feels unique rather than repetitive. Every animation has its own rhythm and flow, creating a more artistic and engaging experience. It's a small detail that makes a big difference in how alive the artwork feels.`), _tmpl$92 = /* @__PURE__ */ template(`<p>These micro-variations are subtle enough to feel natural but significant enough to eliminate the "robot" feeling from animations.`), _tmpl$93 = /* @__PURE__ */ template(`<p>Refined the button controls and zoom behavior based on user feedback. The viewing experience is now more intuitive and responsive across all devices.`), _tmpl$94 = /* @__PURE__ */ template(`<h4>Button improvements`), _tmpl$95 = /* @__PURE__ */ template(`<p><strong>Better positioning:</strong> Buttons are now optimally placed on both landscape and portrait orientations.<br><strong>Visual refinements:</strong> Updated button styles for better visibility and a more modern look.<br><strong>Touch targets:</strong> Improved button sizes and spacing for easier interaction on mobile devices.`), _tmpl$96 = /* @__PURE__ */ template(`<h4>Zoom enhancements`), _tmpl$97 = /* @__PURE__ */ template(`<p><strong>Cinematic zoom:</strong> Smoother, more natural zoom animations when clicking on hotspots.<br><strong>Mouse wheel support:</strong> You can now zoom in and out using your mouse wheel or trackpad for precise control.<br><strong>Improved performance:</strong> Zoom operations are now more fluid, especially on mobile devices.`), _tmpl$98 = /* @__PURE__ */ template(`<p>These improvements make navigation feel more natural and give you better control over your viewing experience. The combination of refined buttons and enhanced zoom creates a more professional and polished interface.`), _tmpl$99 = /* @__PURE__ */ template(`<p>Completed a significant restructuring of the hotspot rendering system. The code is now much more organized and maintainable, which means faster improvements and easier bug fixes going forward.`), _tmpl$100 = /* @__PURE__ */ template(`<h4>What changed under the hood`), _tmpl$101 = /* @__PURE__ */ template(`<p>Split the renderer file into smaller, focused modules. Each piece now handles one specific job - animations, Safari compatibility, performance optimization, etc. It's like organizing a cluttered workshop where every tool now has its proper place.`), _tmpl$102 = /* @__PURE__ */ template(`<h4>What this means for you`), _tmpl$103 = /* @__PURE__ */ template(`<p><strong>More reliable performance:</strong> The rendering system is now more efficient and predictable.<br><strong>Easier updates:</strong> Adding new features or fixing issues is now much simpler.<br><strong>Better stability:</strong> Less chance of one change breaking something else.`), _tmpl$104 = /* @__PURE__ */ template(`<p>Everything should work exactly as before - this was purely about making the code cleaner and more professional. If you notice any differences in behavior, please let me know!`), _tmpl$105 = /* @__PURE__ */ template(`<p>Fixed the annoying flickering issue that occurred at the end of cinematic zoom animations. The zoom transitions are now smooth and stable across all platforms.`), _tmpl$106 = /* @__PURE__ */ template(`<p>When zooming to a hotspot or expanding to full view, the animation would flicker between two zoom levels during the final moments. This was caused by conflicting optimization systems fighting for control.`), _tmpl$107 = /* @__PURE__ */ template(`<h4>The complete solution`), _tmpl$108 = /* @__PURE__ */ template(`<p>The flickering issue is now mostly resolved, but a complete fix still requires switching renderers once. This is a known initialization issue that we're investigating.`), _tmpl$109 = /* @__PURE__ */ template(`<p><strong>Temporary workaround:</strong> If you still see flickering, press 'C' to open debug menu, click "Soft Glow" then "Sharp Outline" to fully eliminate the issue.`), _tmpl$110 = /* @__PURE__ */ template(`<p><strong>Alternative:</strong> Type <code>fixFlickering()</code> in the browser console.`), _tmpl$111 = /* @__PURE__ */ template(`<ol><li><strong>Applied TileCascadeFix at startup</strong> - Prevents tile cascade issues</li><li><strong>Implemented CinematicZoomManager</strong> - Coordinates all zoom animations with proper damping</li><li><strong>Added forceRedraw() calls</strong> - Ensures the viewer refreshes properly after animations</li><li><strong>State reset after initialization</strong> - Attempts to clean up any initialization issues`), _tmpl$112 = /* @__PURE__ */ template(`<p><strong>Desktop:</strong> 1.0s animation with 6.5 spring stiffness<br><strong>Mobile:</strong> 1.2s animation with 8.0 spring stiffness<br><strong>Cinematic mode:</strong> Temporarily disables tile optimizations during zoom`), _tmpl$113 = /* @__PURE__ */ template(`<p><em>The difference is immediately noticeable - zoom animations now feel professional and polished, matching the quality of the rest of the viewer.`), _tmpl$114 = /* @__PURE__ */ template(`<p>Removed the complex "Zoom Performance" section from the debug menu to simplify the interface.`), _tmpl$115 = /* @__PURE__ */ template(`<p>The debug menu now focuses on essential controls for visual customization, interaction behavior, and hotspot discovery. Advanced zoom tuning parameters have been removed as they were rarely used and added unnecessary complexity.`), _tmpl$116 = /* @__PURE__ */ template(`<p><em>The artwork already performs at 60 FPS with the default settings, making manual tuning unnecessary for most users.`), _tmpl$117 = /* @__PURE__ */ template(`<p>Fixed the issue where Playwright manual tests weren't opening a visible browser window. The tests were running in headless mode by default.`), _tmpl$118 = /* @__PURE__ */ template(`<p>Added the <code>--headed</code> option to all manual test scripts. Now when you run tests for Safari or mobile debugging, an actual browser window will open for visual inspection.`), _tmpl$119 = /* @__PURE__ */ template(`<h4>Available test commands`), _tmpl$120 = /* @__PURE__ */ template(`<p><strong>Safari Desktop Manual Test:</strong><br><code>npm run test:safari-desktop</code><br>Opens webkit browser for desktop Safari testing with debug overlays.`), _tmpl$121 = /* @__PURE__ */ template(`<p><strong>iOS Safari Manual Test:</strong><br><code>npm run test:ios-safari</code><br>Opens webkit browser for mobile Safari testing.`), _tmpl$122 = /* @__PURE__ */ template(`<p><strong>Direct command with options:</strong><br><code>npx playwright test tests/safari-desktop-manual-test.spec.js --project=webkit --headed`), _tmpl$123 = /* @__PURE__ */ template(`<p><em>The test window stays open for 10 minutes to allow thorough manual testing. Press Ctrl+C to stop the test when done.`), _tmpl$124 = /* @__PURE__ */ template(`<p>Fixed a visual issue where the artwork was displaying grainy artifacts. The monochrome drawings now render cleanly at all zoom levels.`), _tmpl$125 = /* @__PURE__ */ template(`<p>The image had a noisy, pixelated appearance that was distracting. Adjusted the rendering settings to better handle black and white artwork - the difference is quite striking.`), _tmpl$126 = /* @__PURE__ */ template(`<p>Fixed several mobile-specific issues that were affecting the zoom experience and made the debug controls more reliable across all devices.`), _tmpl$127 = /* @__PURE__ */ template(`<h4>Mobile zoom improvements`), _tmpl$128 = /* @__PURE__ */ template(`<p><strong>Smoother zooming</strong><br>The cinematic zoom when tapping hotspots now performs better on phones and tablets. Reduced stuttering during the animation and improved frame rates on lower-end devices.`), _tmpl$129 = /* @__PURE__ */ template(`<p><strong>Touch responsiveness</strong><br>Fixed an issue where hotspots would sometimes become unresponsive after zooming. Touch interactions now reset properly after each zoom animation completes.`), _tmpl$130 = /* @__PURE__ */ template(`<h4>Debug panel refinements`), _tmpl$131 = /* @__PURE__ */ template(`<p>Made the mobile debug controls more stable - the slide-up panel now opens and closes more reliably, and the FPS counter updates consistently. Also improved the visual spacing on smaller screens.`), _tmpl$132 = /* @__PURE__ */ template(`<p><em>Small but important fixes that should make the mobile experience feel more polished and responsive.`), _tmpl$133 = /* @__PURE__ */ template(`<p>The debug controls (press 'C' to open) now work on phones and tablets.`), _tmpl$134 = /* @__PURE__ */ template(`<p><strong>Mobile devices</strong><br>A compact bar at the bottom shows FPS and a settings icon. Tap it to reveal controls that slide up. Swipe down or tap outside to dismiss.`), _tmpl$135 = /* @__PURE__ */ template(`<p><strong>Desktop</strong><br>The panel can now be minimized to a small floating button instead of closing completely.`), _tmpl$136 = /* @__PURE__ */ template(`<p><em>Small quality-of-life improvement, but it makes testing on different devices much more pleasant!`), _tmpl$137 = /* @__PURE__ */ template(`<p>The experimental touch-hold system I mentioned yesterday is now more reliable. After testing, I found and fixed an issue where hotspots would sometimes stop responding after being activated once.`), _tmpl$138 = /* @__PURE__ */ template(`<p>If you enable "Temporal" mode in the debug menu (press 'C'), the hold-to-interact system now works consistently. Hotspots stay visible while you hold them, and each interaction resets cleanly for the next one.`), _tmpl$139 = /* @__PURE__ */ template(`<h4>Also tweaked`), _tmpl$140 = /* @__PURE__ */ template(`<p>Added white color options to the border palette since you're working with black ink artwork. More importantly, <strong>temporal mode is now the default on mobile devices</strong> - meaning visitors will use the hold-to-interact system instead of direct taps. You can always switch back to standard tap-to-zoom in the debug menu if needed.`), _tmpl$141 = /* @__PURE__ */ template(`<p>With ~600 interactive zones hidden throughout your artwork, I've added a way to briefly reveal what's clickable without disrupting the visual experience.`), _tmpl$142 = /* @__PURE__ */ template(`<h4>How it works`), _tmpl$143 = /* @__PURE__ */ template(`<p>Press 'H' (desktop) or triple-tap anywhere (mobile) to make all nearby hotspots gently pulse for 6 seconds. The effect uses contrast inversion to ensure visibility on your black ink artwork while staying subtle enough not to break immersion.`), _tmpl$144 = /* @__PURE__ */ template(`<h4>Also included: Alternative touch controls`), _tmpl$145 = /* @__PURE__ */ template(`<p>For mobile users, I've prepared an experimental hold-to-interact system that's currently tucked away in the debug menu. If you're curious, press 'C' to open debug options and switch from "Direct" to "Temporal" interaction. This changes how taps work - but the standard tap-to-zoom remains the default for now.`), _tmpl$146 = /* @__PURE__ */ template(`<p>The reveal helper should make exploration feel less like guesswork and more like discovery. Let me know if the visibility needs adjusting - it's easy to make it bolder or more subtle based on your preference.`), _tmpl$147 = /* @__PURE__ */ template(`<p><strong>Safari animations:</strong> Now working! Chrome/Firefox/Edge still have the edge visually, but Safari's functional. Requires Safari 13.1+ (2020 or newer).`), _tmpl$148 = /* @__PURE__ */ template(`<p><strong>Smart zoom behavior:</strong> Following Google Arts & Culture's approach, animations now adapt to zoom level. Below 8x zoom = full animations. Above 8x = quick 150ms transitions only. When you're examining details up close, decorative animations would just distract.`), _tmpl$149 = /* @__PURE__ */ template(`<p><strong>Next:</strong> Making the cinematic zoom buttery smooth when clicking hotspots. Also thinking the stroke animation makes sense for desktop, but mobile needs something snappier.`), _tmpl$150 = /* @__PURE__ */ template(`<p><em>Personal note: Getting really excited - it's starting to take shape! :D`), _tmpl$151 = /* @__PURE__ */ template(`<p><strong>Current status:</strong> While the hover animations now work on Safari, the visual effect isn't as pronounced as on Chrome/Firefox. I'm quite proud of the result on chrome at the moment. I think it's quite satisfying.`), _tmpl$152 = /* @__PURE__ */ template(`<p><strong>Recommendation:</strong> Use Chrome for now to see the intended visual impact. The difference is noticeable - Chrome displays richer glows and better depth.`), _tmpl$153 = /* @__PURE__ */ template(`<p><strong>What's next:</strong> Working on Safari-specific optimizations to improve the visual quality without compromising performance.`), _tmpl$154 = /* @__PURE__ */ template(`<p><strong>Following up on July 7th:</strong> The Safari issue is fixed! The stroke reveal animation now works properly on Safari desktop where you can actually hover.`), _tmpl$155 = /* @__PURE__ */ template(`<p><strong>Next up</strong>: Making the animation more visible and impactful for desktop users, plus exploring touch-friendly animations for mobile devices.`), _tmpl$156 = /* @__PURE__ */ template(`<p><strong>Responding to your feedback:</strong> You mentioned the hover effect felt static with just the white border appearing. I've implemented a first animation to bring more life to the interactions.`), _tmpl$157 = /* @__PURE__ */ template(`<p><strong>What's new:</strong> A stroke reveal animation that progressively traces the hotspot outline when you hover. Instead of the border just "popping" into view, it now draws itself smoothly around the shape - like watching someone trace the contour with a pen.`), _tmpl$158 = /* @__PURE__ */ template(`<p><strong>Current settings:</strong><br>• White stroke with subtle shadow for visibility<br>• 1.2 second drawing animation<br>• Works on Chrome, Firefox, and Edge`), _tmpl$159 = /* @__PURE__ */ template(`<p><strong>Needs refinement:</strong> The animation is quite subtle right now - you might have to look closely to see the progressive drawing effect. I'll be adjusting the timing and visibility to make it more noticeable and satisfying.`), _tmpl$160 = /* @__PURE__ */ template(`<p><strong>Safari issue discovered:</strong> Just noticed the animation isn't working properly on Safari (There's always something with Safari 🙃). Will fix this tomorrow along with the other refinements.`), _tmpl$161 = /* @__PURE__ */ template(`<p><strong>Note:</strong> This is one hover effect I wanted to try first. I'm planning to experiment with additional animations to find what feels best for your artwork. Let me know your thoughts!`), _tmpl$162 = /* @__PURE__ */ template(`<p><strong>What's improved:</strong> The circular spotlight effect in Apple Mode (Safari/iOS) now adapts much better to different hotspot shapes.`), _tmpl$163 = /* @__PURE__ */ template(`<p><strong>What changed:</strong><br>• Spotlights are now tighter and more focused around each hotspot (both mobile and desktop)<br>• Better detection of when to use circles vs ellipses based on hotspot shape`), _tmpl$164 = /* @__PURE__ */ template(`<p><strong>The result:</strong> Whether a hotspot is round, tall, wide, or irregular, the spotlight should now feel more natural and better frame the content the user is exploring.`), _tmpl$165 = /* @__PURE__ */ template(`<p>Try clicking on different shaped hotspots - the spotlight should feel more consistent and purposeful now!`), _tmpl$166 = /* @__PURE__ */ template(`<p><strong>The issue:</strong> Some complex hotspots still extend outside the spotlight area after yesterday's improvements.`), _tmpl$167 = /* @__PURE__ */ template(`<p><strong>Today's attempt:</strong> Since a single circular spotlight can't perfectly cover irregular shapes, I tried combining multiple circles at different positions to fill in the gaps. Unfortunately, Safari doesn't support this technique - it only displays one spotlight instead of blending them together like other browsers do.`), _tmpl$168 = /* @__PURE__ */ template(`<p><strong>Next:</strong> Fine-tuning the spotlight sizing parameters to better fit each hotspot's unique shape.`), _tmpl$169 = /* @__PURE__ */ template(`<p><strong>What's improved:</strong> The spotlight effect on Safari and iOS devices now much better matches the actual hotspot shapes, especially on desktop Safari!`), _tmpl$170 = /* @__PURE__ */ template(`<p><strong>Key changes:</strong><br>• Spotlights now use elliptical shapes for elongated hotspots<br>• Tighter, more precise spotlight coverage that follows the hotspot boundaries closely<br>• Better visual consistency between the outline of the hotspot and the darkened area<br>• Desktop Safari shows the most dramatic improvements, mobile iOS continues to be refined`), _tmpl$171 = /* @__PURE__ */ template(`<p><strong>Still fine-tuning:</strong> Some complex hotspots have small areas that peek slightly outside the spotlight. Mobile Safari needs additional optimization for the same precision as desktop.`), _tmpl$172 = /* @__PURE__ */ template(`<p><strong>What's new:</strong> You can now leave feedback directly on each update! No need to switch to Telegram for quick comments.`), _tmpl$173 = /* @__PURE__ */ template(`<p><strong>How it works:</strong><br>• Type your feedback in the text box below any update<br>• Click "Post Feedback" to send<br>• Edit or delete your comments anytime<br>• Everything syncs in real-time between us`), _tmpl$174 = /* @__PURE__ */ template(`<p><strong>Quick tip:</strong> The system remembers who you are. If it shows the wrong name, just click "Change" above the feedback box to switch between Deji and Leonard.`), _tmpl$175 = /* @__PURE__ */ template(`<p>Feel free to test it out below! This makes it much easier to discuss specific features without jumping between apps.`), _tmpl$176 = /* @__PURE__ */ template(`<p><strong>The Problem:</strong> In Apple Mode, the circular gradient spotlight doesn't show the exact boundaries of the clickable area. Users might not know where the hotspot actually ends.`), _tmpl$177 = /* @__PURE__ */ template(`<p><strong>Context:</strong> Since Apple/Safari doesn't support the precise polygon cutouts we have in Standard Mode (that's their technical limitation), we need to work within these constraints.`), _tmpl$178 = /* @__PURE__ */ template(`<p><strong>Today's Experiment:</strong> Added a subtle outline that follows the exact hotspot shape. The gradient spotlight stays circular, but now the actual boundaries are visible.`), _tmpl$179 = /* @__PURE__ */ template(`<p><strong>Note:</strong> This is very much a work in progress. The current implementation might be too distracting, not visible enough, or just not the right approach entirely.`), _tmpl$180 = /* @__PURE__ */ template(`<p><strong>Try it yourself:</strong> In debug mode (press 'C'), there's now a button to cycle through different border styles - from subtle to bold. Your feedback will help determine if we should refine this solution or try something completely different.`), _tmpl$181 = /* @__PURE__ */ template(`<p><strong>Following up on July 1st:</strong> The Safari compatibility issue has been resolved with a custom implementation.`), _tmpl$182 = /* @__PURE__ */ template(`<p><strong>The Solution:</strong> Created a Safari-specific spotlight system that works within WebKit's limitations:<br>• Uses radial gradient masks instead of polygon cutouts<br>• Provides a circular/elliptical spotlight effect around hotspots<br>• Maintains smooth 60 FPS performance on all iOS devices`), _tmpl$183 = /* @__PURE__ */ template(`<p><strong>What's Different:</strong><br>• <strong>Chrome/Firefox:</strong> Precise polygon cutout matching exact hotspot shape<br>• <strong>Safari/iOS:</strong> Smooth gradient spotlight that adapts to hotspot size`), _tmpl$184 = /* @__PURE__ */ template(`<p><strong>Added Intelligence:</strong> While implementing the Safari solution, the system now analyzes each hotspot's complexity to determine optimal spotlight sizing. Complex shapes get more breathing room, simple shapes stay tight and focused.`), _tmpl$185 = /* @__PURE__ */ template(`<p><strong>Current Status:</strong> The spotlight effect now works on ALL devices and browsers, with each platform getting an optimized implementation.`), _tmpl$186 = /* @__PURE__ */ template(`<p><strong>Good news:</strong> The spotlight effect works great on the vast majority of devices and browsers. It works on Mac computers except when using Safari.`), _tmpl$187 = /* @__PURE__ */ template(`<p><strong>The only exception:</strong> Apple devices with Safari/WebKit. This includes:<br>• iPhone (Safari & Chrome)<br>• iPad (Safari & Chrome)<br>• Mac (Safari only - Chrome works fine!)`), _tmpl$188 = /* @__PURE__ */ template(`<p><strong>Why it can't work on these devices:</strong> Safari has a long-standing bug with creating transparent cutouts in overlays. On iOS, Apple forces all browsers (including Chrome) to use Safari's engine internally, so they inherit the same limitation.`), _tmpl$189 = /* @__PURE__ */ template(`<p><strong>What happens instead:</strong> The darkening works, but the hotspot shape doesn't get cut out - so everything stays dark instead of creating a spotlight effect.`), _tmpl$190 = /* @__PURE__ */ template(`<p><strong>To see the full effect:</strong> Use any non-Apple device, or use Chrome/Firefox on your Mac. The effect is smooth, precise, and quite satisfying to interact with!`), _tmpl$191 = /* @__PURE__ */ template(`<p><strong>Next steps:</strong> Creating a fallback specifically for Safari/iOS that will still provide visual focus, just using a different method.`), _tmpl$192 = /* @__PURE__ */ template(`<p><strong>New Feature - Zoom Speed Slider:</strong> Added a debug panel slider (desktop only) so you can test different cinematic zoom speeds when clicking hotspots. Press 'C' to toggle the debug panel and adjust the speed from 0.5x to 2.5x. Once you find your preferred speed, let me know and I'll make it permanent.`), _tmpl$193 = /* @__PURE__ */ template(`<p><strong>Zoom Behavior:</strong> The current zoom animation is really basic right now and will be improved.`), _tmpl$194 = /* @__PURE__ */ template(`<p><strong>Known Issues:</strong> There are some bugs with the zoom system - sometimes hotspots don't respond properly to clicks, and the zoom can behave unpredictably. These will be fixed along with the performance improvements. Oh and the "Full View" button does not appear on mobile right now 🤷 `), _tmpl$195 = /* @__PURE__ */ template(`<p><strong>Performance Status:</strong> While the spotlight effect is now perfect at 60 FPS, I'm still working on zoom performance. Currently experiencing significant lag on mobile when zooming to distant hotspots, and occasional frame drops on desktop during the zoom animation. This is my top priority to fix.`), _tmpl$196 = /* @__PURE__ */ template(`<p><strong>Flawless Synchronization:</strong> Fixed the "elastic lag" where spotlight would trail behind during zoom/pan (was using DOM positioning, now uses OpenSeadragon's native overlay system for perfect sync). Added intelligent progressive fade: as you pan/zoom away, the darkening smoothly fades before releasing focus. Creates a natural, cinematic experience that guides viewer attention. <em>(Fade transitions still being refined)`), _tmpl$197 = /* @__PURE__ */ template(`<p><strong>Focus Mode (Darkening Overlay):</strong> Implemented the spotlight effect you requested! When clicking a hotspot, surrounding areas darken to help viewers focus. This first version is basic but functional - ready for your feedback and refinement.`), _tmpl$198 = /* @__PURE__ */ template(`<p>Hey Deji! 👋`), _tmpl$199 = /* @__PURE__ */ template(`<p>I've been visiting friends and family in my hometown for the past 3 days, so I haven't been able to work as intensively on the project during that time.`), _tmpl$200 = /* @__PURE__ */ template(`<p>I totally relate to your potato mode confession 😅 We all have those moments where we just need to disconnect and recharge. Though honestly, your project is so motivating that it's been the perfect antidote to my own potato tendencies - I find myself constantly drawn back to it.`), _tmpl$201 = /* @__PURE__ */ template(`<p>I'm back home today and excited to dedicate my full attention to the project again. Your feedback was incredibly valuable – I'll be implementing all the adjustments you mentioned progressively. Right now, I'm focusing hard on eliminating FPS drops on mobile as I now understand how critical the mobile experience is.`), _tmpl$202 = /* @__PURE__ */ template(`<p><strong>P.S.</strong> I've temporarily been locked out of Upwork (they flagged some "unusual activity" on my account). They said it should be resolved by Monday, but if you need to reach me before then, I'm available on Telegram: <a href=https://t.me/LeonardCote target=_blank>@LeonardCote`), _tmpl$203 = /* @__PURE__ */ template(`<p>Looking forward to showing you the improvements!<br>- Leonard`), _tmpl$204 = /* @__PURE__ */ template(`<div class=message-content><h3 style="margin-top:30px;margin-bottom:20px;font-size:18px;color:rgba(255, 255, 255, 0.95);">Previous Updates`), _tmpl$205 = /* @__PURE__ */ template(`<div class=developer-message><div class=message-header><h3>Project Updates</h3><button class=close-btn aria-label="Close updates"role=button tabindex=0>×</button></div><style>
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(-4px); }
         to { opacity: 1; transform: translateY(0); }
     }
-</style><div class=message-toggle><button class=toggle-btn>`), _tmpl$203 = /* @__PURE__ */ template(`<div class=update-section><h4> (<!>)`), _tmpl$204 = /* @__PURE__ */ template(`<div class=app-container>`), _tmpl$205 = /* @__PURE__ */ template(`<div class=loading-screen><p>Loading Interactive Art Diary...`);
+</style><div class=message-toggle><button class=toggle-btn>`), _tmpl$206 = /* @__PURE__ */ template(`<div class=update-section><h4> (<!>)`), _tmpl$207 = /* @__PURE__ */ template(`<div class=app-container>`), _tmpl$208 = /* @__PURE__ */ template(`<div class=loading-screen><p>Loading Interactive Art Diary...`);
 function DeveloperMessage({
   onClose
 }) {
   const [showFullMessage, setShowFullMessage] = createSignal(false);
   createSignal(false);
   const allUpdates = [{
-    id: "interaction-fixes-oct0607",
-    date: "October 6-7",
-    title: "🎯 Interaction Refinements",
+    id: "zoom-refinements-oct20-23",
+    date: "October 20-23",
+    title: "🎬 Cinematic Zoom & Performance Boost",
     content: [(() => {
       var _el$ = _tmpl$(), _el$2 = _el$.firstChild, _el$4 = _el$2.nextSibling;
       _el$4.style.setProperty("color", "#FFD700");
@@ -39104,326 +39122,354 @@ function DeveloperMessage({
       _el$8.style.setProperty("color", "#FFD700");
       _el$8.style.setProperty("fontWeight", "600");
       return _el$5;
-    })(), _tmpl$3()]
+    })(), (() => {
+      var _el$9 = _tmpl$3(), _el$0 = _el$9.firstChild;
+      _el$9.style.setProperty("marginTop", "16px");
+      _el$9.style.setProperty("padding", "14px 16px");
+      _el$9.style.setProperty("background", "linear-gradient(135deg, rgba(167, 139, 250, 0.08) 0%, rgba(167, 139, 250, 0.12) 100%)");
+      _el$9.style.setProperty("borderLeft", "3px solid #A78BFA");
+      _el$9.style.setProperty("borderRadius", "6px");
+      _el$9.style.setProperty("color", "#A78BFA");
+      _el$9.style.setProperty("fontStyle", "italic");
+      _el$9.style.setProperty("fontSize", "0.95em");
+      _el$0.style.setProperty("fontSize", "1.1em");
+      _el$0.style.setProperty("marginRight", "6px");
+      return _el$9;
+    })()]
+  }, {
+    id: "interaction-fixes-oct0607",
+    date: "October 6-7",
+    title: "🎯 Interaction Refinements",
+    content: [(() => {
+      var _el$1 = _tmpl$4(), _el$10 = _el$1.firstChild, _el$12 = _el$10.nextSibling;
+      _el$12.style.setProperty("color", "#FFD700");
+      _el$12.style.setProperty("fontWeight", "600");
+      return _el$1;
+    })(), (() => {
+      var _el$13 = _tmpl$5(), _el$14 = _el$13.firstChild, _el$16 = _el$14.nextSibling;
+      _el$16.style.setProperty("color", "#FFD700");
+      _el$16.style.setProperty("fontWeight", "600");
+      return _el$13;
+    })(), _tmpl$6()]
   }, {
     id: "mobile-performance-oct01",
     date: "October 1",
     title: "📱 Mobile Performance Improvements",
     content: [(() => {
-      var _el$0 = _tmpl$4(), _el$1 = _el$0.firstChild, _el$11 = _el$1.nextSibling;
-      _el$11.style.setProperty("color", "#FFD700");
-      _el$11.style.setProperty("fontWeight", "600");
-      return _el$0;
-    })(), _tmpl$5()]
+      var _el$18 = _tmpl$7(), _el$19 = _el$18.firstChild, _el$21 = _el$19.nextSibling;
+      _el$21.style.setProperty("color", "#FFD700");
+      _el$21.style.setProperty("fontWeight", "600");
+      return _el$18;
+    })(), _tmpl$8()]
   }, {
     id: "mobile-breakthrough-sep30",
     date: "September 30",
     title: "📱 Mobile Getting Better",
     content: [(() => {
-      var _el$13 = _tmpl$6(), _el$14 = _el$13.firstChild, _el$16 = _el$14.nextSibling;
-      _el$16.style.setProperty("color", "#FFD700");
-      _el$16.style.setProperty("fontWeight", "600");
-      return _el$13;
+      var _el$23 = _tmpl$9(), _el$24 = _el$23.firstChild, _el$26 = _el$24.nextSibling;
+      _el$26.style.setProperty("color", "#FFD700");
+      _el$26.style.setProperty("fontWeight", "600");
+      return _el$23;
     })(), (() => {
-      var _el$17 = _tmpl$7(), _el$18 = _el$17.firstChild, _el$20 = _el$18.nextSibling;
-      _el$20.style.setProperty("color", "#FFD700");
-      _el$20.style.setProperty("fontWeight", "600");
-      return _el$17;
+      var _el$27 = _tmpl$0(), _el$28 = _el$27.firstChild, _el$30 = _el$28.nextSibling;
+      _el$30.style.setProperty("color", "#FFD700");
+      _el$30.style.setProperty("fontWeight", "600");
+      return _el$27;
     })(), (() => {
-      var _el$21 = _tmpl$8(), _el$22 = _el$21.firstChild, _el$23 = _el$22.firstChild, _el$25 = _el$23.nextSibling;
-      _el$25.style.setProperty("color", "#FFD700");
-      _el$25.style.setProperty("fontWeight", "600");
-      return _el$21;
+      var _el$31 = _tmpl$1(), _el$32 = _el$31.firstChild, _el$33 = _el$32.firstChild, _el$35 = _el$33.nextSibling;
+      _el$35.style.setProperty("color", "#FFD700");
+      _el$35.style.setProperty("fontWeight", "600");
+      return _el$31;
     })()]
   }, {
     id: "incremental-progress-sep27",
     date: "September 27",
     title: "🎨 Steady Performance Improvements",
     content: [(() => {
-      var _el$26 = _tmpl$9(), _el$27 = _el$26.firstChild, _el$29 = _el$27.nextSibling;
-      _el$29.style.setProperty("color", "#FFD700");
-      _el$29.style.setProperty("fontWeight", "600");
-      return _el$26;
+      var _el$36 = _tmpl$10(), _el$37 = _el$36.firstChild, _el$39 = _el$37.nextSibling;
+      _el$39.style.setProperty("color", "#FFD700");
+      _el$39.style.setProperty("fontWeight", "600");
+      return _el$36;
     })(), (() => {
-      var _el$30 = _tmpl$0(), _el$31 = _el$30.firstChild, _el$33 = _el$31.nextSibling;
-      _el$33.style.setProperty("color", "#FFD700");
-      _el$33.style.setProperty("fontWeight", "600");
-      return _el$30;
-    })(), _tmpl$1()]
+      var _el$40 = _tmpl$11(), _el$41 = _el$40.firstChild, _el$43 = _el$41.nextSibling;
+      _el$43.style.setProperty("color", "#FFD700");
+      _el$43.style.setProperty("fontWeight", "600");
+      return _el$40;
+    })(), _tmpl$12()]
   }, {
     id: "mobile-progress-sep26",
     date: "September 26",
     title: "📱 Mobile Performance Progress",
     content: [(() => {
-      var _el$35 = _tmpl$10(), _el$36 = _el$35.firstChild, _el$38 = _el$36.nextSibling;
-      _el$38.style.setProperty("color", "#FFD700");
-      _el$38.style.setProperty("fontWeight", "600");
-      return _el$35;
+      var _el$45 = _tmpl$13(), _el$46 = _el$45.firstChild, _el$48 = _el$46.nextSibling;
+      _el$48.style.setProperty("color", "#FFD700");
+      _el$48.style.setProperty("fontWeight", "600");
+      return _el$45;
     })(), (() => {
-      var _el$39 = _tmpl$11(), _el$40 = _el$39.firstChild, _el$42 = _el$40.nextSibling;
-      _el$42.style.setProperty("color", "#FFD700");
-      _el$42.style.setProperty("fontWeight", "600");
-      return _el$39;
+      var _el$49 = _tmpl$14(), _el$50 = _el$49.firstChild, _el$52 = _el$50.nextSibling;
+      _el$52.style.setProperty("color", "#FFD700");
+      _el$52.style.setProperty("fontWeight", "600");
+      return _el$49;
     })(), (() => {
-      var _el$43 = _tmpl$12(), _el$44 = _el$43.firstChild, _el$45 = _el$44.firstChild, _el$47 = _el$45.nextSibling;
-      _el$47.style.setProperty("color", "#FFD700");
-      _el$47.style.setProperty("fontWeight", "600");
-      return _el$43;
+      var _el$53 = _tmpl$15(), _el$54 = _el$53.firstChild, _el$55 = _el$54.firstChild, _el$57 = _el$55.nextSibling;
+      _el$57.style.setProperty("color", "#FFD700");
+      _el$57.style.setProperty("fontWeight", "600");
+      return _el$53;
     })()]
   }, {
     id: "performance-progress-sep25",
     date: "September 25",
     title: "⚡ Rendering Engine Streamlined",
     content: [(() => {
-      var _el$48 = _tmpl$13(), _el$49 = _el$48.firstChild, _el$51 = _el$49.nextSibling;
-      _el$51.style.setProperty("color", "#FFD700");
-      _el$51.style.setProperty("fontWeight", "600");
-      return _el$48;
+      var _el$58 = _tmpl$16(), _el$59 = _el$58.firstChild, _el$61 = _el$59.nextSibling;
+      _el$61.style.setProperty("color", "#FFD700");
+      _el$61.style.setProperty("fontWeight", "600");
+      return _el$58;
     })(), (() => {
-      var _el$52 = _tmpl$14(), _el$53 = _el$52.firstChild, _el$55 = _el$53.nextSibling;
-      _el$55.style.setProperty("color", "#FFD700");
-      _el$55.style.setProperty("fontWeight", "600");
-      return _el$52;
+      var _el$62 = _tmpl$17(), _el$63 = _el$62.firstChild, _el$65 = _el$63.nextSibling;
+      _el$65.style.setProperty("color", "#FFD700");
+      _el$65.style.setProperty("fontWeight", "600");
+      return _el$62;
     })(), (() => {
-      var _el$56 = _tmpl$15(), _el$57 = _el$56.firstChild, _el$58 = _el$57.firstChild, _el$60 = _el$58.nextSibling;
-      _el$60.style.setProperty("color", "#FFD700");
-      _el$60.style.setProperty("fontWeight", "600");
-      return _el$56;
+      var _el$66 = _tmpl$18(), _el$67 = _el$66.firstChild, _el$68 = _el$67.firstChild, _el$70 = _el$68.nextSibling;
+      _el$70.style.setProperty("color", "#FFD700");
+      _el$70.style.setProperty("fontWeight", "600");
+      return _el$66;
     })()]
   }, {
     id: "ios-canvas-fix-sep22",
     date: "September 22",
     title: "🔧 iOS Canvas Disappearing Fixed",
-    content: [_tmpl$16(), _tmpl$17(), _tmpl$18()]
+    content: [_tmpl$19(), _tmpl$20(), _tmpl$21()]
   }, {
     id: "mobile-performance-september21",
     date: "September 21",
     title: "📱 Mobile Performance Improvements",
-    content: [_tmpl$19(), _tmpl$20(), _tmpl$21(), _tmpl$22()]
+    content: [_tmpl$22(), _tmpl$23(), _tmpl$24(), _tmpl$25()]
   }, {
     id: "haptic-support-september19",
     date: "September 19",
     title: "📳 Haptic Vibration Support",
-    content: [_tmpl$23(), _tmpl$24(), (() => {
-      var _el$70 = _tmpl$25(), _el$71 = _el$70.firstChild;
-      _el$70.style.setProperty("marginTop", "12px");
-      _el$70.style.setProperty("marginBottom", "16px");
-      _el$70.style.setProperty("display", "flex");
-      _el$70.style.setProperty("justifyContent", "center");
-      _el$70.style.setProperty("alignItems", "center");
-      _el$70.style.setProperty("overflow", "auto");
-      setAttribute(_el$71, "src", tableauHaptic);
-      _el$71.style.setProperty("display", "block");
-      _el$71.style.setProperty("width", "100%");
-      _el$71.style.setProperty("maxWidth", "400px");
-      _el$71.style.setProperty("height", "auto");
-      _el$71.style.setProperty("borderRadius", "8px");
-      _el$71.style.setProperty("objectFit", "contain");
-      return _el$70;
-    })(), _tmpl$26(), _tmpl$27(), _tmpl$28(), _tmpl$29(), _tmpl$30()]
+    content: [_tmpl$26(), _tmpl$27(), (() => {
+      var _el$80 = _tmpl$28(), _el$81 = _el$80.firstChild;
+      _el$80.style.setProperty("marginTop", "12px");
+      _el$80.style.setProperty("marginBottom", "16px");
+      _el$80.style.setProperty("display", "flex");
+      _el$80.style.setProperty("justifyContent", "center");
+      _el$80.style.setProperty("alignItems", "center");
+      _el$80.style.setProperty("overflow", "auto");
+      setAttribute(_el$81, "src", tableauHaptic);
+      _el$81.style.setProperty("display", "block");
+      _el$81.style.setProperty("width", "100%");
+      _el$81.style.setProperty("maxWidth", "400px");
+      _el$81.style.setProperty("height", "auto");
+      _el$81.style.setProperty("borderRadius", "8px");
+      _el$81.style.setProperty("objectFit", "contain");
+      return _el$80;
+    })(), _tmpl$29(), _tmpl$30(), _tmpl$31(), _tmpl$32(), _tmpl$33()]
   }, {
     id: "memory-leak-fix-september10",
     date: "September 10",
     title: "📳 Critical Mobile Fix",
-    content: [_tmpl$31(), _tmpl$32(), _tmpl$33(), _tmpl$34(), _tmpl$35()]
+    content: [_tmpl$34(), _tmpl$35(), _tmpl$36(), _tmpl$37(), _tmpl$38()]
   }, {
     id: "ripple-mode-september07",
     date: "September 7",
     title: "🌊 Experimental Ripple Mode for Mobile",
-    content: [_tmpl$36(), _tmpl$37(), _tmpl$38(), _tmpl$39(), _tmpl$40(), _tmpl$41(), _tmpl$42()]
+    content: [_tmpl$39(), _tmpl$40(), _tmpl$41(), _tmpl$42(), _tmpl$43(), _tmpl$44(), _tmpl$45()]
   }, {
     id: "performance-fix-september03",
     date: "September 3",
     title: "✨ Major iPad Performance & Mobile Fade Fix",
-    content: [_tmpl$43(), _tmpl$44(), _tmpl$45(), _tmpl$46(), _tmpl$47(), _tmpl$48()]
+    content: [_tmpl$46(), _tmpl$47(), _tmpl$48(), _tmpl$49(), _tmpl$50(), _tmpl$51()]
   }, {
     id: "cache-fix-september01",
     date: "September 1",
     title: "🔧 Animation Fix & Google Sheets Ready",
-    content: [_tmpl$49(), _tmpl$50(), _tmpl$51(), _tmpl$52(), _tmpl$53()]
+    content: [_tmpl$52(), _tmpl$53(), _tmpl$54(), _tmpl$55(), _tmpl$56()]
   }, {
     id: "single-reveal-august29",
     date: "August 29",
     title: "👆 Single Hotspot Reveal Mode",
-    content: [_tmpl$54(), _tmpl$37(), _tmpl$55(), _tmpl$56(), _tmpl$57(), _tmpl$58()]
+    content: [_tmpl$57(), _tmpl$40(), _tmpl$58(), _tmpl$59(), _tmpl$60(), _tmpl$61()]
   }, {
     id: "ios-fixes-august28",
     date: "August 28",
     title: "🎯 iOS Bug Fixes",
-    content: [_tmpl$59(), _tmpl$60(), _tmpl$61()]
+    content: [_tmpl$62(), _tmpl$63(), _tmpl$64()]
   }, {
     id: "week-achievements-august14",
     date: "August 14",
     title: "🛠️ Performance Week",
-    content: [_tmpl$62(), _tmpl$63(), _tmpl$64(), _tmpl$65()]
+    content: [_tmpl$65(), _tmpl$66(), _tmpl$67(), _tmpl$68()]
   }, {
     id: "mobile-performance-august9",
     date: "August 7",
     title: "📱 Mobile Performance Improvements",
-    content: [_tmpl$66(), _tmpl$63(), _tmpl$67(), _tmpl$68(), _tmpl$69(), _tmpl$70(), _tmpl$71(), _tmpl$72()]
+    content: [_tmpl$69(), _tmpl$66(), _tmpl$70(), _tmpl$71(), _tmpl$72(), _tmpl$73(), _tmpl$74(), _tmpl$75()]
   }, {
     id: "mobile-ripple-august1",
     date: "August 1",
     title: "💫 Mobile Touch Feedback",
-    content: [_tmpl$73(), _tmpl$37(), _tmpl$74(), _tmpl$75(), _tmpl$76(), _tmpl$77()]
+    content: [_tmpl$76(), _tmpl$40(), _tmpl$77(), _tmpl$78(), _tmpl$79(), _tmpl$80()]
   }, {
     id: "pigment-liner-improvements-july28",
     date: "July 28",
     title: "🎨 Authentic Pigment Liner Effects",
-    content: [_tmpl$78(), _tmpl$37(), _tmpl$79(), _tmpl$80()]
+    content: [_tmpl$81(), _tmpl$40(), _tmpl$82(), _tmpl$83()]
   }, {
     id: "random-trace-points-july27",
     date: "July 27",
     title: "✨ Random Drawing Points",
-    content: [_tmpl$81(), _tmpl$82(), _tmpl$83(), _tmpl$84()]
+    content: [_tmpl$84(), _tmpl$85(), _tmpl$86(), _tmpl$87()]
   }, {
     id: "organic-animations-july26",
     date: "July 26",
     title: "🌿 Natural Animation Variations",
-    content: [_tmpl$85(), _tmpl$37(), _tmpl$86(), _tmpl$87(), _tmpl$88(), _tmpl$89()]
+    content: [_tmpl$88(), _tmpl$40(), _tmpl$89(), _tmpl$90(), _tmpl$91(), _tmpl$92()]
   }, {
     id: "button-zoom-improvements-july25",
     date: "July 25",
     title: "🎮 Button Controls & Zoom Improvements",
-    content: [_tmpl$90(), _tmpl$91(), _tmpl$92(), _tmpl$93(), _tmpl$94(), _tmpl$95()]
+    content: [_tmpl$93(), _tmpl$94(), _tmpl$95(), _tmpl$96(), _tmpl$97(), _tmpl$98()]
   }, {
     id: "architecture-refactor-july24",
     date: "July 24",
     title: "🏗️ Major Architecture Improvements",
-    content: [_tmpl$96(), _tmpl$97(), _tmpl$98(), _tmpl$99(), _tmpl$100(), _tmpl$101()]
+    content: [_tmpl$99(), _tmpl$100(), _tmpl$101(), _tmpl$102(), _tmpl$103(), _tmpl$104()]
   }, {
     id: "cinematic-zoom-fix-july16",
     date: "July 16",
     title: "🎯 Cinematic Zoom Fixed - No More Flickering",
-    content: [_tmpl$102(), _tmpl$32(), _tmpl$103(), _tmpl$104(), _tmpl$105(), _tmpl$106(), _tmpl$107(), _tmpl$108(), _tmpl$68(), _tmpl$109(), _tmpl$110()]
+    content: [_tmpl$105(), _tmpl$35(), _tmpl$106(), _tmpl$107(), _tmpl$108(), _tmpl$109(), _tmpl$110(), _tmpl$111(), _tmpl$71(), _tmpl$112(), _tmpl$113()]
   }, {
     id: "debug-menu-cleanup-july15",
     date: "July 15",
     title: "🧹 Debug Menu Simplified",
-    content: [_tmpl$111(), _tmpl$82(), _tmpl$112(), _tmpl$113()]
+    content: [_tmpl$114(), _tmpl$85(), _tmpl$115(), _tmpl$116()]
   }, {
     id: "playwright-manual-tests-july15",
     date: "July 15",
     title: "🧪 Manual Test Window Fix for Playwright",
-    content: [_tmpl$114(), _tmpl$82(), _tmpl$115(), _tmpl$116(), _tmpl$117(), _tmpl$118(), _tmpl$119(), _tmpl$120()]
+    content: [_tmpl$117(), _tmpl$85(), _tmpl$118(), _tmpl$119(), _tmpl$120(), _tmpl$121(), _tmpl$122(), _tmpl$123()]
   }, {
     id: "visual-artifacts-july15",
     date: "July 15",
     title: "🎨 Visual Quality Fix - No More Grain",
-    content: [_tmpl$121(), _tmpl$82(), _tmpl$122()]
+    content: [_tmpl$124(), _tmpl$85(), _tmpl$125()]
   }, {
     id: "mobile-zoom-july14",
     date: "July 14",
     title: "📱 Mobile Zoom Performance & Debug Improvements",
-    content: [_tmpl$123(), _tmpl$124(), _tmpl$125(), _tmpl$126(), _tmpl$127(), _tmpl$128(), _tmpl$129()]
+    content: [_tmpl$126(), _tmpl$127(), _tmpl$128(), _tmpl$129(), _tmpl$130(), _tmpl$131(), _tmpl$132()]
   }, {
     id: "debug-panel-july13",
     date: "July 13",
     title: "🎛️ Control Panel Goes Mobile-Friendly",
-    content: [_tmpl$130(), _tmpl$37(), _tmpl$131(), _tmpl$132(), _tmpl$133()]
+    content: [_tmpl$133(), _tmpl$40(), _tmpl$134(), _tmpl$135(), _tmpl$136()]
   }, {
     id: "temporal-polish-july12",
     date: "July 12",
     title: "📱 Mobile Touch Controls Refined",
-    content: [_tmpl$134(), _tmpl$20(), _tmpl$135(), _tmpl$136(), _tmpl$137()]
+    content: [_tmpl$137(), _tmpl$23(), _tmpl$138(), _tmpl$139(), _tmpl$140()]
   }, {
     id: "reveal-mode-july11",
     date: "July 11",
     title: "🔍 Easier Mobile Exploration",
-    content: [_tmpl$138(), _tmpl$139(), _tmpl$140(), _tmpl$141(), _tmpl$142(), _tmpl$143()]
+    content: [_tmpl$141(), _tmpl$142(), _tmpl$143(), _tmpl$144(), _tmpl$145(), _tmpl$146()]
   }, {
     id: "safari-compatibility-july10",
     date: "July 10",
     title: "🍎 Safari Compatibility & Smart Zoom Update",
-    content: [_tmpl$144(), _tmpl$145(), _tmpl$146(), _tmpl$147()]
+    content: [_tmpl$147(), _tmpl$148(), _tmpl$149(), _tmpl$150()]
   }, {
     id: "safari-visual-july9",
     date: "July 9",
     title: "Visual Effects - Browser Differences",
-    content: [_tmpl$148(), _tmpl$149(), _tmpl$150()]
+    content: [_tmpl$151(), _tmpl$152(), _tmpl$153()]
   }, {
     id: "safari-fix-july8",
     date: "July 8",
     title: "✅ Safari Issue Resolved",
-    content: [_tmpl$151(), _tmpl$152()]
+    content: [_tmpl$154(), _tmpl$155()]
   }, {
     id: "hover-animations-july7",
     date: "July 7 - night",
     title: "✨ Hover Animation Update",
-    content: [_tmpl$153(), _tmpl$154(), _tmpl$155(), _tmpl$156(), _tmpl$157(), _tmpl$158()]
+    content: [_tmpl$156(), _tmpl$157(), _tmpl$158(), _tmpl$159(), _tmpl$160(), _tmpl$161()]
   }, {
     id: "spotlight-refinements-july7",
     date: "July 7",
     title: "🍎 Apple Mode Spotlight Improvements",
-    content: [_tmpl$159(), _tmpl$160(), _tmpl$161(), _tmpl$162()]
+    content: [_tmpl$162(), _tmpl$163(), _tmpl$164(), _tmpl$165()]
   }, {
     id: "spotlight-coverage-july5",
     date: "July 5",
     title: "🔍 Working on Complete Hotspot Coverage for Safari/iOS",
-    content: [_tmpl$163(), _tmpl$164(), _tmpl$165()]
+    content: [_tmpl$166(), _tmpl$167(), _tmpl$168()]
   }, {
     id: "spotlight-improvements-july4",
     date: "July 4",
     title: "🎯 Spotlight Effect Improvements for Safari/iOS",
-    content: [_tmpl$166(), _tmpl$167(), _tmpl$168()]
+    content: [_tmpl$169(), _tmpl$170(), _tmpl$171()]
   }, {
     id: "feedback-system-july3",
     date: "July 3 - night",
     title: "💬 New: Direct Feedback System",
-    content: [_tmpl$169(), _tmpl$170(), _tmpl$171(), _tmpl$172()]
+    content: [_tmpl$172(), _tmpl$173(), _tmpl$174(), _tmpl$175()]
   }, {
     id: "border-experiment-july3",
     date: "July 3",
     title: "🔧 Border Experiment for Apple Mode",
-    content: [_tmpl$173(), _tmpl$174(), _tmpl$175(), _tmpl$176(), _tmpl$177()]
+    content: [_tmpl$176(), _tmpl$177(), _tmpl$178(), _tmpl$179(), _tmpl$180()]
   }, {
     id: "safari-solution-july2",
     date: "July 2",
     title: "✅ Safari/iOS Spotlight Solution Implemented",
-    content: [_tmpl$178(), _tmpl$179(), _tmpl$180(), _tmpl$181(), _tmpl$182()]
+    content: [_tmpl$181(), _tmpl$182(), _tmpl$183(), _tmpl$184(), _tmpl$185()]
   }, {
     id: "browser-compat-july1-night",
     date: "July 1 - night",
     title: "🔧 Spotlight Effect - Browser Compatibility",
-    content: [_tmpl$183(), _tmpl$184(), _tmpl$185(), _tmpl$186(), _tmpl$187(), _tmpl$188()]
+    content: [_tmpl$186(), _tmpl$187(), _tmpl$188(), _tmpl$189(), _tmpl$190(), _tmpl$191()]
   }, {
     id: "zoom-speed-july1",
     date: "July 1",
     title: "🎬 Zoom Speed Control & Performance Update",
-    content: [_tmpl$189(), _tmpl$190(), _tmpl$191(), _tmpl$192()]
+    content: [_tmpl$192(), _tmpl$193(), _tmpl$194(), _tmpl$195()]
   }, {
     id: "performance-june30",
     date: "June 30",
     title: "🎯 Performance Breakthrough",
-    content: _tmpl$193()
+    content: _tmpl$196()
   }, {
     id: "focus-mode-june29",
     date: "June 29",
     title: "🔧 New Feature",
-    content: _tmpl$194()
+    content: _tmpl$197()
   }, {
     id: "personal-june28",
     date: "June 28",
     title: "💬 Personal Message",
-    content: [_tmpl$195(), _tmpl$196(), _tmpl$197(), _tmpl$198(), _tmpl$199(), _tmpl$200()]
+    content: [_tmpl$198(), _tmpl$199(), _tmpl$200(), _tmpl$201(), _tmpl$202(), _tmpl$203()]
   }];
   const recentUpdates = allUpdates.slice(0, 2);
   const olderUpdates = allUpdates.slice(2);
   return (() => {
-    var _el$259 = _tmpl$202(), _el$260 = _el$259.firstChild, _el$261 = _el$260.firstChild, _el$262 = _el$261.nextSibling, _el$263 = _el$260.nextSibling, _el$264 = _el$263.nextSibling, _el$265 = _el$264.firstChild;
-    _el$262.$$touchend = (e) => {
+    var _el$269 = _tmpl$205(), _el$270 = _el$269.firstChild, _el$271 = _el$270.firstChild, _el$272 = _el$271.nextSibling, _el$273 = _el$270.nextSibling, _el$274 = _el$273.nextSibling, _el$275 = _el$274.firstChild;
+    _el$272.$$touchend = (e) => {
       e.preventDefault();
       e.stopPropagation();
       onClose();
     };
-    addEventListener(_el$262, "click", onClose);
-    insert(_el$259, () => recentUpdates.map((update) => (() => {
-      var _el$268 = _tmpl$203(), _el$269 = _el$268.firstChild, _el$270 = _el$269.firstChild, _el$272 = _el$270.nextSibling;
-      _el$272.nextSibling;
-      insert(_el$269, () => update.title, _el$270);
-      insert(_el$269, () => update.date, _el$272);
-      insert(_el$268, () => update.content, null);
-      insert(_el$268, createComponent(FeedbackSection, {
+    addEventListener(_el$272, "click", onClose);
+    insert(_el$269, () => recentUpdates.map((update) => (() => {
+      var _el$278 = _tmpl$206(), _el$279 = _el$278.firstChild, _el$280 = _el$279.firstChild, _el$282 = _el$280.nextSibling;
+      _el$282.nextSibling;
+      insert(_el$279, () => update.title, _el$280);
+      insert(_el$279, () => update.date, _el$282);
+      insert(_el$278, () => update.content, null);
+      insert(_el$278, createComponent(FeedbackSection, {
         get updateId() {
           return update.id;
         },
@@ -39431,24 +39477,24 @@ function DeveloperMessage({
           return update.title;
         }
       }), null);
-      return _el$268;
-    })()), _el$264);
-    _el$265.$$click = () => setShowFullMessage(!showFullMessage());
-    insert(_el$265, () => showFullMessage() ? "− Hide previous updates" : "+ Show previous updates");
-    insert(_el$259, createComponent(Show, {
+      return _el$278;
+    })()), _el$274);
+    _el$275.$$click = () => setShowFullMessage(!showFullMessage());
+    insert(_el$275, () => showFullMessage() ? "− Hide previous updates" : "+ Show previous updates");
+    insert(_el$269, createComponent(Show, {
       get when() {
         return showFullMessage();
       },
       get children() {
-        var _el$266 = _tmpl$201();
-        _el$266.firstChild;
-        insert(_el$266, () => olderUpdates.map((update) => (() => {
-          var _el$273 = _tmpl$203(), _el$274 = _el$273.firstChild, _el$275 = _el$274.firstChild, _el$277 = _el$275.nextSibling;
-          _el$277.nextSibling;
-          insert(_el$274, () => update.title, _el$275);
-          insert(_el$274, () => update.date, _el$277);
-          insert(_el$273, () => update.content, null);
-          insert(_el$273, createComponent(FeedbackSection, {
+        var _el$276 = _tmpl$204();
+        _el$276.firstChild;
+        insert(_el$276, () => olderUpdates.map((update) => (() => {
+          var _el$283 = _tmpl$206(), _el$284 = _el$283.firstChild, _el$285 = _el$284.firstChild, _el$287 = _el$285.nextSibling;
+          _el$287.nextSibling;
+          insert(_el$284, () => update.title, _el$285);
+          insert(_el$284, () => update.date, _el$287);
+          insert(_el$283, () => update.content, null);
+          insert(_el$283, createComponent(FeedbackSection, {
             get updateId() {
               return update.id;
             },
@@ -39456,12 +39502,12 @@ function DeveloperMessage({
               return update.title;
             }
           }), null);
-          return _el$273;
+          return _el$283;
         })()), null);
-        return _el$266;
+        return _el$276;
       }
     }), null);
-    return _el$259;
+    return _el$269;
   })();
 }
 function App() {
@@ -39485,23 +39531,23 @@ function App() {
     setLoaded(true);
   });
   return (() => {
-    var _el$278 = _tmpl$204();
-    insert(_el$278, createComponent(FPSMonitor, {}), null);
-    insert(_el$278, (() => {
+    var _el$288 = _tmpl$207();
+    insert(_el$288, createComponent(FPSMonitor, {}), null);
+    insert(_el$288, (() => {
       var _c$ = memo(() => !!showMessage());
       return () => _c$() && createComponent(DeveloperMessage, {
         onClose: handleCloseMessage
       });
     })(), null);
-    insert(_el$278, (() => {
+    insert(_el$288, (() => {
       var _c$2 = memo(() => !!(!showMessage() && loaded()));
       return () => _c$2() ? createComponent(ArtworkViewer, {
         get artworkId() {
           return currentArtwork();
         }
-      }) : memo(() => !!!showMessage())() ? _tmpl$205() : null;
+      }) : memo(() => !!!showMessage())() ? _tmpl$208() : null;
     })(), null);
-    return _el$278;
+    return _el$288;
   })();
 }
 delegateEvents(["click", "touchend"]);
