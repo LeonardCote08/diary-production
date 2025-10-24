@@ -1,5 +1,5 @@
-import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-BJ3Nkr3R.js";
-import "./viewerSetup-qtYBKVrB.js";
+import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-Dn8KCa-i.js";
+import "./viewerSetup-c9760TLF.js";
 const GestureStates = {
   IDLE: "idle",
   UNDETERMINED: "undetermined",
@@ -6318,7 +6318,44 @@ class TemporalEchoController {
       path.style.fillOpacity = "";
       path.style.filter = "";
       path.style.animationDelay = "";
+      path.removeAttribute("stroke");
+      path.removeAttribute("stroke-width");
+      path.removeAttribute("stroke-opacity");
+      path.removeAttribute("stroke-dasharray");
+      path.removeAttribute("stroke-dashoffset");
+      path.removeAttribute("filter");
     });
+    const glowLayers = element.querySelectorAll(
+      ".glow-layer-1, .glow-layer-2, .glow-layer-3, .glow-layer-4, .glow-layer-5"
+    );
+    if (glowLayers.length > 0) {
+      console.log(
+        `[TemporalEchoController] Cleaning ${glowLayers.length} Safari glow layers for TEMPO 2`
+      );
+      glowLayers.forEach((layer) => {
+        layer.style.opacity = "0";
+        if (layer.getAnimations) {
+          layer.getAnimations().forEach((animation) => {
+            animation.cancel();
+          });
+        }
+        layer.style.stroke = "";
+        layer.style.strokeWidth = "";
+        layer.style.strokeOpacity = "";
+        layer.style.strokeDasharray = "";
+        layer.style.strokeDashoffset = "";
+        layer.style.filter = "";
+        layer.style.animation = "";
+        layer.style.animationDelay = "";
+        layer.removeAttribute("stroke");
+        layer.removeAttribute("stroke-width");
+        layer.removeAttribute("stroke-opacity");
+        layer.removeAttribute("stroke-dasharray");
+        layer.removeAttribute("stroke-dashoffset");
+        layer.removeAttribute("filter");
+        layer.removeAttribute("opacity");
+      });
+    }
     element.style.animationDelay = "";
     element.style.removeProperty("--zoom-factor");
     if (element.getAnimations) {
@@ -6326,12 +6363,10 @@ class TemporalEchoController {
         animation.cancel();
       });
     }
-    requestAnimationFrame(() => {
-      void element.offsetHeight;
-      requestAnimationFrame(() => {
-        console.log("[TemporalEchoController] iOS: Styles cleaned and reflow forced");
-      });
-    });
+    void element.offsetHeight;
+    console.log(
+      "[TemporalEchoController] Styles cleaned, glow layers reset, iOS cache invalidated"
+    );
   }
   /**
    * Clean up revealed hotspots after animation - Critical for Safari iOS

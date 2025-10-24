@@ -1,9 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-BVOoGk8e.js","assets/main-BJ3Nkr3R.js","assets/main-C1kNOX5V.css","assets/viewerSetup-qtYBKVrB.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-LQNA9LfA.js","assets/main-Dn8KCa-i.js","assets/main-C1kNOX5V.css","assets/viewerSetup-c9760TLF.js"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-BJ3Nkr3R.js";
-import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-qtYBKVrB.js";
+import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-Dn8KCa-i.js";
+import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-c9760TLF.js";
 class TemporalModeHandler {
   constructor(options = {}) {
     this.audioEngine = options.audioEngine || window.audioEngine;
@@ -7051,8 +7051,17 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
     }
     const selectedOverlay = this.stateManager.getOverlay(hotspot.id);
     if (selectedOverlay) {
-      console.log("🎯 Applying selected state BEFORE onHotspotClick for:", hotspot.id);
-      this.applyStyle(selectedOverlay.element, hotspot.type, "selected");
+      if (this.isMobile) {
+        console.log(
+          "📱 Mobile: Delaying selected state to prevent TEMPO 1 border persistence"
+        );
+        setTimeout(() => {
+          this.applyStyle(selectedOverlay.element, hotspot.type, "selected");
+        }, 150);
+      } else {
+        console.log("🎯 Applying selected state BEFORE onHotspotClick for:", hotspot.id);
+        this.applyStyle(selectedOverlay.element, hotspot.type, "selected");
+      }
     }
     this.onHotspotClick(hotspot);
     if (this.optimizedStateManagement) {
@@ -8006,7 +8015,13 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
       return;
     }
     if (this.styleManager) {
-      this.styleManager.applyStyle(overlay.element, hotspot.type, "selected");
+      if (this.isMobile) {
+        setTimeout(() => {
+          this.styleManager.applyStyle(overlay.element, hotspot.type, "selected");
+        }, 150);
+      } else {
+        this.styleManager.applyStyle(overlay.element, hotspot.type, "selected");
+      }
     }
     this.stateManager.setSelectedHotspot(hotspot);
     console.log("✅ Visual selected state applied for:", hotspot.id);
@@ -9635,7 +9650,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
   }
   if (renderer.eventCoordinator) {
     const TemporalEchoController = (await __vitePreload(async () => {
-      const { default: __vite_default__ } = await import("./TemporalEchoController-BVOoGk8e.js");
+      const { default: __vite_default__ } = await import("./TemporalEchoController-LQNA9LfA.js");
       return { default: __vite_default__ };
     }, true ? __vite__mapDeps([0,1,2,3]) : void 0)).default;
     const echoController = new TemporalEchoController({
