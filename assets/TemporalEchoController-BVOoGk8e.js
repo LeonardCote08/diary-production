@@ -1,4 +1,5 @@
-import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-FA-Kvulv.js";
+import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-BJ3Nkr3R.js";
+import "./viewerSetup-qtYBKVrB.js";
 const GestureStates = {
   IDLE: "idle",
   UNDETERMINED: "undetermined",
@@ -1007,7 +1008,7 @@ class CSSRippleRenderer {
                 fill: none !important;
                 stroke-width: 6 !important;
                 /* Reduced filter complexity for better mobile performance */
-                filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.7));
+                ${"/* drop-shadow disabled for performance test */"}
                 animation-name: hotspot-simple-fade-in !important;
                 animation-duration: 0.4s !important;
                 animation-timing-function: ease-out !important;
@@ -1107,36 +1108,31 @@ class CSSRippleRenderer {
             .hotspot-echo-reveal.contrast-adaptive-dark path {
                 stroke: rgba(255, 255, 255, 0.95) !important;
                 stroke-width: 2px !important;
-                filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.9)) !important;
+                ${"/* drop-shadow disabled for performance test */"}
             }
             
             .hotspot-echo-reveal.contrast-adaptive-light path {
                 stroke: rgba(0, 0, 0, 0.95) !important;
                 stroke-width: 2px !important;
-                filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.9)) !important;
+                ${"/* drop-shadow disabled for performance test */"}
             }
             
             .hotspot-echo-reveal.contrast-adaptive-medium path {
                 stroke: rgba(255, 255, 255, 1) !important;
                 stroke-width: 2.5px !important;
-                filter: 
-                    drop-shadow(0 0 2px rgba(0, 0, 0, 1))
-                    drop-shadow(0 0 6px rgba(255, 255, 255, 0.9)) !important;
+                ${"/* drop-shadow disabled for performance test */"}
             }
             
             .hotspot-echo-reveal.contrast-adaptive-complex path {
                 stroke: rgba(255, 255, 255, 1) !important;
                 stroke-width: 3px !important;
-                filter: 
-                    drop-shadow(1px 1px 1px rgba(0, 0, 0, 1))
-                    drop-shadow(-1px -1px 1px rgba(0, 0, 0, 1))
-                    drop-shadow(0 0 8px rgba(255, 255, 255, 1)) !important;
+                ${"/* drop-shadow disabled for performance test */"}
             }
             
             /* Mobile optimizations */
             @media (max-width: 768px) {
                 .hotspot-echo-reveal.contrast-adaptive-complex path {
-                    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 1)) !important;
+                    ${"/* drop-shadow disabled for performance test */"}
                 }
                 
                 /* Reduce animation complexity on mobile */
@@ -5799,6 +5795,9 @@ class TemporalEchoController {
       element.classList.add("hotspot-echo-reveal");
       if (isBlackMode) {
         element.classList.add("black-mode");
+      }
+      {
+        element.classList.add("no-drop-shadow");
       }
       if (window.hotspotPositionDebugEnabled) {
         debugHotspotPosition(element, hotspot.id);

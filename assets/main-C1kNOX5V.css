@@ -1910,10 +1910,20 @@ button.debug-toggle-option {
     transform: translate(-50%, -50%);
 }/**
  * Adaptive Contrast Styles for Hotspot Visibility
- * 
+ *
  * Different styles based on background luminance analysis
  * Optimized for Deji's monochrome artwork
  */
+
+/* PERFORMANCE TEST: Disable all drop-shadows when no-drop-shadow class is present */
+.no-drop-shadow path,
+.no-drop-shadow polygon,
+.no-drop-shadow polyline,
+.no-drop-shadow.hotspot-echo-reveal path,
+.no-drop-shadow.hotspot-echo-reveal polygon,
+.no-drop-shadow.hotspot-echo-reveal polyline {
+    filter: none !important;
+}
 
 /* Base adaptive contrast styles */
 .hotspot-echo-reveal.contrast-adaptive-dark path {
