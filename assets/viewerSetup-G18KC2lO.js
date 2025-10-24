@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-CuhMzJpt.js","assets/main-BrWc49qQ.js","assets/main-WYmQ8p-N.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-CQqDBlw3.js","assets/main-BX-68-1g.js","assets/main-WYmQ8p-N.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-BrWc49qQ.js";
+import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-BX-68-1g.js";
 class ImageOverlayManager {
   constructor() {
     this.overlays = /* @__PURE__ */ new Map();
@@ -5185,7 +5185,7 @@ class SpotlightSynchronizer {
    * Start synchronized spotlight animation with target hotspot
    * FIXED: Use direct polling instead of events
    */
-  startSynchronization(hotspot, expectedDuration = 1800) {
+  startSynchronization(hotspot, expectedDuration = 1800, explicitTargetZoom = null) {
     console.log(
       "🔄 SPOTLIGHT SYNC: Starting direct polling coordination for hotspot:",
       hotspot.id
@@ -5198,14 +5198,22 @@ class SpotlightSynchronizer {
     this.animationStartTime = performance.now();
     this.startZoom = this.viewer.viewport.getZoom();
     this.startCenter = this.viewer.viewport.getCenter();
-    if (this.viewer.viewport.zoomSpring && this.viewer.viewport.zoomSpring.target) {
+    if (explicitTargetZoom !== null) {
+      this.targetZoom = explicitTargetZoom;
+      console.log("🔄 SYNC: Using explicit targetZoom:", explicitTargetZoom.toFixed(2));
+    } else if (this.viewer.viewport.zoomSpring && this.viewer.viewport.zoomSpring.target) {
       this.targetZoom = this.viewer.viewport.zoomSpring.target.value;
+      console.log("🔄 SYNC: Read targetZoom from spring:", this.targetZoom.toFixed(2));
     } else {
       const bounds = this.getHotspotBounds(hotspot);
       const viewportRect = this.viewer.container.getBoundingClientRect();
       this.targetZoom = Math.min(
         viewportRect.width * 0.8 / bounds.width,
         viewportRect.height * 0.8 / bounds.height
+      );
+      console.warn(
+        "⚠️  SYNC: Using fallback calculation (may be inaccurate):",
+        this.targetZoom.toFixed(2)
       );
     }
     if (this.viewer.viewport.centerSpringX && this.viewer.viewport.centerSpringX.target) {
@@ -9564,7 +9572,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-CuhMzJpt.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-CQqDBlw3.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(
     viewer,
     state,

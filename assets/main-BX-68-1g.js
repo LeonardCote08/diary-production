@@ -20207,7 +20207,8 @@ function useViewerAnimations(viewer, state, components) {
       }
       if (components().spotlightSynchronizer && hotspot) {
         const currentZoom = viewer.viewport.getZoom();
-        const targetZoom = viewer.viewport.getBounds().width / bounds.width;
+        const currentBounds = viewer.viewport.getBounds();
+        const targetZoom = currentBounds.width / bounds.width;
         const zoomRatio = targetZoom / currentZoom;
         const isMobileDevice = /Android|iPhone|iPad/i.test(navigator.userAgent);
         let expectedDuration;
@@ -20218,10 +20219,18 @@ function useViewerAnimations(viewer, state, components) {
         } else {
           expectedDuration = (isMobileDevice ? 2.8 : 4.5) * 1e3;
         }
-        components().spotlightSynchronizer.startSynchronization(hotspot, expectedDuration);
-        console.log(
-          `[SpotlightSync] Started for hotspot ${hotspot.id}, duration: ${expectedDuration}ms`
+        components().spotlightSynchronizer.startSynchronization(
+          hotspot,
+          expectedDuration,
+          targetZoom
+          // ← NEW: Pass calculated targetZoom explicitly
         );
+        console.log("[SpotlightSync] Started with explicit targetZoom:", {
+          hotspotId: hotspot.id,
+          currentZoom: currentZoom.toFixed(2),
+          targetZoom: targetZoom.toFixed(2),
+          duration: expectedDuration + "ms"
+        });
       }
       await cinematicManager.performZoom(bounds, zoomOptions);
     } catch (error) {
@@ -21813,7 +21822,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-BdigS6FA.js").then((n) => n.v);
+      } = await import("./viewerSetup-G18KC2lO.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };

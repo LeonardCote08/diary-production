@@ -1,4 +1,4 @@
-import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-BrWc49qQ.js";
+import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-BX-68-1g.js";
 const GestureStates = {
   IDLE: "idle",
   UNDETERMINED: "undetermined",
@@ -4131,6 +4131,7 @@ class TemporalEchoController {
     this.echoAnimations = /* @__PURE__ */ new Map();
     this.activeTimeouts = /* @__PURE__ */ new Set();
     this.hotspotCleanupTimeouts = /* @__PURE__ */ new Map();
+    this._pendingTempo2Activation = null;
     this.safetyCleanupInterval = null;
     this.startSafetyCleanup();
     this.fullResetInterval = null;
@@ -4482,14 +4483,30 @@ class TemporalEchoController {
             );
           }
         }
-        if (window.nativeHotspotRenderer) {
-          console.log(
-            "[TemporalEchoController] Directly activating revealed hotspot for zoom"
-          );
-          setTimeout(() => {
-            window.nativeHotspotRenderer.activateHotspot(targetHotspot, true);
-          }, 50);
-        }
+        this._pendingTempo2Activation = {
+          hotspotId: targetHotspot.id,
+          timestamp: performance.now()
+        };
+        setTimeout(() => {
+          var _a2;
+          if (((_a2 = this._pendingTempo2Activation) == null ? void 0 : _a2.hotspotId) === targetHotspot.id) {
+            console.log(
+              "[TemporalEchoController] TEMPO 2 FALLBACK: Activating via setTimeout (CLICK was not emitted)",
+              targetHotspot.id
+            );
+            if (window.nativeHotspotRenderer) {
+              window.nativeHotspotRenderer.activateHotspot(targetHotspot, true);
+            }
+            this._pendingTempo2Activation = null;
+          } else {
+            console.log(
+              "[TemporalEchoController] TEMPO 2: setTimeout cancelled - CLICK handler already ran"
+            );
+          }
+        }, 50);
+        console.log(
+          "[TemporalEchoController] TEMPO 2: Scheduled fallback activation, awaiting CLICK event"
+        );
         return false;
       }
     }

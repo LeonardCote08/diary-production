@@ -1,9 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-YoXvXYus.js","assets/main-BrWc49qQ.js","assets/main-WYmQ8p-N.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-Cz3q6zam.js","assets/main-BX-68-1g.js","assets/main-WYmQ8p-N.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-BrWc49qQ.js";
-import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-BdigS6FA.js";
+import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-BX-68-1g.js";
+import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-G18KC2lO.js";
 class TemporalModeHandler {
   constructor(options = {}) {
     this.audioEngine = options.audioEngine || window.audioEngine;
@@ -6844,6 +6844,7 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
   }
   setupPointerEvents() {
     this.eventCoordinator.on(this.eventCoordinator.eventTypes.CLICK, (data) => {
+      var _a;
       console.log("EventCoordinator CLICK detected", data);
       if (data.event.target.closest(".openseadragon-controls")) {
         return;
@@ -6865,6 +6866,12 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
               "Revealed hotspot clicked, triggering cinematic zoom:",
               clickedHotspot.id
             );
+            if (window.temporalEchoController && ((_a = window.temporalEchoController._pendingTempo2Activation) == null ? void 0 : _a.hotspotId) === clickedHotspot.id) {
+              console.log(
+                "[NativeHotspotRenderer] TEMPO 2: Clearing fallback setTimeout - CLICK path active"
+              );
+              window.temporalEchoController._pendingTempo2Activation = null;
+            }
             this.activateHotspot(clickedHotspot);
           } else {
             console.log(
@@ -9628,7 +9635,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
   }
   if (renderer.eventCoordinator) {
     const TemporalEchoController = (await __vitePreload(async () => {
-      const { default: __vite_default__ } = await import("./TemporalEchoController-YoXvXYus.js");
+      const { default: __vite_default__ } = await import("./TemporalEchoController-Cz3q6zam.js");
       return { default: __vite_default__ };
     }, true ? __vite__mapDeps([0,1,2]) : void 0)).default;
     const echoController = new TemporalEchoController({
