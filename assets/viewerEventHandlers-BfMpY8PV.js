@@ -1,9 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-CTFI-kw0.js","assets/main-DcA6eySp.js","assets/main-C1kNOX5V.css","assets/viewerSetup-CN7evlwk.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-BoeNA1GC.js","assets/main-BZZxpuyY.js","assets/main-C1kNOX5V.css","assets/viewerSetup-DS_ING31.js"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-DcA6eySp.js";
-import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-CN7evlwk.js";
+import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-BZZxpuyY.js";
+import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-DS_ING31.js";
 class TemporalModeHandler {
   constructor(options = {}) {
     this.audioEngine = options.audioEngine || window.audioEngine;
@@ -1428,6 +1428,9 @@ class LevelOfDetailManager {
     this.cachedVisibleHotspots = null;
     this.lastUpdateTime = 0;
     this.MIN_UPDATE_INTERVAL = 32;
+    this.MIN_UPDATE_INTERVAL_ZOOMING = 200;
+    this.isZooming = false;
+    this.zoomDebounceTimer = null;
     this.stats = {
       totalHotspots: 0,
       visibleHotspots: 0,
@@ -1444,13 +1447,23 @@ class LevelOfDetailManager {
   selectVisibleHotspots(allHotspots, viewport, currentZoom, selectedHotspot, hoveredHotspot) {
     const startTime = performance.now();
     const now = performance.now();
-    if (now - this.lastUpdateTime < this.MIN_UPDATE_INTERVAL) {
+    const throttleInterval = this.isZooming ? this.MIN_UPDATE_INTERVAL_ZOOMING : this.MIN_UPDATE_INTERVAL;
+    if (now - this.lastUpdateTime < throttleInterval) {
       if (this.cachedVisibleHotspots) {
         return this.cachedVisibleHotspots;
       }
     }
     const bounds = viewport.getBounds();
     const center = bounds.getCenter();
+    if (this.lastZoom && Math.abs(currentZoom - this.lastZoom) > 0.01) {
+      this.isZooming = true;
+      if (this.zoomDebounceTimer) {
+        clearTimeout(this.zoomDebounceTimer);
+      }
+      this.zoomDebounceTimer = setTimeout(() => {
+        this.isZooming = false;
+      }, 300);
+    }
     if (this.lastViewportBounds && this.cachedVisibleHotspots) {
       const lastBounds = this.lastViewportBounds;
       const deltaX = Math.abs(bounds.x - lastBounds.x);
@@ -1826,6 +1839,11 @@ class LevelOfDetailManager {
     this.lastViewportBounds = null;
     this.cachedVisibleHotspots = null;
     this.lastUpdateTime = 0;
+    this.isZooming = false;
+    if (this.zoomDebounceTimer) {
+      clearTimeout(this.zoomDebounceTimer);
+      this.zoomDebounceTimer = null;
+    }
   }
 }
 function normalizePath(coordinates, isMultiPolygon) {
@@ -2750,10 +2768,11 @@ class EventCoordinator extends EventEmitter {
    */
   handlePointerMove(event) {
     if (!this.activePointers.has(event.pointerId)) return;
-    if (this.isMobile && !this.isDragging) {
+    if (this.isMobile) {
       const now = Date.now();
       if (!this.lastPointerMoveTime) this.lastPointerMoveTime = 0;
-      if (now - this.lastPointerMoveTime < 16) {
+      const throttleInterval = this.isDragging ? 50 : 16;
+      if (now - this.lastPointerMoveTime < throttleInterval) {
         return;
       }
       this.lastPointerMoveTime = now;
@@ -4205,7 +4224,7 @@ class RenderOptimizer {
     this.viewer.addHandler("animation", scheduleUpdate);
     this.viewer.addHandler("animation-finish", () => {
       if (!this.updatesPaused) {
-        updateCallback();
+        scheduleUpdate();
       }
     });
     if (!this.isMobile) {
@@ -9236,30 +9255,42 @@ function setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotCli
       }
     }
   });
+  let animationFinishDebounceTimer = null;
+  let lastAnimationFinishTime = 0;
+  const ANIMATION_FINISH_DEBOUNCE = 150;
   viewer.addHandler("animation-finish", () => {
+    const now = performance.now();
+    const timeSinceLastCall = now - lastAnimationFinishTime;
+    lastAnimationFinishTime = now;
     console.log("animation-finish fired", {
       isZoomingToHotspot: state.isZoomingToHotspot(),
-      isExpandingToFullView: state.isExpandingToFullView()
+      isExpandingToFullView: state.isExpandingToFullView(),
+      timeSinceLastCall: `${timeSinceLastCall.toFixed(0)}ms`
     });
+    if (animationFinishDebounceTimer) {
+      clearTimeout(animationFinishDebounceTimer);
+    }
     if (state.isZoomingToHotspot()) {
-      console.log("animation-finish: Setting isZoomingToHotspot to false");
-      state.setIsZoomingToHotspot(false);
-      if (componentsObj.renderer) {
-        console.log("animation-finish: Calling resumeUpdates");
-        componentsObj.renderer.resumeUpdates();
-        componentsObj.renderer.updateVisibility();
-      }
-      if (componentsObj.renderOptimizer) {
-        componentsObj.renderOptimizer.endCinematicZoom();
-      }
-      setTimeout(() => {
-        if (window.lastKnownMouseX !== void 0 && componentsObj.renderer) {
-          console.log("Forcing hover re-evaluation after zoom animation");
-          if (componentsObj.renderer.eventCoordinator && componentsObj.renderer.eventCoordinator.forceReactivateMouseTracking) {
-            componentsObj.renderer.eventCoordinator.forceReactivateMouseTracking();
-          }
+      animationFinishDebounceTimer = setTimeout(() => {
+        console.log("animation-finish: DEBOUNCED - Setting isZoomingToHotspot to false");
+        state.setIsZoomingToHotspot(false);
+        if (componentsObj.renderer) {
+          console.log("animation-finish: Calling resumeUpdates");
+          componentsObj.renderer.resumeUpdates();
+          componentsObj.renderer.updateVisibility();
         }
-      }, 300);
+        if (componentsObj.renderOptimizer) {
+          componentsObj.renderOptimizer.endCinematicZoom();
+        }
+        setTimeout(() => {
+          if (window.lastKnownMouseX !== void 0 && componentsObj.renderer) {
+            console.log("Forcing hover re-evaluation after zoom animation");
+            if (componentsObj.renderer.eventCoordinator && componentsObj.renderer.eventCoordinator.forceReactivateMouseTracking) {
+              componentsObj.renderer.eventCoordinator.forceReactivateMouseTracking();
+            }
+          }
+        }, 300);
+      }, ANIMATION_FINISH_DEBOUNCE);
     }
   });
   viewer.addHandler("animation-start", (event) => {
@@ -9659,7 +9690,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
   }
   if (renderer.eventCoordinator) {
     const TemporalEchoController = (await __vitePreload(async () => {
-      const { default: __vite_default__ } = await import("./TemporalEchoController-CTFI-kw0.js");
+      const { default: __vite_default__ } = await import("./TemporalEchoController-BoeNA1GC.js");
       return { default: __vite_default__ };
     }, true ? __vite__mapDeps([0,1,2,3]) : void 0)).default;
     const echoController = new TemporalEchoController({

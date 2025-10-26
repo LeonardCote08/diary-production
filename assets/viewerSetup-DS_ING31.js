@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-D8bw_wt5.js","assets/main-DcA6eySp.js","assets/main-C1kNOX5V.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-BfMpY8PV.js","assets/main-BZZxpuyY.js","assets/main-C1kNOX5V.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-DcA6eySp.js";
+import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-BZZxpuyY.js";
 class ImageOverlayManager {
   constructor() {
     this.overlays = /* @__PURE__ */ new Map();
@@ -4677,32 +4677,32 @@ function applyIOSTileDisappearFix(viewer) {
     clearTimeout(panEndTimer);
     clearTimeout(forceRedrawTimer);
   });
+  let animationFinishDebounceTimer = null;
+  const ANIMATION_FINISH_DEBOUNCE = 150;
   viewer.addHandler("animation-finish", (event) => {
     if (isPanning) {
-      isPanning = false;
-      const isBrowserStack = window.location.hostname.includes("browserstack") || navigator.userAgent.includes("BrowserStack");
-      if (isBrowserStack) {
-        setTimeout(() => {
-          forceRedraw();
-        }, 50);
-      } else {
-        const isIPhone3 = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
-        if (isIPhone3) {
-          console.log("[iPhone] Skipping forced redraw to prevent flash");
-          isPanning = false;
-          return;
-        } else {
-          requestAnimationFrame(() => {
-            forceRedraw();
-          });
-          panEndTimer = setTimeout(() => {
-            forceRedraw();
-          }, 100);
-          forceRedrawTimer = setTimeout(() => {
-            forceRedraw();
-          }, 250);
-        }
+      if (animationFinishDebounceTimer) {
+        clearTimeout(animationFinishDebounceTimer);
       }
+      animationFinishDebounceTimer = setTimeout(() => {
+        isPanning = false;
+        const isBrowserStack = window.location.hostname.includes("browserstack") || navigator.userAgent.includes("BrowserStack");
+        if (isBrowserStack) {
+          setTimeout(() => {
+            forceRedraw();
+          }, 50);
+        } else {
+          const isIPhone3 = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
+          if (isIPhone3) {
+            console.log("[iPhone] Skipping forced redraw to prevent flash");
+            return;
+          } else {
+            requestAnimationFrame(() => {
+              forceRedraw();
+            });
+          }
+        }
+      }, ANIMATION_FINISH_DEBOUNCE);
     }
   });
   function forceRedraw() {
@@ -7563,34 +7563,34 @@ class ThermalManager {
         // Max concurrent operations
       },
       [this.thermalStates.WARM]: {
-        cpuThrottle: 0.8,
-        // 80% performance
-        animationScale: 0.8,
+        cpuThrottle: 0.9,
+        // 90% performance (relaxed from 0.8)
+        animationScale: 0.9,
         // Slightly faster animations
-        renderDelay: 50,
-        // 50ms delay between operations
-        maxConcurrent: 6
-        // Reduced concurrent operations
+        renderDelay: 30,
+        // 30ms delay (relaxed from 50ms)
+        maxConcurrent: 8
+        // Reduced concurrent operations (relaxed from 6)
       },
       [this.thermalStates.HOT]: {
-        cpuThrottle: 0.6,
-        // 60% performance
-        animationScale: 0.5,
-        // Much faster animations
-        renderDelay: 100,
-        // 100ms delay
-        maxConcurrent: 3
-        // Minimal concurrent operations
+        cpuThrottle: 0.75,
+        // 75% performance (relaxed from 0.6)
+        animationScale: 0.7,
+        // Faster animations
+        renderDelay: 80,
+        // 80ms delay (relaxed from 100ms)
+        maxConcurrent: 5
+        // Reduced concurrent operations (relaxed from 3)
       },
       [this.thermalStates.CRITICAL]: {
-        cpuThrottle: 0.3,
-        // 30% performance
-        animationScale: 0.3,
-        // Minimal animations
-        renderDelay: 200,
-        // 200ms delay
-        maxConcurrent: 1
-        // One operation at a time
+        cpuThrottle: 0.6,
+        // 60% performance (relaxed from 0.3)
+        animationScale: 0.5,
+        // Reduced animations
+        renderDelay: 150,
+        // 150ms delay (relaxed from 200ms)
+        maxConcurrent: 3
+        // Minimal concurrent operations (relaxed from 1)
       }
     };
     this.performanceHistory = [];
@@ -7686,11 +7686,11 @@ class ThermalManager {
   evaluateThermalState() {
     let newState = this.thermalStates.NORMAL;
     const sustainedTime = this.thermalEstimation.sustainedHighPerf;
-    if (sustainedTime > 12e4) {
+    if (sustainedTime > 24e4) {
       newState = this.thermalStates.CRITICAL;
-    } else if (sustainedTime > 6e4) {
+    } else if (sustainedTime > 12e4) {
       newState = this.thermalStates.HOT;
-    } else if (sustainedTime > 3e4) {
+    } else if (sustainedTime > 6e4) {
       newState = this.thermalStates.WARM;
     }
     if (this.batteryAPISupported) {
@@ -7701,7 +7701,7 @@ class ThermalManager {
       }
     }
     const recentPerf = this.getRecentPerformance(5e3);
-    if (recentPerf.avgFPS < 20) {
+    if (recentPerf.avgFPS < 15) {
       newState = this.increaseThrottleState(newState);
     }
     if (recentPerf.avgMemoryUsage > 0.8) {
@@ -9575,7 +9575,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-D8bw_wt5.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-BfMpY8PV.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(
     viewer,
     state,
