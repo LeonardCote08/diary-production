@@ -1,5 +1,5 @@
-import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-Dn8KCa-i.js";
-import "./viewerSetup-c9760TLF.js";
+import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-DcA6eySp.js";
+import "./viewerSetup-CN7evlwk.js";
 const GestureStates = {
   IDLE: "idle",
   UNDETERMINED: "undetermined",
@@ -4129,9 +4129,7 @@ class TemporalEchoController {
     this.hotspotCleanupTimeouts = /* @__PURE__ */ new Map();
     this._pendingTempo2Activation = null;
     this.safetyCleanupInterval = null;
-    this.startSafetyCleanup();
     this.fullResetInterval = null;
-    this.startPeriodicReset();
     this.spatialIndexReady = false;
     this.canvasRenderer = null;
     this.isRevealing = false;
@@ -4150,7 +4148,29 @@ class TemporalEchoController {
     this.initializeContrastDetection();
     this.borderRadialAnimator = new BorderRadialAnimator(this.viewer, this.stateManager, this);
     console.log("[TemporalEchoController] BorderRadialAnimator initialized for ripple mode");
-    this.cleanupAllRevealStylesOnStartup();
+    if ("requestIdleCallback" in window) {
+      requestIdleCallback(() => this.cleanupAllRevealStylesOnStartup(), { timeout: 2e3 });
+    } else {
+      setTimeout(() => this.cleanupAllRevealStylesOnStartup(), 100);
+    }
+    this.cachedBorderStyle = localStorage.getItem("borderStyle") || "default";
+    this.cachedRevealType = localStorage.getItem("revealType");
+    window.addEventListener("storage", (e) => {
+      if (e.key === "borderStyle") {
+        this.cachedBorderStyle = e.newValue || "default";
+        console.log(
+          "[TemporalEchoController] Border style cache updated:",
+          this.cachedBorderStyle
+        );
+      }
+      if (e.key === "revealType") {
+        this.cachedRevealType = e.newValue;
+        console.log(
+          "[TemporalEchoController] Reveal type cache updated:",
+          this.cachedRevealType
+        );
+      }
+    });
     this.frameCount = 0;
     this.lastFPSCheck = performance.now();
     this.currentFPS = 60;
@@ -5817,7 +5837,7 @@ class TemporalEchoController {
         zoomFactor = Math.min(3, lowZoomThreshold / currentZoom);
       }
       element.style.setProperty("--zoom-factor", zoomFactor);
-      let borderStyle = localStorage.getItem("borderStyle") || "default";
+      let borderStyle = this.cachedBorderStyle;
       const isAndroid = /Android/i.test(navigator.userAgent);
       if (isAndroid && this.isMobile) {
         borderStyle = "pigment";
@@ -6015,7 +6035,7 @@ class TemporalEchoController {
         }
       });
       if (elements.length > 0) {
-        const borderStyle = localStorage.getItem("borderStyle") || "default";
+        const borderStyle = this.cachedBorderStyle;
         this.batchDOMManager.batchRevealHotspots(elements, {
           staggerDelay: this.config.staggerDelay,
           revealDuration: this.config.revealDuration,

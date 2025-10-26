@@ -21822,7 +21822,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-c9760TLF.js").then((n) => n.v);
+      } = await import("./viewerSetup-CN7evlwk.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
@@ -39575,6 +39575,14 @@ function App() {
   })();
 }
 delegateEvents(["click", "touchend"]);
+{
+  console.log = () => {
+  };
+  console.debug = () => {
+  };
+  console.info = () => {
+  };
+}
 const root = document.getElementById("root");
 render(() => createComponent(App, {}), root);
 export {
