@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-BWdZcxBK.js","assets/main-CdvJWdUU.js","assets/main-C1kNOX5V.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-BTndIej_.js","assets/main-B6Ns1z4B.js","assets/main-C1kNOX5V.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-CdvJWdUU.js";
+import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-B6Ns1z4B.js";
 class ImageOverlayManager {
   constructor() {
     this.overlays = /* @__PURE__ */ new Map();
@@ -6434,16 +6434,17 @@ const performanceConfig = {
     // Mobile optimizations from research
     subPixelRoundingEnabled: false,
     // MOBILE OPTIMIZATION: Reduce GPU load
-    // RESEARCH-BASED ANIMATION SETTINGS FOR NATURAL FEEL
-    animationTime: 0.3,
-    // RESEARCH: Optimal balance of speed and smoothness
-    springStiffness: 12,
-    // MOBILE OPTIMIZATION: Increased from 10.0 for tighter control
+    // TOUCH FLUIDITY RESEARCH (Oct 2025) - DESKTOP CONFIG
+    animationTime: 0.8,
+    // Touch fluidity research (optimal 0.6-1.0)
+    springStiffness: 10,
+    // Touch fluidity research (8-12 range optimal)
     blendTime: 0.3,
     // RESEARCH: Match animationTime for consistency
     flickEnabled: true,
     flickMinSpeed: 120,
     flickMomentum: 0.25,
+    // Desktop default
     // Zoom settings - OPTIMIZED FOR SMOOTH LOW ZOOM PERFORMANCE
     zoomPerScroll: 1.1,
     // Smaller steps reduce tile loading spikes
@@ -6986,7 +6987,7 @@ const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourc
     config.visibilityRatio = 1;
     config.maxTilesPerFrame = 2;
     config.alwaysBlend = false;
-    config.constrainDuringPan = true;
+    config.constrainDuringPan = false;
     config.maxZoomPixelRatio = 1.5;
     config.imageSmoothingEnabled = false;
     config.updatePixelDensityRatio = false;
@@ -7059,11 +7060,11 @@ const buildViewerConfig = (config, dziUrl, drawerType, isMobileDevice, tileSourc
       // Research: Prevent scroll conflicts
       clickToZoom: false,
       dblClickToZoom: false,
-      flickEnabled: isIOS2 ? false : config.flickEnabled,
-      // CRITICAL: Disable on iOS to prevent corruption triggers
+      flickEnabled: true,
+      // FIXED: Enable on iOS (mobileOptimizedConfig manages momentum)
       flickMinSpeed: config.flickMinSpeed,
-      flickMomentum: isIOS2 ? 0 : config.flickMomentum,
-      // CRITICAL: No momentum on iOS
+      flickMomentum: isIOS2 ? 0.2 : 0.28,
+      // TEST: iOS 0.20 conservative, Android 0.28
       pinchToZoom: true,
       dragToPan: true,
       pinchRotate: false
@@ -7108,15 +7109,15 @@ const getMobileOptimizedConfig = (isMobile2, isIOS2) => {
     // Memory management - CRITICAL for iOS
     maxImageCacheCount: isMobile2 ? 50 : 100,
     // iOS has 200MB limit
-    // Animation optimization
+    // Animation optimization (Touch Fluidity Research Oct 2025)
     blendTime: 0,
     // CRITICAL: No blending for PNG with transparency
-    springStiffness: isMobile2 ? 6.5 : 8,
-    // Lower for mobile responsiveness
+    springStiffness: isMobile2 ? 10 : 12,
+    // Touch fluidity research (was 6.5)
     animationTime: isMobile2 ? 0.8 : 1.2,
-    // Faster animations on mobile
+    // Touch fluidity research (optimal 0.6-1.0)
     immediateRender: true,
-    // Skip animations when possible
+    // Touch fluidity research - eliminates 16-33ms delay
     // iOS-specific fixes
     placeholderFillStyle: isIOS2 ? null : "#000000",
     // Fix iOS flickering
@@ -7132,7 +7133,7 @@ const getMobileOptimizedConfig = (isMobile2, isIOS2) => {
     showNavigator: false,
     showNavigationControl: false,
     debugMode: false,
-    // Touch optimization
+    // Touch optimization (Touch Fluidity Research Oct 2025)
     gestureSettingsTouch: {
       scrollToZoom: false,
       // Prevent conflicts with page scroll
@@ -7142,8 +7143,10 @@ const getMobileOptimizedConfig = (isMobile2, isIOS2) => {
       // CRITICAL: Disable for consistent tap behavior
       pinchToZoom: true,
       flickEnabled: true,
+      // FIXED: Enable on iOS (HTML drawer + new config may prevent corruption)
       flickMinSpeed: isMobile2 ? 100 : 120,
-      flickMomentum: isMobile2 ? 0.15 : 0.25
+      flickMomentum: isIOS2 ? 0.2 : 0.28
+      // TEST: iOS 0.20 (conservative), increase to 0.32 if no corruption
     },
     // Mouse settings (for desktop)
     gestureSettingsMouse: {
@@ -7155,7 +7158,8 @@ const getMobileOptimizedConfig = (isMobile2, isIOS2) => {
     // Viewport constraints
     visibilityRatio: isMobile2 ? 0.8 : 1,
     // Allow some image to be outside viewport
-    constrainDuringPan: true,
+    constrainDuringPan: false,
+    // Touch fluidity research - prevents jitter (OSD Issue #1232)
     // CRITICAL: New in 4.1.0 - Tile drawing optimizations
     maxTilesPerFrame: isMobile2 ? 3 : void 0,
     // Limit tiles drawn per frame
@@ -9032,7 +9036,6 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
     }
     viewerConfigOptions.prefetchTiles = true;
     viewerConfigOptions.subPixelRoundingEnabled = false;
-    viewerConfigOptions.constrainDuringPan = true;
     viewerConfigOptions.minPixelRatio = 1;
     viewerConfigOptions.smoothTileEdgesMinZoom = Infinity;
     console.log(
@@ -9575,7 +9578,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-BWdZcxBK.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-BTndIej_.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(
     viewer,
     state,

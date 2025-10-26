@@ -1,9 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-BQBQNrly.js","assets/main-CdvJWdUU.js","assets/main-C1kNOX5V.css","assets/viewerSetup-QkWKXfa3.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-DagCcr9T.js","assets/main-B6Ns1z4B.js","assets/main-C1kNOX5V.css","assets/viewerSetup-BPqMOMJw.js"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-CdvJWdUU.js";
-import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-QkWKXfa3.js";
+import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-B6Ns1z4B.js";
+import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-BPqMOMJw.js";
 class TemporalModeHandler {
   constructor(options = {}) {
     this.audioEngine = options.audioEngine || window.audioEngine;
@@ -2719,7 +2719,7 @@ class EventCoordinator extends EventEmitter {
     this.container = container;
     this.svg = svg;
     container.addEventListener("pointerdown", this.handlePointerDown);
-    container.addEventListener("pointermove", this.handlePointerMove);
+    container.addEventListener("pointermove", this.handlePointerMove, { passive: true });
     container.addEventListener("pointerup", this.handlePointerUp);
     container.addEventListener("pointercancel", this.handlePointerCancel);
     svg.addEventListener("mousemove", this.handleMouseMove);
@@ -9690,7 +9690,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
   }
   if (renderer.eventCoordinator) {
     const TemporalEchoController = (await __vitePreload(async () => {
-      const { default: __vite_default__ } = await import("./TemporalEchoController-BQBQNrly.js");
+      const { default: __vite_default__ } = await import("./TemporalEchoController-DagCcr9T.js");
       return { default: __vite_default__ };
     }, true ? __vite__mapDeps([0,1,2,3]) : void 0)).default;
     const echoController = new TemporalEchoController({

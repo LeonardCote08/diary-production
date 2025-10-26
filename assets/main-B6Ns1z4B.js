@@ -21182,6 +21182,7 @@ function PerformanceIndicator(props) {
     }
   });
 }
+const DEBUG_TUNING_VERSION = "2.0-touch-fluidity";
 let debugTuningState = {
   // Core OpenSeadragon settings for artifact elimination
   blendTime: {
@@ -21201,24 +21202,24 @@ let debugTuningState = {
     description: "Max concurrent tiles - lower prevents cascade artifacts"
   },
   animationTime: {
-    value: 1.2,
-    // Research optimal for smooth mouse wheel
+    value: 0.8,
+    // Touch fluidity research (0.6-1.0 range optimal)
     min: 0.1,
     max: 3,
     step: 0.1,
     description: "Zoom animation duration - affects smoothness"
   },
   springStiffness: {
-    value: 6.5,
-    // Research optimal for artifact-free zoom
+    value: 10,
+    // Touch fluidity research (8-12 range optimal)
     min: 1,
     max: 20,
     step: 0.5,
     description: "Animation responsiveness - affects zoom feel"
   },
   immediateRender: {
-    value: false,
-    // Research shows false reduces tile pop-in
+    value: true,
+    // Touch fluidity research - eliminates 16-33ms delay
     description: "Force immediate tile rendering"
   },
   imageLoaderLimit: {
@@ -21371,6 +21372,22 @@ function updateTuningParameter(key, value) {
   }
 }
 function loadSavedTuningValues() {
+  const savedVersion = localStorage.getItem("debugTuning_version");
+  if (savedVersion !== DEBUG_TUNING_VERSION) {
+    console.log(
+      `[DebugTuning] Version mismatch (${savedVersion} → ${DEBUG_TUNING_VERSION}), resetting to new defaults`
+    );
+    Object.keys(debugTuningState).forEach((key) => {
+      localStorage.removeItem(`debugTuning_${key}`);
+    });
+    localStorage.setItem("debugTuning_version", DEBUG_TUNING_VERSION);
+    console.log("Applied new default values:", {
+      animationTime: debugTuningState.animationTime.value,
+      springStiffness: debugTuningState.springStiffness.value,
+      immediateRender: debugTuningState.immediateRender.value
+    });
+    return;
+  }
   Object.keys(debugTuningState).forEach((key) => {
     const savedValue = localStorage.getItem(`debugTuning_${key}`);
     if (savedValue !== null) {
@@ -21389,12 +21406,12 @@ function resetTuningToDefaults() {
     // Eliminate transparency artifacts
     maxTilesPerFrame: 1,
     // Prevent cascade
-    animationTime: 1.2,
-    // Optimal smoothness
-    springStiffness: 6.5,
-    // Balanced responsiveness
-    immediateRender: false,
-    // Reduce pop-in
+    animationTime: 0.8,
+    // Touch fluidity research (was 1.2)
+    springStiffness: 10,
+    // Touch fluidity research (was 6.5)
+    immediateRender: true,
+    // Touch fluidity research (was false)
     imageLoaderLimit: 2,
     // Prevent cascade
     enableProgressiveQuality: true,
@@ -21822,7 +21839,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-QkWKXfa3.js").then((n) => n.v);
+      } = await import("./viewerSetup-BPqMOMJw.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
