@@ -21839,7 +21839,7 @@ function ArtworkViewer(props) {
     } = await __vitePreload(async () => {
       const {
         initializeViewer: initializeViewer2
-      } = await import("./viewerSetup-BPqMOMJw.js").then((n) => n.v);
+      } = await import("./viewerSetup-C5b-UYst.js").then((n) => n.v);
       return {
         initializeViewer: initializeViewer2
       };
@@ -21887,7 +21887,15 @@ function ArtworkViewer(props) {
       }
     }, 500);
     const handleFullscreenChange = () => {
-      state.setIsFullscreen(fullscreenManager.isFullscreen());
+      var _a, _b, _c, _d, _e, _f;
+      const isNowFullscreen = fullscreenManager.isFullscreen();
+      console.log("[FULLSCREEN DEBUG] Fullscreen state changed:", {
+        isFullscreen: isNowFullscreen,
+        timestamp: performance.now(),
+        viewportZoom: (_c = (_b = (_a = state.viewer()) == null ? void 0 : _a.viewport) == null ? void 0 : _b.getZoom) == null ? void 0 : _c.call(_b),
+        viewportCenter: (_f = (_e = (_d = state.viewer()) == null ? void 0 : _d.viewport) == null ? void 0 : _e.getCenter) == null ? void 0 : _f.call(_e)
+      });
+      state.setIsFullscreen(isNowFullscreen);
     };
     const removeListener = fullscreenManager.addChangeListener(handleFullscreenChange);
     intervals.fullscreenCleanup = removeListener;
@@ -22263,11 +22271,11 @@ function ArtworkViewer(props) {
                 return _el$21;
               }
             }), (() => {
-              var _el$25 = _tmpl$5$2(), _el$26 = _el$25.firstChild, _el$27 = _el$26.firstChild, _el$29 = _el$27.nextSibling;
-              _el$29.nextSibling;
-              var _el$30 = _el$26.nextSibling;
-              insert(_el$26, () => Math.round(state.autoDeselectThreshold() * 100), _el$29);
-              _el$30.$$input = (e) => {
+              var _el$25 = _tmpl$5$2(), _el$26 = _el$25.firstChild, _el$27 = _el$26.firstChild, _el$30 = _el$27.nextSibling;
+              _el$30.nextSibling;
+              var _el$31 = _el$26.nextSibling;
+              insert(_el$26, () => Math.round(state.autoDeselectThreshold() * 100), _el$30);
+              _el$31.$$input = (e) => {
                 var _a;
                 const value = parseFloat(e.target.value);
                 state.setAutoDeselectThreshold(value);
@@ -22275,21 +22283,21 @@ function ArtworkViewer(props) {
                   state.components().overlayManager.setAutoDeselectThreshold(value);
                 }
               };
-              _el$30.style.setProperty("width", "100%");
-              _el$30.style.setProperty("height", "20px");
-              _el$30.style.setProperty("background", "rgba(255,255,255,0.1)");
-              _el$30.style.setProperty("borderRadius", "10px");
-              _el$30.style.setProperty("outline", "none");
-              _el$30.style.setProperty("appearance", "none");
-              _el$30.style.setProperty("WebkitAppearance", "none");
-              createRenderEffect(() => _el$30.value = state.autoDeselectThreshold());
+              _el$31.style.setProperty("width", "100%");
+              _el$31.style.setProperty("height", "20px");
+              _el$31.style.setProperty("background", "rgba(255,255,255,0.1)");
+              _el$31.style.setProperty("borderRadius", "10px");
+              _el$31.style.setProperty("outline", "none");
+              _el$31.style.setProperty("appearance", "none");
+              _el$31.style.setProperty("WebkitAppearance", "none");
+              createRenderEffect(() => _el$31.value = state.autoDeselectThreshold());
               return _el$25;
             })(), (() => {
-              var _el$31 = _tmpl$6$2(), _el$32 = _el$31.firstChild, _el$33 = _el$32.firstChild, _el$35 = _el$33.nextSibling;
-              _el$35.nextSibling;
-              var _el$36 = _el$32.nextSibling;
-              insert(_el$32, () => Math.round(state.panDeselectThreshold() * 100), _el$35);
-              _el$36.$$input = (e) => {
+              var _el$32 = _tmpl$6$2(), _el$33 = _el$32.firstChild, _el$34 = _el$33.firstChild, _el$37 = _el$34.nextSibling;
+              _el$37.nextSibling;
+              var _el$38 = _el$33.nextSibling;
+              insert(_el$33, () => Math.round(state.panDeselectThreshold() * 100), _el$37);
+              _el$38.$$input = (e) => {
                 var _a;
                 const value = parseFloat(e.target.value);
                 state.setPanDeselectThreshold(value);
@@ -22298,15 +22306,15 @@ function ArtworkViewer(props) {
                   console.log(`Set pan threshold to ${value}`);
                 }
               };
-              _el$36.style.setProperty("width", "100%");
-              _el$36.style.setProperty("height", "20px");
-              _el$36.style.setProperty("background", "rgba(255,255,255,0.1)");
-              _el$36.style.setProperty("borderRadius", "10px");
-              _el$36.style.setProperty("outline", "none");
-              _el$36.style.setProperty("appearance", "none");
-              _el$36.style.setProperty("WebkitAppearance", "none");
-              createRenderEffect(() => _el$36.value = state.panDeselectThreshold());
-              return _el$31;
+              _el$38.style.setProperty("width", "100%");
+              _el$38.style.setProperty("height", "20px");
+              _el$38.style.setProperty("background", "rgba(255,255,255,0.1)");
+              _el$38.style.setProperty("borderRadius", "10px");
+              _el$38.style.setProperty("outline", "none");
+              _el$38.style.setProperty("appearance", "none");
+              _el$38.style.setProperty("WebkitAppearance", "none");
+              createRenderEffect(() => _el$38.value = state.panDeselectThreshold());
+              return _el$32;
             })()];
           }
         }), null);
@@ -22334,13 +22342,13 @@ function ArtworkViewer(props) {
         return state.showExpandButton();
       },
       get children() {
-        var _el$37 = _tmpl$8$2();
-        _el$37.$$click = () => {
+        var _el$39 = _tmpl$8$2();
+        _el$39.$$click = () => {
           var _a;
           return (_a = animations()) == null ? void 0 : _a.expandToFullView();
         };
-        createRenderEffect(() => className(_el$37, `expand-button glass-button ${state.expandButtonFading() ? "fade-out" : ""}`));
-        return _el$37;
+        createRenderEffect(() => className(_el$39, `expand-button glass-button ${state.expandButtonFading() ? "fade-out" : ""}`));
+        return _el$39;
       }
     }), null);
     insert(_el$, createComponent(Show, {
@@ -22348,9 +22356,9 @@ function ArtworkViewer(props) {
         return memo(() => !!(state.viewerReady() && !isIPhone()))() && fullscreenManager.isSupported();
       },
       get children() {
-        var _el$38 = _tmpl$9$2(), _el$39 = _el$38.firstChild;
-        _el$39.$$click = handleFullscreenClick;
-        insert(_el$39, (() => {
+        var _el$40 = _tmpl$9$2(), _el$41 = _el$40.firstChild;
+        _el$41.$$click = handleFullscreenClick;
+        insert(_el$41, (() => {
           var _c$ = memo(() => !!state.isFullscreen());
           return () => _c$() ? (
             // Exit fullscreen icon
@@ -22360,8 +22368,8 @@ function ArtworkViewer(props) {
             _tmpl$10$1()
           );
         })());
-        createRenderEffect(() => setAttribute(_el$39, "aria-label", state.isFullscreen() ? "Exit fullscreen" : "Enter fullscreen"));
-        return _el$38;
+        createRenderEffect(() => setAttribute(_el$41, "aria-label", state.isFullscreen() ? "Exit fullscreen" : "Enter fullscreen"));
+        return _el$40;
       }
     }), null);
     return _el$;
