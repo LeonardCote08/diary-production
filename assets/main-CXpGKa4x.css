@@ -17,16 +17,18 @@ a {
     text-decoration: inherit;
 }
 
-    a:hover {
-        color: #535bf2;
-    }
+a:hover {
+    color: #535bf2;
+}
 
 body {
     margin: 0;
     padding: 0;
     min-width: 320px;
     min-height: 100vh;
-    overflow: hidden; /* Ajouté ici directement */
+    min-height: 100dvh; /* Dynamic viewport height - Safari 15.4+ */
+    overflow: hidden;
+    overscroll-behavior: none; /* Prevent bounce */
 }
 
 h1 {
@@ -46,14 +48,14 @@ button {
     transition: border-color 0.25s;
 }
 
-    button:hover {
-        border-color: #646cff;
-    }
+button:hover {
+    border-color: #646cff;
+}
 
-    button:focus,
-    button:focus-visible {
-        outline: 4px auto -webkit-focus-ring-color;
-    }
+button:focus,
+button:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
+}
 
 @media (prefers-color-scheme: light) {
     :root {
@@ -74,7 +76,9 @@ button {
 #root {
     width: 100vw;
     height: 100vh;
+    height: 100dvh; /* Dynamic viewport - adapts to Safari UI */
     display: block;
+    /* NO padding - let viewer use full screen, UI elements will handle safe-areas */
 }
 
 /* Container pour OpenSeadragon */
@@ -100,23 +104,6 @@ button {
     height: 100%;
     pointer-events: none;
 }
-
-/* Audio player en bas */
-.audio-player {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(0, 0, 0, 0.9);
-    backdrop-filter: blur(10px);
-    padding: 1rem;
-    transform: translateY(100%);
-    transition: transform 0.3s ease;
-}
-
-    .audio-player.active {
-        transform: translateY(0);
-    }
 /* MediaButton.css - Styled to match AudioPlayer aesthetic */
 
 .media-button-container {
@@ -1474,7 +1461,9 @@ button.debug-toggle-option {
 .fullscreen-button-container {
     position: fixed;
     top: 20px;
+    top: max(20px, env(safe-area-inset-top)); /* Avoid notch on iPhone */
     right: 20px;
+    right: max(20px, env(safe-area-inset-right));
     z-index: 1000;
 }
 .fullscreen-button {

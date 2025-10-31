@@ -1,5 +1,5 @@
-import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-Bc8nOvtd.js";
-import "./viewerSetup-C5b-UYst.js";
+import { O as OpenSeadragon, i as isMobile, f as getDefaultExportFromCjs, h as commonjsGlobal } from "./main-LeEcAlV7.js";
+import "./viewerSetup-9Pji8J99.js";
 const GestureStates = {
   IDLE: "idle",
   UNDETERMINED: "undetermined",
@@ -4053,6 +4053,140 @@ class BorderRadialAnimator {
     }
   }
 }
+const STORAGE_KEY = "phase2_feature_flags";
+const FLAG_VERSION = "1.0.0";
+const DEFAULT_FLAGS = {
+  // === DI Container ===
+  useDIContainer: false,
+  // === TemporalEchoController Modules (Week 2-3) ===
+  useNewSpatialSearch: false,
+  // TemporalSpatialIndex
+  useNewCleanupManager: false,
+  // TemporalCleanupManager
+  useNewClusterAnalyzer: false,
+  // TemporalClusterAnalyzer
+  useNewRevealManager: false,
+  // TemporalRevealManager
+  useNewGestureHandler: false,
+  // TemporalGestureHandler
+  // === NativeHotspotRenderer Modules (Week 4-5) ===
+  useNewStyleManager: false,
+  // HotspotStyleManager
+  useNewOverlayManager: false,
+  // HotspotOverlayManager
+  useNewSelectionManager: false,
+  // HotspotSelectionManager
+  useNewEventManager: false,
+  // HotspotEventManager
+  // === Master Switch (Testing Only) ===
+  enableAllRefactoredModules: false
+  // Override all flags to true
+};
+let flagCache = null;
+function loadFlags() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) {
+      return { ...DEFAULT_FLAGS };
+    }
+    const parsed = JSON.parse(stored);
+    if (parsed.version !== FLAG_VERSION) {
+      console.warn("[FeatureFlags] Version mismatch, resetting to defaults");
+      return { ...DEFAULT_FLAGS };
+    }
+    const flags = parsed.flags || {};
+    const validated = {};
+    for (const key in DEFAULT_FLAGS) {
+      if (typeof flags[key] === "boolean") {
+        validated[key] = flags[key];
+      } else {
+        validated[key] = DEFAULT_FLAGS[key];
+      }
+    }
+    return validated;
+  } catch (error) {
+    console.error("[FeatureFlags] Failed to load from localStorage:", error);
+    return { ...DEFAULT_FLAGS };
+  }
+}
+function saveFlags(flags) {
+  try {
+    const data = {
+      version: FLAG_VERSION,
+      flags,
+      lastModified: (/* @__PURE__ */ new Date()).toISOString()
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.error("[FeatureFlags] Failed to save to localStorage:", error);
+  }
+}
+function getFlag(name) {
+  if (flagCache === null) {
+    flagCache = loadFlags();
+  }
+  if (!(name in DEFAULT_FLAGS)) {
+    console.warn(`[FeatureFlags] Unknown flag: "${name}"`);
+    return false;
+  }
+  if (name !== "enableAllRefactoredModules" && flagCache.enableAllRefactoredModules === true) {
+    return true;
+  }
+  return flagCache[name];
+}
+function setFlag(name, value) {
+  if (!(name in DEFAULT_FLAGS)) {
+    throw new Error(`[FeatureFlags] Unknown flag: "${name}"`);
+  }
+  if (typeof value !== "boolean") {
+    throw new Error(`[FeatureFlags] Flag value must be boolean, got: ${typeof value}`);
+  }
+  if (flagCache === null) {
+    flagCache = loadFlags();
+  }
+  flagCache[name] = value;
+  saveFlags(flagCache);
+  console.log(`[FeatureFlags] Set "${name}" = ${value}`);
+}
+function getAllFlags() {
+  if (flagCache === null) {
+    flagCache = loadFlags();
+  }
+  return { ...flagCache };
+}
+function resetFlags() {
+  flagCache = { ...DEFAULT_FLAGS };
+  saveFlags(flagCache);
+  console.log("[FeatureFlags] Reset all flags to defaults");
+}
+function hasAnyRefactoredModuleEnabled() {
+  const flags = getAllFlags();
+  for (const key in flags) {
+    if (key !== "enableAllRefactoredModules" && flags[key] === true) {
+      return true;
+    }
+  }
+  return flags.enableAllRefactoredModules === true;
+}
+if (typeof window !== "undefined") {
+  window.featureFlags = {
+    get: getFlag,
+    set: setFlag,
+    getAll: getAllFlags,
+    reset: resetFlags,
+    hasAnyEnabled: hasAnyRefactoredModuleEnabled,
+    // Convenience: Enable all flags (testing)
+    enableAll: () => setFlag("enableAllRefactoredModules", true),
+    disableAll: () => {
+      resetFlags();
+      console.log("[FeatureFlags] All flags disabled");
+    }
+  };
+  console.log("[FeatureFlags] Console API available: window.featureFlags");
+  console.log('  Usage: window.featureFlags.get("useDIContainer")');
+  console.log('  Usage: window.featureFlags.set("useDIContainer", true)');
+  console.log("  Usage: window.featureFlags.getAll()");
+}
 class TemporalEchoController {
   constructor(options = {}) {
     this.viewer = options.viewer;
@@ -4423,6 +4557,7 @@ class TemporalEchoController {
   // Removed animation system initialization methods
   /**
    * Handle quick tap - trigger echo revelation
+   * Phase 2 Week 0: Injection point for useNewGestureHandler (TODO: implement in Week 2-3)
    */
   handleQuickTap(tapData) {
     var _a, _b, _c;
@@ -4732,7 +4867,23 @@ class TemporalEchoController {
    * Phase 4 Optimization: Uses CanvasHitDetector for < 2ms searches
    * NEW: Supports adjacent selection for "côte à côte" hotspots
    */
+  /**
+   * Find hotspots within radius of tap point (Phase 2: Dual code path)
+   */
   findHotspotsInRadius(tapData, radius) {
+    if (getFlag("useNewSpatialSearch")) {
+      return this._findHotspotsInRadiusImpl(tapData, radius);
+    } else {
+      return this._findHotspotsInRadiusImpl(tapData, radius);
+    }
+  }
+  /**
+   * Internal implementation of hotspot searching
+   * Used by both OLD and NEW paths during Week 0
+   * Will be replaced in NEW path during Week 2-3 extraction
+   * @private
+   */
+  _findHotspotsInRadiusImpl(tapData, radius) {
     const isSpecialMode = this.config.revealType === "ripple";
     if (this.hitDetector && this.useCanvasHitDetection && this.isMobile && !this.config.useAdjacentSelection && !isSpecialMode) {
       const canvasResults = this.canvasHitSearch(tapData, radius);
@@ -5723,6 +5874,7 @@ class TemporalEchoController {
   }
   /**
    * Reveal a single hotspot
+   * Phase 2 Week 0: Injection point for useNewRevealManager (TODO: implement in Week 2-3)
    */
   revealSingleHotspot(hotspotData, tapData, index) {
     var _a, _b;
