@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-DHtINa_h.js","assets/main-LeEcAlV7.js","assets/main-CXpGKa4x.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/viewerEventHandlers-DjGg2WQX.js","assets/main-CMhWozAd.js","assets/main-Dhvkcytq.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as getTuningState, c as OverlayManagerFactory, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-LeEcAlV7.js";
+import { O as OpenSeadragon, i as isMobile, g as getBrowserOptimalDrawer, a as applyTileCascadeFix, b as OverlayManagerFactory, c as getTuningState, d as applyTuningToViewer, _ as __vitePreload, r as removeTileCascadeFix } from "./main-CMhWozAd.js";
 class ImageOverlayManager {
   constructor() {
     this.overlays = /* @__PURE__ */ new Map();
@@ -4766,13 +4766,12 @@ function createIOSHTMLConfig(baseConfig) {
   );
   return {
     ...baseConfig,
-    // CRITICAL: Bypass canvas entirely on iOS
-    useCanvas: false,
-    drawer: "html",
-    // Force HTML drawer explicitly
-    // Performance optimizations for HTML rendering
-    immediateRender: false,
-    // CRITICAL: Wait for tiles to load (was true)
+    // CRITICAL: Use Canvas drawer (HTML drawer broken on iOS - GitHub #541)
+    useCanvas: true,
+    drawer: "canvas",
+    // Performance optimizations for Canvas rendering
+    immediateRender: true,
+    // CRITICAL: Required for mobile Canvas drawer
     alwaysBlend: false,
     // Better performance
     imageSmoothingEnabled: false,
@@ -8995,9 +8994,11 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   );
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   if (isIOS2) {
-    viewerConfigOptions.useCanvas = false;
-    viewerConfigOptions.drawer = "html";
-    console.log("[iOS] Forcing HTML drawer - canvas disabled completely");
+    viewerConfigOptions.useCanvas = true;
+    viewerConfigOptions.drawer = "canvas";
+    viewerConfigOptions.immediateRender = true;
+    console.log("[iOS] Using Canvas drawer (HTML drawer broken - GH#541)");
+    OpenSeadragon.pixelDensityRatio = 1;
   }
   if (isIOS2) {
     console.log("[CRITICAL iOS CONFIG]", {
@@ -9196,6 +9197,37 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
       stateSetters.setIsLoading(false);
       stateSetters.setViewerReady(true);
     }
+  });
+  viewer.addHandler("after-resize", () => {
+    var _a2, _b2, _c2;
+    const containerSize = viewer.viewport.getContainerSize();
+    console.log("[AFTER-RESIZE] Viewport bounds finalized", {
+      containerSize: { x: containerSize.x, y: containerSize.y },
+      zoom: viewer.viewport.getZoom(),
+      center: viewer.viewport.getCenter()
+    });
+    if ((_a2 = componentsObj.overlayManager) == null ? void 0 : _a2.resize) {
+      componentsObj.overlayManager.resize(containerSize.x, containerSize.y);
+      if (componentsObj.overlayManager.constructor.name === "Canvas2DOverlayManager") {
+        componentsObj.overlayManager.redraw();
+        console.log("[AFTER-RESIZE] Canvas2D overlay resized and redrawn");
+      }
+    }
+    if (((_b2 = componentsObj.overlayManager) == null ? void 0 : _b2.constructor.name) === "CSSOverlayManager") {
+      componentsObj.overlayManager.resize(containerSize.x, containerSize.y);
+      console.log("[AFTER-RESIZE] CSS overlay resized");
+    }
+    if ((_c2 = componentsObj.renderer) == null ? void 0 : _c2.updateVisibility) {
+      componentsObj.renderer.updateVisibility();
+    }
+    viewer.forceRedraw();
+  });
+  viewer.addHandler("resize", () => {
+    console.log("[OSD] resize event fired", {
+      containerSize: viewer.viewport.getContainerSize(),
+      autoResize: viewer.autoResize,
+      orientationChanging: document.body.classList.contains("orientation-changing")
+    });
   });
   viewer.addHandler("open-failed", (event) => {
     console.error("OpenSeadragon open-failed event:", event);
@@ -9578,7 +9610,7 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   viewer.viewport.centerSpringX.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.centerSpringY.springStiffness = performanceConfig.viewer.springStiffness;
   viewer.viewport.zoomSpring.springStiffness = performanceConfig.viewer.springStiffness;
-  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-DHtINa_h.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
+  const eventHandlers = await __vitePreload(() => import("./viewerEventHandlers-DjGg2WQX.js"), true ? __vite__mapDeps([0,1,2]) : void 0);
   eventHandlers.setupViewerEventHandlers(
     viewer,
     state,
@@ -9590,6 +9622,13 @@ async function initializeViewer(viewerRef, props, state, handleHotspotClick) {
   const keyHandler = eventHandlers.setupKeyboardHandler(viewer, state, componentsObj);
   intervals.handleKeyPress = keyHandler;
   eventHandlers.setupResizeObserver(viewerRef, viewer, state);
+  const orientationCleanup = eventHandlers.setupOrientationHandler(viewer, state, componentsObj);
+  if (orientationCleanup) {
+    state.setComponents((prev) => ({
+      ...prev,
+      orientationCleanup
+    }));
+  }
   console.log(
     "[viewerSetup] All handlers attached, now opening viewer with tileSources:",
     dziUrl

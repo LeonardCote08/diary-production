@@ -1,9 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-DQyShX5M.js","assets/main-LeEcAlV7.js","assets/main-CXpGKa4x.css","assets/viewerSetup-9Pji8J99.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-CdasmGhp.js","assets/main-CMhWozAd.js","assets/main-Dhvkcytq.css","assets/viewerSetup-Ct0ukrPv.js"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-LeEcAlV7.js";
-import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-9Pji8J99.js";
+import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-CMhWozAd.js";
+import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-Ct0ukrPv.js";
 class TemporalModeHandler {
   constructor(options = {}) {
     this.audioEngine = options.audioEngine || window.audioEngine;
@@ -9527,10 +9527,24 @@ function setupKeyboardHandler(viewer, state, componentsObj) {
 }
 function setupResizeObserver(viewerRef, viewer, state) {
   let resizeTimeout;
+  let lastWidth = 0;
+  let lastHeight = 0;
+  const isOrientationChanging = () => {
+    return document.body.classList.contains("orientation-changing");
+  };
   const resizeObserver = new ResizeObserver((entries) => {
     if (!(viewer == null ? void 0 : viewer.viewport) || !viewer.isOpen()) return;
+    if (isOrientationChanging()) {
+      console.log("[RESIZE] Skipping - orientation change in progress");
+      return;
+    }
     for (let entry of entries) {
       const { width, height } = entry.contentRect;
+      if (width === lastWidth && height === lastHeight) {
+        return;
+      }
+      lastWidth = width;
+      lastHeight = height;
       if (width > 0 && height > 0) {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
@@ -9545,29 +9559,139 @@ function setupResizeObserver(viewerRef, viewer, state) {
                   viewer.forceRedraw();
                   const afterZoom = viewer.viewport.getZoom();
                   const afterCenter = viewer.viewport.getCenter();
-                  console.log("[RESIZE DEBUG] Manual resize triggered", {
+                  console.log("[RESIZE] Manual resize (non-orientation)", {
                     dimensions: { width, height },
                     zoomChange: (afterZoom - beforeZoom).toFixed(4),
                     positionChange: {
                       x: (afterCenter.x - beforeCenter.x).toFixed(4),
                       y: (afterCenter.y - beforeCenter.y).toFixed(4)
-                    },
-                    timestamp: performance.now()
+                    }
                   });
                 }
               }
             } catch (error) {
               if (error.message && !error.message.includes("undefined")) {
-                console.warn("Resize error:", error);
+                console.warn("[RESIZE] Error:", error);
               }
             }
           });
-        }, 250);
+        }, 150);
       }
     }
   });
   resizeObserver.observe(viewerRef);
   state.setComponents((prev) => ({ ...prev, resizeObserver }));
+}
+function setupOrientationHandler(viewer, state, components2) {
+  const isMobile2 = /Mobi|Android/i.test(navigator.userAgent);
+  const isIPhone = /iPhone/.test(navigator.userAgent) && !/iPad/.test(navigator.userAgent);
+  const isIPad = /iPad/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+  if (!isMobile2) return null;
+  let orientationTimeout = null;
+  let isRotating = false;
+  let wasAutoResize = true;
+  console.log("[ORIENTATION] Handler initialized - Canvas drawer mode", {
+    device: { isIPhone, isIPad, isMobile: isMobile2 }
+  });
+  function pauseOverlayUpdates() {
+    var _a, _b;
+    console.log("[ORIENTATION] Pausing overlay updates");
+    if ((_a = components2.overlayManager) == null ? void 0 : _a.pauseRendering) {
+      components2.overlayManager.pauseRendering();
+    }
+    document.body.classList.add("orientation-changing");
+    if ((_b = components2.renderer) == null ? void 0 : _b.pauseUpdates) {
+      components2.renderer.pauseUpdates();
+    }
+  }
+  function resumeOverlayUpdates() {
+    console.log("[ORIENTATION] Resuming overlay updates");
+    setTimeout(() => {
+      var _a, _b;
+      document.body.classList.remove("orientation-changing");
+      if ((_a = components2.overlayManager) == null ? void 0 : _a.resumeRendering) {
+        components2.overlayManager.resumeRendering();
+      }
+      if ((_b = components2.renderer) == null ? void 0 : _b.resumeUpdates) {
+        components2.renderer.resumeUpdates();
+      }
+      viewer.forceRedraw();
+    }, 100);
+  }
+  function finishOrientationChange() {
+    console.log("[ORIENTATION] Finishing rotation sequence");
+    const containerSize = new OpenSeadragon.Point(
+      viewer.container.clientWidth,
+      viewer.container.clientHeight
+    );
+    console.log("[ORIENTATION] Container size:", {
+      width: containerSize.x,
+      height: containerSize.y
+    });
+    const currentZoom = viewer.viewport.getZoom(true);
+    const currentCenter = viewer.viewport.getCenter(true);
+    console.log("[ORIENTATION] Saved viewport state:", {
+      zoom: currentZoom,
+      center: { x: currentCenter.x, y: currentCenter.y }
+    });
+    viewer.viewport.resize(containerSize, true);
+    viewer.viewport.zoomTo(currentZoom, null, true);
+    viewer.viewport.panTo(currentCenter, true);
+    viewer.viewport.applyConstraints(true);
+    viewer.forceRedraw();
+    console.log("[ORIENTATION] Viewport resized and repositioned");
+    viewer.autoResize = wasAutoResize;
+    console.log("[ORIENTATION] Re-enabled autoResize");
+    setTimeout(() => {
+      resumeOverlayUpdates();
+      isRotating = false;
+      console.log("[ORIENTATION] Rotation sequence complete ✓");
+    }, 100);
+  }
+  function handleOrientationChange(event) {
+    if (isRotating) {
+      console.log("[ORIENTATION] Already handling rotation, skipping duplicate");
+      return;
+    }
+    isRotating = true;
+    console.log("[ORIENTATION] Change detected - Canvas drawer mode");
+    wasAutoResize = viewer.autoResize;
+    viewer.autoResize = false;
+    console.log("[ORIENTATION] Disabled autoResize (was:", wasAutoResize, ")");
+    if (orientationTimeout) {
+      clearTimeout(orientationTimeout);
+    }
+    pauseOverlayUpdates();
+    const afterResize = () => {
+      finishOrientationChange();
+      window.removeEventListener("resize", afterResize);
+    };
+    window.addEventListener("resize", afterResize, { once: true });
+    orientationTimeout = setTimeout(
+      () => {
+        if (isRotating) {
+          console.log("[ORIENTATION] Fallback timeout fired");
+          finishOrientationChange();
+          window.removeEventListener("resize", afterResize);
+        }
+      },
+      isIPhone ? 1e3 : 800
+    );
+  }
+  window.addEventListener("orientationchange", handleOrientationChange);
+  if (screen.orientation) {
+    screen.orientation.addEventListener("change", handleOrientationChange);
+  }
+  return () => {
+    window.removeEventListener("orientationchange", handleOrientationChange);
+    if (screen.orientation) {
+      screen.orientation.removeEventListener("change", handleOrientationChange);
+    }
+    if (orientationTimeout) {
+      clearTimeout(orientationTimeout);
+    }
+    console.log("[ORIENTATION] Handler cleaned up");
+  };
 }
 function scheduleIdleTask(callback) {
   if ("requestIdleCallback" in window) {
@@ -9702,7 +9826,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
   }
   if (renderer.eventCoordinator) {
     const TemporalEchoController = (await __vitePreload(async () => {
-      const { default: __vite_default__ } = await import("./TemporalEchoController-DQyShX5M.js");
+      const { default: __vite_default__ } = await import("./TemporalEchoController-CdasmGhp.js");
       return { default: __vite_default__ };
     }, true ? __vite__mapDeps([0,1,2,3]) : void 0)).default;
     const echoController = new TemporalEchoController({
@@ -9758,6 +9882,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
 export {
   setupAdaptiveSprings,
   setupKeyboardHandler,
+  setupOrientationHandler,
   setupResizeObserver,
   setupViewerEventHandlers
 };
