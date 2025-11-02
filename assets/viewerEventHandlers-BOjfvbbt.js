@@ -1,757 +1,9 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-CdasmGhp.js","assets/main-CMhWozAd.js","assets/main-Dhvkcytq.css","assets/viewerSetup-Ct0ukrPv.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/TemporalEchoController-DVD9ApXn.js","assets/main-C1izmsWZ.js","assets/main-CfdsZWTP.css","assets/viewerSetup-DrKd-syM.js"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-CMhWozAd.js";
-import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-Ct0ukrPv.js";
-class TemporalModeHandler {
-  constructor(options = {}) {
-    this.audioEngine = options.audioEngine || window.audioEngine;
-    this.onPhaseChange = options.onPhaseChange || (() => {
-    });
-    this.modeStateManager = options.modeStateManager;
-    this.thresholds = {
-      explore: 300,
-      preview: 500,
-      activate: 800
-    };
-    this.state = {
-      isHolding: false,
-      holdStartTime: 0,
-      holdTimer: null,
-      currentPhase: null,
-      targetHotspot: null,
-      feedbackGiven: /* @__PURE__ */ new Set()
-    };
-    this.currentPointerX = null;
-    this.currentPointerY = null;
-    this.progressElement = null;
-    this.isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || "ontouchstart" in window;
-  }
-  startHold(hotspot, pointerX, pointerY) {
-    if (!hotspot) return;
-    if (this.modeStateManager && (this.modeStateManager.modeStates.temporal.active || this.modeStateManager.modeStates.temporal.phase)) {
-      console.warn("[TEMPORAL_DEBUG] Cleaning stale temporal state before startHold");
-      this.modeStateManager.setTemporalState(false, null);
-      this.modeStateManager.modeStates.temporal.active = false;
-      this.modeStateManager.modeStates.temporal.phase = null;
-    }
-    this.state.isHolding = true;
-    this.state.holdStartTime = Date.now();
-    this.state.targetHotspot = hotspot;
-    this.state.feedbackGiven.clear();
-    this.state.currentPhase = null;
-    if (this.onPhaseChange) {
-      this.onPhaseChange("initial", hotspot);
-    }
-    if (this.isMobile) {
-      this.createTouchRipple(pointerX, pointerY);
-    }
-    if (this.state.holdTimer) {
-      clearTimeout(this.state.holdTimer);
-    }
-    this.scheduleFeedback();
-    this.showProgressIndicator(pointerX, pointerY);
-    this.currentPointerX = pointerX;
-    this.currentPointerY = pointerY;
-    this.animateProgress();
-  }
-  endHold() {
-    const duration = this.state.isHolding ? Date.now() - this.state.holdStartTime : 0;
-    const hotspot = this.state.targetHotspot;
-    const finalPhase = this.state.currentPhase;
-    if (this.state.holdTimer) {
-      clearTimeout(this.state.holdTimer);
-      this.state.holdTimer = null;
-    }
-    this.hideProgressIndicator();
-    this.state.isHolding = false;
-    this.state.holdStartTime = 0;
-    this.state.currentPhase = null;
-    this.state.targetHotspot = null;
-    this.state.feedbackGiven.clear();
-    this.cleanupTemporalVisuals();
-    if (this.modeStateManager) {
-      this.modeStateManager.setTemporalState(false, null);
-    }
-    return { duration, hotspot, finalPhase };
-  }
-  cleanupTemporalVisuals() {
-    console.log("[TemporalModeHandler] Cleaning up temporal visuals");
-    const temporalClasses = [
-      "hotspot-temporal-touchDown",
-      "hotspot-temporal-explore",
-      "hotspot-temporal-preview",
-      "hotspot-temporal-activate"
-    ];
-    document.querySelectorAll("[data-hotspot-id]").forEach((element) => {
-      temporalClasses.forEach((className) => {
-        element.classList.remove(className);
-      });
-      element.style.removeProperty("opacity");
-      element.style.removeProperty("visibility");
-      element.style.removeProperty("transition");
-    });
-    if (this.modeStateManager) {
-      this.modeStateManager.setTemporalState(false, null);
-    }
-  }
-  scheduleFeedback() {
-    this.giveFeedback("touchDown");
-    this.state.holdTimer = setTimeout(() => {
-      if (!this.state.isHolding) return;
-      this.state.currentPhase = "explore";
-      this.giveFeedback("explore");
-      this.state.holdTimer = setTimeout(() => {
-        if (!this.state.isHolding) return;
-        this.state.currentPhase = "preview";
-        this.giveFeedback("preview");
-        this.state.holdTimer = setTimeout(() => {
-          if (!this.state.isHolding) return;
-          this.state.currentPhase = "activate";
-          this.giveFeedback("activate");
-        }, this.thresholds.activate - this.thresholds.preview);
-      }, this.thresholds.preview - this.thresholds.explore);
-    }, this.thresholds.explore);
-  }
-  giveFeedback(phase) {
-    if (!this.state.isHolding) {
-      console.log("[TEMPORAL_DEBUG] Ignoring feedback - not holding");
-      return;
-    }
-    if (this.state.feedbackGiven.has(phase)) return;
-    this.state.feedbackGiven.add(phase);
-    if (phase === "touchDown" && this.isMobile) {
-      this.playHaptic("touchDown");
-    }
-    this.onPhaseChange(phase, this.state.targetHotspot);
-    this.playAudio(phase);
-    this.playHaptic(phase);
-  }
-  playAudio(phase) {
-    if (!this.audioEngine) return;
-    const hotspotSize = this.calculateHotspotSize(this.state.targetHotspot);
-    switch (phase) {
-      case "touchDown":
-        this.audioEngine.playTemporalSound("touch", 2e3, 20);
-        break;
-      case "explore":
-        this.audioEngine.playTemporalTick(hotspotSize);
-        break;
-      case "preview":
-        this.audioEngine.playTemporalBoop();
-        break;
-      case "activate":
-        this.audioEngine.playTemporalThunk(hotspotSize);
-        break;
-    }
-  }
-  playHaptic(phase) {
-    if (!navigator.vibrate || !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) return;
-    const patterns = {
-      touchDown: [20, 10, 20],
-      // au lieu de touchDown: 10
-      explore: 20,
-      preview: [30, 10, 30],
-      activate: 100
-    };
-    if (patterns[phase]) {
-      try {
-        navigator.vibrate(patterns[phase]);
-      } catch (e) {
-      }
-    }
-  }
-  calculateHotspotSize(hotspot) {
-    if (!hotspot || !hotspot.coordinates) return 0.5;
-    let minX = Infinity, maxX = -Infinity;
-    let minY = Infinity, maxY = -Infinity;
-    const coords = hotspot.shape === "multipolygon" ? hotspot.coordinates[0] : hotspot.coordinates;
-    coords.forEach(([x, y]) => {
-      minX = Math.min(minX, x);
-      maxX = Math.max(maxX, x);
-      minY = Math.min(minY, y);
-      maxY = Math.max(maxY, y);
-    });
-    const area = (maxX - minX) * (maxY - minY);
-    return Math.min(1, Math.max(0, area / 1e4));
-  }
-  createProgressIndicator() {
-    if (this.progressElement) return;
-    this.progressElement = document.createElement("div");
-    this.progressElement.className = "temporal-progress-indicator";
-    this.progressElement.innerHTML = `
-            <svg width="64" height="64" style="position: absolute; top: -2px; left: -2px; transform: rotate(-90deg);">
-                <circle cx="32" cy="32" r="30" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="4"/>
-                <circle cx="32" cy="32" r="30" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="4"
-                        stroke-dasharray="188.5" stroke-dashoffset="188.5" class="progress-ring"/>
-            </svg>
-        `;
-    document.body.appendChild(this.progressElement);
-  }
-  createTouchRipple(x, y) {
-    const ripple = document.createElement("div");
-    ripple.className = "temporal-touch-ripple";
-    ripple.style.left = x - 20 + "px";
-    ripple.style.top = y - 20 + "px";
-    document.body.appendChild(ripple);
-    setTimeout(() => {
-      ripple.remove();
-    }, 600);
-  }
-  showProgressIndicator(x, y) {
-    if (!this.progressElement) {
-      this.createProgressIndicator();
-    }
-    this.progressElement.style.display = "block";
-    this.progressElement.style.left = x + "px";
-    this.progressElement.style.top = y + "px";
-  }
-  hideProgressIndicator() {
-    if (this.progressElement) {
-      this.progressElement.style.display = "none";
-    }
-  }
-  updateProgress(x, y, progress) {
-    if (!this.progressElement) return;
-    this.currentPointerX = x;
-    this.currentPointerY = y;
-    this.progressElement.style.left = x + "px";
-    this.progressElement.style.top = y + "px";
-  }
-  animateProgress() {
-    if (!this.state.isHolding) {
-      this.hideProgressIndicator();
-      return;
-    }
-    const elapsed = Date.now() - this.state.holdStartTime;
-    const maxDuration = this.thresholds.activate + 200;
-    const progress = Math.min(1, elapsed / maxDuration);
-    if (this.progressElement) {
-      const ring = this.progressElement.querySelector(".progress-ring");
-      if (ring) {
-        const offset = 188.5 - 188.5 * progress;
-        ring.style.strokeDashoffset = offset;
-      }
-      if (this.currentPointerX !== void 0 && this.currentPointerY !== void 0) {
-        this.progressElement.style.left = this.currentPointerX + "px";
-        this.progressElement.style.top = this.currentPointerY + "px";
-      }
-    }
-    if (this.state.isHolding && progress < 1) {
-      requestAnimationFrame(() => this.animateProgress());
-    } else {
-      this.hideProgressIndicator();
-    }
-  }
-  getCurrentProgress() {
-    if (!this.state.isHolding) return 0;
-    const elapsed = Date.now() - this.state.holdStartTime;
-    const maxDuration = this.thresholds.activate + 200;
-    return Math.min(1, elapsed / maxDuration);
-  }
-  updateThreshold(type, value) {
-    if (this.thresholds[type] !== void 0) {
-      this.thresholds[type] = value;
-    }
-  }
-  reset() {
-    this.endHold();
-    if (this.progressElement) {
-      this.progressElement.remove();
-      this.progressElement = null;
-    }
-  }
-  destroy() {
-    this.reset();
-  }
-}
-class TemporalHoldDetectionEngine {
-  constructor(options = {}) {
-    this.audioEngine = options.audioEngine || window.audioEngine;
-    this.onStateChange = options.onStateChange || (() => {
-    });
-    this.onDiscovery = options.onDiscovery || (() => {
-    });
-    this.onActivation = options.onActivation || (() => {
-    });
-    this.thresholds = {
-      intentionDelay: 100,
-      // NEW: 100ms delay before starting temporal detection
-      navigation: 150,
-      // 0-150ms: immediate navigation response
-      discovery: 400,
-      // 400ms: discovery mode with haptic pulse
-      activation: 800,
-      // 800ms: full activation
-      earlyVelocityCheck: 150,
-      // Monitor velocity for 150ms after intention delay
-      distanceCheck: 200
-      // Monitor distance for 200ms total
-    };
-    this.velocityThreshold = this.isMobile ? 5 : 15;
-    this.frameTime = 16.67;
-    this.distanceThresholds = {
-      panDetection: this.isMobile ? 25 : 8,
-      // pixels - much larger for mobile touch (was 12)
-      maxHoldDistance: this.isMobile ? 35 : 15
-      // maximum allowed drift during hold (was 20)
-    };
-    this.state = {
-      isHolding: false,
-      holdStartTime: 0,
-      currentPhase: null,
-      targetHotspot: null,
-      initialPosition: { x: 0, y: 0 },
-      lastPosition: { x: 0, y: 0 },
-      velocityHistory: [],
-      feedbackGiven: /* @__PURE__ */ new Set(),
-      timer: null,
-      // NEW: Intention delay and pan detection
-      intentionTimer: null,
-      temporalStarted: false,
-      // True after intention delay passes
-      earlyVelocityTimer: null,
-      // Timer for early velocity monitoring
-      distanceTimer: null
-      // Timer for distance monitoring
-    };
-    this.hapticIntensities = {
-      discovery: 0.3,
-      // 30% intensity at 400ms
-      activation: 1
-      // 100% intensity at 800ms
-    };
-    this.lastFrameTime = 0;
-    this.velocityBufferSize = 5;
-    this.updateThrottle = this.isMobile ? 33 : 16;
-    this.lastUpdateTime = 0;
-    this.isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || "ontouchstart" in window;
-    this.update = this.update.bind(this);
-    this.calculateVelocity = this.calculateVelocity.bind(this);
-    this.schedulePhases = this.schedulePhases.bind(this);
-    this.startEarlyVelocityMonitoring = this.startEarlyVelocityMonitoring.bind(this);
-    this.startDistanceMonitoring = this.startDistanceMonitoring.bind(this);
-    this.checkPanDetection = this.checkPanDetection.bind(this);
-  }
-  /**
-   * Start temporal hold detection
-   * @param {Object} hotspot - Target hotspot
-   * @param {number} x - Initial touch X coordinate
-   * @param {number} y - Initial touch Y coordinate
-   */
-  startHold(hotspot, x, y) {
-    if (!hotspot) return;
-    console.log("[TemporalHoldEngine] Starting hold detection with intention delay", {
-      hotspotId: hotspot.id,
-      position: { x, y },
-      intentionDelay: this.thresholds.intentionDelay,
-      timestamp: Date.now()
-    });
-    this.reset();
-    this.state.isHolding = true;
-    this.state.holdStartTime = performance.now();
-    this.state.targetHotspot = hotspot;
-    this.state.initialPosition = { x, y };
-    this.state.lastPosition = { x, y };
-    this.state.velocityHistory = [];
-    this.state.feedbackGiven.clear();
-    this.state.currentPhase = "intention_delay";
-    this.state.temporalStarted = false;
-    this.lastFrameTime = performance.now();
-    this.update();
-    this.state.intentionTimer = setTimeout(() => {
-      if (!this.state.isHolding) return;
-      console.log(
-        "[TemporalHoldEngine] Intention delay passed - starting temporal detection"
-      );
-      this.state.temporalStarted = true;
-      this.state.currentPhase = "initiated";
-      this.startEarlyVelocityMonitoring();
-      this.startDistanceMonitoring();
-      this.schedulePhases();
-      this.onStateChange("initiated", hotspot, {
-        duration: this.getHoldDuration(),
-        velocity: this.getAverageVelocity(),
-        phase: "initiated"
-      });
-    }, this.thresholds.intentionDelay);
-    this.onStateChange("intention_delay", hotspot, {
-      duration: 0,
-      velocity: 0,
-      phase: "intention_delay"
-    });
-  }
-  /**
-   * Update position and calculate velocity (called on every touch move)
-   * @param {number} x - Current touch X coordinate
-   * @param {number} y - Current touch Y coordinate
-   */
-  updatePosition(x, y) {
-    if (!this.state.isHolding) return;
-    const now = performance.now();
-    if (this.isMobile && now - this.lastUpdateTime < this.updateThrottle) {
-      return;
-    }
-    this.lastUpdateTime = now;
-    const deltaTime = now - this.lastFrameTime;
-    if (deltaTime > 0) {
-      const velocity = this.calculateVelocity(x, y, deltaTime);
-      this.state.velocityHistory.push(velocity);
-      if (this.state.velocityHistory.length > this.velocityBufferSize) {
-        this.state.velocityHistory.shift();
-      }
-      if (this.checkPanDetection(x, y)) {
-        console.log("[TemporalHoldEngine] Pan movement detected, ending hold");
-        this.endHold("pan_detected");
-        return;
-      }
-      if (this.state.temporalStarted) {
-        const avgVelocity = this.getAverageVelocity();
-        if (avgVelocity > this.velocityThreshold) {
-          console.log("[TemporalHoldEngine] Fast movement detected, ending hold", {
-            velocity: avgVelocity,
-            threshold: this.velocityThreshold
-          });
-          this.endHold("navigation_detected");
-          return;
-        }
-      }
-      this.state.lastPosition = { x, y };
-      this.lastFrameTime = now;
-    }
-  }
-  /**
-   * Calculate instantaneous velocity
-   * @param {number} x - Current X position
-   * @param {number} y - Current Y position
-   * @param {number} deltaTime - Time since last update (ms)
-   * @returns {number} Velocity in pixels per frame
-   */
-  calculateVelocity(x, y, deltaTime) {
-    const deltaX = x - this.state.lastPosition.x;
-    const deltaY = y - this.state.lastPosition.y;
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    const pixelsPerMs = distance / deltaTime;
-    const pixelsPerFrame = pixelsPerMs * this.frameTime;
-    return pixelsPerFrame;
-  }
-  /**
-   * Get smoothed average velocity from history
-   * @returns {number} Average velocity in pixels per frame
-   */
-  getAverageVelocity() {
-    if (this.state.velocityHistory.length === 0) return 0;
-    const sum = this.state.velocityHistory.reduce((acc, vel) => acc + vel, 0);
-    return sum / this.state.velocityHistory.length;
-  }
-  /**
-   * Start early velocity monitoring (150ms after intention delay)
-   */
-  startEarlyVelocityMonitoring() {
-    this.state.earlyVelocityTimer = setTimeout(() => {
-      if (!this.state.isHolding) return;
-      console.log("[TemporalHoldEngine] Early velocity monitoring period ended");
-    }, this.thresholds.earlyVelocityCheck);
-  }
-  /**
-   * Start distance monitoring (200ms after intention delay)
-   */
-  startDistanceMonitoring() {
-    this.state.distanceTimer = setTimeout(() => {
-      if (!this.state.isHolding) return;
-      console.log("[TemporalHoldEngine] Distance monitoring period ended");
-    }, this.thresholds.distanceCheck);
-  }
-  /**
-   * Check if current movement indicates panning intention
-   * @param {number} x - Current X position
-   * @param {number} y - Current Y position
-   * @returns {boolean} True if pan detected
-   */
-  checkPanDetection(x, y) {
-    if (!this.state.isHolding) return false;
-    const totalDistance = Math.sqrt(
-      Math.pow(x - this.state.initialPosition.x, 2) + Math.pow(y - this.state.initialPosition.y, 2)
-    );
-    const elapsed = this.getHoldDuration();
-    if (elapsed < this.thresholds.intentionDelay + this.thresholds.distanceCheck) {
-      if (totalDistance > this.distanceThresholds.panDetection) {
-        console.log("[TemporalHoldEngine] Pan detected - distance exceeded", {
-          distance: totalDistance,
-          threshold: this.distanceThresholds.panDetection,
-          elapsed
-        });
-        return true;
-      }
-    }
-    if (this.state.temporalStarted && totalDistance > this.distanceThresholds.maxHoldDistance) {
-      console.log("[TemporalHoldEngine] Hold drift exceeded", {
-        distance: totalDistance,
-        threshold: this.distanceThresholds.maxHoldDistance
-      });
-      return true;
-    }
-    return false;
-  }
-  /**
-   * Schedule progressive feedback phases based on research thresholds
-   */
-  schedulePhases() {
-    if (!this.state.temporalStarted) {
-      console.log(
-        "[TemporalHoldEngine] Cannot schedule phases - temporal detection not started"
-      );
-      return;
-    }
-    if (this.state.timer) {
-      clearTimeout(this.state.timer);
-    }
-    const discoveryDelay = this.thresholds.discovery - this.thresholds.intentionDelay;
-    this.state.timer = setTimeout(() => {
-      if (!this.state.isHolding || !this.state.temporalStarted) return;
-      this.enterDiscoveryPhase();
-      const activationDelay = this.thresholds.activation - this.thresholds.discovery;
-      this.state.timer = setTimeout(() => {
-        if (!this.state.isHolding || !this.state.temporalStarted) return;
-        this.enterActivationPhase();
-      }, activationDelay);
-    }, discoveryDelay);
-  }
-  /**
-   * Enter discovery phase (400ms)
-   */
-  enterDiscoveryPhase() {
-    if (!this.state.isHolding || this.state.feedbackGiven.has("discovery")) {
-      return;
-    }
-    console.log("[TemporalHoldEngine] Entering discovery phase");
-    this.state.currentPhase = "discovery";
-    this.state.feedbackGiven.add("discovery");
-    this.playHaptic("discovery", this.hapticIntensities.discovery);
-    this.playDiscoveryAudio();
-    this.onDiscovery(this.state.targetHotspot, {
-      duration: this.getHoldDuration(),
-      phase: "discovery",
-      intensity: this.hapticIntensities.discovery
-    });
-    this.onStateChange("discovery", this.state.targetHotspot, {
-      duration: this.getHoldDuration(),
-      velocity: this.getAverageVelocity(),
-      phase: "discovery"
-    });
-  }
-  /**
-   * Enter activation phase (800ms)
-   */
-  enterActivationPhase() {
-    if (!this.state.isHolding || this.state.feedbackGiven.has("activation")) {
-      return;
-    }
-    console.log("[TemporalHoldEngine] Entering activation phase");
-    this.state.currentPhase = "activation";
-    this.state.feedbackGiven.add("activation");
-    this.playHaptic("activation", this.hapticIntensities.activation);
-    this.playActivationAudio();
-    this.onActivation(this.state.targetHotspot, {
-      duration: this.getHoldDuration(),
-      phase: "activation",
-      finalPosition: this.state.lastPosition
-    });
-    this.onStateChange("activation", this.state.targetHotspot, {
-      duration: this.getHoldDuration(),
-      velocity: this.getAverageVelocity(),
-      phase: "activation"
-    });
-    this.endHold("activated");
-  }
-  /**
-   * End temporal hold detection
-   * @param {string} reason - Reason for ending ('activated', 'released', 'navigation_detected')
-   * @returns {Object} Final state information
-   */
-  endHold(reason = "released") {
-    if (!this.state.isHolding) return null;
-    const duration = this.getHoldDuration();
-    const finalPhase = this.state.currentPhase;
-    const hotspot = this.state.targetHotspot;
-    console.log("[TemporalHoldEngine] Ending hold", {
-      reason,
-      duration,
-      finalPhase,
-      hotspotId: hotspot == null ? void 0 : hotspot.id
-    });
-    if (this.state.timer) {
-      clearTimeout(this.state.timer);
-      this.state.timer = null;
-    }
-    this.reset();
-    this.onStateChange("ended", hotspot, {
-      duration,
-      reason,
-      finalPhase
-    });
-    return {
-      duration,
-      hotspot,
-      finalPhase,
-      reason
-    };
-  }
-  /**
-   * Update loop for continuous velocity tracking
-   */
-  update() {
-    if (!this.state.isHolding) return;
-    requestAnimationFrame(this.update);
-  }
-  /**
-   * Get current hold duration in milliseconds
-   * @returns {number} Duration since hold started
-   */
-  getHoldDuration() {
-    if (!this.state.isHolding) return 0;
-    return performance.now() - this.state.holdStartTime;
-  }
-  /**
-   * Play haptic feedback with specified intensity
-   * @param {string} phase - Current phase ('discovery', 'activation')
-   * @param {number} intensity - Haptic intensity (0.0 - 1.0)
-   */
-  playHaptic(phase, intensity) {
-    if (!this.isMobile || !navigator.vibrate) return;
-    try {
-      const patterns = {
-        discovery: [Math.round(30 * intensity), 10, Math.round(20 * intensity)],
-        activation: [Math.round(100 * intensity)]
-      };
-      if (patterns[phase]) {
-        navigator.vibrate(patterns[phase]);
-      }
-    } catch (error) {
-      console.debug("[TemporalHoldEngine] Haptic feedback not available:", error.message);
-    }
-  }
-  /**
-   * Play spatial audio cues for discovery phase
-   */
-  playDiscoveryAudio() {
-    if (!this.audioEngine) return;
-    try {
-      this.audioEngine.playTemporalSound("discovery", 1e3, 15);
-    } catch (error) {
-      console.debug("[TemporalHoldEngine] Discovery audio not available:", error.message);
-    }
-  }
-  /**
-   * Play activation audio
-   */
-  playActivationAudio() {
-    if (!this.audioEngine) return;
-    try {
-      const hotspotSize = this.calculateHotspotSize(this.state.targetHotspot);
-      this.audioEngine.playTemporalThunk(hotspotSize);
-    } catch (error) {
-      console.debug("[TemporalHoldEngine] Activation audio not available:", error.message);
-    }
-  }
-  /**
-   * Calculate hotspot size for audio feedback variation
-   * @param {Object} hotspot - Hotspot object
-   * @returns {number} Normalized size (0.0 - 1.0)
-   */
-  calculateHotspotSize(hotspot) {
-    if (!hotspot || !hotspot.coordinates) return 0.5;
-    let minX = Infinity, maxX = -Infinity;
-    let minY = Infinity, maxY = -Infinity;
-    const coords = hotspot.shape === "multipolygon" ? hotspot.coordinates[0] : hotspot.coordinates;
-    coords.forEach(([x, y]) => {
-      minX = Math.min(minX, x);
-      maxX = Math.max(maxX, x);
-      minY = Math.min(minY, y);
-      maxY = Math.max(maxY, y);
-    });
-    const area = (maxX - minX) * (maxY - minY);
-    return Math.min(1, Math.max(0, area / 1e4));
-  }
-  /**
-   * Check if currently in holding state
-   * @returns {boolean} True if holding
-   */
-  isHolding() {
-    return this.state.isHolding;
-  }
-  /**
-   * Get current phase information
-   * @returns {Object} Current phase data
-   */
-  getCurrentPhase() {
-    return {
-      phase: this.state.currentPhase,
-      duration: this.getHoldDuration(),
-      velocity: this.getAverageVelocity(),
-      hotspot: this.state.targetHotspot
-    };
-  }
-  /**
-   * Update threshold values (for fine-tuning)
-   * @param {string} type - Threshold type ('navigation', 'discovery', 'activation')
-   * @param {number} value - New threshold value in milliseconds
-   */
-  updateThreshold(type, value) {
-    if (this.thresholds.hasOwnProperty(type)) {
-      this.thresholds[type] = value;
-      console.log(`[TemporalHoldEngine] Updated ${type} threshold to ${value}ms`);
-    }
-  }
-  /**
-   * Reset all state
-   */
-  reset() {
-    if (this.state.timer) {
-      clearTimeout(this.state.timer);
-      this.state.timer = null;
-    }
-    if (this.state.intentionTimer) {
-      clearTimeout(this.state.intentionTimer);
-      this.state.intentionTimer = null;
-    }
-    if (this.state.earlyVelocityTimer) {
-      clearTimeout(this.state.earlyVelocityTimer);
-      this.state.earlyVelocityTimer = null;
-    }
-    if (this.state.distanceTimer) {
-      clearTimeout(this.state.distanceTimer);
-      this.state.distanceTimer = null;
-    }
-    this.state = {
-      isHolding: false,
-      holdStartTime: 0,
-      currentPhase: null,
-      targetHotspot: null,
-      initialPosition: { x: 0, y: 0 },
-      lastPosition: { x: 0, y: 0 },
-      velocityHistory: [],
-      feedbackGiven: /* @__PURE__ */ new Set(),
-      timer: null,
-      // NEW: Reset new state properties
-      intentionTimer: null,
-      temporalStarted: false,
-      earlyVelocityTimer: null,
-      distanceTimer: null
-    };
-  }
-  /**
-   * Cleanup and destroy
-   */
-  destroy() {
-    this.reset();
-    this.onStateChange = null;
-    this.onDiscovery = null;
-    this.onActivation = null;
-    this.audioEngine = null;
-  }
-}
+import { O as OpenSeadragon, e as createLogger, i as isMobile, _ as __vitePreload } from "./main-C1izmsWZ.js";
+import { o as organicVariations, C as CentralizedEventManager, p as performanceConfig, a as adjustSettingsForPerformance } from "./viewerSetup-DrKd-syM.js";
 class ModeStateManager {
   constructor() {
     this.modes = {
@@ -778,16 +30,6 @@ class ModeStateManager {
       temporal: {
         active: false,
         phase: null
-      },
-      reveal: {
-        active: false,
-        timer: null,
-        style: this.loadStateWithValidation("revealStyle", "invert", [
-          "invert",
-          "glow",
-          "outline",
-          "shadow"
-        ])
       }
     };
     this.listeners = {
@@ -854,31 +96,9 @@ class ModeStateManager {
   isTemporalActive() {
     return this.currentMode === "temporal" && this.modeStates.temporal.active;
   }
-  // Reveal mode state
-  setRevealActive(active) {
-    this.modeStates.reveal.active = active;
-    if (!active && this.modeStates.reveal.timer) {
-      clearTimeout(this.modeStates.reveal.timer);
-      this.modeStates.reveal.timer = null;
-    }
-    this.notifyListeners("stateChange", { mode: "reveal", state: this.modeStates.reveal });
-  }
-  isRevealActive() {
-    return this.modeStates.reveal.active;
-  }
-  setRevealTimer(timer) {
-    this.modeStates.reveal.timer = timer;
-  }
-  setRevealStyle(style) {
-    this.modeStates.reveal.style = style;
-    localStorage.setItem("revealStyle", style);
-  }
-  getRevealStyle() {
-    return this.modeStates.reveal.style;
-  }
   // Check if any special mode blocks normal interactions
   shouldBlockNormalInteractions() {
-    return this.isTemporalActive() || this.isRevealActive();
+    return this.isTemporalActive();
   }
   // Listener management
   on(event, callback) {
@@ -902,7 +122,6 @@ class ModeStateManager {
   reset() {
     this.modeStates.temporal.active = false;
     this.modeStates.temporal.phase = null;
-    this.setRevealActive(false);
   }
   forceTemporalCleanup() {
     console.log("[ModeStateManager] Force temporal cleanup");
@@ -3388,182 +2607,6 @@ class StaticRenderer {
     group.setAttribute("data-last-zoom", currentZoom.toString());
   }
 }
-class RevealRenderer {
-  constructor(options = {}) {
-    this.viewer = options.viewer;
-    this.svg = options.svg;
-    this.isMobile = options.isMobile;
-    this.debugMode = options.debugMode;
-    this.state = {
-      active: false,
-      timer: null,
-      duration: 6e3,
-      animations: /* @__PURE__ */ new Map()
-    };
-    this.config = {
-      breathingDuration: 6e3,
-      // 6 seconds per breathing cycle
-      minOpacity: 0.3,
-      maxOpacity: 1,
-      pulseScale: 1.05,
-      activationKeys: ["h", "H"],
-      tripleTapThreshold: 500
-      // ms between taps
-    };
-    this.tapCount = 0;
-    this.lastTapTime = 0;
-  }
-  /**
-   * Setup reveal mode triggers
-   */
-  setupTriggers() {
-    document.addEventListener("keydown", (e) => {
-      if (this.config.activationKeys.includes(e.key)) {
-        e.preventDefault();
-        this.toggle();
-      }
-    });
-    this.svg.addEventListener("pointerdown", (e) => {
-      if (this.isMobile) {
-        this.handleTripleTap(e);
-      }
-    });
-  }
-  /**
-   * Handle triple tap detection for mobile
-   */
-  handleTripleTap(event) {
-    const currentTime = Date.now();
-    const timeSinceLastTap = currentTime - this.lastTapTime;
-    if (timeSinceLastTap < this.config.tripleTapThreshold) {
-      this.tapCount++;
-      if (this.tapCount >= 3) {
-        event.preventDefault();
-        this.toggle();
-        this.tapCount = 0;
-      }
-    } else {
-      this.tapCount = 1;
-    }
-    this.lastTapTime = currentTime;
-  }
-  /**
-   * Toggle reveal mode
-   */
-  toggle() {
-    if (this.state.active) {
-      this.deactivate();
-    } else {
-      this.activate();
-    }
-  }
-  /**
-   * Activate reveal mode
-   */
-  activate() {
-    if (this.state.active) return;
-    console.log("Activating reveal mode");
-    this.state.active = true;
-    this.svg.classList.add("reveal-mode-active");
-    if (window.nativeHotspotRenderer && window.nativeHotspotRenderer.stateManager) {
-      window.nativeHotspotRenderer.stateManager.getAllOverlays().forEach((overlay) => {
-        if (overlay.isVisible) {
-          this.startBreathingAnimation(overlay);
-        }
-      });
-    }
-    this.state.timer = setTimeout(() => {
-      this.deactivate();
-    }, this.state.duration);
-  }
-  /**
-   * Deactivate reveal mode
-   */
-  deactivate() {
-    if (!this.state.active) return;
-    console.log("Deactivating reveal mode");
-    this.state.active = false;
-    this.svg.classList.remove("reveal-mode-active");
-    if (this.state.timer) {
-      clearTimeout(this.state.timer);
-      this.state.timer = null;
-    }
-    this.state.animations.forEach((animationData, hotspotId) => {
-      this.stopBreathingAnimation({ hotspot: { id: hotspotId } });
-    });
-  }
-  /**
-   * Start breathing animation for a hotspot
-   */
-  startBreathingAnimation(overlay) {
-    if (this.state.animations.has(overlay.hotspot.id)) return;
-    const element = overlay.element;
-    const mainPath = element.querySelector(".main-path");
-    if (!mainPath) return;
-    const breathingAnimation = {
-      element,
-      mainPath,
-      startTime: Date.now(),
-      animationFrame: null
-    };
-    const animate = () => {
-      if (!this.state.active || !this.state.animations.has(overlay.hotspot.id)) {
-        return;
-      }
-      const elapsed = Date.now() - breathingAnimation.startTime;
-      const phase = elapsed % this.config.breathingDuration / this.config.breathingDuration;
-      const opacity = this.config.minOpacity + (this.config.maxOpacity - this.config.minOpacity) * (0.5 + 0.5 * Math.sin(phase * Math.PI * 2));
-      element.style.opacity = opacity;
-      const scale = 1 + (this.config.pulseScale - 1) * Math.sin(phase * Math.PI * 2);
-      element.style.transform = `scale(${scale})`;
-      breathingAnimation.animationFrame = requestAnimationFrame(animate);
-    };
-    this.state.animations.set(overlay.hotspot.id, breathingAnimation);
-    animate();
-  }
-  /**
-   * Stop breathing animation for a hotspot
-   */
-  stopBreathingAnimation(overlay) {
-    const animationData = this.state.animations.get(overlay.hotspot.id);
-    if (!animationData) return;
-    if (animationData.animationFrame) {
-      cancelAnimationFrame(animationData.animationFrame);
-    }
-    animationData.element.style.opacity = "";
-    animationData.element.style.transform = "";
-    this.state.animations.delete(overlay.hotspot.id);
-  }
-  /**
-   * Check if reveal mode is active
-   */
-  isActive() {
-    return this.state.active;
-  }
-  /**
-   * Update visibility - called when hotspots visibility changes
-   */
-  updateVisibility(overlays) {
-    if (!this.state.active) return;
-    overlays.forEach((overlay) => {
-      if (overlay.isVisible && !this.state.animations.has(overlay.hotspot.id)) {
-        this.startBreathingAnimation(overlay);
-      } else if (!overlay.isVisible && this.state.animations.has(overlay.hotspot.id)) {
-        this.stopBreathingAnimation(overlay);
-      }
-    });
-  }
-  /**
-   * Cleanup on destroy
-   */
-  destroy() {
-    this.deactivate();
-    if (this.state.timer) {
-      clearTimeout(this.state.timer);
-    }
-    this.state.animations.clear();
-  }
-}
 class TemporalRenderer {
   constructor(options = {}) {
     this.viewer = options.viewer;
@@ -5011,7 +4054,7 @@ class StyleManager {
     this.renderOptimizer = options.renderOptimizer;
     this.stateManager = options.stateManager;
     this.animationQueue = options.animationQueue;
-    this.revealRenderer = options.revealRenderer;
+    this.revealRenderer = options.revealRenderer || null;
     this.temporalRenderer = options.temporalRenderer;
     this.isSafari = options.isSafari || false;
     this.colorScheme = options.colorScheme;
@@ -5232,7 +4275,7 @@ class StyleManager {
         return;
       }
     }
-    if (this.revealRenderer.isActive() && state !== "normal") {
+    if (this.revealRenderer && this.revealRenderer.isActive() && state !== "normal") {
       return;
     }
     if (state === "hover" && group.getAttribute("data-hover-maintained") === "true") {
@@ -6293,9 +5336,6 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
     this.modeStateManager = new ModeStateManager();
     this.modeStateManager.on("modeChange", (data) => {
       if (data.from === "temporal" && data.to !== "temporal") {
-        if (this.temporalHandler) {
-          this.temporalHandler.endHold();
-        }
         if (this.temporalRenderer) {
           this.temporalRenderer.cleanupVisuals();
         }
@@ -6308,41 +5348,8 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
     this.temporalRenderer = new TemporalRenderer({
       viewer: this.viewer,
       modeStateManager: this.modeStateManager,
-      stateManager: this.stateManager,
-      temporalHandler: null
-      // Will be set after TemporalModeHandler creation
+      stateManager: this.stateManager
     });
-    this.temporalDetectionEngine = new TemporalHoldDetectionEngine({
-      audioEngine: window.audioEngine,
-      onStateChange: (state, hotspot, data) => {
-        if (this.modeStateManager) {
-          this.modeStateManager.setTemporalState(
-            state === "discovery" || state === "activation",
-            state === "ended" ? null : state
-          );
-        }
-      },
-      onDiscovery: (hotspot, data) => {
-        this.temporalRenderer.handlePhaseChange("discovery", hotspot);
-      },
-      onActivation: (hotspot, data) => {
-        this.temporalRenderer.handlePhaseChange("activation", hotspot);
-        setTimeout(() => {
-          if (this.onHotspotClick) {
-            this.onHotspotClick(hotspot);
-          }
-        }, 50);
-      }
-    });
-    this.temporalHandler = new TemporalModeHandler({
-      audioEngine: window.audioEngine,
-      modeStateManager: this.modeStateManager,
-      onPhaseChange: (phase, hotspot) => {
-        this.temporalRenderer.handlePhaseChange(phase, hotspot);
-      }
-    });
-    this.temporalRenderer.temporalHandler = this.temporalHandler;
-    this.temporalRenderer.detectionEngine = this.temporalDetectionEngine;
     this.colorPalettes = {
       // Original palettes
       tech: {
@@ -6551,13 +5558,6 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
     this.lastPointerDownTime = 0;
     this.lastPointerDownPoint = null;
     this.isPinching = false;
-    this.revealRenderer = new RevealRenderer({
-      viewer: this.viewer,
-      svg: null,
-      // Will be set in init()
-      isMobile: this.isMobile,
-      debugMode: this.debugMode
-    });
     this.engine = new RendererEngine({
       viewer: this.viewer,
       spatialIndex: this.spatialIndex,
@@ -6567,7 +5567,6 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
       memoryManager: this.memoryManager,
       safariCompat: this.safariCompat,
       staticRenderer: this.staticRenderer,
-      revealRenderer: this.revealRenderer,
       temporalRenderer: this.temporalRenderer,
       debugMode: this.debugMode,
       colorScheme: this.colorScheme,
@@ -6584,7 +5583,6 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
       renderOptimizer: this.renderOptimizer,
       stateManager: this.stateManager,
       animationQueue: this.animationQueue,
-      revealRenderer: this.revealRenderer,
       temporalRenderer: this.temporalRenderer,
       isSafari: this.isSafari,
       colorScheme: this.colorScheme,
@@ -6614,22 +5612,6 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
         }
     `;
       document.head.appendChild(style);
-    }
-    if (!document.getElementById("reveal-mode-styles")) {
-      const revealStyle = document.createElement("style");
-      revealStyle.id = "reveal-mode-styles";
-      revealStyle.textContent = `
-        .reveal-mode-active .hotspot-wrapper {
-            will-change: opacity, transform;
-        }
-        
-        @keyframes revealPulse {
-            0% { opacity: 0.3; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.05); }
-            100% { opacity: 0.3; transform: scale(1); }
-        }
-    `;
-      document.head.appendChild(revealStyle);
     }
     if (!document.getElementById("pigment-liner-animations")) {
       const pigmentStyle = document.createElement("style");
@@ -6703,7 +5685,6 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
     );
     this.setupMouseTracking();
     this.setupDragDetection();
-    this.setupRevealMode();
     this.viewer.addHandler("zoom", () => {
       this.currentZoom = this.viewer.viewport.getZoom();
       const previousZoom = this.renderOptimizer.lastViewportZoom || 0;
@@ -6756,7 +5737,6 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
       window.nativeHotspotRenderer.cleanup();
     }
     window.nativeHotspotRenderer = this;
-    window.temporalDetectionEngine = this.temporalDetectionEngine;
   }
   // Expose resetAnimationState for CinematicZoomManager
   getResetAnimationState() {
@@ -7829,9 +6809,6 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
       this.stateManager.batchUpdateVisibility(visibilityUpdates);
     }
     this.asyncHitDetector.updateVisibleHotspots(activeHotspots);
-    if (this.revealRenderer.isActive()) {
-      this.revealRenderer.updateVisibility(activeHotspots);
-    }
     const visibleCount = activeHotspots.size;
     if (Math.abs(currentZoom - this.renderOptimizer.lastViewportZoom) > 0.5) {
       requestAnimationFrame(() => {
@@ -7953,16 +6930,6 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
   boundsIntersect(a, b) {
     return !(a.maxX < b.minX || a.minX > b.maxX || a.maxY < b.minY || a.minY > b.maxY);
   }
-  setupRevealMode() {
-    this.revealRenderer.setupTriggers();
-  }
-  toggleRevealMode() {
-    if (this.revealRenderer.isActive()) {
-      this.revealRenderer.deactivate();
-    } else {
-      this.revealRenderer.activate();
-    }
-  }
   /**
    * Enable the renderer
    */
@@ -8058,9 +7025,6 @@ const _NativeHotspotRenderer = class _NativeHotspotRenderer {
     console.log("Destroying NativeHotspotRenderer");
     if (this.animationQueue) {
       this.animationQueue.clear();
-    }
-    if (this.revealRenderer) {
-      this.revealRenderer.destroy();
     }
     if (this.temporalRenderer) {
       this.temporalRenderer.destroy();
@@ -9380,50 +8344,6 @@ function setupViewerEventHandlers(viewer, state, componentsObj, handleHotspotCli
       }
     }
   });
-  if (isMobile()) {
-    viewer.addHandler("canvas-click", (event) => {
-      var _a;
-      const eventCoordinator = (_a = componentsObj.renderer) == null ? void 0 : _a.eventCoordinator;
-      if (eventCoordinator) {
-        const now = Date.now();
-        const recentDrag = eventCoordinator.lastDragEndTime && now - eventCoordinator.lastDragEndTime < 300;
-        if (recentDrag) {
-          return;
-        }
-      }
-      const viewerWidth = viewer.container.clientWidth;
-      const viewerHeight = viewer.container.clientHeight;
-      const cornerSize = 100;
-      const inTopLeft = event.position.x < cornerSize && event.position.y < cornerSize;
-      const inTopRight = event.position.x > viewerWidth - cornerSize && event.position.y < cornerSize;
-      const inBottomLeft = event.position.x < cornerSize && event.position.y > viewerHeight - cornerSize;
-      const inBottomRight = event.position.x > viewerWidth - cornerSize && event.position.y > viewerHeight - cornerSize;
-      if (inTopLeft || inTopRight || inBottomLeft || inBottomRight) {
-        const currentTaps = state.tapCount() + 1;
-        state.setTapCount(currentTaps);
-        if (state.tapTimeout()) {
-          clearTimeout(state.tapTimeout());
-        }
-        if (currentTaps >= 3) {
-          const currentLevel = state.debugLevel();
-          const newLevel = currentLevel === 0 ? 1 : 0;
-          state.setDebugLevel(newLevel);
-          localStorage.setItem("debugLevel", newLevel.toString());
-          if (componentsObj.performanceMonitor) {
-            componentsObj.performanceMonitor.disableDebugOverlay();
-          }
-          console.log(`Debug mode: ${newLevel === 1 ? "ON" : "OFF"}`);
-          state.setTapCount(0);
-        } else {
-          state.setTapTimeout(
-            setTimeout(() => {
-              state.setTapCount(0);
-            }, 1e3)
-          );
-        }
-      }
-    });
-  }
 }
 function setupAdaptiveSprings(viewer, performanceConfig2) {
   const originalSprings = {
@@ -9463,30 +8383,6 @@ function setupKeyboardHandler(viewer, state, componentsObj) {
     },
     f: () => viewer.viewport.fitBounds(viewer.world.getHomeBounds()),
     F: () => viewer.viewport.fitBounds(viewer.world.getHomeBounds()),
-    c: () => {
-      if (isMobile()) return;
-      const currentLevel = state.debugLevel();
-      const newLevel = currentLevel === 0 ? 1 : 0;
-      state.setDebugLevel(newLevel);
-      localStorage.setItem("debugLevel", newLevel.toString());
-      if (componentsObj.performanceMonitor) {
-        componentsObj.performanceMonitor.disableDebugOverlay();
-      }
-      if (componentsObj.renderer) {
-        componentsObj.renderer.setDebugMode(newLevel === 1);
-      }
-      console.log(`Debug mode: ${newLevel === 1 ? "ON" : "OFF"}`);
-    },
-    h: () => {
-      if (componentsObj.renderer) {
-        componentsObj.renderer.toggleRevealMode();
-      }
-    },
-    H: () => {
-      if (componentsObj.renderer) {
-        componentsObj.renderer.toggleRevealMode();
-      }
-    },
     e: () => {
       if (componentsObj.echoController) {
         if (componentsObj.echoController.config.enabled) {
@@ -9826,7 +8722,7 @@ async function initializeHotspotSystem(viewer, state, componentsObj, handleHotsp
   }
   if (renderer.eventCoordinator) {
     const TemporalEchoController = (await __vitePreload(async () => {
-      const { default: __vite_default__ } = await import("./TemporalEchoController-CdasmGhp.js");
+      const { default: __vite_default__ } = await import("./TemporalEchoController-DVD9ApXn.js");
       return { default: __vite_default__ };
     }, true ? __vite__mapDeps([0,1,2,3]) : void 0)).default;
     const echoController = new TemporalEchoController({

@@ -1124,103 +1124,14 @@ button.debug-toggle-option {
         top: calc(10px + env(safe-area-inset-top));
         right: calc(10px + env(safe-area-inset-right));
     }
-}/* Temporal Progress Indicator */
-.temporal-progress-indicator {
-    position: fixed;
-    width: 60px;
-    height: 60px;
-    border: 2px solid rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 10000;
-    display: none;
-    transform: translate(-50%, -50%);
-}
-.temporal-progress-indicator .progress-ring {
-        transition: stroke-dashoffset 100ms linear;
-    }
-/* Temporal Visual States - Without scale transforms */
-.hotspot-temporal-touchDown {
-    opacity: 1 !important;
-    transition: all 150ms ease-out !important;
-}
-.hotspot-temporal-touchDown .main-path {
-        stroke: rgba(255, 255, 255, 0.8) !important;
-        stroke-width: 2px !important;
-        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6)) !important;
-        transition: all 150ms ease-out !important;
-        opacity: 1 !important;
-    }
-.hotspot-temporal-explore {
-    opacity: 1 !important;
-    transition: all 200ms ease-out !important;
-}
-.hotspot-temporal-explore .main-path {
-        stroke: rgba(255, 255, 255, 0.9) !important;
-        stroke-width: 2.5px !important;
-        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8)) !important;
-        opacity: 1 !important;
-    }
-.hotspot-temporal-preview {
-    opacity: 1 !important;
-    transition: all 200ms ease-out !important;
-}
-.hotspot-temporal-preview .main-path {
-        stroke: var(--hotspot-stroke-color, #ffffff) !important;
-        stroke-width: 3px !important;
-        opacity: 1 !important;
-        filter: drop-shadow(0 0 12px rgba(255, 255, 255, 1)) !important;
-        transition: all 200ms ease-out !important;
-    }
-.hotspot-temporal-activate {
-    opacity: 1 !important;
-    filter: brightness(1.3) drop-shadow(0 0 15px rgba(255, 255, 255, 0.8)) !important;
-    transition: all 300ms ease-out !important;
-}
-.hotspot-temporal-activate .main-path {
-        stroke: var(--hotspot-stroke-color, #ffffff) !important;
-        stroke-width: 3.5px !important;
-        opacity: 1 !important;
-    }
-/* Enhanced temporal feedback for mobile */
-@media (max-width: 768px) {
-    .hotspot-temporal-touchDown {
-        opacity: 0.85 !important;
-        transform: scale(1.15) !important;
-    }
-
-        .hotspot-temporal-touchDown .main-path {
-            stroke-width: 3px !important;
-            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 1)) !important;
-        }
-}
-/* Ripple effect for initial touch */
-@keyframes temporalRipple {
-    0% {
-        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8);
-    }
-
-    100% {
-        box-shadow: 0 0 0 20px rgba(255, 255, 255, 0);
-    }
-}
-.temporal-touch-ripple {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    pointer-events: none;
-    animation: temporalRipple 0.6s ease-out;
-    z-index: 10001;
-}
-/* QUICK WIN #3: iOS/Safari Performance Fixes */
+}/* QUICK WIN #3: iOS/Safari Performance Fixes */
 /* Critical fix for iOS/Safari performance regression in OpenSeadragon 4.1.0 */
 /* Issue #2434: Focus outline is the #1 performance killer on iOS */
 .openseadragon-canvas:focus {
     outline: 0 !important;
     /* This single line fixes major Safari/iOS performance drops */
 }
+
 /* Additional WebKit performance optimizations */
 @supports (-webkit-appearance: none) {
     .openseadragon-container {
@@ -1249,6 +1160,7 @@ button.debug-toggle-option {
         transform-style: preserve-3d;
     }
 }
+
 /* Touch optimization for all mobile devices */
 .openseadragon-canvas,
 .openseadragon-container,
@@ -1257,6 +1169,7 @@ button.debug-toggle-option {
     touch-action: manipulation;
     /* Eliminates 300ms delay on tap for better responsiveness */
 }
+
 /* Mobile Safari specific optimizations */
 @media (max-width: 768px) {
     @supports (-webkit-touch-callout: none) {
@@ -1272,22 +1185,27 @@ button.debug-toggle-option {
         }
     }
 }
+
 /* Fix focus-related performance issues on all WebKit browsers */
 .openseadragon-container *:focus {
     outline: none !important;
     /* Remove any focus styling that could cause performance issues */
 }
+
 /* CSS-based darkening overlay */
 .openseadragon-container {
     transition: filter 0.4s ease-out;
 }
+
 .openseadragon-container.darkening-active {
     filter: brightness(0.3) contrast(1.1);
 }
+
 /* Ensure hotspots remain visible */
 .openseadragon-container.darkening-active .hotspot-selected {
     filter: brightness(3.3) contrast(0.9);
 }
+
 /* Stroke reveal animation with organic timing */
 @keyframes strokeReveal {
     0% {
@@ -1298,6 +1216,7 @@ button.debug-toggle-option {
         stroke-dashoffset: 0;
     }
 }
+
 /* Disable stroke animations on iOS/WebKit */
 @supports (-webkit-touch-callout: none) {
     .hotspot-hover path[data-animated='true'],
@@ -1306,6 +1225,7 @@ button.debug-toggle-option {
         stroke-dashoffset: 0 !important;
     }
 }
+
 /* Apply animation to paths, not groups */
 .hotspot-hover path[data-animated='true'],
 .hotspot-selected path[data-animated='true'] {
@@ -1314,11 +1234,13 @@ button.debug-toggle-option {
     animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
     animation-fill-mode: forwards;
 }
+
 /* CRITICAL: Remove transition conflicts */
 .hotspot-hover path,
 .hotspot-selected path {
     transition: none !important;
 }
+
 /* Safari-specific optimizations */
 @supports (-webkit-appearance: none) {
     svg path {
@@ -1326,6 +1248,7 @@ button.debug-toggle-option {
         -webkit-backface-visibility: hidden;
     }
 }
+
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
     .hotspot-hover path[data-animated='true'],
@@ -1352,6 +1275,7 @@ button.debug-toggle-option {
         stroke-dashoffset: 0;
     }
 }
+
 /* Ensure Safari animations run smoothly */
 @supports (-webkit-appearance: none) {
     .glow-layer-1,
@@ -1368,6 +1292,7 @@ button.debug-toggle-option {
         will-change: auto;
     }
 }
+
 /* Canvas2D Overlay Optimizations */
 .canvas2d-spotlight-overlay {
     /* Force hardware acceleration */
@@ -1391,12 +1316,14 @@ button.debug-toggle-option {
     z-index: 9999 !important;
     pointer-events: none !important;
 }
+
 /* Reveal Mode Base - Always applied */
 .hotspot-reveal-breathing {
     opacity: 1 !important;
     visibility: visible !important;
     pointer-events: all !important;
 }
+
 /* STYLE 1: High Visibility Invert */
 @keyframes revealPulseInvert {
     0%,
@@ -1410,6 +1337,7 @@ button.debug-toggle-option {
         opacity: 1;
     }
 }
+
 .reveal-style-invert .hotspot-reveal-breathing path {
     animation: revealPulseInvert 1.5s ease-in-out infinite !important;
     /* Replaced mix-blend-mode for better mobile performance */
@@ -1421,6 +1349,7 @@ button.debug-toggle-option {
     fill: none !important;
     pointer-events: all !important;
 }
+
 /* STYLE 2: Neon Glow */
 @keyframes revealPulseNeon {
     0%,
@@ -1432,6 +1361,7 @@ button.debug-toggle-option {
         opacity: 1;
     }
 }
+
 .reveal-style-neon .hotspot-reveal-breathing path {
     animation: revealPulseNeon 1.5s ease-in-out infinite !important;
     /* Replaced mix-blend-mode for better mobile performance */
@@ -1445,6 +1375,7 @@ button.debug-toggle-option {
     /* Simplified filter for better mobile performance - single drop-shadow instead of multiple */
     filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.9)) !important;
 }
+
 /* Mobile adjustments for both styles */
 @media (max-width: 768px) {
     .reveal-style-invert .hotspot-reveal-breathing path,
@@ -1466,6 +1397,7 @@ button.debug-toggle-option {
     right: max(20px, env(safe-area-inset-right));
     z-index: 1000;
 }
+
 .fullscreen-button {
     width: 44px;
     height: 44px;
@@ -1480,11 +1412,13 @@ button.debug-toggle-option {
     font-size: 20px;
     background: transparent; /* Glass effect will be applied by .glass-button class */
 }
+
 /* Icon styling */
 .fullscreen-button svg {
     width: 20px;
     height: 20px;
 }
+
 /* PERFORMANCE: Hotspot visibility classes for hardware acceleration */
 .hotspot-hidden {
     opacity: 0 !important;
@@ -1497,6 +1431,7 @@ button.debug-toggle-option {
     /* PERFORMANCE: No transitions for faster updates */
     transition: none !important;
 }
+
 .hotspot-visible {
     opacity: 1 !important;
     visibility: visible !important;
@@ -1507,6 +1442,7 @@ button.debug-toggle-option {
     /* PERFORMANCE: No transitions for faster updates */
     transition: none !important;
 }
+
 /* PHASE 2 OPTIMIZATION: Improved class toggle (86ms → 10-20ms)
    Optimization: Use className.baseVal instead of classList for SVG elements
    This is faster because it bypasses the classList API overhead
@@ -1518,6 +1454,7 @@ button.debug-toggle-option {
    Note: The real bottleneck was classList API overhead + style recalculation
    Using direct className assignment + RAF batching reduces this significantly
 */
+
 /* PERFORMANCE: Optimize container for batch updates */
 .openseadragon-svg {
     /* Container-level optimizations */
@@ -1526,6 +1463,7 @@ button.debug-toggle-option {
     /* Prevent layout thrashing during batch updates */
     isolation: isolate;
 }
+
 /* Ensure will-change is set on all hotspot elements */
 .openseadragon-svg g[data-hotspot-id] {
     /* PERFORMANCE: Reduced will-change properties */
@@ -1533,6 +1471,7 @@ button.debug-toggle-option {
     /* Containment for better performance */
     contain: layout style;
 }
+
 /* OpenSeadragon container optimization for Canvas2D */
 .openseadragon-container.canvas2d-active {
     /* Isolate paint operations */
@@ -1540,6 +1479,7 @@ button.debug-toggle-option {
     /* Optimize compositing */
     will-change: transform;
 }
+
 /* Mobile-specific optimizations */
 @media (max-width: 768px) {
     /* More aggressive GPU acceleration on mobile */
@@ -1555,107 +1495,6 @@ button.debug-toggle-option {
     .openseadragon-svg g[data-hotspot-id] {
         will-change: auto !important;
     }
-}
-/* Temporal Progress Indicator */
-.temporal-progress-indicator {
-    position: fixed;
-    width: 60px;
-    height: 60px;
-    border: 2px solid rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 10000;
-    display: none;
-    transform: translate(-50%, -50%);
-}
-
-    .temporal-progress-indicator .progress-ring {
-        transition: stroke-dashoffset 100ms linear;
-    }
-
-/* Temporal Visual States - Without scale transforms */
-.hotspot-temporal-touchDown {
-    opacity: 1 !important;
-    transition: all 150ms ease-out !important;
-}
-
-    .hotspot-temporal-touchDown .main-path {
-        stroke: rgba(255, 255, 255, 0.8) !important;
-        stroke-width: 2px !important;
-        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6)) !important;
-        transition: all 150ms ease-out !important;
-        opacity: 1 !important;
-    }
-
-.hotspot-temporal-explore {
-    opacity: 1 !important;
-    transition: all 200ms ease-out !important;
-}
-
-    .hotspot-temporal-explore .main-path {
-        stroke: rgba(255, 255, 255, 0.9) !important;
-        stroke-width: 2.5px !important;
-        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8)) !important;
-        opacity: 1 !important;
-    }
-
-.hotspot-temporal-preview {
-    opacity: 1 !important;
-    transition: all 200ms ease-out !important;
-}
-
-    .hotspot-temporal-preview .main-path {
-        stroke: var(--hotspot-stroke-color, #ffffff) !important;
-        stroke-width: 3px !important;
-        opacity: 1 !important;
-        filter: drop-shadow(0 0 12px rgba(255, 255, 255, 1)) !important;
-        transition: all 200ms ease-out !important;
-    }
-
-.hotspot-temporal-activate {
-    opacity: 1 !important;
-    filter: brightness(1.3) drop-shadow(0 0 15px rgba(255, 255, 255, 0.8)) !important;
-    transition: all 300ms ease-out !important;
-}
-
-    .hotspot-temporal-activate .main-path {
-        stroke: var(--hotspot-stroke-color, #ffffff) !important;
-        stroke-width: 3.5px !important;
-        opacity: 1 !important;
-    }
-/* Enhanced temporal feedback for mobile */
-@media (max-width: 768px) {
-    .hotspot-temporal-touchDown {
-        opacity: 0.85 !important;
-        transform: scale(1.15) !important;
-    }
-
-        .hotspot-temporal-touchDown .main-path {
-            stroke-width: 3px !important;
-            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 1)) !important;
-        }
-}
-
-/* Ripple effect for initial touch */
-@keyframes temporalRipple {
-    0% {
-        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8);
-    }
-
-    100% {
-        box-shadow: 0 0 0 20px rgba(255, 255, 255, 0);
-    }
-}
-
-.temporal-touch-ripple {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    pointer-events: none;
-    animation: temporalRipple 0.6s ease-out;
-    z-index: 10001;
 }
 /* Temporal Echo Revelation System Styles */
 
